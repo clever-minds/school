@@ -35,9 +35,9 @@
                     <li>
                         <a href="#about-us">{{ __('about_us') }}</a>
                     </li>
-                    <li>
+                    {{--<li>
                         <a href="#pricing">{{ __('pricing') }}</a>
-                    </li>
+                    </li>--}}
                     @if (count($faqs))
                         <li>
                             <a href="#faq">{{ __('faqs') }}</a>
@@ -91,7 +91,7 @@
 
             <div class="loginBtnsWrapper">
                 <button class="commonBtn redirect-login">{{ __('login') }}</button>
-                <button class="commonBtn" id="trialBtn" data-bs-toggle="modal" data-bs-target="#staticBackdrop">{{ __('start_trial') }}</button>
+                  {{-- <button class="commonBtn" id="trialBtn" data-bs-toggle="modal" data-bs-target="#staticBackdrop">{{ __('start_trial') }}</button>--}}
                 {{-- <a href="{{ url('school/registration') }}" class="commonBtn">{{ __('start_trial') }}</a> --}}
             </div>
         </div>
@@ -118,9 +118,9 @@
                     <li>
                         <a href="#about-us">{{ __('about_us') }}</a>
                     </li>
-                    <li>
+                   {{-- <li>
                         <a href="#pricing">{{ __('pricing') }}</a>
-                    </li>
+                    </li>--}}
                     @if (count($faqs))
                         <li>
                             <a href="#faq">{{ __('faqs') }}</a>
@@ -471,7 +471,7 @@
     </section>
     <!-- whyBest ends here  -->
 
-    <section class="pricing" id="pricing">
+  {{--  <section class="pricing" id="pricing">
         <div class="container commonMT">
             <div class="row">
                 <div class="col-12">
@@ -615,7 +615,7 @@
                 </div>
             </div>
         </div>
-    </section>
+    </section>--}}
     <!-- pricing ends here  -->
 
     @if (isset($settings['custom_package_status']) && $settings['custom_package_status'])

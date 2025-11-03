@@ -85,6 +85,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Session;
+use App\Http\Controllers\ExpenseTransController;
 
 
 
@@ -118,6 +119,11 @@ Route::get('set-language/{lang}', [LanguageController::class, 'set_language']);
 Route::post('password/reset', [ResetPasswordController::class, 'reset'])->name('password.update');
 
 Route::get('students/admission-form', [StudentController::class, 'admissionForm'])->name('admission.form');
+Route::get('/students/update-uni', [StudentController::class, 'showUpdateUniForm'])
+    ->name('students.showUpdateUniForm');
+Route::get('/student/search', [StudentController::class, 'searchStudent']);
+Route::post('/students/update-uni', [StudentController::class, 'updateUniNo'])
+    ->name('students.updateUniNo');
 Route::get('email/verify', [Controller::class, 'emailVerify']);
 
 Route::group(['prefix' => 'school'], static function () {
@@ -199,6 +205,7 @@ Route::group(['middleware' => ['Role', 'checkSchoolStatus', 'status','SwitchData
             Route::PATCH('change/rank', [PackageController::class, 'change_rank']);
 
         });
+      
         Route::resource('package', PackageController::class);
 
         // Addons
@@ -1076,7 +1083,15 @@ Route::get('AddSuperAdminSeeder-seeder', static function () {
     echo "Done";
     return false;
 });
+       
+Route::group(['prefix' => 'expense-trans'], static function () {
+    Route::get('/', [ExpenseTransController::class, 'index'])->name('expense-trans.index');
+    Route::post('store', [ExpenseTransController::class, 'store'])->name('expense-trans.store');
+    Route::get('today-summary', [ExpenseTransController::class, 'todaySummary'])->name('expense-trans.today');
+    Route::put('update/{id}', [ExpenseTransController::class, 'update'])->name('expense-trans.update');
+    Route::delete('delete/{id}', [ExpenseTransController::class, 'destroy'])->name('expense-trans.delete');
 
+});
 Route::get('/js/lang', static function () {
     //    https://medium.com/@serhii.matrunchyk/using-laravel-localization-with-javascript-and-vuejs-23064d0c210e
     header('Content-Type: text/javascript');

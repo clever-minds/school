@@ -217,6 +217,17 @@
 {{--                                    </div>--}}
 {{--                                </div>--}}
 {{--                            </div>--}}
+                                <div class="border border-secondary rounded-lg mb-3">
+                                    <h3 class="col-12 page-title mt-3 ">
+                                        {{ __('Expense Settings') }}
+                                    </h3>
+
+                                        {{-- Minus Balance Limit --}}
+                                        <div class="form-group col-md-3 col-sm-12">
+                                            <label for="expense_negative_limit">{{__('Minus Balance Limit')}} <span class="text-muted">({{__('allowed negative balance')}})</span></label>
+                                            <input name="expense_negative_limit" id="expense_negative_limit" value="{{ $settings['expense_negative_limit'] ?? 0 }}" type="number" min="0" step="0.01" placeholder="{{__('Enter minus limit')}}" class="form-control"/>
+                                        </div>
+                                    </div>
 
                             {{-- <input class="btn btn-theme" type="submit" value="{{ __('submit') }}"> --}}
                             <input class="btn btn-theme float-right ml-3" id="create-btn" type="submit" value={{ __('submit') }}>

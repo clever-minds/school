@@ -32,7 +32,7 @@
                                         <th scope="col" data-field="id" data-sortable="true" data-visible="false">{{ __('id') }}</th>
                                         <th scope="col" data-field="no">{{ __('no.') }}</th>
                                         <th scope="col" data-field="full_name">{{ __('name') }}</th>
-                                        <th scope="col" data-field="email">{{ __('admission_no') }}</th>
+                                        <th scope="col" data-field="mobile">{{ __('mobile_no') }}</th>
                                         <th scope="col" data-field="operate" data-escape="false">{{ __('action') }}
                                         </th>
                                     </tr>

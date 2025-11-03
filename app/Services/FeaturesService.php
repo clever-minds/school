@@ -16,11 +16,12 @@ class FeaturesService {
     public static function getFeatures($schoolID = null) {
         // Fetch All the Features of the School in which User is associated. Then Cache that result for 30 minutes
         $schoolID = !empty($schoolID) ? $schoolID : Auth::user()->school_id;
+                         
+
         if (!empty($schoolID)) {
             return app(CachingService::class)->schoolLevelCaching(config('constants.CACHE.SCHOOL.FEATURES'), function () use ($schoolID) {
                 $active_subscription = app(SubscriptionService::class)->active_subscription($schoolID);
                 if ($active_subscription) {
-                    
                     // Check any outstanding subscription bills
                     $today_date = Carbon::now()->format('Y-m-d');
                     $subscriptionBill = SubscriptionBill::with(['subscription' => function($q) {

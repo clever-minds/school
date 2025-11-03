@@ -36,9 +36,9 @@
                     <li>
                         <a href="{{ url('/#about-us') }}">{{ __('about_us') }}</a>
                     </li>
-                    <li>
+                   {{-- <li>
                         <a href="{{ url('/#pricing') }}">{{ __('pricing') }}</a>
-                    </li>
+                    </li>--}}
                     @if (count($faqs))
                         <li>
                             <a href="{{ url('/#faq') }}">{{ __('faqs') }}</a>
@@ -118,9 +118,9 @@
                     <li>
                         <a href="{{ url('/#about-us') }}">{{ __('about_us') }}</a>
                     </li>
-                    <li>
+                    {{--<li>
                         <a href="{{ url('/#pricing') }}">{{ __('pricing') }}</a>
-                    </li>
+                    </li>--}}
                     @if (count($faqs))
                         <li>
                             <a href="{{ url('/#faq') }}">{{ __('faqs') }}</a>

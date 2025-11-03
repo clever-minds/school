@@ -12,62 +12,13 @@
             </h3>
         </div>
         <div class="row">
-            <div class="col-md-12 grid-margin stretch-card">
-                <div class="card">
-                    <div class="card-body">
-                        <h4 class="card-title">
-                            {{ __('create') . ' ' . __('expense') }}
-                        </h4>
-                        <form class="pt-3" id="create-form" action="{{ route('expense.store') }}" method="POST" novalidate="novalidate" enctype="multipart/form-data">
-                            <div class="row">
-                                <div class="form-group col-sm-12 col-md-5">
-                                    <label>{{ __('select') }} {{ __('category') }} <span class="text-danger">*</span></label>
-                                    {!! Form::select('category_id', $expenseCategory, null, ['required','class' => 'form-control','placeholder' => __('select') .' '. __('category')]) !!}
-                                </div>
+           
 
-                                <div class="form-group col-sm-12 col-md-5">
-                                    <label for="title">{{ __('title') }} <span class="text-danger">*</span></label>
-                                    <input name="title" id="title" type="text" placeholder="{{ __('title') }}" class="form-control" required/>
-                                </div>
-
-                                <div class="form-group col-sm-12 col-md-2">
-                                    <label for="ref_no">{{ __('reference_no') }}</label>
-                                    <input name="ref_no" id="ref_no" type="text" placeholder="{{ __('reference_no') }}" class="form-control"/>
-                                </div>
-
-                                <div class="form-group col-sm-12 col-md-3">
-                                    <label for="amount">{{ __('Amount') }} <span class="text-danger">*</span></label>
-                                    <input name="amount" id="amount" type="number" placeholder="{{ __('Amount') }}" class="form-control" required/>
-                                </div>
-
-                                <div class="form-group col-sm-12 col-md-3">
-                                    <label for="date">{{ __('date') }} <span class="text-danger">*</span></label>
-                                    <input name="date" id="date" type="text" placeholder="{{ __('date') }}" class="datepicker-popup-no-future form-control" autocomplete="off" required/>
-                                </div>
-
-                                <div class="form-group col-sm-12 col-md-6">
-                                    <label for="description">{{ __('description') }} </label>
-                                    <textarea name="description" id="description" placeholder="{{ __('description') }}" class="form-control"></textarea>
-                                </div>
-
-                                <div class="form-group col-sm-12 col-md-3">
-                                    <label for="">{{ __('select') }} {{ __('session_year') }}</label>
-                                    {!! Form::select('session_year_id', $sessionYear, $current_session_year->id, ['required','class' => 'form-control']) !!}
-                                </div>
-
-                            </div>
-                            <input class="btn btn-theme float-right ml-3" id="create-btn" type="submit" value={{ __('submit') }}>
-                                <input class="btn btn-secondary float-right" type="reset" value={{ __('reset') }}>
-                        </form>
-                    </div>
-                </div>
-            </div>
-
-            <div class="col-md-12 grid-margin stretch-card">
+          <div class="col-md-12 grid-margin stretch-card">
                 <div class="card">
                     <div class="card-body">
                         <h4 class="card-title">{{ __('list') . ' ' . __('expense') }}</h4>
-                        <div class="row" id="toolbar">
+                         {{--  <div class="row" id="toolbar">
 
                             <div class="form-group col-sm-12 col-md-4">
                                 <label class="filter-menu">{{ __('session_year') }}</label>
@@ -84,7 +35,7 @@
                                 {!! Form::select('month', $months, null, ['class' => 'form-control', 'id' => 'filter_month', 'placeholder' => __('all')]) !!}
                             </div>
 
-                        </div>
+                        </div>--}}
 
                         <table aria-describedby="mydesc" class='table' id='table_list' data-toggle="table"
                                data-url="{{ route('expense.show',[1]) }}" data-click-to-select="true"

@@ -8,7 +8,8 @@ use Illuminate\Foundation\Console\Kernel as ConsoleKernel;
 class Kernel extends ConsoleKernel
 {
 
-    protected $commands = [Commands\SubscriptionBillCron::class];
+    protected $commands = [Commands\SubscriptionBillCron::class,\App\Console\Commands\AddPermissionToAllTenants::class,
+];
 
     /**
      * Define the application's command schedule.

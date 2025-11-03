@@ -43,7 +43,7 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Validator;
 use JetBrains\PhpStorm\NoReturn;
 use Throwable;
-
+use App\Models\User;
 class ParentApiController extends Controller
 {
 
@@ -108,10 +108,10 @@ class ParentApiController extends Controller
     {
 
         $validator = Validator::make($request->all(), [
-            'email' => 'required|email',
+            'email' => 'required',
             'password' => 'required',
         ], [
-            'email.required' => 'The email field cannot be empty.',
+            'email.required' => 'The mobile field cannot be empty.',
             'email.email' => 'Please provide a valid email address.',
             'password.required' => 'The password field cannot be empty.',
         ]);
@@ -134,7 +134,7 @@ class ParentApiController extends Controller
 
         if (
             Auth::attempt([
-                'email' => $request->email,
+                'mobile' => $request->email,
                 'password' => $request->password
             ])
         ) {
@@ -2072,4 +2072,71 @@ class ParentApiController extends Controller
             ResponseService::errorResponse();
         }
     }
+ public function forgotPassword(Request $request)
+{
+    $validator = Validator::make($request->all(), [
+        'school_code' => 'required|string',
+        'mobile'      => 'required|digits:10',
+    ], [
+        'school_code.required' => 'Please enter the school code.',
+        'mobile.required'      => 'Please enter the mobile number.',
+        'mobile.digits'        => 'Mobile number must be 10 digits.',
+    ]);
+
+
+    if ($validator->fails()) {
+        return ResponseService::validationError($validator->errors()->first());
+    }
+
+    try {
+        $schoolCode = $request->school_code;
+        $mobile = $request->mobile;
+        $user = null;
+
+        // ✅ Case 1: Search by school_code (school DB)
+        if ($schoolCode) {
+            $school = School::on('mysql')->where('code', $schoolCode)->first();
+
+            if ($school) {
+                DB::setDefaultConnection('school');
+                Config::set('database.connections.school.database', $school->database_name);
+                DB::purge('school');
+                DB::connection('school')->reconnect();
+                DB::setDefaultConnection('school');
+
+                // 🔍 Find user who has "parent" role
+                $user = $this->user->builder()
+                    ->role('Guardian')
+                    ->first();
+            } else {
+                return response()->json(['error' => true, 'message' => 'Invalid school code'], 200);
+            }
+        }
+
+        // ✅ Case 2: Search by mobile (main DB)
+        if ($mobile) {
+            $user = User::on('mysql')
+                ->where('mobile', $mobile)
+                ->role('Guardian') // Spatie role filter
+                ->first();
+        }
+
+        // ✅ Common response
+        if (!empty($user)) {
+            $this->user->update($user->id, [
+                'reset_request' => 1,
+                'school_id'     => $user->school_id ?? null,
+            ]);
+            return ResponseService::successResponse("Request sent successfully");
+        } else {
+            return ResponseService::errorResponse("Invalid user details", null, config('constants.RESPONSE_CODE.INVALID_USER_DETAILS'));
+        }
+
+    } catch (Throwable $e) {
+        ResponseService::logErrorResponse($e);
+        return ResponseService::errorResponse();
+    }
+}
+
+
 }

@@ -5,6 +5,8 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Http\Controllers\SystemSettingsController;
 use App\Models\Role;
+use App\Models\School;
+
 use App\Models\User;
 use App\Repositories\Announcement\AnnouncementInterface;
 use App\Repositories\AnnouncementClass\AnnouncementClassInterface;
@@ -1260,6 +1262,24 @@ class StaffApiController extends Controller
         } catch (\Throwable $th) {
             ResponseService::logErrorResponse($th);
             ResponseService::errorResponse();
+        }
+    }
+     public function getAllSchools(Request $request)
+    {
+        try {
+            // Optional: Add filters if needed (e.g. by city or active status)
+            $schools = School::select('id', 'name')
+                            ->orderBy('name', 'ASC')
+                            ->get();
+
+            if ($schools->isEmpty()) {
+                return ResponseService::errorResponse('No schools found');
+            }
+
+            return ResponseService::successResponse('Schools fetched successfully', $schools);
+        } catch (\Throwable $th) {
+            ResponseService::logErrorResponse($th);
+            return ResponseService::errorResponse('Failed to fetch schools');
         }
     }
 }

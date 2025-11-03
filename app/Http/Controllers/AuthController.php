@@ -189,12 +189,10 @@ class AuthController extends Controller {
         $failedAttempts = session('failed_attempts', 0);
         $userId = Session::get('2fa_user_id');
         $user = \App\Models\User::find($userId);
-    
         // If the 2FA secret has expired (based on the user's `updated_at`)
-        $actual_start_at = Carbon::parse($user->updated_at);
+        $actual_start_at = Carbon::parse($user->getRawOriginal('updated_at'));
         $actual_end_at = Carbon::now();
         $mins = $actual_start_at->diffInMinutes($actual_end_at);
-    
         if ($mins >= 5) {
             // Expired, clear 2FA secret and expire session
             $this->clearTwoFactorData($user);
@@ -203,10 +201,8 @@ class AuthController extends Controller {
             $request->session()->regenerate();
             session()->forget('school_database_name');
             Session::forget('school_database_name');
-    
             return redirect('/login')->withErrors(['code' => '2FA Expired. Please Login Again.']);
         }
-    
         // Verify 2FA secret
         if ($user->two_factor_secret == $request->two_factor_secret) {
             // Reset failed attempts and set expiration date for 2FA
@@ -224,25 +220,20 @@ class AuthController extends Controller {
                 $request->session()->regenerate();
                 session()->forget('school_database_name');
                 Session::forget('school_database_name');
-    
                 return redirect('/')->withErrors(['code' => 'Too many failed attempts. Please try again.']);
             }
-    
             // Increment failed attempts and store in session
             $failedAttempts++;
             session(['failed_attempts' => $failedAttempts]);
-    
             return back()->withErrors(['code' => 'Invalid code. Please try again.']);
         }
     }
-    
-    // function to clear 2FA data
-    private function clearTwoFactorData($user) {
-        DB::table('users')->where('email', $user->email)->update([
+
+    private function clearTwoFactorData($user)
+    {
+        $user->update([
             'two_factor_secret' => null,
             'two_factor_expires_at' => null
         ]);
     }
-
-    
 }

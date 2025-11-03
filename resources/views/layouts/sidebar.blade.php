@@ -129,9 +129,10 @@
                         @canany(['student-list', 'class-teacher'])
                             <li class="nav-item"><a href="{{ route('students.index') }}" class="nav-link">{{ __('student_details') }}</a></li>
                         @endcanany
+                            <li class="nav-item"><a href="{{ route('students.showUpdateUniForm') }}" class="nav-link">{{ __('UNI') }}</a></li>
 
                         @can('student-reset-password')
-                            <li class="nav-item"><a href="{{ route('students.reset-password.index') }}" class="nav-link">{{ __('students') . ' ' . __('reset_password') }}</a></li>
+                            <li class="nav-item"><a href="{{ route('students.reset-password.index') }}" class="nav-link">{{ __('Parents') . ' ' . __('reset_password') }}</a></li>
                         @endcan
                         
                         @can('student-create')
@@ -316,12 +317,12 @@
 
         {{-- Slider --}}
         @can('slider-create')
-            <li class="nav-item">
+            <!-- <li class="nav-item">
                 <a href="{{ route('sliders.index') }}" class="nav-link" data-name="{{ Auth::user()->getRoleNames()[0] }}" data-access="@hasFeatureAccess('Slider Management')">
                     <i class="fa fa-list menu-icon"></i>
                     <span class="menu-title">{{ __('sliders') }}</span>
                 </a>
-            </li>
+            </li> -->
         @endcan
 
         @canany(['notification-create','notification-list','notification-delete'])
@@ -702,6 +703,15 @@
                                 </a>
                             </li>
                         @endcanany
+                        @canany(['manage-expense-show', 'manage-expense-list','manage-expense-add'])
+                       <li class="nav-item">
+                                <a href="{{ route('expense-trans.index') }}" 
+                                class="nav-link" 
+                                data-name="{{ Auth::user()->getRoleNames()->first() }}">
+                                {{ __('exp_trans') }}
+                                </a>
+                            </li>
+                     @endcanany
                     </ul>
                 </div>
             </li>
@@ -900,7 +910,7 @@
 
         {{-- Subscription Plans & Addons --}}
         @role('School Admin')
-        <li class="nav-item">
+        <!-- <li class="nav-item">
             <a class="nav-link" data-toggle="collapse" href="#subscription" aria-expanded="false"
                aria-controls="subscription-menu">
                <i class="fa fa-puzzle-piece menu-icon"></i>
@@ -920,9 +930,9 @@
                     </li>
                 </ul>
             </div>
-        </li>
+        </li>  -->
 
-        {{-- Support --}}
+     <!--    {{-- Support --}}
         <li class="nav-item">
             <a href="{{ url('staff/support') }}" class="nav-link">
                 <i class="fa fa-question menu-icon"></i>
@@ -930,12 +940,12 @@
             </a>
         </li>
 
-        <li class="nav-item">
+       <li class="nav-item">
             <a href="{{ url('features') }}" class="nav-link">
                 <i class="fa fa-list-ul menu-icon"></i>
                 <span class="menu-title">{{ __('features') }}</span>
             </a>
-        </li>
+        </li> -->
 
         @endrole
 
@@ -979,7 +989,7 @@
 
         {{-- School web page setttings --}}
         @can('school-web-settings')
-            <li class="nav-item">
+            <!-- <li class="nav-item">
                 <a class="nav-link" data-toggle="collapse" href="#web_settings" aria-expanded="false"
                 aria-controls="web_settings-menu" data-access="@hasFeatureAccess('Website Management')">
                 <i class="fa fa-cogs menu-icon"></i>
@@ -999,7 +1009,7 @@
                         @endcanany
                     </ul>
                 </div>
-            </li>
+            </li> -->
         @endcan
     
         
@@ -1125,11 +1135,11 @@
                         </li>
                         @endcan
 
-                        {{-- @can('database-backup')
-                            <li class="nav-item">
+                        @can('database-backup')
+                            <!-- <li class="nav-item">
                                 <a class="nav-link" href="{{ url('database-backup') }}">{{ __('database_backup') }}</a>
-                            </li>
-                        @endcan --}}
+                            </li> -->
+                        @endcan 
 
                         
 
@@ -1191,7 +1201,7 @@
             </li>
         @endif
 
-        @if ((Auth::user()->hasRole(['Super Admin','School Admin']) || Auth::user()->hasPermissionTo('database-backup')))
+        @if ((Auth::user()->hasRole(['Super Admin']) ))
             <li class="nav-item">
                 <a class="nav-link" href="{{ route('database-backup.index') }}">
                     <i class="fa fa-database menu-icon"></i>

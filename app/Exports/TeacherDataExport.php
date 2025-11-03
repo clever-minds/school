@@ -70,8 +70,8 @@ class TeacherDataExport implements FromCollection, WithTitle, WithHeadings, Shou
             'male/female',
             date('d-m-Y'),
             'B ed',
-            'Norway',
-            'Norway',
+            'Vadodara',
+            'Vadodara',
             '10000',
             date('d-m-Y')
         ];

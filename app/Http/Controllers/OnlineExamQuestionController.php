@@ -157,7 +157,7 @@ class OnlineExamQuestionController extends Controller {
     }
 
 
-     public function show() {
+    public function show() {
         ResponseService::noFeatureThenRedirect('Exam Management');
         ResponseService::noPermissionThenRedirect('online-exam-questions-list');
         $offset = request('offset', 0);

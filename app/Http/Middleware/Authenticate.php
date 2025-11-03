@@ -27,6 +27,7 @@ class Authenticate extends Middleware
             DB::connection('school')->reconnect();
             DB::setDefaultConnection('school');
         } else {
+            //dd("else");
             DB::purge('school');
             DB::connection('mysql')->reconnect();
             DB::setDefaultConnection('mysql');

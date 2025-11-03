@@ -41,7 +41,19 @@ class Handler extends ExceptionHandler
 
     function render($request, Throwable $exception)
     {
-        
+        // if (!config('app.debug')) {
+        //     \Log::error($exception);
+        //     return response()->view('errors.503', [
+        //         'message' => 'We’re currently experiencing technical issues. Please try again later.'
+        //     ], 503);
+        // }
+        if (str_contains($exception->getMessage(), 'Unknown database')) {
+            \Log::error('Database not found: ' . $exception->getMessage());
+            return response()->view('errors.503', [
+                'message' => 'School database not found or under maintenance. Please try again later.'
+            ], 503);
+        }
+
         if ($this->isHttpException($exception)) {
             switch ($exception->getStatusCode()) {
 

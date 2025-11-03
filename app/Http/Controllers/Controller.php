@@ -138,7 +138,6 @@ class Controller extends BaseController {
         } catch (\Throwable $th) {
             
         }
-
         try {
             $school = School::on('mysql')->where('domain', $fullDomain)->orwhere('domain', $subdomain)->where('installed', 1)->first();
         } catch (\Throwable $th) {
@@ -146,8 +145,10 @@ class Controller extends BaseController {
         }
 
         if ($school) {
+
             // Get current subscription features
             $subscription = $this->subscriptionService->active_subscription($school->id);
+
             if ($subscription) {
                 $features = $subscription->subscription_feature->pluck('feature.name')->toArray();
                 $addons = $subscription->addons->pluck('feature.name')->toArray();
@@ -803,6 +804,7 @@ class Controller extends BaseController {
     {
         try {
             $user = Auth::user();
+
             if (!$user->hasVerifiedEmail()) {
                 $now = Carbon::now();
                 if ($now->diffInHours($user->updated_at) >= 2) {

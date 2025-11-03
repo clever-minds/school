@@ -104,7 +104,7 @@ class StudentController extends Controller {
             'admission_no'        => 'required|unique:users,email',
             'admission_date'      => 'required',
             'session_year_id'     => 'required|numeric',
-            'guardian_email'      => 'required|email',
+            //'guardian_email'      => 'required|email',
             'guardian_first_name' => 'required|string',
             'guardian_last_name'  => 'required|string',
             'guardian_mobile'     => 'required|numeric',
@@ -154,7 +154,7 @@ class StudentController extends Controller {
             $sessionYear = $this->sessionYear->findById($request->session_year_id);
             $guardian = $userService->createOrUpdateParent($request->guardian_first_name, $request->guardian_last_name, $request->guardian_email, $request->guardian_mobile, $request->guardian_gender, $request->guardian_image);
             $is_send_notification = true;
-            $userService->createStudentUser($request->first_name, $request->last_name, $request->admission_no, $request->mobile, $request->dob, $request->gender, $request->image, $request->class_section_id, $request->admission_date, $request->current_address, $request->permanent_address, $sessionYear->id, $guardian->id, $request->extra_fields ?? [], $request->status ?? 0, $is_send_notification);
+            $userService->createStudentUser($request->first_name,$request->middle_name, $request->last_name, $request->admission_no, $request->mobile, $request->dob, $request->gender, $request->image, $request->class_section_id, $request->admission_date, $request->current_address, $request->permanent_address, $sessionYear->id, $guardian->id, $request->extra_fields ?? [], $request->status ?? 0, $is_send_notification);
 
             DB::commit();
             ResponseService::successResponse('Data Stored Successfully');
@@ -181,15 +181,16 @@ class StudentController extends Controller {
         ResponseService::noAnyPermissionThenSendJson(['student-create', 'student-edit']);
         $rules = [
             'first_name'      => 'required',
+            'middle_name'       => 'required',
             'last_name'       => 'required',
             'mobile'          => 'nullable|regex:/^([0-9\s\-\+\(\)]*)$/',
             'image'           => 'nullable|mimes:jpeg,png,jpg,svg|image|max:2048',
             'dob'             => 'required',
             'session_year_id' => 'required|numeric',
-            'guardian_email'  => 'required|email|unique:users,email',
+           // 'guardian_email'  => 'required|email|unique:users,email',
         ];
         if (is_numeric($request->guardian_id)) {
-            $rules['guardian_email'] = 'required|email|unique:users,email,' . $request->guardian_id;
+           // $rules['guardian_email'] = 'required|email|unique:users,email,' . $request->guardian_id;
         }
         $request->validate($rules);
 
@@ -198,8 +199,7 @@ class StudentController extends Controller {
             $userService = app(UserService::class);
             $sessionYear = $this->sessionYear->findById($request->session_year_id);
             $guardian = $userService->createOrUpdateParent($request->guardian_first_name, $request->guardian_last_name, $request->guardian_email, $request->guardian_mobile, $request->guardian_gender, $request->guardian_image, $request->parent_reset_password);
-
-            $userService->updateStudentUser($id, $request->first_name, $request->last_name, $request->mobile, $request->dob, $request->gender, $request->image, $sessionYear->id, $request->extra_fields ?? [], $guardian->id, $request->current_address, $request->permanent_address, $request->reset_password, $request->class_section_id);
+            $userService->updateStudentUser($id, $request->first_name,$request->middle_name, $request->last_name, $request->mobile, $request->dob, $request->gender, $request->image, $sessionYear->id, $request->extra_fields ?? [], $guardian->id, $request->current_address, $request->permanent_address, $request->reset_password, $request->class_section_id);
             DB::commit();
             ResponseService::successResponse('Data Updated Successfully');
         } catch (Throwable $e) {
@@ -517,7 +517,7 @@ class StudentController extends Controller {
         $rows = array();
         $no = 1;
         foreach ($res as $row) {
-            $operate = BootstrapTableService::button('fa fa-edit', route('student.reset-password.update', $row->id), ['reset_password', 'btn-gradient-primary', 'btn-action', 'btn-rounded btn-icon'], ['title' => trans("reset_password"), 'data-id' => $row->id, 'data-dob' => $row->dob]);
+            $operate = BootstrapTableService::button('fa fa-edit', route('student.reset-password.update', $row->id), ['reset_password', 'btn-gradient-primary', 'btn-action', 'btn-rounded btn-icon'], ['title' => trans("reset_password"), 'data-id' => $row->id, 'data-mobile' => $row->mobile]);
             $tempRow = $row->toArray();
             $tempRow['no'] = $no++;
             $tempRow['operate'] = $operate;
@@ -528,12 +528,12 @@ class StudentController extends Controller {
         return response()->json($bulkData);
     }
 
-    public function resetPasswordUpdate(Request $request) {
+public function resetPasswordUpdate(Request $request) {
         ResponseService::noPermissionThenRedirect('student-change-password');
         try {
             DB::beginTransaction();
-            $dob = date('dmY', strtotime($request->dob));
-            $password = Hash::make($dob);
+            $mobile = $request->mobile;
+            $password = Hash::make($mobile);
             $this->user->update($request->id, ['password' => $password, 'reset_request' => 0]);
             DB::commit();
 
@@ -1105,4 +1105,112 @@ class StudentController extends Controller {
                 ResponseService::errorResponse();
         }
     }
+    public function showUpdateUniForm()
+{
+
+    try {
+        DB::beginTransaction();
+
+        // ✅ Example: All students list for GR Number dropdown
+      
+
+        // ✅ Return the Blade view
+        return view('students.uni');
+    } catch (Throwable $e) {
+        DB::rollBack();
+
+        ResponseService::logErrorResponse($e);
+        return ResponseService::errorRedirect('Something went wrong while loading the form.');
+    }
+}
+
+    public function updateUniNo(Request $request)
+{
+    // ✅ Permission check (similar to updateApplicationStatus)
+    ResponseService::noPermissionThenRedirect('student-edit');
+
+    // ✅ Validation
+    $request->validate([
+        'student_id'  => 'required|exists:students,id',
+        'student_uni' => 'required|string|max:255',
+    ], [
+        'student_id.required'  => 'Student ID is required.',
+        'student_uni.required' => 'Student University Number is required.',
+    ]);
+
+    try {
+        DB::beginTransaction();
+
+        // ✅ Student Record Fetch
+        $student = $this->student->builder()->where('id', $request->student_id)->firstOrFail();
+
+        // ✅ Update Field
+        $student->update([
+            'student_uni' => $request->student_uni,
+        ]);
+
+        DB::commit();
+
+        // ✅ Success response
+        ResponseService::successResponse('Student UNI Number updated successfully!');
+    } catch (Throwable $e) {
+        DB::rollBack();
+
+        // ✅ Error logging + response
+        ResponseService::logErrorResponse($e);
+        ResponseService::errorResponse();
+    }
+}
+public function searchStudent(Request $request)
+{
+    try {
+        // JS sends ?email=xyz
+        $search = $request->input('email');
+
+        $students = DB::table('users')
+            ->join('students', 'students.user_id', '=', 'users.id')
+            ->join('model_has_roles', 'model_has_roles.model_id', '=', 'users.id')
+            ->join('roles', 'roles.id', '=', 'model_has_roles.role_id')
+            ->where('roles.name', 'student')
+            ->when($search, function ($query, $search) {
+                $query->where('students.admission_no', 'like', "%{$search}%")  // ✅ Added GR Number
+                      ->orWhere('users.email', 'like', "%{$search}%")   // ✅ Keep email too
+                      ->orWhere('users.first_name', 'like', "%{$search}%")
+                      ->orWhere('users.last_name', 'like', "%{$search}%");
+            })
+            ->select(
+                'users.id as user_id',
+                'students.id as student_id',
+                'students.admission_no as gr_no',
+                'users.first_name',
+                'users.last_name',
+                'users.email',
+                'users.mobile'
+            )
+            ->orderBy('students.admission_no', 'asc')
+            ->limit(20)
+            ->get();
+
+        $formatted = $students->map(function ($student) {
+            return [
+                'id'          => $student->student_id,
+                'text'        => $student->gr_no . ' - ' . $student->first_name . ' ' . $student->last_name,
+                'email'       => $student->email,
+                'first_name'  => $student->first_name,
+                'last_name'   => $student->last_name,
+                'mobile'      => $student->mobile,
+            ];
+        });
+
+  return response()->json([
+        'data' => $formatted,
+        'total_count' => $formatted->count(),
+    ]);    } catch (\Throwable $e) {
+        \Log::error($e);
+        return response()->json([], 500);
+    }
+}
+
+
+
 }

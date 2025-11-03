@@ -24,9 +24,9 @@ final class SetupSchoolDatabase implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
-    public int $tries = 1;
-    public int $timeout = 300; // 5 minutes timeout
-    public int $backoff = 60; // 1 minute between retries
+    public int $tries = 3;
+    public int $timeout = 300;
+    public int $backoff = 60;
 
     /**
      * Create a new job instance.
@@ -35,7 +35,11 @@ final class SetupSchoolDatabase implements ShouldQueue
         private readonly int $schoolId,
         private readonly ?int $packageId = null,
         private readonly ?string $schoolCodePrefix = null
-    ) {}
+    ) {
+        // CRITICAL: Use 'sync' queue to avoid database queue issues
+        // Or use Redis if available: $this->onConnection('redis')
+       // $this->onConnection('sync');
+    }
 
     /**
      * Execute the job.
@@ -47,11 +51,16 @@ final class SetupSchoolDatabase implements ShouldQueue
         SystemSettingInterface $systemSettings
     ): void {
         try {
+            // Always ensure we start on the central (mysql) connection
             DB::setDefaultConnection('mysql');
+            DB::reconnect('mysql');
+            
             Log::info("Starting school database setup for school ID: {$this->schoolId}");
 
-            // Get school data
+            // Get school data from central database
             $school = School::findOrFail($this->schoolId);
+            
+            Log::info("Current Database: {$school->database_name}");
             
             // Create database
             DB::statement("CREATE DATABASE IF NOT EXISTS {$school->database_name}");
@@ -66,6 +75,7 @@ final class SetupSchoolDatabase implements ShouldQueue
             if ($this->packageId) {
                 $subscriptionService->createSubscription($this->packageId, $school->id, null, 1);
                 $cache->removeSchoolCache(config('constants.CACHE.SCHOOL.SETTINGS'), $school->id);
+                Log::info("✅ Automatically assigned package ID {$this->packageId} to school: {$school->name}");
             }
 
             // Update school code prefix if provided
@@ -85,11 +95,23 @@ final class SetupSchoolDatabase implements ShouldQueue
             // Update school status to active
             $school->update(['status' => 1, 'installed' => 1]);
 
-            DB::setDefaultConnection('school');
-            Config::set('database.connections.school.database', $school->database_name);
+            // Configure and switch to tenant database for final operations
+            Config::set('database.connections.school', [
+                'driver' => 'mysql',
+                'host' => env('DB_HOST'),
+                'port' => env('DB_PORT'),
+                'database' => $school->database_name,
+                'username' => env('DB_USERNAME'),
+                'password' => env('DB_PASSWORD'),
+                'charset' => 'utf8mb4',
+                'collation' => 'utf8mb4_unicode_ci',
+            ]);
+            
             DB::purge('school');
             DB::connection('school')->reconnect();
             DB::setDefaultConnection('school');
+            
+            // Update school record in tenant database
             School::where('id', $this->schoolId)->update(['status' => 1, 'installed' => 1]);
 
             $school = School::with('user')->findOrFail($this->schoolId);
@@ -113,7 +135,6 @@ final class SetupSchoolDatabase implements ShouldQueue
             }
 
             Log::info("Welcome email sent successfully for school ID: {$this->schoolId}");
-
             Log::info("School database setup completed successfully for school ID: {$this->schoolId}");
 
         } catch (Throwable $e) {
@@ -122,7 +143,10 @@ final class SetupSchoolDatabase implements ShouldQueue
                 'trace' => $e->getTraceAsString()
             ]);
 
-            // Update school status to failed
+            // Ensure we're on central database for status update
+            DB::setDefaultConnection('mysql');
+            DB::reconnect('mysql');
+            
             $school = School::find($this->schoolId);
             if ($school) {
                 $school->update(['status' => 0, 'installed' => 0]);
@@ -139,13 +163,20 @@ final class SetupSchoolDatabase implements ShouldQueue
     {
         Log::error("School database setup job failed permanently for school ID: {$this->schoolId}", [
             'error' => $exception->getMessage(),
-            'trace' => $exception->getTraceAsString()
         ]);
 
-        // Update school status to failed
-        $school = School::find($this->schoolId);
-        if ($school) {
-            $school->update(['status' => 0, 'installed' => 0]);
+        try {
+            DB::setDefaultConnection('mysql');
+            DB::reconnect('mysql');
+            
+            $school = School::find($this->schoolId);
+            if ($school) {
+                $school->update(['status' => 0, 'installed' => 0]);
+            }
+        } catch (Throwable $e) {
+            Log::error("Failed to update school status on job failure", [
+                'error' => $e->getMessage()
+            ]);
         }
     }
 
@@ -172,4 +203,4 @@ final class SetupSchoolDatabase implements ShouldQueue
 
         return $templateContent;
     }
-} 
+}

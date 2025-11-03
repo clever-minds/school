@@ -279,10 +279,10 @@ window.studentEvents = {
     'click .edit-data': function (e, value, row) {
         // Reset the radio button
         $('input[name=application_status]').prop('checked', false);
-
         $('#edit_id').val(row.id);
         $('#edit_user_id').val(row.user_id);
         $('#edit_first_name').val(row.user.first_name);
+        $('#edit_middle_name').val(row.user.middle_name);
         $('#edit_last_name').val(row.user.last_name);
         $('#edit_mobile').val(row.user.mobile);
         $('#edit_dob').val(moment(row.dob_org, 'YYYY-MM-DD').format('DD-MM-YYYY'));

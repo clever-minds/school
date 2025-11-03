@@ -100,6 +100,8 @@ Route::group(['prefix' => 'parent'], static function () {
         // Route::group(['middleware' => ['']], static function () {
         //     Route::get('test', [ParentApiController::class, 'test']);
         // });
+            Route::post('forgot-password', [ParentApiController::class, 'forgotPassword']);
+
         Route::group(['middleware' => ['APISwitchDatabase']], static function () {
             Route::get('test', [ParentApiController::class, 'test']);
 
@@ -244,6 +246,7 @@ Route::group(['prefix' => 'teacher'], static function () {
 // Staff & Teacher APIs
 Route::group(['prefix' => 'staff'], static function () {
     Route::post('login', [TeacherApiController::class, 'login']);
+Route::get('/schools', [StaffApiController::class, 'getAllSchools']);
 
     Route::group(['middleware' => ['APISwitchDatabase', 'checkSchoolStatus']], static function () {
         // Payroll

@@ -65,6 +65,9 @@
         margin-right: 5px;
         vertical-align: middle;
     }
+    .sidebar .nav .nav-item .nav-link i.menu-icon {
+    color:{{ $schoolsettings['primary_color'] ?? '#22577a' }} !important;
+}
 </style>
 <script>
     const baseUrl = "{{ URL::to('/') }}";

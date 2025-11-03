@@ -99,7 +99,8 @@ class SchoolSettingsController extends Controller {
             'time_format'             => 'required',
             'domain'                  => 'nullable|unique:schools,domain,'.Auth::user()->school_id,
             'google_map_link'         => 'nullable',
-            'fees_remainder_duration' => 'required'
+            'fees_remainder_duration' => 'required',
+             'expense_negative_limit' => 'required'
 
         ];
         $validator = Validator::make($request->all(), $settings);
@@ -145,7 +146,8 @@ class SchoolSettingsController extends Controller {
                 'tagline' => $request->school_tagline,
                 'domain' => $request->domain,
                 'domain_type' => $request->domain_type,
-                'fees_remainder_duration' => $request->fees_remainder_duration
+                'fees_remainder_duration' => $request->fees_remainder_duration,
+                'expense_negative_limit'=>$request->expense_negative_limit
             ];
             if ($request->hasFile('vertical_logo') && Auth::user()->school_id) {
                 $school = $this->school->findById(Auth::user()->school_id);

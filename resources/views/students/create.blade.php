@@ -24,7 +24,7 @@
                             <div class="row">
                                 <div class="form-group col-sm-12 col-md-12 col-lg-6 col-xl-3">
                                     <label>{{ __('Gr Number') }} <span class="text-danger">*</span></label>
-                                    {!! Form::text('admission_no', $admission_no, ['readonly','placeholder' => __('Gr Number'), 'class' => 'form-control']) !!}
+                                    {!! Form::text('admission_no', "", ['','placeholder' => __('Gr Number'), 'class' => 'form-control']) !!}
                                 </div>
 
                                 <div class="form-group col-sm-12 col-md-12 col-lg-6 col-xl-3">
@@ -85,6 +85,10 @@
                                     <label>{{ __('first_name') }} <span class="text-danger">*</span></label>
                                     {!! Form::text('first_name', null, ['placeholder' => __('first_name'), 'class' => 'form-control']) !!}
 
+                                </div>
+                                 <div class="form-group col-sm-12 col-md-12 col-lg-6 col-xl-4">
+                                    <label>{{ __('middle_name') }} <span class="text-danger">*</span></label>
+                                    {!! Form::text('middle_name', null, ['placeholder' => __('middle_name'), 'class' => 'form-control', 'id' => 'edit_middle_name']) !!}
                                 </div>
                                 <div class="form-group col-sm-12 col-md-12 col-lg-6 col-xl-4">
                                     <label>{{ __('last_name') }} <span class="text-danger">*</span></label>

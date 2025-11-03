@@ -1,6 +1,7 @@
 <?php
 
 namespace App\Services;
+use Illuminate\Support\Facades\Log;
 
 use App\Models\School;
 use App\Models\SchoolSetting;
@@ -16,9 +17,13 @@ use Illuminate\Support\Facades\File;
 use Spatie\Permission\Models\Permission;
 use Spatie\Permission\Models\Role;
 use Illuminate\Support\Facades\Session;
-
+use App\Services\SubscriptionService;
 class SchoolDataService {
-
+ private SubscriptionService $subscriptionService;
+ public function __construct(SubscriptionService $subscriptionService)
+    {
+        $this->subscriptionService = $subscriptionService;
+    }
     public function preSettingsSetup($schoolData) {
 
         DB::setDefaultConnection('school');
@@ -202,6 +207,8 @@ class SchoolDataService {
 
         );
         SchoolSetting::upsert($schoolSettingData, ["name", "school_id"], ["data", "type"]);
+        $this->assignLastActivePlanToNewSchool($schoolData);
+
     }
     
     public function createPreSetupRole($school) {
@@ -249,6 +256,8 @@ class SchoolDataService {
         DB::purge('school');
         DB::connection('school')->reconnect();
         DB::setDefaultConnection('school');
+        app(\Spatie\Permission\PermissionRegistrar::class)->forgetCachedPermissions();
+
         Artisan::call('migrate', [
             '--database' => 'school',
             '--path' => 'database/migrations/schools',
@@ -260,6 +269,10 @@ class SchoolDataService {
     public function createPermissions() {
 
         $permissions = [
+            ['name' => 'update-student-uni'],
+            ['name' => 'manage-expense-show'],
+            ['name' => 'manage-expense-list'],
+            ['name' => 'manage-expense-add'],
             ...self::permission('role'),
             ...self::permission('medium'),
             ...self::permission('section'),
@@ -378,6 +391,7 @@ class SchoolDataService {
             return $data;
         }, $permissions);
         Permission::upsert($permissions, ['name'], ['name']);
+        \Artisan::call('permission:cache-reset');
     }
 
     public static function permission($prefix, array $customPermissions = []) {
@@ -441,6 +455,7 @@ class SchoolDataService {
             'student-create',
             'student-edit',
             'student-delete',
+            'update-student-uni',
 
             'timetable-list',
             'timetable-create',
@@ -624,6 +639,10 @@ class SchoolDataService {
             'student-diary-edit',
             'student-diary-delete',
 
+            'manage-expense-add',
+            'manage-expense-list',
+            'manage-expense-add',
+
         ];
         
         $role->syncPermissions($SchoolAdminHasAccessTo);
@@ -679,6 +698,39 @@ class SchoolDataService {
         ];
         $teacher_role->syncPermissions($TeacherHasAccessTo);
     }
+       public function assignLastActivePlanToNewSchool($schoolData)
+        {
+            try {
+                // Switch to main DB to get the last active plan
+                DB::setDefaultConnection('mysql');
+                Config::set('database.connections.mysql.database', env('DB_DATABASE'));
+                DB::purge('mysql');
+                DB::connection('mysql')->reconnect();
+
+                $lastActivePlan = DB::table('packages')
+                    ->where('status', 1)
+                    ->orderByDesc('id')
+                    ->first();
+
+                if ($lastActivePlan) {
+                    // Switch to the new school DB
+                    DB::setDefaultConnection('school');
+                    Config::set('database.connections.school.database', $schoolData->database_name);
+                    DB::purge('school');
+                    DB::connection('school')->reconnect();
+
+                    // Automatically create a new subscription for the new school
+                    // using your existing SubscriptionService logic
+                    $this->subscriptionService->createSubscription($lastActivePlan->id, $schoolData->id, null, 1);
+
+                    Log::info("✅ Automatically assigned package ID {$lastActivePlan->id} to school: {$schoolData->name}");
+                } else {
+                    Log::warning("⚠️ No active plan found in main DB to assign to new school: {$schoolData->name}");
+                }
+            } catch (\Exception $e) {
+                Log::error("❌ Failed to assign last active plan to new school: " . $e->getMessage());
+            }
+        }
     
     public static  function switchToMainDatabase()
     {
@@ -702,5 +754,6 @@ class SchoolDataService {
         Session::put('school_database_name', $school_database);
         
     }
-    
+ 
+
 }

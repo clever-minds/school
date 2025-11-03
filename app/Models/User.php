@@ -28,6 +28,7 @@ class User extends Authenticatable implements MustVerifyEmail {
      */
     protected $fillable = [
         'first_name',
+        'middle_name',
         'last_name',
         'email',
         'mobile',
@@ -82,9 +83,9 @@ class User extends Authenticatable implements MustVerifyEmail {
         return $this->hasOne(Students::class, 'user_id', 'id')->withTrashed();
     }
 
-    // public function parent() {
-    //     return $this->hasOne(Parents::class, 'user_id', 'id');
-    // }
+    public function parent() {
+        return $this->hasOne(Parents::class, 'user_id', 'id');
+    }
 
     public function staff() {
         return $this->hasOne(Staff::class, 'user_id', 'id');

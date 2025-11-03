@@ -579,6 +579,39 @@ select2Search($(".edit-guardian-search"), baseUrl + "/guardian/search", null, 'S
     }
     return repo.email || repo.text;
 });
+
+
+
+select2Search($(".grno-search"), baseUrl + "/student/search", null,
+  "Search for GR NO. Student", Select2SearchDesignTemplate, function (repo) {
+        if (!repo || !repo.id) return;
+    if (repo && repo.text) {
+      $("#student_id").val(repo.id || "");
+      $("#edit_guardian_first_name").val(repo.first_name || "");
+      $("#edit_guardian_last_name").val(repo.last_name || "");
+      $("#edit_guardian_mobile").val(repo.mobile || "");
+      $("#edit_guardian_dob").val(repo.dob || "");
+
+      if (repo.gender === "male") {
+        $("#edit-guardian-male").prop("checked", true);
+        $("#edit-guardian-female").prop("checked", false);
+      } else if (repo.gender === "female") {
+        $("#edit-guardian-female").prop("checked", true);
+        $("#edit-guardian-male").prop("checked", false);
+      }
+
+      if (repo.image) {
+        $("#edit-guardian-image-tag").attr("src", repo.image);
+      }
+    } else {
+      $("#edit_guardian_first_name, #edit_guardian_last_name, #edit_guardian_mobile").val("");
+      $("#edit-guardian-image-tag").attr("src", "");
+    }
+
+    return  repo?.text;
+});
+
+
 $(document).on('submit', '.email-template-setting-form', function (e) {
     e.preventDefault();
     let formData = new FormData(this);
@@ -1804,7 +1837,7 @@ const electiveSubjectGroupRepeater = $('.elective-subject-group-repeater').repea
 $(document).on('click', '.reset_password', function (e) {
     e.preventDefault();
     let studentID = $(this).data('id');
-    let studentDOB = $(this).data('dob');
+    let studentDOB = $(this).data('mobile');
     let url = $(this).data('url');
     Swal.fire({
         title: window.trans["are_you_sure"],
@@ -1822,7 +1855,7 @@ $(document).on('click', '.reset_password', function (e) {
                 type: "POST",
                 data: {
                     id: studentID,
-                    dob: studentDOB
+                    mobile: studentDOB
                 },
                 success: function (response) {
                     if (response.error == true) {

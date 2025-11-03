@@ -113,8 +113,8 @@
                         <div class="modal-body">
                             <div class="row">
                                 <div class="form-group col-sm-12 col-md-12 col-lg-6 col-xl-4">
-                                    <label>{{ __('admission_no') }} <span class="text-danger">*</span></label>
-                                    {!! Form::text('admission_no', null, ['placeholder' => __('admission_no'), 'class' => 'form-control', 'id' => 'edit_admission_no' ,'readonly'=>true]) !!}
+                                    <label>{{ __('GR Number') }} <span class="text-danger">*</span></label>
+                                    {!! Form::text('admission_no', null, ['placeholder' => __('GR Number'), 'class' => 'form-control', 'id' => 'edit_admission_no' ,'readonly'=>false]) !!}
 
                                 </div>
 
@@ -143,6 +143,10 @@
                                 <div class="form-group col-sm-12 col-md-12 col-lg-6 col-xl-4">
                                     <label>{{ __('first_name') }} <span class="text-danger">*</span></label>
                                     {!! Form::text('first_name', null, ['placeholder' => __('first_name'), 'class' => 'form-control', 'id' => 'edit_first_name']) !!}
+                                </div>
+                                <div class="form-group col-sm-12 col-md-12 col-lg-6 col-xl-4">
+                                    <label>{{ __('middle_name') }} <span class="text-danger">*</span></label>
+                                    {!! Form::text('middle_name', null, ['placeholder' => __('middle_name'), 'class' => 'form-control', 'id' => 'edit_middle_name']) !!}
                                 </div>
 
                                 <div class="form-group col-sm-12 col-md-12 col-lg-6 col-xl-4">

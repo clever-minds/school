@@ -1474,7 +1474,7 @@ $(document).on('change', '.subject', function () {
 $(document).on('click', '.reset_password', function (e) {
     e.preventDefault();
     let studentID = $(this).data('id');
-    let studentDOB = $(this).data('dob');
+    let studentDOB = $(this).data('mobile');
     let url = $(this).data('url');
     Swal.fire({
         title: window.trans["are_you_sure"],
@@ -1492,7 +1492,7 @@ $(document).on('click', '.reset_password', function (e) {
                 type: "POST",
                 data: {
                     id: studentID,
-                    dob: studentDOB
+                    mobile: studentDOB
                 },
                 success: function (response) {
                     if (response.error == true) {

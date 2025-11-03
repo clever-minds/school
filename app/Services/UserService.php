@@ -66,7 +66,7 @@ class UserService {
         );
 
         //NOTE : This line will return the old values if the user is already exists
-        $user = $this->user->guardian()->where('email', $email)->first();
+        $user = $this->user->guardian()->where('mobile', $mobile)->first();
         if (!empty($image)) {
             $parent['image'] = UploadService::upload($image, 'guardian');
         }
@@ -113,11 +113,12 @@ class UserService {
      * @throws Throwable
      */
 
-    public function createStudentUser(string $first_name, string $last_name, string $admission_no, string|null $mobile, string $dob, string $gender, \Symfony\Component\HttpFoundation\File\UploadedFile|null $image, int $classSectionID, string $admissionDate, $current_address = null, $permanent_address = null, int $sessionYearID, int $guardianID, array $extraFields = [], int $status, $is_send_notification = null) {
+    public function createStudentUser(string $first_name,string $middle_name, string $last_name, string $admission_no, string|null $mobile, string $dob, string $gender, \Symfony\Component\HttpFoundation\File\UploadedFile|null $image, int $classSectionID, string $admissionDate, $current_address = null, $permanent_address = null, int $sessionYearID, int $guardianID, array $extraFields = [], int $status, $is_send_notification = null) {
         $password = $this->makeStudentPassword($dob);
         //Create Student User First
         $user = $this->user->create([
             'first_name'        => $first_name,
+            'middle_name'        => $middle_name,
             'last_name'         => $last_name,
             'email'             => $admission_no,
             'mobile'            => $mobile,
@@ -197,9 +198,10 @@ class UserService {
      * @return Model|null
      * @throws JsonException
      */
-    public function updateStudentUser($userID, $first_name, $last_name, $mobile, $dob, $gender, $image, $sessionYearID, array $extraFields = [], $guardianID = null, $current_address = null, $permanent_address = null, $reset_password = null, $classSectionID) {
+    public function updateStudentUser($userID, $first_name, $middle_name, $last_name, $mobile, $dob, $gender, $image, $sessionYearID, array $extraFields = [], $guardianID = null, $current_address = null, $permanent_address = null, $reset_password = null, $classSectionID) {
         $studentUserData = array(
             'first_name'        => $first_name,
+            'middle_name'       => $middle_name,
             'last_name'         => $last_name,
             'mobile'            => $mobile,
             'dob'               => date('Y-m-d', strtotime($dob)),

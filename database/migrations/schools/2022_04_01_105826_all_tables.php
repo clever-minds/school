@@ -199,6 +199,7 @@ return new class extends Migration
             $table->foreignId('user_id')->references('id')->on('users')->onDelete('cascade');
             $table->foreignId('class_section_id')->references('id')->on('class_sections')->onDelete('cascade');
             $table->string('admission_no', 512);
+            $table->string('uni_no', 512);
             $table->integer('roll_number')->nullable();
             $table->date('admission_date');
             $table->foreignId('school_id')->references('id')->on('schools')->onDelete('cascade');
@@ -834,6 +835,39 @@ return new class extends Migration
             $table->timestamps();
             $table->unique(['subscription_id','feature_id'],'unique');
         });
+        Schema::create('manage_expenses', function (Blueprint $table) {
+            $table->id(); // bigint unsigned auto_increment primary key
+            $table->integer('exp_id')->nullable();
+            $table->string('title', 255);
+            $table->text('description')->nullable();
+            $table->decimal('amount', 12, 2)->default(0.00);
+            $table->decimal('balance', 12, 2)->default(0.00);
+            $table->enum('type', ['credit', 'debit'])->default('debit');
+            $table->date('transaction_date')->nullable();
+            $table->timestamps();
+
+            $table->index('exp_id');
+            $table->index('transaction_date');
+        });
+        Schema::create('expance_trans_log', function (Blueprint $table) {
+            $table->id();
+            $table->unsignedBigInteger('expnace_trans_id')->nullable();
+            $table->integer('user_id')->nullable();
+            $table->string('trans_type', 50);
+            $table->decimal('amount', 10, 2);
+            $table->text('description')->nullable();
+            $table->timestamps();
+
+            $table->index('user_id');
+            $table->index('expnace_trans_id');
+
+            // Foreign key relation
+            $table->foreign('expnace_trans_id')
+                ->references('id')
+                ->on('manage_expenses')
+                ->onDelete('set null')
+                ->onUpdate('cascade');
+        });
 
 
     }
@@ -926,6 +960,8 @@ return new class extends Migration
         Schema::dropIfExists('staff_support_schools');
         Schema::dropIfExists('faqs');
         Schema::dropIfExists('subscription_features');
+        Schema::dropIfExists('expance_trans_log');
+        Schema::dropIfExists('manage_expenses');
 
     }
 };
