@@ -39,6 +39,7 @@ use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
 use PDF;
 use PHPUnit\Framework\Constraint\Count;
+use App\Models\Notification;
 
 class StaffApiController extends Controller
 {
@@ -1282,4 +1283,34 @@ class StaffApiController extends Controller
             return ResponseService::errorResponse('Failed to fetch schools');
         }
     }
+   public function getNotifications()
+{
+    try {
+
+        $userId = auth()->id(); // ✅ logged-in user
+
+        $notifications = Notification::with([
+                'notificationUsers' => function ($q) use ($userId) {
+                    $q->where('user_id', $userId);
+                }
+            ])
+            ->where('send_to', '!=', 'Guardian')
+            ->whereHas('notificationUsers', function ($q) use ($userId) {
+                $q->where('user_id', $userId);
+            })
+            ->orderBy('id', 'DESC')
+            ->get();
+
+        return ResponseService::successResponse(
+            "Notifications fetched successfully",
+            $notifications
+        );
+
+    } catch (Throwable $e) {
+
+        ResponseService::logErrorResponse($e);
+        return ResponseService::errorResponse();
+    }
+}
+
 }

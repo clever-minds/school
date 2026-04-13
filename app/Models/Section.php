@@ -7,11 +7,12 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Facades\Auth;
 use App\Traits\DateFormatTrait;
+use App\Traits\LogsActivity;
 
 class Section extends Model
 {
     use SoftDeletes, DateFormatTrait;
-    use HasFactory;
+    use HasFactory,LogsActivity;
 
     protected $fillable = ['name', 'school_id'];
     protected $hidden = ['created_at','updated_at'];

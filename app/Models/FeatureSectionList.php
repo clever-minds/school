@@ -6,9 +6,11 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Storage;
 use App\Traits\DateFormatTrait;
+use App\Traits\LogsActivity;
+
 class FeatureSectionList extends Model
     {
-        use HasFactory, DateFormatTrait;
+        use HasFactory, DateFormatTrait,LogsActivity;
     protected $fillable = ['feature_section_id','feature','description','image'];
 
 

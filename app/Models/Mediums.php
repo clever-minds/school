@@ -7,10 +7,12 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Facades\Auth;
 use App\Traits\DateFormatTrait;
+use App\Traits\LogsActivity;
 
 
 class Mediums extends Model
 {
+    use LogsActivity;
     protected $fillable = ['name', 'school_id'];
     use SoftDeletes;
     use HasFactory, DateFormatTrait;

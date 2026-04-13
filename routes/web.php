@@ -57,11 +57,13 @@ use App\Http\Controllers\StreamController;
 use App\Http\Controllers\StudentController;
 use App\Http\Controllers\SubjectController;
 use App\Http\Controllers\SubscriptionBillPaymentController;
+use App\Http\Controllers\StudentPickupController;
 use App\Http\Controllers\SubscriptionController;
 use App\Http\Controllers\SubscriptionWebhookController;
 use App\Http\Controllers\SystemSettingsController;
 use App\Http\Controllers\SystemUpdateController;
 use App\Http\Controllers\TeacherController;
+use App\Http\Controllers\TeacherOnboardingController;
 use App\Http\Controllers\TimetableController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\WebhookController;
@@ -86,6 +88,8 @@ use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Session;
 use App\Http\Controllers\ExpenseTransController;
+use App\Http\Controllers\ActivityLogController;
+use App\Http\Controllers\Auth\ImpersonationController;
 
 
 
@@ -153,6 +157,20 @@ Route::group(['prefix' => 'install'], static function () {
 
 // auth
 Route::group(['middleware' => ['Role', 'checkSchoolStatus', 'status','SwitchDatabase','verifiedEmail','CheckForMaintenanceMode','2fa','wizardSettings']], static function () {
+
+Route::middleware([
+    'auth',
+    'SwitchDatabase',     // 👈 DB FIRST
+    'permission:login-as-staff'
+])
+->get('/admin/login-as-staff/{id}',
+    [ImpersonationController::class, 'loginAsStaff']
+)
+->name('admin.impersonate');
+
+Route::post('/admin/impersonation-exit',
+    [ImpersonationController::class, 'exit']
+)->name('admin.impersonation.exit');
 
     Route::group(['middleware' => 'language'], static function () {
 
@@ -335,6 +353,8 @@ Route::group(['middleware' => ['Role', 'checkSchoolStatus', 'status','SwitchData
 
         Route::resource('system-settings', SystemSettingsController::class);
 
+        Route::get('/activity-logs', [ActivityLogController::class, 'index'])->name('activity.logs');
+        Route::get('activity-logs/fetch', [ActivityLogController::class, 'fetchLogs'])->name('activity.logs.fetch');
 
         Route::get('system-update', [SystemUpdateController::class, 'index'])->name('system-update.index');
         Route::post('system-update', [SystemUpdateController::class, 'update'])->name('system-update.update');
@@ -502,6 +522,24 @@ Route::group(['middleware' => ['Role', 'checkSchoolStatus', 'status','SwitchData
             Route::get('get-class-section-by-class/{class_id}',[StudentController::class, 'getclassSectionByClass']);
         });
         Route::resource('students', StudentController::class);
+
+        /*** Student Pickup ***/
+        Route::group(['prefix' => 'student-pickup'], static function () {
+            Route::get('/', [StudentPickupController::class, 'index'])->name('student-pickup.index');
+            Route::get('/list', [StudentPickupController::class, 'show'])->name('student-pickup.list');
+        });
+
+        /*** Teacher Onboarding ***/
+        Route::group(['prefix' => 'teacher-onboarding'], static function () {
+            Route::get('/jd', [TeacherOnboardingController::class, 'jdIndex'])->name('teacher-onboarding.jd.index');
+            Route::post('/jd', [TeacherOnboardingController::class, 'jdStore'])->name('teacher-onboarding.jd.store');
+            Route::get('/jd/show', [TeacherOnboardingController::class, 'jdShow'])->name('teacher-onboarding.jd.show');
+
+            Route::get('/questions', [TeacherOnboardingController::class, 'questionIndex'])->name('teacher-onboarding.questions.index');
+            Route::post('/questions', [TeacherOnboardingController::class, 'questionStore'])->name('teacher-onboarding.questions.store');
+            Route::get('/questions/list', [TeacherOnboardingController::class, 'questionList'])->name('teacher-onboarding.questions.list');
+            Route::delete('/questions/{id}', [TeacherOnboardingController::class, 'questionDelete'])->name('teacher-onboarding.questions.delete');
+        });
 
         Route::get('id-card-settings', [SchoolSettingsController::class, 'id_card_index'])->name('id-card-settings');
         Route::post('id-card-settings', [SchoolSettingsController::class, 'id_card_store']);
@@ -686,6 +724,8 @@ Route::group(['middleware' => ['Role', 'checkSchoolStatus', 'status','SwitchData
 
             // Receipt
             Route::get('/paid/receipt-pdf/{id}', [FeesController::class, 'feesPaidReceiptPDF'])->name('fees.paid.receipt.pdf');
+                Route::get('fees-paid-receipt/{id}', [FeesController::class, 'feesPaidReceiptPDF1'])
+                    ->name('fees.paid.receipt.pdf_ins');
 
             // Fees Over Due Dashboard
             Route::get('/fees-over-due/{class_section_id}', [FeesController::class, 'feesOverDue']);
@@ -1090,6 +1130,10 @@ Route::group(['prefix' => 'expense-trans'], static function () {
     Route::get('today-summary', [ExpenseTransController::class, 'todaySummary'])->name('expense-trans.today');
     Route::put('update/{id}', [ExpenseTransController::class, 'update'])->name('expense-trans.update');
     Route::delete('delete/{id}', [ExpenseTransController::class, 'destroy'])->name('expense-trans.delete');
+    Route::get('/ajax-summary', [ExpenseTransController::class, 'getExpenseSummary'])->name('expenses.ajax-summary');
+    Route::get('export', [ExpenseTransController::class, 'export'])
+    ->name('expense-trans.export');
+
 
 });
 Route::get('/js/lang', static function () {

@@ -350,6 +350,7 @@ function feesPaidListQueryParams(p) {
         offset: p.offset,
         search: p.search,
         fees_id: $('#filter_fees_id').val(),
+        student_id: $('#student_id').val(),
         class_id: $('#filter_fees_id').find('option:selected').data('class-section-id'),
         session_year_id: $('#filter_session_year_id').val(),
         mode: $('#filter_mode').val(),

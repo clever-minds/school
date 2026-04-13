@@ -201,6 +201,8 @@ use App\Repositories\TopicCommon\TopicCommonRepository;
 use App\Repositories\OnlineExamQuestionCommon\OnlineExamQuestionCommonInterface;
 use App\Repositories\SessionYearsTrackings\SessionYearsTrackingsInterface;
 use App\Repositories\SessionYearsTrackings\SessionYearsTrackingsRepository;
+use App\Repositories\StudentPickup\StudentPickupInterface;
+use App\Repositories\StudentPickup\StudentPickupRepository;
 use Notification;
 
 class RepositoryServiceProvider extends ServiceProvider {
@@ -309,6 +311,7 @@ class RepositoryServiceProvider extends ServiceProvider {
         $this->app->bind(DiaryCategoryInterface::class, DiaryCategoryRepository::class);
         $this->app->bind(DiaryInterface::class, DiaryRepository::class);
         $this->app->bind(DiaryStudentInterface::class, DiaryStudentRepository::class); 
+        $this->app->bind(StudentPickupInterface::class, StudentPickupRepository::class);
     }
 
     /**

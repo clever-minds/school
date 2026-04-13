@@ -6,11 +6,12 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Auth;
 use App\Traits\DateFormatTrait;
+use App\Traits\LogsActivity;
 
 class StudentSubject extends Model
 {
     use HasFactory;
-    use DateFormatTrait;
+    use DateFormatTrait,LogsActivity;
 
     protected $fillable = [
         'student_id',

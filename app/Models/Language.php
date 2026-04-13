@@ -5,11 +5,12 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use App\Traits\DateFormatTrait;
+use App\Traits\LogsActivity;
 
 class Language extends Model {
     use HasFactory;
     use DateFormatTrait;
-
+    use LogsActivity;
     protected $fillable = [
         'id',
         'name',

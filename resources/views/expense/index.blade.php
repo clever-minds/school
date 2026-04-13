@@ -29,14 +29,19 @@
                                 <label class="filter-menu">{{ __('category') }}</label>
                                 {!! Form::select('category_id', $expenseCategory + ['salary' => __('salary')], null, ['class' => 'form-control', 'id' => 'filter_category_id', 'placeholder' => __('all')]) !!}
                             </div>
-
+                            
                             <div class="form-group col-sm-12 col-md-4">
                                 <label class="filter-menu"> {{ __('month') }}</label>
                                 {!! Form::select('month', $months, null, ['class' => 'form-control', 'id' => 'filter_month', 'placeholder' => __('all')]) !!}
                             </div>
 
                         </div>--}}
-
+                        <div class="row" id="toolbar">
+                            <div class="form-group col-sm-12 col-md-4">
+                                    <input type="date" id="filter-date-trans" class="form-control "
+                                value="">
+                            </div>
+                         </div>
                         <table aria-describedby="mydesc" class='table' id='table_list' data-toggle="table"
                                data-url="{{ route('expense.show',[1]) }}" data-click-to-select="true"
                                data-side-pagination="server" data-pagination="true"
@@ -134,6 +139,15 @@
 @endsection
 @section('js')
     <script>
+        $('#table_list').bootstrapTable({
+            queryParams: function (params) {
+                params.from_date = $('#filter-date-trans').val();
+                return params;
+            }
+        });
 
+        $('#filter-date-trans').on('change', function () {
+            $('#table_list').bootstrapTable('refresh');
+        });
     </script>
 @endsection

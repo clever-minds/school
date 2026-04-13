@@ -17,6 +17,7 @@
                 {{ __('cache_clear') }}
             </a>
         </div>
+      
 
         @if ($schoolSettings['school_name'] ?? '')
             <div class="align-items-stretch d-none d-md-block d-sm-block cache-clear">
@@ -32,6 +33,25 @@
                     </div>
                 </div>
             @endcan
+        @endif
+         @if(auth()->user()->impersonated_by &&
+            session('impersonation_admin') === true
+        )
+            <div class="align-items-stretch d-none d-md-flex d-sm-flex cache-clear">
+                <div class="alert  py-2 px-3 mb-0 d-flex align-items-center">
+                    <i class="fa fa-user-secret mr-2"></i>
+                    <span>
+                    Logged in as <strong>Staff</strong>
+                    </span>
+
+                    <form class="ml-3" method="POST"
+                        action="{{ route('admin.impersonation.exit') }}">
+                        @csrf
+                        <button class="btn btn-sm btn-dark">
+        Admin                </button>
+                    </form>
+                </div>
+            </div>
         @endif
         <ul class="navbar-nav navbar-nav-right">
             @can('class-teacher')

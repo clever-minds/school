@@ -17,9 +17,10 @@ use Illuminate\Support\Facades\Storage;
 use Laravel\Sanctum\HasApiTokens;
 use Spatie\Permission\Traits\HasPermissions;
 use Spatie\Permission\Traits\HasRoles;
+use App\Traits\LogsActivity;
 
 class User extends Authenticatable implements MustVerifyEmail {
-    use HasApiTokens, HasFactory, Notifiable, HasRoles, SoftDeletes, HasPermissions, DateFormatTrait;
+    use HasApiTokens, HasFactory, Notifiable, HasRoles, SoftDeletes, HasPermissions, DateFormatTrait,LogsActivity;
 
     /**
      * The attributes that are mass assignable.
@@ -30,6 +31,7 @@ class User extends Authenticatable implements MustVerifyEmail {
         'first_name',
         'middle_name',
         'last_name',
+        'mother_name',
         'email',
         'mobile',
         'image',
@@ -46,7 +48,8 @@ class User extends Authenticatable implements MustVerifyEmail {
         'email_verified_at',
         'two_factor_secret',
         'two_factor_expires_at',
-        'two_factor_enabled'
+        'two_factor_enabled',
+        'impersonated_by'
     ];
 
     protected static function boot() {
@@ -175,10 +178,10 @@ class User extends Authenticatable implements MustVerifyEmail {
         return asset('assets/dummy_logo.jpg');
     }
 
-    public function getFullNameAttribute() {
-        return $this->first_name . ' ' . $this->last_name;
+   public function getFullNameAttribute()
+    {
+        return strtoupper($this->first_name) . ' ' . strtoupper($this->last_name);
     }
-
 
     public function guardianRelationChild() {
         return $this->hasMany(Students::class, 'guardian_id');
@@ -386,4 +389,19 @@ class User extends Authenticatable implements MustVerifyEmail {
     {
         return date('d - M',strtotime($this->getRawOriginal('dob')));
     }
+   public function getFirstNameAttribute($value)
+    {
+        return strtoupper($value);
+    }
+
+    public function getLastNameAttribute($value)
+    {
+        return strtoupper($value);
+    }
+    public function notificationUsers()
+    {
+        return $this->hasMany(NotificationUser::class);
+    }
+
+
 }

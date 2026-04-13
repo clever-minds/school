@@ -33,9 +33,26 @@
                                 </div>
                             </div>
 
-                            <div class="form-group">
+                            <!-- <div class="form-group">
                                 <label for="name">{{ __('name') }} <span class="text-danger">*</span></label>
                                 <input name="name" id="name" type="text" placeholder="{{ __('name') }}" class="form-control" required="required"/>
+                            </div> -->
+
+                            @php
+                            $classes = ['Nursery','LKG','UKG','Balvatika','1st','2nd','3rd','4th','5th','6th','7th','8th','9th','10th','11th','12th'];
+                            @endphp
+
+                            <div class="form-group">
+                                <label for="class">{{ __('class') }} <span class="text-danger">*</span></label>
+
+                                <select name="name" id="name" class="form-control" required>
+                                    <option value="">{{ __('Select Class') }}</option>
+
+                                    @foreach($classes as $class)
+                                        <option value="{{ $class }}">{{ $class }}</option>
+                                    @endforeach
+
+                                </select>
                             </div>
                             <div class="form-group">
                                 <label for="shift_id">{{ __('Shift') }} <span class="text-info"> ({{__("Optional")}})</span></label>

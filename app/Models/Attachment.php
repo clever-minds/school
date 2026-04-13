@@ -6,10 +6,11 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Storage;
 use App\Traits\DateFormatTrait;
+use App\Traits\LogsActivity;
 
 class Attachment extends Model
 {
-    use HasFactory, DateFormatTrait;
+    use HasFactory, DateFormatTrait,LogsActivity;
     protected $fillable = ['message_id','file','file_type'];
 
     public function getFileAttribute($value) {

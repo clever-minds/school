@@ -87,6 +87,7 @@ class LoginController extends Controller
         if ($request->code) {
             // Retrieve the school's database connection info
             $school = School::on('mysql')->where('code', $request->code)->where('installed', 1)->first();
+	  
           
             if (!$school) {
                 return back()->withErrors(['code' => 'Invalid school identifier.']);

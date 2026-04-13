@@ -29,9 +29,20 @@
                                         <input name="school_email" id="school_email" value="{{ $settings['school_email'] ?? '' }}" type="email" required placeholder="{{ __('school_email') }}" class="form-control"/>
                                     </div>
 
-                                    <div class="form-group col-md-4 col-sm-12">
+                                    <div class="form-group col-md-2 col-sm-12">
                                         <label for="school_code">{{ __('school_code') }}</label>
                                         <input name="school_code" id="school_code" value="{{ Auth::user()->school->code }}" type="text" disabled placeholder="{{ __('school_code') }}" class="form-control"/>
+                                    </div>
+                                      <div class="form-group col-md-2 col-sm-12">
+                                        <label for="school_code">{{ __('Dise Code') }}</label> 
+                                            <input
+                                                name="dise_code"
+                                                id="dise_code"
+                                                value="{{ $settings['dise_code'] ?? '' }}"
+                                                type="text"
+                                                placeholder="{{ __('DISE Code') }}"
+                                                class="form-control"
+                                            />
                                     </div>
 
                                     <div class="form-group col-md-6 col-sm-12">

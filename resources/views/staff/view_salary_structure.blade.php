@@ -132,7 +132,7 @@
                                             </div>
                                             <div class="form-group col-md-5" id="amount_allowance_div" style="display: none">
                                                 <label>{{ __('amount') }} <span class="text-danger">*</span></label>
-                                                <input type="number" id="allowance_amount" name="allowance[0][amount]" class="allowance_amount real_time_change form-control" min="1" placeholder="{{ __('amount') }}" required>
+                                                <input type="number" id="allowance_amount" name="allowance[0][amount]" class="allowance_amount real_time_change form-control" min="0" placeholder="{{ __('amount') }}" required>
                                             </div>
 
                                             <div class="form-group col-md-5" id="percentage_allowance_div" style="display: none">
@@ -219,7 +219,7 @@
                                                 </div>
                                                 <div class="form-group col-md-5" id="amount_deduction_div" style="display: none">
                                                     <label>{{ __('amount') }} <span class="text-danger">*</span></label>
-                                                    <input type="number" id="deduction_amount" name="deduction[0][amount]" class="deduction_amount real_time_change form-control" min="1" placeholder="{{ __('amount') }}" required>
+                                                    <input type="number" id="deduction_amount" name="deduction[0][amount]" class="deduction_amount real_time_change form-control" min="0" placeholder="{{ __('amount') }}" required>
                                                 </div>
                                                 
                                                 <div class="form-group col-md-5" id="percentage_deduction_div" style="display: none">

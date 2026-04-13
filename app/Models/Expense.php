@@ -9,10 +9,11 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Support\Facades\Auth;
 use App\Traits\DateFormatTrait;
+use App\Traits\LogsActivity;
 
 class Expense extends Model
 {
-    use HasFactory, DateFormatTrait;
+    use HasFactory, DateFormatTrait,LogsActivity;
     protected $fillable = ['category_id', 'ref_no', 'staff_id', 'month', 'year', 'title', 'description', 'amount', 'date', 'school_id', 'session_year_id', 'basic_salary', 'paid_leaves'];
 
     protected $appends = ['taken_leaves'];
@@ -94,4 +95,5 @@ class Expense extends Model
     {
         return $this->formatDateValue($value);
     }
+  
 }

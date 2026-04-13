@@ -52,7 +52,7 @@
                 @endif
                 {{-- School logo --}}
                 @if (in_array('school_logo', $certificateTemplate->fields))
-                    <img src="{{ $settings['vertical_logo'] }}" {!! $style['school_logo'] !!} alt="" class="school_logo">
+                    <img src="{{ $settings['horizontal_logo'] }}" {!! $style['school_logo'] !!} alt="" class="school_logo">
                 @endif
 
                 {{-- School name --}}
@@ -83,7 +83,7 @@
 
                 {{-- Description --}}
                 <div class="description" {!! $style['description'] !!}>
-                    {!! $user['description'] !!}
+                    {!! $user['description'] ?? '' !!}
                 </div>
             </div>
         </div>

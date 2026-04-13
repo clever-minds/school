@@ -6,11 +6,14 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use App\Traits\DateFormatTrait;
+use App\Traits\LogsActivity;
 
 
 class ExamMarks extends Model
 {
     use HasFactory, DateFormatTrait;
+    use LogsActivity;
+
     protected $fillable = [
         'exam_timetable_id',
         'student_id',

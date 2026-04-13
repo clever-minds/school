@@ -9,10 +9,11 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\hasOne;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Facades\Auth;
+use App\Traits\LogsActivity;
 
 class AddonSubscription extends Model
 {
-    use HasFactory, SoftDeletes;
+    use HasFactory, SoftDeletes,LogsActivity;
     protected $fillable = [
         'school_id',
         'feature_id',

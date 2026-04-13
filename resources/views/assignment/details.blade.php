@@ -1,7 +1,7 @@
 @extends('layouts.master')
 
 @section('title')
-    {{ __('manage') . ' ' . __('assignment') }}
+    {{ __('manage') . ' ' . __('assignment') . ' OR  ' . __('homework') }}
 @endsection
 
 @section('content')

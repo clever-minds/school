@@ -5,11 +5,12 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use App\Traits\DateFormatTrait;
+use App\Traits\LogsActivity;
 
 class Message extends Model
 {
-    use HasFactory, DateFormatTrait;
-    protected $fillable = ['chat_id','sender_id','message','read_at'];
+    use HasFactory, DateFormatTrait,LogsActivity;
+    protected $fillable = ['chat_id','sender_id','student_user_id','message','read_at'];
 
 
 
@@ -50,4 +51,8 @@ class Message extends Model
         }
         return null;
     }
+    public function student()
+{
+    return $this->belongsTo(Students::class, 'student_user_id', 'user_id');
+}
 }

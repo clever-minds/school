@@ -373,7 +373,16 @@ class StaffController extends Controller {
                 }
                 $operate .= BootstrapTableService::button('fa fa-exclamation-triangle', route('staff.destroy', $row->id), ['deactivate-staff', 'btn-gradient-info'], ['title' => __('inactive')]);
 
-                
+             if (auth()->user()->can('login-as-staff')) {
+                    $operate .= BootstrapTableService::button(
+                        'fa fa-sign-in',
+                        route('admin.impersonate', ['id' => $row->id]),
+                        ['btn-gradient-info'],
+                        ['title' => __('Login As Staff')]
+                    );
+                }
+
+
                 
             }
 
@@ -709,8 +718,8 @@ class StaffController extends Controller {
 
             $sessionYear = $this->cache->getDefaultSessionYear();
             $valid_until = date('F j, Y',strtotime($sessionYear->end_date));
-            $height = $settings['staff_page_height'] * 2.8346456693;
-            $width = $settings['staff_page_width'] * 2.8346456693;
+            $height = $settings['page_height'] * 2.8346456693;
+            $width = $settings['page_width'] * 2.8346456693;
             // $customPaper = array(0,0,360,200);
             $customPaper = array(0,0,$width,$height);
             $users = $this->user->builder()->select('id','first_name','last_name','image','school_id','gender','dob','mobile','email')->whereIn('id',$user_ids)->with(['roles','staff','extra_user_datas' => function ($query) {
@@ -718,7 +727,7 @@ class StaffController extends Controller {
                 },
             ])->get();
 
-            $settings['staff_page_height'] = ($settings['staff_page_height'] * 3.7795275591).'px';
+            $settings['page_height'] = ($settings['page_height'] * 3.7795275591).'px';
 
             $pdf = PDF::loadView('staff.staff_id_card',compact('users','sessionYear','valid_until','settings'));
             $pdf->setPaper($customPaper);

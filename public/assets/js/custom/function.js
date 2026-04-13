@@ -217,6 +217,41 @@ function Select2SearchDesignTemplate(repo) {
     return $container;
 }
 
+function Select2SearchDesignTemplatemob(repo) {
+    /**
+     * This function is used in Select2 Searching Functionality
+     */
+    if (repo.loading) {
+        return repo.text;
+    }
+    let $container;
+    if (repo.id && repo.text) {
+        $container = $(
+            "<div class='select2-result-repository clearfix'>" +
+            "<div class='select2-result-repository__title'></div>" +
+            "</div>"
+        );
+        $container.find(".select2-result-repository__title").text(repo.text);
+    } else {
+        $container = $(
+            "<div class='select2-result-repository clearfix'>" +
+            "<div class='row'>" +
+            "<div class='col-1 select2-result-repository__avatar' style='width:20px'>" +
+            "<img src='" + repo.image + "' class='w-100' alt=''/>" +
+            "</div>" +
+            "<div class='col-10'>" +
+            "<div class='select2-result-repository__title'></div>" +
+            "<div class='select2-result-repository__description'></div>" +
+            "</div>" +
+            "</div>"
+        );
+
+        $container.find(".select2-result-repository__title").text(repo.first_name + " " + repo.last_name);
+        $container.find(".select2-result-repository__description").text(repo.mobile);
+    }
+
+    return $container;
+}
 /**
  *
  * @param searchElement

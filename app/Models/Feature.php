@@ -5,10 +5,13 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use App\Traits\DateFormatTrait;
+use App\Traits\LogsActivity;
+
 class Feature extends Model
 {
     use HasFactory;
     use DateFormatTrait;
+    use LogsActivity;
     protected $fillable = ['name','is_default','status','required_vps'];
     protected $connection = 'mysql';
 

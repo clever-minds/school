@@ -8,9 +8,10 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
 use App\Models\SessionYearsTracking;
 use App\Traits\DateFormatTrait;
+use App\Traits\LogsActivity;
 
 class Lesson extends Model {
-    use HasFactory, DateFormatTrait;
+    use HasFactory, DateFormatTrait,LogsActivity;
 
     protected $fillable = [
         'name',

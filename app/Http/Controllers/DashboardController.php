@@ -207,6 +207,8 @@ class DashboardController extends Controller
                 'fullPaidFees' => $fullPaidFees,
             ];
 
+            $student_pickup_count = \App\Models\StudentPickupRequest::where('status', 0)->count();
+
         }
 
         // Super admin dashboard
@@ -283,7 +285,7 @@ class DashboardController extends Controller
         }
 
         if ((Auth::user()->hasRole('School Admin') || Auth::user()->school_id) && (!Auth::user()->hasRole('Teacher') && !Auth::user()->hasRole('Super Admin'))) {
-            return view('dashboard', compact('teacher', 'parent', 'student', 'announcement', 'teachers', 'boys', 'girls', 'total_students', 'license_expire', 'subscription', 'previous_subscriptions', 'holiday', 'classData', 'prepiad_upcoming_plan', 'prepiad_upcoming_plan_type', 'check_payment', 'sessionYear', 'classes_counter', 'streams', 'exams', 'fees_detail', 'settings', 'class_names', 'paymentConfiguration', 'system_settings', 'class_section_names'));
+            return view('dashboard', compact('teacher', 'parent', 'student', 'announcement', 'teachers', 'boys', 'girls', 'total_students', 'license_expire', 'subscription', 'previous_subscriptions', 'holiday', 'classData', 'prepiad_upcoming_plan', 'prepiad_upcoming_plan_type', 'check_payment', 'sessionYear', 'classes_counter', 'streams', 'exams', 'fees_detail', 'settings', 'class_names', 'paymentConfiguration', 'system_settings', 'class_section_names', 'student_pickup_count'));
         }
         if (Auth::user()->hasRole('Teacher')) {
             return view('teacher_dashboard', compact('teacher', 'parent', 'student', 'announcement', 'teachers', 'boys', 'girls', 'holiday', 'timetables', 'classData', 'sessionYear', 'classes_counter', 'streams', 'class_names', 'total_students', 'exams'));

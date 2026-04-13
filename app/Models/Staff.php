@@ -5,11 +5,12 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Storage;
 use App\Traits\DateFormatTrait;
+use App\Traits\LogsActivity;
 
 
 class Staff extends Model {
 
-    use DateFormatTrait;
+    use DateFormatTrait,LogsActivity;
     protected $table = "staffs";
     protected $fillable = [
         'user_id',

@@ -235,6 +235,7 @@ class TeacherController extends Controller {
     }
 
     public function show() {
+       // dd(auth()->user()->getAllPermissions()->pluck('name')); 
         ResponseService::noPermissionThenRedirect('teacher-list');
         $offset = request('offset', 0);
         $limit = request('limit', 10);
@@ -281,7 +282,15 @@ class TeacherController extends Controller {
                 $operate .= BootstrapTableService::menuButton('inactive',route('teachers.change-status', $row->id),['deactivate-teacher'],[]);
                 $operate .= BootstrapTableService::menuButton('salary_structure',route('staff.payroll-structure', $row->id),[],[]);
                 $operate .= BootstrapTableService::menuTrashButton('delete',route('teachers.trash', $row->id));
-                
+              if (!empty($row->id)) {
+                    $operate .= BootstrapTableService::menuButton(
+                        'login_as_staff',
+                        route('admin.impersonate', ['id' => $row->id])
+                    );
+                }
+
+
+
             }
 
             $tempRow = $row->toArray();

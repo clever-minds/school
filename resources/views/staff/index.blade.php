@@ -12,6 +12,8 @@
             </h3>
         </div>
         <div class="row">
+            @can('staff-create')
+
             <div class="col-md-12 grid-margin stretch-card">
                 <div class="card">
                     <div class="card-body">
@@ -306,6 +308,7 @@
                     </div>
                 </div>
             </div>
+            @endcan
 
             <div class="col-md-12 grid-margin stretch-card">
                 <div class="card">

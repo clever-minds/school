@@ -6,10 +6,11 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Auth;
 use App\Traits\DateFormatTrait;
+use App\Traits\LogsActivity;
 
 class LeaveMaster extends Model
 {
-    use HasFactory, DateFormatTrait;
+    use HasFactory, DateFormatTrait,LogsActivity;
     protected $fillable = ['leaves','holiday','session_year_id','school_id'];
     protected $hidden = ['created_at','updated_at'];
     

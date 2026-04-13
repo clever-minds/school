@@ -37,7 +37,6 @@ use Illuminate\Validation\ValidationException;
 use Illuminate\Support\Facades\Validator;
 use App\Models\ClassTeacher;
 use Illuminate\Support\Str;
-
 use function PHPUnit\Framework\isEmpty;
 
 class ExamController extends Controller
@@ -242,8 +241,7 @@ class ExamController extends Controller
 
                 $classNameWithSection = $row->class->name . ' - ' . $section->name . ' ' . $row->class->medium->name;
 
-                $class_section_id = $this->classSection->builder()->where('section_id', $sectionId)->first();
-
+                $class_section_id = $this->classSection->builder()->where('section_id', $sectionId)->where('class_id', $row->class_id)->first();
                 if ($row->has_timetable) {
                     foreach ($row->timetable as $timetable) {
                         $subject = $timetable->subject_with_name;
@@ -417,18 +415,19 @@ class ExamController extends Controller
             $search = $request->input('search');
 
             // Get Exam with timetable id and date to get exam status also
-            $exam = $this->exam->builder()->with('timetable:id,date')->where('id', $request->exam_id)->first();
-
+            //$exam = $this->exam->builder()->with('timetable:id,date')->where('id', $request->exam_id)->first();
+            $exam = $this->exam->builder()->with('timetable')->where('id', $request->exam_id)->first();
             // Get Student ids according to Subject is elective or compulsory
             $classSubject = $this->classSubject->findById($request->class_subject_id);
+
             if ($classSubject->type == "Elective") {
                 $studentIds = $this->studentSubject->builder()->where(['class_section_id' => $request->class_section_id, 'class_subject_id' => $classSubject->id])->pluck('student_id');
             } else {
                 $studentIds = $this->users->builder()->role('Student')->whereHas('student', function ($query) use ($request) {
                     $query->where('class_section_id', $request->class_section_id);
                 })->pluck('id');
+                
             }
-
             // Get Timetable Data
             $timetable = $exam->timetable()->where('class_subject_id', $request->class_subject_id)->first();
 
@@ -544,6 +543,8 @@ class ExamController extends Controller
     {
         ResponseService::noFeatureThenRedirect('Exam Management');
         ResponseService::noPermissionThenRedirect('exam-result');
+        DB::enableQueryLog();
+
         $exams = $this->exam->builder()->with('class.medium')->where('publish', 1);
         $sessionYears = $this->sessionYear->all();
         // $classSections = $this->classSection->all(['*'], ['class', 'class.stream', 'section', 'medium']);
@@ -557,6 +558,7 @@ class ExamController extends Controller
 
         $classSections = $classSections->get();
         $exams = $exams->get()->append(['prefix_name']);
+                //dd(DB::getQueryLog());
 
         return view('exams.show_exam_result', compact('exams', 'sessionYears', 'classSections'));
     }
@@ -1207,7 +1209,7 @@ class ExamController extends Controller
                 $classNameWithSection = $row->class->name . ' - ' . $section->name . ' ' . $row->class->medium->name;
 
                 // Get the class section ID for this section
-                $class_section_id = $this->classSection->builder()->where('section_id', $sectionId)->first();
+                $class_section_id = $this->classSection->builder()->where('section_id', $sectionId)->where('class_id', $row->class_id)->first();
 
                 if ($row->has_timetable) {
                     foreach ($row->timetable as $timetable) {

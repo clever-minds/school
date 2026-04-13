@@ -7,10 +7,12 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Storage;
 use App\Traits\DateFormatTrait;
+use App\Traits\LogsActivity;
 
 class Gallery extends Model
 {
     use HasFactory, DateFormatTrait;
+    use LogsActivity;
     protected $fillable = [
         'title','description','thumbnail','session_year_id','school_id'
     ];

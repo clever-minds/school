@@ -229,7 +229,6 @@ class Controller extends BaseController {
         DB::setDefaultConnection('school');
 
         $schoolSettings = $this->cache->getSchoolSettings('*',$school->id);
-
         $sliders = Slider::where('school_id',$school->id)->whereIn('type',[2,3])->get();
         if (!count($sliders)) {
             $sliders = [
@@ -328,7 +327,6 @@ class Controller extends BaseController {
             ResponseService::successResponse('Message send successfully');
 
         } catch (Throwable $e) {
-            dd($e);
             if (Str::contains($e->getMessage(), ['Failed', 'Mail', 'Mailer', 'MailManager'])) {
                 ResponseService::warningResponse("Message send successfully. But Email not sent.");
             } else {

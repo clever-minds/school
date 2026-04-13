@@ -107,7 +107,7 @@
                                 <div class="modal-dialog modal-lg" role="document">
                                     <div class="modal-content">
                                         <div class="modal-header">
-                                            <h4 class="modal-title" id="exampleModalLabel">{{ __('edit') . ' ' . __('students') }}</h4><br>
+                                            <h4 class="modal-title" id="exampleModalLabel">{{ __('View') . ' ' . __('students') }}</h4><br>
                                             <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                                                 <span aria-hidden="true"><i class="fa fa-close"></i></span>
                                             </button>
@@ -127,7 +127,7 @@
                     
                                                     <div class="form-group col-sm-12 col-md-12 col-lg-6 col-xl-4">
                                                         <label>{{ __('Session Year') }} <span class="text-danger">*</span></label>
-                                                        <select required name="session_year_id" class="form-control" id="session_year_id">
+                                                        <select required name="session_year_id" class="form-control" id="session_year_id" disabled>>
                                                             @foreach ($sessionYears as $sessionYear)
                                                                 <option value="{{ $sessionYear->id }}">{{$sessionYear->name}}</option>
                                                             @endforeach
@@ -136,7 +136,7 @@
                     
                                                     <div class="form-group col-sm-12 col-md-12 col-lg-6 col-xl-4">
                                                         <label>{{ __('Class') }} <span class="text-danger">*</span></label>
-                                                        <select required name="class_id" class="form-control" id="edit_student_class_id">
+                                                        <select required name="class_id" class="form-control" id="edit_student_class_id" disabled>>
                                                             <option value="">{{ __('select_class') }}</option>
                                                             @foreach ($classes as $class)
                                                                 <option value={{ $class->id }}>{{$class->full_name}}</option>
@@ -145,7 +145,7 @@
                                                     </div>
                                                     <div class="form-group col-sm-12 col-md-12 col-lg-6 col-xl-4">
                                                         <label>{{ __('Class Section') }} <span class="text-danger">*</span></label>
-                                                        <select name="class_section_id" class="form-control" id="edit_student_class_section_id">
+                                                        <select name="class_section_id" class="form-control" id="edit_student_class_section_id" disabled>>
                                                             <option value="">{{ __('select_class_section') }}</option>
                                                         </select>
                                                     </div>
@@ -154,17 +154,17 @@
                                                 <div class="row mt-5">
                                                     <div class="form-group col-sm-12 col-md-12 col-lg-6 col-xl-4">
                                                         <label>{{ __('first_name') }} <span class="text-danger">*</span></label>
-                                                        {!! Form::text('first_name', null, ['placeholder' => __('first_name'), 'class' => 'form-control', 'id' => 'edit_first_name']) !!}
+                                                        {!! Form::text('first_name', null, ['placeholder' => __('first_name'), 'class' => 'form-control', 'id' => 'edit_first_name','readonly'=>true]) !!}
                                                     </div>
                     
                                                     <div class="form-group col-sm-12 col-md-12 col-lg-6 col-xl-4">
                                                         <label>{{ __('last_name') }} <span class="text-danger">*</span></label>
-                                                        {!! Form::text('last_name', null, ['placeholder' => __('last_name'), 'class' => 'form-control', 'id' => 'edit_last_name']) !!}
+                                                        {!! Form::text('last_name', null, ['placeholder' => __('last_name'), 'class' => 'form-control', 'id' => 'edit_last_name','readonly'=>true]) !!}
                                                     </div>
                     
                                                     <div class="form-group col-sm-12 col-md-12 col-lg-6 col-xl-4">
                                                         <label>{{ __('dob') }} <span class="text-danger">*</span></label>
-                                                        {!! Form::text('dob', null, ['placeholder' => __('dob'), 'class' => 'datepicker-popup-no-future form-control', 'id' => 'edit_dob']) !!}
+                                                        {!! Form::text('dob', null, ['placeholder' => __('dob'), 'class' => 'datepicker-popup-no-future form-control', 'id' => 'edit_dob','readonly'=>true]) !!}
                                                         <span class="input-group-addon input-group-append">
                                                         </span>
                                                     </div>
@@ -174,13 +174,13 @@
                                                         <div class="d-flex">
                                                             <div class="form-check form-check-inline">
                                                                 <label class="form-check-label">
-                                                                    {!! Form::radio('gender', 'male', false ,['id' => 'male']) !!}
+                                                                    {!! Form::radio('gender', 'male', false ,['id' => 'male' ,'disabled' => 'disabled']) !!}
                                                                     {{ __('male') }}
                                                                 </label>
                                                             </div>
                                                             <div class="form-check form-check-inline">
                                                                 <label class="form-check-label">
-                                                                    {!! Form::radio('gender', 'female', false , ['id' => 'female']) !!}
+                                                                    {!! Form::radio('gender', 'female', false , ['id' => 'female' ,'disabled' => 'disabled']) !!}
                                                                     {{ __('female') }}
                                                                 </label>
                                                             </div>
@@ -188,28 +188,22 @@
                                                     </div>
                                                     <div class="form-group col-sm-12 col-md-12 col-lg-6 col-xl-4">
                                                         <label>{{ __('image') }} </label>
-                                                        <input type="file" name="image" class="file-upload-default"/>
-                                                        <div class="input-group col-xs-12">
-                                                            <input type="text" class="form-control file-upload-info" disabled="" placeholder="{{ __('image') }}" required="required" id="edit_image"/>
-                                                            <span class="input-group-append">
-                                                                <button class="file-upload-browse btn btn-theme" type="button">{{ __('upload') }}</button>
-                                                            </span>
-                                                        </div>
+                                                       
                                                         <div style="width: 100px;">
                                                             <img src="" id="edit-student-image-tag" class="img-fluid w-100" alt=""/>
                                                         </div>
                                                     </div>
                                                     <div class="form-group col-sm-12 col-md-12 col-lg-6 col-xl-4">
                                                         <label>{{ __('mobile') }}</label>
-                                                        {!! Form::number('mobile', null, ['placeholder' => __('mobile'), 'min' => 1 , 'class' => 'form-control remove-number-increment', 'id' => 'edit_mobile']) !!}
+                                                        {!! Form::number('mobile', null, ['placeholder' => __('mobile'), 'min' => 1 , 'class' => 'form-control remove-number-increment', 'id' => 'edit_mobile','readonly'=>true]) !!}
                                                     </div>
                                                     <div class="form-group col-sm-12 col-md-6">
                                                         <label>{{ __('current_address') }} <span class="text-danger">*</span></label>
-                                                        {!! Form::textarea('current_address', null, ['required', 'placeholder' => __('current_address'), 'class' => 'form-control', 'rows' => 3,'id'=>'edit-current-address']) !!}
+                                                        {!! Form::textarea('current_address', null, ['required', 'placeholder' => __('current_address'), 'class' => 'form-control', 'rows' => 3,'id'=>'edit-current-address','readonly'=>true]) !!}
                                                     </div>
                                                     <div class="form-group col-sm-12 col-md-6">
                                                         <label>{{ __('permanent_address') }} <span class="text-danger">*</span></label>
-                                                        {!! Form::textarea('permanent_address', null, ['required', 'placeholder' => __('permanent_address'), 'class' => 'form-control', 'rows' => 3,'id'=>'edit-permanent-address']) !!}
+                                                        {!! Form::textarea('permanent_address', null, ['required', 'placeholder' => __('permanent_address'), 'class' => 'form-control', 'rows' => 3,'id'=>'edit-permanent-address','readonly'=>true]) !!}
                                                     </div>
                                                 </div>
                     
@@ -294,18 +288,7 @@
                                                                         {{ Form::textarea('extra_fields['.$key.'][data]', '', ['placeholder' => $data->name, 'id' => $fieldName, 'class' => 'form-control textarea-fields', ($data->is_required ? 'required' : '') , 'rows' => 3]) }}
                         
                                                                         {{-- File Upload Field --}}
-                                                                    @elseif($data->type == 'file')
-                                                                        <div class="input-group col-xs-12">
-                                                                            {{ Form::file('extra_fields['.$key.'][data]', ['class' => 'file-upload-default', 'id' => $fieldName,($data->is_required == 1 ? 'required' : '')]) }}
-                                                                            {{ Form::text('', '', ['class' => 'form-control file-upload-info', 'disabled' => '', 'placeholder' => __('image')]) }}
-                                                                            <span class="input-group-append">
-                                                                                <button class="file-upload-browse btn btn-theme" type="button">{{ __('upload') }}</button>
-                                                                            </span>
-                                                                        </div>
-                                                                        <div id="file_div_{{$fieldName}}" class="mt-2 d-none file-div">
-                                                                            <a href="" id="file_link_{{$fieldName}}" target="_blank">{{$data->name}}</a>
-                                                                        </div>
-                                                                    @endif
+                                                                              @endif
                                                                 </div>
                                                             @endif
                                                         @endforeach
@@ -330,23 +313,23 @@
                                                 {{-- Guardian Details --}}
                                                 <div class="row mt-5">
                                                     <div class="form-group col-sm-12 col-md-12">
-                                                        <label>{{ __('guardian') . ' ' . __('email') }} <span class="text-danger">*</span></label>
-                                                        <select class="edit-guardian-search form-control" name="guardian_id"></select>
-                                                        <input type="hidden" id="edit_guardian_email" name="guardian_email">
+                                                        <label>{{ __('guardian') . ' ' . __('Mobile') }} <span class="text-danger">*</span></label>
+                                                        <select class="edit-guardian-search form-control" name="guardian_id" disabled></select>
+                                                        <input type="hidden" id="edit_guardian_mobile" name="guardian_mobile">
                                                     </div>
                     
                                                     <div class="form-group col-sm-12 col-md-12 col-lg-6 col-xl-4">
-                                                        <label>{{ __('guardian') . ' ' . __('first_name') }} <span class="text-danger">*</span></label>
-                                                        {!! Form::text('guardian_first_name', null, ['placeholder' => __('guardian') . ' ' . __('first_name'), 'class' => 'form-control', 'id' => 'edit_guardian_first_name']) !!}
+                                                        <label>{{ __('Father') . ' ' . __('first_name') }} <span class="text-danger">*</span></label>
+                                                        {!! Form::text('guardian_first_name', null, ['placeholder' => __('guardian') . ' ' . __('first_name'), 'class' => 'form-control', 'id' => 'edit_guardian_first_name','readonly'=>true]) !!}
                                                     </div>
                     
                                                     <div class="form-group col-sm-12 col-md-12 col-lg-6 col-xl-4">
-                                                        <label>{{ __('guardian') . ' ' . __('last_name') }} <span class="text-danger">*</span></label>
-                                                        {!! Form::text('guardian_last_name', null, ['placeholder' => __('guardian') . ' ' . __('last_name'), 'class' => 'form-control', 'id' => 'edit_guardian_last_name']) !!}
+                                                        <label>{{ __('Father') . ' ' . __('last_name') }} <span class="text-danger">*</span></label>
+                                                        {!! Form::text('guardian_last_name', null, ['placeholder' => __('guardian') . ' ' . __('last_name'), 'class' => 'form-control', 'id' => 'edit_guardian_last_name','readonly'=>true]) !!}
                                                     </div>
                                                     <div class="form-group col-sm-12 col-md-12 col-lg-6 col-xl-4">
-                                                        <label>{{ __('guardian') . ' ' . __('mobile') }} <span class="text-danger">*</span></label>
-                                                        {!! Form::number('guardian_mobile', null, ['placeholder' => __('guardian') . ' ' . __('mobile'), 'class' => 'form-control remove-number-increment', 'min' => 1  ,'id' => 'edit_guardian_mobile']) !!}
+                                                        <label>{{ __('Father') . ' ' . __('email') }} <span class="text-danger">*</span></label>
+                                                        {!! Form::number('guardian_email', null, ['placeholder' => __('guardian') . ' ' . __('email'), 'class' => 'form-control ', 'min' => 1  ,'id' => 'edit_guardian_mobile','readonly'=>true]) !!}
                                                     </div>
                                                     <div class="form-group col-sm-12 col-md-12">
                                                         <label>{{ __('gender') }} <span class="text-danger">*</span></label><br>
@@ -369,13 +352,7 @@
                                                     </div>
                                                     <div class="form-group col-sm-12 col-md-12 col-lg-6 col-xl-4">
                                                         <label>{{ __('image') }} </label>
-                                                        <input type="file" name="guardian_image" class="file-upload-default"/>
-                                                        <div class="input-group col-xs-12">
-                                                            <input type="text" class="form-control file-upload-info" disabled="" placeholder="{{ __('image') }}" required="required" id="edit_image"/>
-                                                            <span class="input-group-append">
-                                                                <button class="file-upload-browse btn btn-theme" type="button">{{ __('upload') }}</button>
-                                                            </span>
-                                                        </div>
+                                                       
                                                         <div style="width: 100px;">
                                                             <img src="" id="edit-guardian-image-tag" class="img-fluid w-100" alt=""/>
                                                         </div>

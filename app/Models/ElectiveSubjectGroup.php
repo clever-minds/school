@@ -7,11 +7,12 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Facades\Auth;
 use App\Traits\DateFormatTrait;
+use App\Traits\LogsActivity;
 
 
 class ElectiveSubjectGroup extends Model
 {
-    use HasFactory, SoftDeletes, DateFormatTrait;
+    use HasFactory, SoftDeletes, DateFormatTrait,LogsActivity;
 
     protected $fillable = [
         'total_subjects',

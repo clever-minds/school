@@ -44,6 +44,8 @@ use Illuminate\Support\Facades\Validator;
 use JetBrains\PhpStorm\NoReturn;
 use Throwable;
 use App\Models\User;
+use App\Models\Notification;
+
 class ParentApiController extends Controller
 {
 
@@ -162,6 +164,9 @@ class ParentApiController extends Controller
             $token = $auth->createToken($auth->first_name)->plainTextToken;
             // $token = $auth->createToken('API Token', ['school_code' => $request->school_code])->plainTextToken;
             $user = $auth;
+            if($user->status === 0){
+                ResponseService::errorResponse('Your account is inactive, please contact admin.', null, config('constants.RESPONSE_CODE.INVALID_LOGIN'));
+            }
             $request->headers->set('school_code', $request->school_code);
             ResponseService::successResponse('User logged-in!', new UserDataResource($user), ['token' => $token], config('constants.RESPONSE_CODE.LOGIN_SUCCESS'));
         } else {
@@ -366,7 +371,6 @@ class ParentApiController extends Controller
             $children = Auth::user()->guardianRelationChild()->where('id', $request->child_id)->whereHas('user', function ($q) {
                 $q->whereNull('deleted_at');
             })->first();
-
             if (empty($children)) {
                 ResponseService::errorResponse("Child's Account is not Active.Contact School Support", NULL, config('constants.RESPONSE_CODE.INACTIVE_CHILD'));
             }
@@ -395,6 +399,8 @@ class ParentApiController extends Controller
                     });
                 }
             }
+          //  dd($data->orderBy('id', 'desc')->paginate(15));
+
             $data = $data->orderBy('id', 'desc')->paginate(15);
             ResponseService::successResponse("Assignments Fetched Successfully", $data);
         } catch (Throwable $e) {
@@ -1880,10 +1886,10 @@ class ParentApiController extends Controller
             ResponseService::validationError($validator->errors()->first());
         }
         try {
+
             $child = Auth::user()->guardianRelationChild()->where('id', $request->child_id)->whereHas('user', function ($q) {
                 $q->whereNull('deleted_at');
             })->first();
-
             if (empty($child)) {
                 ResponseService::errorResponse("Child's Account is not Active.Contact School Support", NULL, config('constants.RESPONSE_CODE.INACTIVE_CHILD'));
             }
@@ -2137,6 +2143,35 @@ class ParentApiController extends Controller
         return ResponseService::errorResponse();
     }
 }
+public function getNotifications()
+{
+    try {
+
+        $userId = auth()->id(); // ✅ logged-in guardian
+
+        $notifications = Notification::with([
+                'notificationUsers' => function ($q) use ($userId) {
+                    $q->where('user_id', $userId);
+                }
+            ])
+            ->whereHas('notificationUsers', function ($q) use ($userId) {
+                $q->where('user_id', $userId);
+            })
+            ->orderBy('id', 'DESC')
+            ->get();
+
+        return ResponseService::successResponse(
+            "Notifications fetched successfully",
+            $notifications
+        );
+
+    } catch (Throwable $e) {
+
+        ResponseService::logErrorResponse($e);
+        return ResponseService::errorResponse();
+    }
+}
+
 
 
 }

@@ -6,11 +6,12 @@ use App\Services\CachingService;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Auth;
 use App\Traits\DateFormatTrait;
+use App\Traits\LogsActivity;
 
 
 class SubjectTeacher extends Model {
 
-    use DateFormatTrait;
+    use DateFormatTrait,LogsActivity;
 
     protected $fillable = [
         'class_section_id',

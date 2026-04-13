@@ -188,7 +188,24 @@
                         </div>
                     </div>
                 </div>
+                {{-- Student Pickup --}}
+            <div class="col-md-2-4 stretch-card grid-margin">
+                <div class="card">
+                    <div class="card-body custom-card-body">
+                        <div class="d-flex flex-row flex-wrap">
+                            <div class="ms-3">
+                                {{ __('pickup_requests') }}
+                                <p class="text-muted">
+                                <h3>{{ $student_pickup_count }}</h3>
+                                </p>
+                                <p class="mt-2 text-success font-weight-bold"> </p>
+                            </div>
+                            <img class="ml-auto" src="{{ url('images/guardians.svg') }}" alt="" style="width: 40px; filter: hue-rotate(90deg);">
+                        </div>
+                    </div>
+                </div>
             </div>
+        </div>
         </div>
     @endif
     {{-- End Counter --}}

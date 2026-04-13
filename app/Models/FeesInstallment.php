@@ -6,11 +6,13 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Auth;
 use App\Traits\DateFormatTrait;
+use App\Traits\LogsActivity;
 
 class FeesInstallment extends Model
 {
     use HasFactory;
     use DateFormatTrait;
+    use LogsActivity;
     protected $fillable = [
         'name',
         'due_date',

@@ -6,10 +6,11 @@ use Auth;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use App\Traits\DateFormatTrait;
+use App\Traits\LogsActivity;
 
 class SubscriptionBillPayment extends Model
 {
-    use HasFactory, DateFormatTrait;
+    use HasFactory, DateFormatTrait,LogsActivity;
     protected $fillable = ['subscription_bill_id','date','amount','payment_type','cheque_number','school_id'];
 
     public function scopeOwner()

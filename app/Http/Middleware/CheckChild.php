@@ -64,7 +64,6 @@ class CheckChild {
                 DB::setDefaultConnection('mysql');
             }
         }
-        
         $children = $request->user()->guardianRelationChild()->where('id', $request->child_id)->first();
         if (empty($children)) {
             return response()->json(array(

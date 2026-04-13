@@ -29,7 +29,12 @@
                             <input type="hidden" id="remaining_amount" value="{{$fees->remaining_amount}}">
                             <input type="hidden" id="total_installment_amount" value="0">
                             <input type="hidden" name="due_charges_amount" value="{{ $due_charges }}">
-                            <h4>{{$student->full_name.':-'.$student->student->class_section->full_name}}</h4><br>
+                            <h4>
+                                {{ $student->full_name }}
+                                :- {{ $student->student->class_section->full_name }}
+                                GR No:- {{ $student->email }}
+                            </h4>
+
                             @php
                                 $total_compulsory_fees = $fees->total_compulsory_fees;
                             @endphp
@@ -176,8 +181,9 @@
                                             </tr>
                                             <tr class="without_installment_enter_amount">
                                                 <th>{{ __('date') }}</th>
-                                                <th colspan="2">{{ __('cheque_no') }}</th>
+                                                <th colspan="2">{{ __('Transection Detail') }}</th>
                                                 <th class="text-right">{{ __('Amount') }}</th>
+                                                 <th class="text-right">{{ __('Genrate Recipt') }}</th>
                                             </tr>
                                             @foreach ($student->fees_paid->compulsory_fee as $fees)
                                                 <tr class="without_installment_enter_amount">
@@ -189,11 +195,32 @@
                                                         {{ $fees->date }}
                                                     </td>
                                                     <td colspan="2">
-                                                        {{ $fees->cheque_no }}
+                                                    @if($fees->mode === "Online")
+                                                        <small>Bank Name : <span class="font-weight-bold">{{ $fees->bank_name ?? '-' }}</span></small><br>
+                                                        <small>Transaction ID : <span class="font-weight-bold">{{ $fees->transaction_id ?? '-' }}</span></small><br>
+                                                    @endif
+                                                    @if($fees->mode === "Cheque")
+                                                        <small>{{ __('cheque_no') }} : <span class="font-weight-bold">{{ $fees->cheque_no ?? '-' }}</span></small><br>
+                                                    @endif
+                                                    @if($fees->mode === "Cash")
+                                                       <span class="font-weight-bold">Cash</span></small><br>
+                                                    @endif
                                                     </td>
                                                     <td class="text-right">
                                                         {{ $fees->amount }} {{' '.$currencySymbol}}
                                                     </td>
+                                                   <td class="text-right">
+                                                    @if(!empty($fees->fees_paid_id))
+                                                        <a href="{{ route('fees.paid.receipt.pdf_ins', $fees->id) }}"
+                                                        target="_blank"
+                                                        class="btn btn-xs btn-gradient-info btn-rounded btn-icon generate-paid-fees-pdf"
+                                                        data-id="{{ $fees->id }}"
+                                                        title="{{ __('generate_pdf') }} {{ __('fees') }}">
+                                                            <i class="fa fa-file-pdf-o"></i>
+                                                        </a>
+                                                    @endif
+                                                </td>
+
                                                 </tr>
                                             @endforeach
                                         @endif
@@ -212,7 +239,7 @@
                                             </td>
                                         </tr>
                                         @endif
-                                        
+                                       
 
                                         </tbody>
                                     </table>
@@ -236,6 +263,12 @@
                                                     {{ __('cheque') }}
                                                 </label>
                                             </div>
+                                             <div class="form-check form-check-inline">
+                                                <label class="form-check-label">
+                                                    <input type="radio" name="mode" class="bank-compulsory-mode mode" value="3">
+                                                    {{ __('Bank') }}
+                                                </label>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
@@ -243,6 +276,23 @@
                                     <label for="cheque_no">{{ __('cheque_no') }} <span class="text-danger">*</span></label>
                                     <input type="number" id="cheque_no" name="cheque_no" placeholder="{{ __('cheque_no') }}" class="form-control cheque-no" required/>
                                 </div>
+                                 <div class="form-group bank-no-container" style="display: none">
+                                    <label for="transaction_id">{{ __('Transaction Id') }} <span class="text-danger">*</span></label>
+                                    <input type="number" id="transaction_id" name="transaction_id" placeholder="{{ __('Transaction Id') }}" class="form-control bank-no" required/>
+                                </div>
+                                <div class="form-group bank-no-container" style="display: none">
+                                    <label for="bank_name">{{ __('Bank Name') }} <span class="text-danger">*</span></label>
+                                    <input type="text" id="bank_name" name="bank_name" placeholder="{{ __('Bank Name') }}" class="form-control bank-no" required/>
+                                </div>
+                                <div class="form-group">
+                                    <label for="remark">{{ __('Remarks') }}</label>
+                                    <textarea id="remark"
+                                    name="remark"
+                                    placeholder="{{ __('remark') }}"
+                                    class="form-control remark"
+                                    rows="3"></textarea>
+                                </div>
+
                                 <input class="btn btn-theme float-right" type="submit" value={{ __('pay') }} />
                             @endif
                             

@@ -1,14 +1,15 @@
 @extends('layouts.master')
 
 @section('title')
-    {{ __('manage') . ' ' . __('assignment') }}
+    {{ __('manage') . ' ' . __('assignment') . ' OR ' . __('homework') }}
 @endsection
 
 @section('content')
     <div class="content-wrapper">
         <div class="page-header">
             <h3 class="page-title">
-                {{ __('manage') . ' ' . __('assignment') }}
+       {{ __('manage') . ' ' . __('assignment') . ' OR ' . __('homework') }}
+
             </h3>
         </div>
         <div class="row">
@@ -16,14 +17,22 @@
                 <div class="card">
                     <div class="card-body">
                         <h4 class="card-title">
-                            {{ __('create') . ' ' . __('assignment') }}
+                            {{ __('create') . ' ' . __('assignment')  . ' OR ' . __('homework') }}
                         </h4>
                         <form class="pt-3 add-assignment-form" id="create-form" action="{{ route('assignment.store') }}"
                               method="POST" novalidate="novalidate" enctype="multipart/form-data" data-success-function ="formSuccessFunction">
                             <div class="row">
 
                                 {!! Form::hidden('user_id', Auth::user()->id, ['id' => 'user_id']) !!}
-                                <div class="form-group col-sm-12 col-md-6">
+                                <div class="form-group col-sm-12 col-md-4">
+                                        <label for="type">{{ __('Type') }} <span class="text-danger">*</span></label>
+                                        <select name="type" id="type" class="form-control" required>
+                                            <option value="">-- {{ __('Select Type') }} --</option>
+                                            <option value="homework">Homework</option>
+                                            <option value="assignment">Assignment</option>
+                                        </select>
+                                    </div>
+                                <div class="form-group col-sm-12 col-md-4">
                                     <label>{{ __('Class') . ' ' . __('section') }} <span
                                             class="text-danger">*</span></label>
                                     <select name="class_section_id[]" id="class-section-id"
@@ -42,7 +51,7 @@
                                     </div>
                                 </div>
 
-                                <div class="form-group col-sm-12 col-md-6">
+                                <div class="form-group col-sm-12 col-md-4">
                                     <label for="subject-id">{{ __('subject') }} <span class="text-danger">*</span></label>
                                     <select name="subject_id" id="subject-id" class="form-control">
                                         <option value="">-- {{ __('Select Subject') }} --</option>
@@ -111,7 +120,7 @@
             <div class="col-md-12 grid-margin stretch-card">
                 <div class="card">
                     <div class="card-body">
-                        <h4 class="card-title">{{ __('list') . ' ' . __('assignment') }}</h4>
+                        <h4 class="card-title">{{ __('list') . ' ' . __('assignment') . ' OR ' . __('homework') }}</h4>
 
                         <div id="toolbar">
                             <div class="row">
@@ -197,6 +206,7 @@
                             <tr>
                                 <th scope="col" data-field="id" data-sortable="false" data-visible="false">{{ __('id') }}</th>
                                 <th scope="col" data-field="no">{{ __('no.') }}</th>
+                                <th scope="col" data-field="type" data-sortable="false"  data-formatter="capitalizeType">{{ __('Type') }}</th>
                                 <th scope="col" data-field="name" data-sortable="false">{{ __('name') }}</th>
                                 <th scope="col" data-events="tableDescriptionEvents" data-formatter="descriptionFormatter" data-field="instructions" data-sortable="false">{{ __('instructions') }}</th>
                                 <th scope="col" data-field="file" data-sortable="false" data-formatter="fileFormatter">{{ __('files') }}</th>
@@ -227,7 +237,7 @@
                     <div class="modal-content">
                         <div class="modal-header">
                             <h5 class="modal-title" id="exampleModalLabel">
-                                {{ __('edit') . ' ' . __('assignment') }}
+                                {{ __('edit') . ' ' . __('assignment') . ' OR ' . __('homework') }}
                             </h5>
                             <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                                 <span aria-hidden="true">&times;</span>
@@ -238,7 +248,15 @@
                             <div class="modal-body">
                                 <div class="row">
                                     <input type="hidden" name="user_id" id="edit_user_id" value="{{ Auth::user()->id }}" disabled/>
-                                    <div class="form-group col-sm-12 col-md-6">
+                                    <div class="form-group col-sm-12 col-md-4">
+                                        <label for="type">{{ __('Type') }} <span class="text-danger">*</span></label>
+                                        <select name="type" id="edit_type_ass" class="form-control" required>
+                                            <option value="">-- {{ __('Select Type') }} --</option>
+                                            <option value="homework" >Homework</option>
+                                            <option value="assignment">Assignment</option>
+                                        </select>
+                                    </div>
+                                    <div class="form-group col-sm-12 col-md-4">
                                         <label>{{ __('class_section') }}</label>
                                         <select name="class_section_id[]" id="edit-class-section-id" class="form-control edit_class_section_id select2-dropdown select2-hidden-accessible" style="width:100%;" tabindex="-1" aria-hidden="true" multiple>
                                             @foreach ($classSections as $item)
@@ -247,7 +265,7 @@
                                         </select>
                                     </div>
 
-                                    <div class="form-group col-sm-12 col-md-6">
+                                    <div class="form-group col-sm-12 col-md-4">
                                         <label>{{ __('subject') }}</label>
                                         <select name="class_subject_id" id="edit-subject-id" class="form-control edit_subject_id" style="width:100%;" tabindex="-1" aria-hidden="true" required>
                                             <option value="">-- {{ __('Select Subject') }} --</option>
@@ -292,7 +310,7 @@
                                         <span class="input-group-addon input-group-append"></span>
                                     </div>
 
-                                    <div class="form-group col-sm-12 col-md-4">
+                                    <div class="form-group col-sm-12 col-md-4" id="edit_points_wrapper">
                                         <label for="edit_points">{{ __('points') }}</label> <span class="text-danger">*</span>
                                         <input type="number" id="edit_points" name="points" placeholder="{{ __('points') }}" class="form-control" min="1"/>
                                     </div>
@@ -338,6 +356,10 @@
                 $('#edit_extra_days_for_resubmission_div').hide();
                 // $('#add_url').hide().val('');
             }, 500);
+        }
+        function capitalizeType(value, row, index) {
+            if (!value) return '';
+            return value.charAt(0).toUpperCase() + value.slice(1);
         }
     </script>
 @endsection

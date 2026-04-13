@@ -164,7 +164,7 @@
                                         <option value="">-- {{ __('Select Subject') }} --</option>
                                         <option value="data-not-found">-- {{ __('no_data_found') }} --</option>
                                         @foreach ($classSubjects as $item)
-                                            <option value="{{ $item->subject_id }}" data-class-id="{{ $item->class_id }}">{{ $item->subject_with_name}}</option>
+                                            <option value="{{ $item->id }}" data-class-id="{{ $item->class_id }}">{{ $item->subject_with_name}}</option>
                                         @endforeach
                                     </select>    
                                 @endif

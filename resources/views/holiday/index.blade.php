@@ -1,173 +1,452 @@
 @extends('layouts.master')
 
 @section('title')
-    {{ __('holiday') }}
+{{ __('holiday') }}
 @endsection
 
 @section('content')
-    <div class="content-wrapper">
-        <div class="page-header">
-            <h3 class="page-title">
-                {{ __('manage') . ' ' . __('holiday') }}
-            </h3>
-        </div>
+<div class="content-wrapper">
 
-        <div class="row">
-            @if (Auth::user()->can('holiday-create'))
-                <div class="col-lg-12 grid-margin stretch-card">
-                    <div class="card">
-                        <div class="card-body">
-                            <h4 class="card-title">
-                                {{ __('create') . ' ' . __('holiday') }}
-                            </h4>
-                            <form class="create-form pt-3" id="create-form" action="{{route('holiday.store')}}" method="POST"
-                                novalidate="novalidate">
-                                @csrf
-                                <div class="row">
-                                    <div class="form-group col-sm-12 col-md-6">
-                                        <label>{{ __('date') }} <span class="text-danger">*</span></label>
-                                        {!! Form::text('date', null, ['required', 'placeholder' => __('date'), 'class' => 'datepicker-popup form-control', 'autocomplete' => 'off']) !!}
-                                        <span class="input-group-addon input-group-append">
-                                        </span>
-                                    </div>
-                                    <div class="form-group col-sm-12 col-md-6">
-                                        <label>{{ __('title') }} <span class="text-danger">*</span></label>
-                                        {!! Form::text('title', null, ['required', 'placeholder' => __('title'), 'class' => 'form-control']) !!}
-                                    </div>
-                                </div>
-                                <div class="row">
-                                    <div class="form-group col-sm-12 col-md-12">
-                                        <label>{{ __('description') }}</label>
-                                        {!! Form::textarea('description', null, ['rows' => '2', 'placeholder' => __('description'), 'class' => 'form-control']) !!}
-                                    </div>
-                                </div>
-                                <input class="btn btn-theme float-right ml-3" id="create-btn" type="submit" value={{ __('submit') }}>
-                                <input class="btn btn-secondary float-right" type="reset" value={{ __('reset') }}>
-                            </form>
-                        </div>
-                    </div>
-                </div>
-            @endif
-            @if (Auth::user()->can('holiday-list'))
-                <div class="col-lg-12 grid-margin stretch-card">
-                    <div class="card">
-                        <div class="card-body">
-                            <h4 class="card-title">
-                                {{ __('list') . ' ' . __('holiday') }}
-                            </h4>
-                            <div class="row" id="toolbar">
-                                <div class="form-group col-12 col-sm-12 col-md-3 col-lg-3">
-                                    <label for="filter_session_year_id" class="filter-menu">{{__("session_year")}}</label>
-                                    <select name="filter_session_year_id" id="filter_session_year_id" class="form-control">
-                                        @foreach ($sessionYears as $sessionYear)
-                                            <option value="{{ $sessionYear->id }}" {{$sessionYear->default == 1 ? "selected" : ""}}>
-                                                {{ $sessionYear->name }}</option>
-                                        @endforeach
-                                    </select>
-                                </div>
-
-                                <div class="form-group col-12 col-sm-12 col-md-3 col-lg-3">
-                                    <label for="filter_month_id" class="filter-menu">{{__("month")}}</label>
-                                    {!! Form::select('month', ['0' => 'All'] + $months, null, ['class' => 'form-control', 'id' => 'filter_month']) !!}
-                                </div>
-                            </div>
-                            <div class="row">
-                                <div class="col-12">
-                                    <table aria-describedby="mydesc" class='table' id='table_list' data-toggle="table"
-                                        data-url="{{ route('holiday.show', 1) }}" data-click-to-select="true"
-                                        data-side-pagination="server" data-pagination="true"
-                                        data-page-list="[5, 10, 20, 50, 100, 200]" data-search="true" data-toolbar="#toolbar"
-                                        data-show-columns="true" data-show-refresh="true" data-fixed-columns="false"
-                                        data-fixed-number="2" data-fixed-right-number="1" data-trim-on-search="false"
-                                        data-mobile-responsive="true" data-sort-name="id" data-sort-order="desc"
-                                        data-maintain-selected="true" data-export-data-type='all' data-show-export="true"
-                                        data-export-options='{ "fileName": "holiday-list-<?= date('d-m-y') ?>","ignoreColumn": ["operate"]}'
-                                        data-query-params="holidayQueryParams">
-                                        <thead>
-                                            <tr>
-                                                <th scope="col" data-field="id" data-sortable="true" data-visible="false">
-                                                    {{ __('id') }} </th>
-                                                <th scope="col" data-field="no"> {{ __('no.') }} </th>
-                                                <th scope="col" data-field="date" data-width="150"> {{ __('date') }} </th>
-                                                <th scope="col" data-field="title">{{ __('title') }} </th>
-                                                <th scope="col" data-events="tableDescriptionEvents"
-                                                    data-formatter="descriptionFormatter" data-field="description">
-                                                    {{ __('description') }}</th>
-                                                @if (Auth::user()->can('holiday-edit') || Auth::user()->can('holiday-delete'))
-                                                    <th data-events="holidayEvents" data-width="150" scope="col"
-                                                        data-field="operate">{{ __('action') }}</th>
-                                                @endif
-                                            </tr>
-                                        </thead>
-                                    </table>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            @endif
-        </div>
+    <div class="page-header">
+        <h3 class="page-title">
+            {{ __('manage') . ' ' . __('holiday') }}
+        </h3>
     </div>
 
+    <div class="row">
 
-    <div class="modal fade" id="editModal" data-backdrop="static" tabindex="-1" role="dialog"
-        aria-labelledby="exampleModalLabel" aria-hidden="true">
-        <div class="modal-dialog" role="document">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="exampleModalLabel"> {{ __('edit') . ' ' . __('holiday') }}</h5>
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true"><i class="fa fa-close"></i></span>
-                    </button>
-                </div>
-                <form id="formdata" class="edit-form" action="{{url('holiday')}}" novalidate="novalidate">
-                    @csrf
-                    <div class="modal-body">
-                        <input type="hidden" name="id" id="id">
-                        <div class="row form-group">
-                            <div class="col-sm-12 col-md-12">
+        {{-- CREATE HOLIDAY --}}
+        @if (Auth::user()->can('holiday-create'))
+        <div class="col-lg-12 grid-margin stretch-card">
+
+            <div class="card">
+                <div class="card-body">
+
+                    <h4 class="card-title">
+                        {{ __('create') . ' ' . __('holiday') }}
+                    </h4>
+
+                    <form class="create-form pt-3" id="create-form" action="{{route('holiday.store')}}" method="POST">
+                        @csrf
+
+                        <div class="row">
+
+                            <div class="form-group col-md-6">
+                                <label>Holiday Type <span class="text-danger">*</span></label>
+
+                                <select name="type" id="holiday-type" class="form-control" required>
+                                    <option value="holiday">Holiday</option>
+                                    <option value="saturday_all">All Saturday Off</option>
+                                    <option value="saturday_1_3">1st & 3rd Saturday Off</option>
+                                    <option value="saturday_2_4">2nd & 4th Saturday Off</option>
+                                </select>
+                            </div>
+
+                            <div class="form-group col-md-6 date-box">
                                 <label>{{ __('date') }} <span class="text-danger">*</span></label>
-                                {!! Form::text('date', null, ['required', 'placeholder' => __('date'), 'class' => 'datepicker-popup form-control', 'id' => 'edit-date']) !!}
-                                <span class="input-group-addon input-group-append">
-                                </span>
+
+                                {!! Form::text('date', null, [
+                                'placeholder' => __('date'),
+                                'class' => 'datepicker-popup form-control',
+                                'autocomplete' => 'off',
+                                'id' => 'date-field'
+                                ]) !!}
                             </div>
+
                         </div>
-                        <div class="row form-group">
-                            <div class="col-sm-12 col-md-12">
+
+
+                        <div class="row">
+
+                            <div class="form-group col-md-6">
                                 <label>{{ __('title') }} <span class="text-danger">*</span></label>
-                                {!! Form::text('title', null, ['required', 'placeholder' => __('title'), 'class' => 'form-control', 'id' => 'edit-title']) !!}
+
+                                {!! Form::text('title', null, [
+                                'required',
+                                'placeholder' => __('title'),
+                                'class' => 'form-control'
+                                ]) !!}
                             </div>
+
+                            <div class="form-group col-md-6 class-box">
+
+                                <label>Select Classes</label>
+
+                                <select name="class_ids[]" id="class_ids" class="form-control select2" multiple>
+
+                                    @foreach($classes as $class)
+                                    <option value="{{ $class->id }}">
+                                        {{ $class->name }}
+                                    </option>
+                                    @endforeach
+
+                                </select>
+
+                            </div>
+
                         </div>
-                        <div class="row form-group">
-                            <div class="col-sm-12 col-md-12">
+
+
+                        <div class="row">
+
+                            <div class="form-group col-md-12">
+
                                 <label>{{ __('description') }}</label>
-                                {!! Form::textarea('description', null, ['placeholder' => __('description'), 'class' => 'form-control', 'id' => 'edit-description']) !!}
+
+                                {!! Form::textarea('description', null, [
+                                'rows' => '2',
+                                'placeholder' => __('description'),
+                                'class' => 'form-control'
+                                ]) !!}
+
                             </div>
+
+                        </div>
+
+
+                        <button class="btn btn-theme float-right ml-3" type="submit">
+                            {{ __('submit') }}
+                        </button>
+
+                        <button class="btn btn-secondary float-right" type="reset">
+                            {{ __('reset') }}
+                        </button>
+
+                    </form>
+
+                </div>
+            </div>
+
+        </div>
+        @endif
+
+
+
+        {{-- HOLIDAY LIST --}}
+        @if (Auth::user()->can('holiday-list'))
+
+        <div class="col-lg-12 grid-margin stretch-card">
+
+            <div class="card">
+
+                <div class="card-body">
+
+                    <h4 class="card-title">
+                        {{ __('list') . ' ' . __('holiday') }}
+                    </h4>
+
+                    {{-- FILTER --}}
+                    <div class="row" id="toolbar">
+
+                        <div class="form-group col-md-3">
+
+                            <label>{{__("session_year")}}</label>
+
+                            <select name="filter_session_year_id" id="filter_session_year_id" class="form-control">
+
+                                @foreach ($sessionYears as $sessionYear)
+
+                                <option value="{{ $sessionYear->id }}" {{$sessionYear->default == 1 ? "selected" : ""}}>
+                                    {{ $sessionYear->name }}
+                                </option>
+
+                                @endforeach
+
+                            </select>
+
+                        </div>
+
+
+                        <div class="form-group col-md-3">
+
+                            <label>{{__("month")}}</label>
+
+                            {!! Form::select('month', ['0' => 'All'] + $months, null, [
+                            'class' => 'form-control',
+                            'id' => 'filter_month'
+                            ]) !!}
+
+                        </div>
+
+                    </div>
+
+
+                    {{-- TABLE --}}
+                    <div class="row">
+                        <div class="col-12">
+
+                            <table
+                                class="table"
+                                id="table_list"
+                                data-toggle="table"
+                                data-url="{{ route('holiday.show', 1) }}"
+                                data-pagination="true"
+                                data-search="true"
+                                data-side-pagination="server"
+                                data-page-list="[5,10,20,50,100]"
+                                data-toolbar="#toolbar"
+                                data-show-refresh="true"
+                                data-show-columns="true"
+                                data-mobile-responsive="true"
+                                data-sort-name="id"
+                                data-sort-order="desc"
+                                data-query-params="holidayQueryParams">
+
+                                <thead>
+
+                                    <tr>
+
+                                        <th data-field="id" data-visible="false">{{ __('id') }}</th>
+
+                                        <th data-field="no">{{ __('no.') }}</th>
+
+                                        <th data-field="date" data-width="150">{{ __('date') }}</th>
+
+                                        <th data-field="title">{{ __('title') }}</th>
+                                        <th data-field="holiday_type">{{ __('Holiday Type') }}</th>
+                                          <th data-field="class">{{ __('Class') }}</th>
+                                        <th data-field="description"
+                                            data-formatter="descriptionFormatter"
+                                            data-events="tableDescriptionEvents">
+                                            {{ __('description') }}
+                                        </th>
+
+                                        @if (Auth::user()->can('holiday-edit') || Auth::user()->can('holiday-delete'))
+
+                                        <th data-field="operate"
+                                            data-events="holidayEvents"
+                                            data-width="150">
+                                            {{ __('action') }}
+                                        </th>
+
+                                        @endif
+
+                                    </tr>
+
+                                </thead>
+
+                            </table>
+
                         </div>
                     </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-dismiss="modal">{{ __('Cancel') }}</button>
-                        <input class="btn btn-theme" type="submit" value={{ __('submit') }}>
-                    </div>
-                </form>
+
+                </div>
             </div>
+
         </div>
+
+        @endif
+
+
     </div>
+</div>
+
+
+
+{{-- EDIT MODAL --}}
+<div class="modal fade" id="editModal" data-backdrop="static">
+
+    <div class="modal-dialog">
+
+        <div class="modal-content">
+
+            <div class="modal-header">
+
+                <h5 class="modal-title">Edit Holiday</h5>
+
+                <button type="button" class="close" data-dismiss="modal">
+                    <i class="fa fa-close"></i>
+                </button>
+
+            </div>
+
+
+         <form id="formdata" class="edit-form" action="{{url('holiday')}}" novalidate="novalidate">
+
+                @csrf
+
+                <div class="modal-body">
+
+                    <input type="hidden" name="id" id="edit-id">
+
+
+                    <div class="row">
+
+                        <div class="form-group col-md-6">
+
+                            <label>Holiday Type</label>
+
+                            <select name="type" id="edit-type" class="form-control">
+
+                                <option value="holiday"> Holiday</option>
+                                <option value="saturday_all">All Saturday Off</option>
+                                <option value="saturday_1_3">1st & 3rd Saturday Off</option>
+                                <option value="saturday_2_4">2nd & 4th Saturday Off</option>
+
+                            </select>
+
+                        </div>
+
+
+                        <div class="form-group col-md-6 edit-date-box">
+
+                            <label>Date</label>
+
+                            <input type="text"
+                                name="date"
+                                id="edit-date"
+                                class="datepicker-popup form-control">
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="form-group edit-class-box">
+
+                        <label>Select Classes</label>
+
+                        <select name="class_ids[]" id="edit-class-ids" class="form-control select2" multiple>
+
+                            @foreach($classes as $class)
+
+                            <option value="{{ $class->id }}">
+                                {{ $class->name }}
+                            </option>
+
+                            @endforeach
+
+                        </select>
+
+                    </div>
+
+
+                    <div class="form-group">
+
+                        <label>Title</label>
+
+                        <input type="text"
+                            name="title"
+                            id="edit-title"
+                            class="form-control">
+
+                    </div>
+
+
+                    <div class="form-group">
+
+                        <label>Description</label>
+
+                        <textarea name="description"
+                            id="edit-description"
+                            class="form-control"
+                            rows="2"></textarea>
+
+                    </div>
+
+                </div>
+
+
+                <div class="modal-footer">
+
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">
+                        Cancel
+                    </button>
+
+                    <button type="submit" class="btn btn-theme">
+                        Submit
+                    </button>
+
+                </div>
+
+            </form>
+
+        </div>
+
+    </div>
+
+</div>
+
 @endsection
 
-@section('js')
-<script>
-    $(function () {
-        const sessionStart = "{{ $current_sessionYear->start_date }}"; // e.g. 2024-04-01
-        const sessionEnd = "{{ $current_sessionYear->end_date }}";     // e.g. 2025-03-31
 
-        $('.datepicker-popup').datepicker({
-            format: 'yyyy-mm-dd',
-            startDate: sessionStart,
-            endDate: sessionEnd,
-            autoclose: true,
-            todayHighlight: true
-        });
+
+@section('js')
+
+<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+
+<script>
+
+$(document).ready(function () {
+
+    $('.select2').select2({
+        placeholder: "Select Classes",
+        allowClear: true
     });
+
+
+    // DATEPICKER
+    const sessionStart = "{{ $current_sessionYear->start_date }}";
+    const sessionEnd = "{{ $current_sessionYear->end_date }}";
+
+    $('.datepicker-popup').datepicker({
+        format: 'yyyy-mm-dd',
+        startDate: sessionStart,
+        endDate: sessionEnd,
+        autoclose: true,
+        todayHighlight: true
+    });
+
+
+    // CREATE FORM TOGGLE
+    function toggleCreateFields() {
+
+        let type = $('#holiday-type').val();
+
+        if(type === 'holiday') {
+
+            $('.date-box').show();
+            $('#date-field').attr('required', true);
+            $('#class_ids').removeAttr('required');
+
+        } else {
+
+            $('.date-box').hide();
+            $('#date-field').val('').removeAttr('required');
+            $('#class_ids').attr('required', true);
+
+        }
+    }
+
+    toggleCreateFields();
+
+    $('#holiday-type').change(function () {
+        toggleCreateFields();
+    });
+
+
+
+    // EDIT FORM TOGGLE
+    $('#edit-type').change(function(){
+
+        let type = $(this).val();
+
+        if(type === 'holiday'){
+
+            $('.edit-date-box').show();
+            $('.edit-class-box').hide();
+
+        }else{
+
+            $('.edit-date-box').hide();
+            $('.edit-class-box').show();
+
+        }
+
+    });
+
+});
+
 </script>
+
 @endsection

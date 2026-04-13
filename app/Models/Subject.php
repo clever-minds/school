@@ -8,11 +8,12 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
 use App\Traits\DateFormatTrait;
+use App\Traits\LogsActivity;
 
 
 class Subject extends Model {
     use SoftDeletes, DateFormatTrait;
-    use HasFactory;
+    use HasFactory,LogsActivity;
 
     protected $fillable = [
         'name',

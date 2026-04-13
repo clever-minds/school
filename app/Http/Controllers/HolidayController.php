@@ -37,60 +37,151 @@ class HolidayController extends Controller
         $sessionYears = $this->sessionYear->all();
         $current_sessionYear = $this->cache->getDefaultSessionYear();
         $months = sessionYearWiseMonth();
-        return view('holiday.index', compact('sessionYears', 'months', 'current_sessionYear'));
+        $classes = \App\Models\ClassSchool::all();
+        return view('holiday.index', compact('sessionYears', 'months', 'current_sessionYear','classes'));
     }
 
 
-    public function store(Request $request)
-    {
-        ResponseService::noFeatureThenRedirect('Holiday Management');
-        ResponseService::noPermissionThenRedirect('holiday-create');
+  public function store(Request $request)
+{
+    ResponseService::noFeatureThenRedirect('Holiday Management');
+    ResponseService::noPermissionThenRedirect('holiday-create');
+
+    // Validation
+    if ($request->type == 'holiday') {
+
         $validator = Validator::make($request->all(), [
-            'date' => 'required',
-            'title' => 'required',
+            'date'  => 'required|date',
+            'title' => 'required'
         ]);
 
-        if ($validator->fails()) {
-            ResponseService::errorResponse($validator->errors()->first());
+    } else {
+
+        $validator = Validator::make($request->all(), [
+            'title'     => 'required',
+            'class_ids' => 'required|array'
+        ]);
+
+    }
+
+    if ($validator->fails()) {
+        ResponseService::errorResponse($validator->errors()->first());
+    }
+
+    try {
+
+        $sessionYear = $this->cache->getDefaultSessionYear();
+
+        $data = $request->all();
+
+        // convert class_ids array to comma separated string
+        if ($request->has('class_ids')) {
+            $data['class_ids'] = implode(',', $request->class_ids);
         }
-        try {
-            $holiday = $this->holiday->create($request->all());
-            $sessionYear = $this->cache->getDefaultSessionYear();
+
+        // date validation only for normal holiday
+        if ($request->type == 'holiday') {
+
             $holidayDate = Carbon::parse($request->date);
             $start = Carbon::parse($sessionYear->start_date);
-            $end = Carbon::parse($sessionYear->end_date);
+            $end   = Carbon::parse($sessionYear->end_date);
 
-            // 🔒 Custom check: date must be within session year
             if ($holidayDate->lt($start) || $holidayDate->gt($end)) {
                 ResponseService::errorResponse('The selected date must fall within the current session year.');
             }
-            $this->sessionYearsTrackingsService->storeSessionYearsTracking('App\Models\Holiday', $holiday->id, Auth::user()->id, $sessionYear->id, Auth::user()->school_id, null);
-            ResponseService::successResponse('Data Stored Successfully');
-        } catch (Throwable $e) {
-            ResponseService::logErrorResponse($e, "Holiday Controller -> Store Method");
-            ResponseService::errorResponse();
+
+        } else {
+            // saturday holiday → no specific date
+            $data['date'] = null;
         }
+
+        // store holiday
+        $holiday = $this->holiday->create($data);
+
+        $this->sessionYearsTrackingsService->storeSessionYearsTracking(
+            'App\Models\Holiday',
+            $holiday->id,
+            Auth::user()->id,
+            $sessionYear->id,
+            Auth::user()->school_id,
+            null
+        );
+
+        ResponseService::successResponse('Data Stored Successfully');
+
+    } catch (Throwable $e) {
+
+        ResponseService::logErrorResponse($e, "Holiday Controller -> Store Method");
+        ResponseService::errorResponse();
+
+    }
+}
+  public function update($id, Request $request)
+{
+    ResponseService::noFeatureThenRedirect('Holiday Management');
+    ResponseService::noPermissionThenSendJson('holiday-edit');
+
+    // Validation
+    if ($request->type == 'holiday') {
+        $validator = Validator::make($request->all(), [
+            'date'  => 'required|date',
+            'title' => 'required'
+        ]);
+    } else {
+        $validator = Validator::make($request->all(), [
+            'title'     => 'required',
+            'class_ids' => 'required|array'
+        ]);
     }
 
-    public function update($id, Request $request)
-    {
-        ResponseService::noFeatureThenRedirect('Holiday Management');
-        ResponseService::noPermissionThenSendJson('holiday-edit');
-        $validator = Validator::make($request->all(), ['date' => 'required', 'title' => 'required',]);
-
-        if ($validator->fails()) {
-            ResponseService::errorResponse($validator->errors()->first());
-        }
-        try {
-            $this->holiday->update($id, $request->all());
-            $sessionYear = $this->cache->getDefaultSessionYear();
-            $this->sessionYearsTrackingsService->storeSessionYearsTracking('App\Models\Holiday', $id, Auth::user()->id, $sessionYear->id, Auth::user()->school_id, null);
-            ResponseService::successResponse('Data Updated Successfully');
-        } catch (Throwable $e) {
-            ResponseService::logErrorResponse($e, "Holiday Controller -> Update Method");
-            ResponseService::errorResponse();
-        }
+    if ($validator->fails()) {
+        ResponseService::errorResponse($validator->errors()->first());
     }
+
+    try {
+        $sessionYear = $this->cache->getDefaultSessionYear();
+
+        $data = $request->all();
+
+        // Convert class_ids array to comma separated string
+        if ($request->has('class_ids')) {
+            $data['class_ids'] = implode(',', $request->class_ids);
+        }
+
+        // Date validation only for normal holiday
+        if ($request->type == 'holiday') {
+            $holidayDate = Carbon::parse($request->date);
+            $start = Carbon::parse($sessionYear->start_date);
+            $end   = Carbon::parse($sessionYear->end_date);
+
+            if ($holidayDate->lt($start) || $holidayDate->gt($end)) {
+                ResponseService::errorResponse('The selected date must fall within the current session year.');
+            }
+        } else {
+            // Saturday holiday → no specific date
+            $data['date'] = null;
+        }
+
+        // Update holiday
+        $this->holiday->update($id, $data);
+
+        // Store session year tracking for audit
+        $this->sessionYearsTrackingsService->storeSessionYearsTracking(
+            'App\Models\Holiday',
+            $id,
+            Auth::user()->id,
+            $sessionYear->id,
+            Auth::user()->school_id,
+            null
+        );
+
+        ResponseService::successResponse('Data Updated Successfully');
+
+    } catch (Throwable $e) {
+        ResponseService::logErrorResponse($e, "Holiday Controller -> Update Method");
+        ResponseService::errorResponse();
+    }
+}
 
     // TODO : Remove this if not necessary
     // public function holiday_view()
@@ -98,55 +189,117 @@ class HolidayController extends Controller
     //     return view('holiday.list');
     // }
 
-    public function show(Request $request)
-    {
-        ResponseService::noFeatureThenRedirect('Holiday Management');
-        ResponseService::noPermissionThenRedirect('holiday-list');
-        $offset = request('offset', 0);
-        $limit = request('limit', 10);
-        $sort = request('sort', 'id');
-        $order = request('order', 'DESC');
-        $search = request('search');
-        $session_year_id = request('session_year_id');
-        $month = request('month');
+ public function show(Request $request)
+{
+    ResponseService::noFeatureThenRedirect('Holiday Management');
+    ResponseService::noPermissionThenRedirect('holiday-list');
 
-        $sessionYear = $this->sessionYear->findById($session_year_id);
+    $offset = request('offset', 0);
+    $limit = request('limit', 10);
+    $sort = request('sort', 'id');
+    $order = request('order', 'DESC');
+    $search = request('search');
+    $session_year_id = request('session_year_id');
+    $month = request('month');
 
-        $sql = $this->holiday->builder()
-            ->where(function ($query) use ($search) {
-                $query->when($search, function ($query) use ($search) {
-                    $query->where(function ($query) use ($search) {
-                        $query->where('id', 'LIKE', "%$search%")->orwhere('title', 'LIKE', "%$search%")->orwhere('description', 'LIKE', "%$search%")->orwhere('date', 'LIKE', "%$search%");
-                    });
+    $sessionYear = $this->sessionYear->findById($session_year_id);
+
+    $sql = $this->holiday->builder()
+       
+
+        ->where(function ($query) use ($search) {
+
+            if ($search) {
+                $query->where(function ($q) use ($search) {
+
+                    $q->where('id', 'LIKE', "%$search%")
+                        ->orWhere('title', 'LIKE', "%$search%")
+                        ->orWhere('description', 'LIKE', "%$search%")
+                        ->orWhere('date', 'LIKE', "%$search%");
                 });
-            })->when($session_year_id, function ($query) use ($sessionYear) {
-                $query->whereDate('date', '>=', $sessionYear->start_date)
-                    ->whereDate('date', '<=', $sessionYear->end_date);
-            })->when($month, function ($query) use ($month) {
-                $query->whereMonth('date', $month);
+            }
+        })
+
+        ->when($session_year_id, function ($query) use ($sessionYear) {
+
+            $query->where(function ($q) use ($sessionYear) {
+
+                $q->whereBetween('date', [
+                    $sessionYear->start_date,
+                    $sessionYear->end_date
+                ])
+                    ->orWhereIn('type', ['saturday_all', 'saturday_2_4']);
             });
+        })
 
-        $total = $sql->count();
+        ->when($month, function ($query) use ($month) {
+            $query->whereMonth('date', $month);
+        });
 
-        $sql->orderBy($sort, $order)->skip($offset)->take($limit);
-        $res = $sql->get();
+    $total = $sql->count();
 
-        $bulkData = array();
-        $bulkData['total'] = $total;
-        $rows = array();
-        $no = 1;
-        foreach ($res as $row) {
-            $operate = BootstrapTableService::editButton(route('holiday.update', $row->id));
-            $operate .= BootstrapTableService::deleteButton(route('holiday.destroy', $row->id));
-            $tempRow = $row->toArray();
-            $tempRow['no'] = $no++;
-            // $tempRow['date'] = format_date($row->date);
-            $tempRow['operate'] = $operate;
-            $rows[] = $tempRow;
+    $sql->orderBy($sort, $order)->skip($offset)->take($limit);
+
+    $res = $sql->get();
+
+    $bulkData = [];
+    $bulkData['total'] = $total;
+
+    $rows = [];
+    $no = 1;
+
+    foreach ($res as $row) {
+
+        $operate = BootstrapTableService::editButton(route('holiday.update', $row->id));
+        $operate .= BootstrapTableService::deleteButton(route('holiday.destroy', $row->id));
+
+        $tempRow = [];
+
+        $tempRow['id'] = $row->id;
+        $tempRow['no'] = $no++;
+       
+        $tempRow['title'] = $row->title;
+        $tempRow['type'] = $row->type;
+        $tempRow['class_ids'] = $row->class_ids;
+        $tempRow['description'] = $row->description;
+
+        // Holiday Type
+        if ($row->type == 'holiday') {
+            $tempRow['date'] = $row->date;
+            $tempRow['holiday_type'] = 'Normal Holiday';
+        } elseif ($row->type == 'saturday_all') {
+             $tempRow['date'] = "";
+            $tempRow['holiday_type'] = 'All Saturday Off';
+        } elseif ($row->type == 'saturday_2_4') {
+            $tempRow['holiday_type'] = '2nd & 4th Saturday Off';
+              $tempRow['date'] = "";
         }
-        $bulkData['rows'] = $rows;
-        return response()->json($bulkData);
+
+        // Class List
+        if ($row->class_ids) {
+
+                $classIds = explode(',', $row->class_ids);
+
+                $classNames = \App\Models\ClassSchool::whereIn('id', $classIds)
+                    ->pluck('name')
+                    ->implode(', ');
+
+                $tempRow['class'] = $classNames;
+
+            } else {
+
+                $tempRow['class'] = '';
+
+            }
+        $tempRow['operate'] = $operate;
+
+        $rows[] = $tempRow;
     }
+
+    $bulkData['rows'] = $rows;
+
+    return response()->json($bulkData);
+}
 
     public function destroy($id)
     {

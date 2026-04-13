@@ -1,14 +1,14 @@
 @extends('layouts.master')
 
 @section('title')
-    {{ __('manage') . ' ' . __('assignment') }}
+    {{ __('manage') . ' ' . __('assignment') . ' OR ' . __('homework') }}
 @endsection
 
 @section('content')
     <div class="content-wrapper">
         <div class="page-header">
             <h3 class="page-title">
-                {{ __('manage') . ' ' . __('assignment_submission') }}
+                {{ __('manage') . ' ' . __('assignment_submission'). ' OR ' . __('homework') }}
             </h3>
         </div>
         <div class="row">
@@ -16,7 +16,7 @@
                 <div class="card">
                     <div class="card-body">
                         <h4 class="card-title">
-                            {{ __('list') . ' ' . __('assignment_submission') }}
+                            {{ __('list') . ' ' . __('assignment_submission') . ' OR ' . __('homework')}}
                         </h4>
 
                         <div class="row" id="toolbar">

@@ -89,8 +89,10 @@ class CachingService {
      * @return mixed|string
      */
     public function getSchoolSettings(array|string $key = '*', $schoolID = null) {
+         
         $schoolSettings = app(SchoolSettingInterface::class);
-        $schoolID = (!empty($schoolID)) ? $schoolID : Auth::user()->school_id;
+        $schoolID = $schoolID ?? (Auth::check() ? Auth::user()->school_id : null);
+
         $settings = $this->schoolLevelCaching(config('constants.CACHE.SCHOOL.SETTINGS'), function () use ($schoolSettings, $schoolID) {
             return $schoolSettings->builder()->where('school_id', $schoolID)->get()->pluck('data', 'name');
         },$schoolID);

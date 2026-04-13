@@ -133,7 +133,7 @@
                     @endif
                     
                     {{-- School logo --}}
-                    <img id="item_school_logo" class="draggableItem height-100" {!! $style['school_logo'] ?? '' !!} src="{{ $settings['vertical_logo'] }}" alt="school_logo">
+                    <img id="item_school_logo" class="draggableItem height-100" {!! $style['school_logo'] ?? '' !!} src="{{ $settings['horizontal_logo'] }}" alt="school_logo">
                     {{-- User image --}}
                     <img id="item_user_image" class="draggableItem" {!! $style['user_image'] ?? '' !!} src="{{ url('assets/dummy_logo.jpg') }}" height="{{ $certificateTemplate->image_size }}" width="{{ $certificateTemplate->image_size }}" alt="user_image">
 

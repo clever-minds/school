@@ -5,10 +5,11 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use App\Traits\DateFormatTrait;
+use App\Traits\LogsActivity;
 
 class SchoolInquiry extends Model
 {
-    use HasFactory, DateFormatTrait;
+    use HasFactory, DateFormatTrait,LogsActivity;
 
     protected $fillable = [
         'school_address',  

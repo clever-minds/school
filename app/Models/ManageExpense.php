@@ -4,18 +4,17 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use App\Traits\LogsActivity;
 
 class ManageExpense extends Model
 {
     use HasFactory;
+    use LogsActivity;
 
-    // Table name
     protected $table = 'manage_expenses';
 
-    // Primary key
-
-    // Mass assignable columns
     protected $fillable = [
+        'exp_id',
         'title',
         'description',
         'amount',
@@ -24,16 +23,17 @@ class ManageExpense extends Model
         'transaction_date',
     ];
 
-    // Dates casting (optional)
     protected $casts = [
         'transaction_date' => 'datetime',
         'created_at' => 'datetime',
         'updated_at' => 'datetime',
     ];
 
-    // If you don't use auto-incrementing 'exp_id', set this
-    public $incrementing = true; // set to false if 'exp_id' is not auto-increment
+    public $incrementing = true; 
 
-    // If your primary key is not integer
-    protected $keyType = 'int'; // change to 'string' if exp_id is string
+    protected $keyType = 'int'; 
+    public function expense()
+    {
+        return $this->belongsTo(Expense::class, 'exp_id');
+    }
 }

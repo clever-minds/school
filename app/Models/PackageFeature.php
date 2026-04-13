@@ -6,9 +6,10 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use App\Traits\DateFormatTrait;
+use App\Traits\LogsActivity;
 
 class PackageFeature extends Model {
-    use HasFactory, DateFormatTrait;
+    use HasFactory, DateFormatTrait,LogsActivity;
 
     protected $fillable = ['package_id', 'feature_id'];
 

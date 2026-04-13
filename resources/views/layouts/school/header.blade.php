@@ -49,7 +49,7 @@
                             <a href="{{ url('school/contact-us') }}">{{ __('contact_us') }}</a>
                         </li>
                     @endif
-                    <li>
+                    <!-- <li>
                         <div class="dropdown">
                             <a class="btn btn-secondary dropdown-toggle" href="#" role="button"
                                 id="languageDropdown" data-bs-toggle="dropdown" aria-expanded="false">
@@ -68,7 +68,7 @@
                                 @endforeach
                             </ul>
                         </div>
-                    </li>
+                    </li> -->
                 </ul>
                 <div class="hamburg">
                     <span data-bs-toggle="offcanvas" data-bs-target="#offcanvasRight" aria-controls="offcanvasRight"><i
@@ -141,7 +141,7 @@
                         </li>
                     @endif
                     <li>
-                        <div class="dropdown">
+                        <!-- <div class="dropdown">
                             <a class="btn btn-secondary dropdown-toggle" href="#" role="button"
                                 id="languageDropdown" data-bs-toggle="dropdown" aria-expanded="false">
                                 {{ __('language') }}
@@ -158,7 +158,7 @@
                                     @endif
                                 @endforeach
                             </ul>
-                        </div>
+                        </div> -->
                     </li>
                     <div class="loginWrapper">
                         @if(isset($schoolSettings['online_registration_status']) && $schoolSettings['online_registration_status'] == 1)

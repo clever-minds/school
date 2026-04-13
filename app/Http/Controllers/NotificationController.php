@@ -100,14 +100,7 @@ class NotificationController extends Controller
             DB::beginTransaction();
             $sessionYear = $this->cache->getDefaultSessionYear();
             $roles = Role::whereNot('name','School Admin')->where('id',$request->roles)->pluck('name')->first();
-            $data = [
-                'title' => $request->title,
-                'message' => $request->message,
-                'send_to' => $roles ?? '',
-                'image' => $request->hasFile('image') ? $request->image : null,
-                'session_year_id' => $sessionYear->id
-            ];
-            $notification = $this->notification->create($data);
+          
             $notifyUser = [];
             
             if ($request->has('user_id')) {
@@ -115,20 +108,45 @@ class NotificationController extends Controller
             }
 
             $customData = [];
-            if ($notification->image) {
+            $customData = [
+                'event_date' => $request->event_date 
+                    ? Carbon::createFromFormat('d-m-Y', $request->event_date)->format('Y-m-d')
+                    : null,
+            ];
+            if ($request->hasFile('image')) {
                 $customData = [
-                    'image' => $notification->image
+                    'image' => $request->hasFile('image') ? $request->image : null,
                 ];
             }
 
-            $this->sessionYearsTrackingsService->storeSessionYearsTracking('App\Models\Notification', $notification->id, Auth::user()->id, $sessionYear->id, Auth::user()->school_id, null);
+            $this->sessionYearsTrackingsService->storeSessionYearsTracking('App\Models\Notification', "", Auth::user()->id, $sessionYear->id, Auth::user()->school_id, null);
 
             $title = $request->title; // Title for Notification
             $body = $request->message;
             $type = 'Notification';
 
             DB::commit();
-            send_notification($notifyUser, $title, $body, $type, $customData); // Send Notification
+            //send_notification($notifyUser, $title, $body, $type, $customData); // Send Notification
+            if (!empty($request->event_date)) {
+                send_notification_all(
+                    $notifyUser,
+                    $title,
+                    $body,
+                    $type,
+                    $customData
+                );
+
+            } else {
+
+                // ⚡ Instant notification
+                send_notification(
+                    $notifyUser,
+                    $title,
+                    $body,
+                    $type,
+                    $customData
+                );
+            }
             ResponseService::successResponse('Data Stored Successfully');
         } catch (Throwable $e) {
             if (Str::contains($e->getMessage(), [

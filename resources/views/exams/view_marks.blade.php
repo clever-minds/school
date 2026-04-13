@@ -29,10 +29,10 @@
                                     @endforeach
                                 </select>
                             </div>
-                            <div class="form-group col-12 col-sm-12 col-md-3 col-lg-3">
+                            {{--<div class="form-group col-12 col-sm-12 col-md-3 col-lg-3">
                                 <label for="filter_medium_id" class="filter-menu">{{ __('medium') }}</label>
                                 {!! Form::select('medium_id', $mediums, null, ['class' => 'form-control', 'id' => 'filter_medium_id', 'placeholder' => __('all')]) !!}
-                            </div>
+                            </div>--}}
                         </div>
                         <table aria-describedby="mydesc" class='table' id='table_list' data-toggle="table"
                                data-url="{{ route('exam.view-marks-list', 1) }}" data-click-to-select="true"

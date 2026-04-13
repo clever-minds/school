@@ -23,7 +23,7 @@
                             <form class="pt-3 mt-6" id="create-form" method="POST" action="{{ route('online-exam.store') }}">
                                 {{-- {!! Form::hidden('user_id', Auth::user()->id, ['id' => 'user_id']) !!} --}}
                                 <div class="row">
-                                    <div class="form-group col-md-6">
+                                    <div class="form-group col-md-4">
                                         <label>{{ __('Class Section') }} <span class="text-danger">*</span></label>
                                         @if (Auth::user()->hasRole('Teacher'))
                                             <select name="class_section_id[]" required id="class-section-id" class="form-control select2 online-exam-class-section-id select2-dropdown select2-hidden-accessible" style="width:100%;" tabindex="-1" aria-hidden="true" multiple>
@@ -53,7 +53,7 @@
                                             </label>
                                         </div>
                                     </div>
-                                    <div class="form-group col-md-6">
+                                    <div class="form-group col-md-4">
                                         
                                         <label>{{ __('subject') }} <span class="text-danger">*</span></label>
                                         @if (Auth::user()->hasRole('Teacher'))
@@ -76,25 +76,26 @@
                                         @endif
 
                                     </div>
-                                </div>
-                                <div class="row">
-                                    <div class="form-group col-md-4 col-lg-4 col-xl-4">
+                                      <div class="form-group col-md-4 col-lg-4 col-xl-4">
                                         <label>{{ __('title') }} <span class="text-danger">*</span></label>
                                         {!! Form::text('title', "", ['required','id' => "title","placeholder" => trans('title'),"class" => "form-control" ]) !!}
                                     </div>
-                                    <div class="form-group col-md-4 col-lg-4 col-xl-2">
+                                </div>
+                                <div class="row">
+                                  
+                                    <div class="form-group col-md-4 col-lg-4 col-xl-3">
                                         <label>{{ __('exam_key') }} <span class="text-danger">*</span></label>
                                         {!! Form::number('exam_key', "", ['required','id' => "key","placeholder" => trans('exam_key'),"class" => "form-control","min" => 1,'readonly' => true]) !!}
                                     </div>
-                                    <div class="form-group col-md-4 col-lg-4 col-xl-2">
+                                    <div class="form-group col-md-4 col-lg-4 col-xl-3">
                                         <label>{{ __('duration') }} <span class="text-danger">*</span> <span class="text-info small">( {{__('in_minutes')}} )</span></label>
                                         {!! Form::number('duration', "", ['required','id' => "duration","placeholder" => trans('duration'),"class" => "form-control","min" => 1]) !!}
                                     </div>
-                                    <div class="form-group col-md-4 col-lg-4 col-xl-2">
+                                    <div class="form-group col-md-4 col-lg-4 col-xl-3">
                                         <label>{{ __('start_date')}} <span class="text-danger">*</span></label>
                                         {!! Form::datetimeLocal('start_date', "", ['required','id' => "start-date timepicker-example","placeholder" => trans('start_date'),"class" => "form-control"]) !!}
                                     </div>
-                                    <div class="form-group col-md-4 col-lg-4 col-xl-2">
+                                    <div class="form-group col-md-4 col-lg-4 col-xl-3">
                                         <label>{{ __('end_date') }} <span class="text-danger">*</span></label>
                                         {!! Form::datetimeLocal('end_date', "", ['required','id' => "end-date","placeholder" => trans('end_date'),"class" => "form-control"]) !!}
                                     </div>
@@ -155,7 +156,7 @@
                                         <option value="">-- {{ __('Select Subject') }} --</option>
                                         <option value="data-not-found">-- {{ __('no_data_found') }} --</option>
                                         @foreach ($classSubjects as $item)
-                                            <option value="{{ $item->subject_id }}" data-class-id="{{ $item->class_id }}">{{ $item->subject_with_name}}</option>
+                                            <option value="{{ $item->class_subject_id }}" data-class-id="{{ $item->class_id }}">{{ $item->subject_with_name}}</option>
                                         @endforeach
                                     </select>    
                                 @endif

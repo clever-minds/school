@@ -75,7 +75,10 @@ $('#create-form,.create-form,.create-form-without-reset').on('submit', function 
                     
                 }
             }
-            
+            if (url.includes("/expense")) {
+                    loadExpenseSummary();
+                }
+
             if (!$(formElement).hasClass('create-form-without-reset')) {
                 
                 try {

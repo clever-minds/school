@@ -104,13 +104,24 @@ class StudentController extends Controller {
             'admission_no'        => 'required|unique:users,email',
             'admission_date'      => 'required',
             'session_year_id'     => 'required|numeric',
-            //'guardian_email'      => 'required|email',
+            'guardian_email'      => 'nullable|email',
             'guardian_first_name' => 'required|string',
             'guardian_last_name'  => 'required|string',
-            'guardian_mobile'     => 'required|numeric',
+            'guardian_mobile'     => 'required|numeric:users,mobile',
+            'student_mother_name'     => 'required',
             'guardian_gender'     => 'required|in:male,female',
             'guardian_image'      => 'nullable|mimes:jpg,jpeg,png|max:4096',
             'status'              => 'nullable|in:0,1',
+            'rte_status'          => 'nullable|in:RTE,NON_RTE',
+            'cast'                => 'required|in:GENERAL,OBC,SC,ST,EWS',
+             'nationality'     => 'required',
+            'last_school'     => 'required',
+            'last_cleared_class'     => 'required',
+            'education_board'     => 'required',
+            'remarks'     => 'required',
+            'birth_place'     => 'required',
+            'blood_group'     => 'required',
+            'pen_no'          => 'required|digits:11',
         ]);
 
         try {
@@ -152,9 +163,9 @@ class StudentController extends Controller {
             }
             $userService = app(UserService::class);
             $sessionYear = $this->sessionYear->findById($request->session_year_id);
-            $guardian = $userService->createOrUpdateParent($request->guardian_first_name, $request->guardian_last_name, $request->guardian_email, $request->guardian_mobile, $request->guardian_gender, $request->guardian_image);
-            $is_send_notification = true;
-            $userService->createStudentUser($request->first_name,$request->middle_name, $request->last_name, $request->admission_no, $request->mobile, $request->dob, $request->gender, $request->image, $request->class_section_id, $request->admission_date, $request->current_address, $request->permanent_address, $sessionYear->id, $guardian->id, $request->extra_fields ?? [], $request->status ?? 0, $is_send_notification);
+            $guardian = $userService->createOrUpdateParent($request->guardian_first_name, $request->guardian_last_name,$request->student_mother_name, $request->guardian_email, $request->guardian_mobile, $request->guardian_gender, $request->guardian_image);
+            $is_send_notification = false;
+            $userService->createStudentUser($request->first_name,$request->middle_name, $request->last_name, $request->admission_no, $request->mobile, $request->dob, $request->gender, $request->image, $request->class_section_id, $request->admission_date, $request->current_address, $request->permanent_address, $sessionYear->id, $guardian->id, $request->extra_fields ?? [], $request->status ?? 0, $is_send_notification,$request->rte_status,$request->cast,$request->nationality,$request->birth_place,$request->blood_group,$request->last_school,$request->last_cleared_class,$request->education_board,$request->remarks,$request->pen_no);
 
             DB::commit();
             ResponseService::successResponse('Data Stored Successfully');
@@ -183,10 +194,25 @@ class StudentController extends Controller {
             'first_name'      => 'required',
             'middle_name'       => 'required',
             'last_name'       => 'required',
+            'admission_no'    => 'required|unique:users,email,' . $id,
             'mobile'          => 'nullable|regex:/^([0-9\s\-\+\(\)]*)$/',
             'image'           => 'nullable|mimes:jpeg,png,jpg,svg|image|max:2048',
             'dob'             => 'required',
             'session_year_id' => 'required|numeric',
+            'rte_status'      => 'nullable|in:RTE,NON_RTE',
+            'cast'            => 'required|in:GENERAL,OBC,SC,ST,EWS',
+            'nationality'     => 'required',
+            'last_school'     => 'required',
+            'last_cleared_class'     => 'required',
+            'education_board'     => 'required',
+            'remarks'     => 'required',
+            'birth_place'     => 'required',
+            'blood_group'     => 'required',
+            'pen_no'          => 'required|digits:11',
+
+
+
+
            // 'guardian_email'  => 'required|email|unique:users,email',
         ];
         if (is_numeric($request->guardian_id)) {
@@ -198,8 +224,8 @@ class StudentController extends Controller {
             DB::beginTransaction();
             $userService = app(UserService::class);
             $sessionYear = $this->sessionYear->findById($request->session_year_id);
-            $guardian = $userService->createOrUpdateParent($request->guardian_first_name, $request->guardian_last_name, $request->guardian_email, $request->guardian_mobile, $request->guardian_gender, $request->guardian_image, $request->parent_reset_password);
-            $userService->updateStudentUser($id, $request->first_name,$request->middle_name, $request->last_name, $request->mobile, $request->dob, $request->gender, $request->image, $sessionYear->id, $request->extra_fields ?? [], $guardian->id, $request->current_address, $request->permanent_address, $request->reset_password, $request->class_section_id);
+            $guardian = $userService->createOrUpdateParent($request->guardian_first_name, $request->guardian_last_name,$request->student_mother_name, $request->guardian_email, $request->guardian_mobile, $request->guardian_gender, $request->guardian_image, $request->parent_reset_password);
+            $userService->updateStudentUser($id, $request->first_name,$request->middle_name, $request->last_name, $request->mobile, $request->dob, $request->gender, $request->image, $sessionYear->id, $request->extra_fields ?? [], $guardian->id, $request->current_address, $request->permanent_address, $request->reset_password, $request->class_section_id,$request->admission_no,$request->rte_status,$request->cast,$request->nationality,$request->birth_place,$request->blood_group,$request->last_school,$request->last_cleared_class,$request->education_board,$request->remarks,$request->pen_no);
             DB::commit();
             ResponseService::successResponse('Data Updated Successfully');
         } catch (Throwable $e) {
@@ -317,6 +343,8 @@ class StudentController extends Controller {
             $tempRow['dob_org'] = $row->user->getRawOriginal('dob');
             $tempRow['eng_student_gender'] = $student_gender;
             $tempRow['eng_guardian_gender'] = $guardian_gender;
+            $tempRow['uid_no'] = $row->uni_no;
+            $tempRow['pen_no'] = $row->pen_no;
             // $tempRow['user.dob'] = format_date($row->user->dob);
             // $tempRow['admission_date'] = format_date($row->admission_date);
             
@@ -813,7 +841,7 @@ public function resetPasswordUpdate(Request $request) {
             $width = $settings['page_width'] * 2.8346456693;
             // $customPaper = array(0,0,360,200);
             $customPaper = array(0,0,$width,$height);
-            $students = $this->user->builder()->select('id','first_name','last_name','image','school_id','gender','dob')->with('student:id,user_id,class_section_id,school_id,guardian_id,roll_number','student.class_section.class','student.class_section.section','student.class_section.medium','student.class_section.class.stream','student.guardian:id,mobile,first_name,last_name')->whereHas('student',function($q) use($user_ids) {
+            $students = $this->user->builder()->select('id','first_name','last_name','image','school_id','gender','dob','current_address','mobile')->with('student:id,user_id,class_section_id,school_id,guardian_id,roll_number','student.class_section.class','student.class_section.section','student.class_section.medium','student.class_section.class.stream','student.guardian:id,mobile,first_name,last_name')->whereHas('student',function($q) use($user_ids) {
                 $q->whereIn('id',$user_ids);
             })->with(['extra_student_details' => function($q) {
                 $q->whereHas('form_field',function($query) {
@@ -969,6 +997,9 @@ public function resetPasswordUpdate(Request $request) {
             $tempRow['eng_guardian_gender'] = $guardian_gender;
             $tempRow['extra_fields'] = $row->user->extra_student_details;
             $tempRow['application_status'] = $row->application_status;
+            $tempRow['rte_status'] = $row->rte_status;
+            $tempRow['cast'] = $row->cast;
+
             foreach ($row->user->extra_student_details as $key => $field) {
                 $data = '';
                 if ($field->form_field->type == 'checkbox') {
@@ -1126,31 +1157,29 @@ public function resetPasswordUpdate(Request $request) {
 
     public function updateUniNo(Request $request)
 {
-    // ✅ Permission check (similar to updateApplicationStatus)
     ResponseService::noPermissionThenRedirect('student-edit');
+        $request->validate([
+            'student_id'  => 'required|exists:students,id',
+            'student_uni' => 'required|string|max:255',
+            'student_pen_no'      => 'nullable|string|max:11',
+        ], [
+            'student_id.required'  => 'Student ID is required.',
+            'student_uni.required' => 'Student UDI Number is required.',
+        ]);
 
-    // ✅ Validation
-    $request->validate([
-        'student_id'  => 'required|exists:students,id',
-        'student_uni' => 'required|string|max:255',
-    ], [
-        'student_id.required'  => 'Student ID is required.',
-        'student_uni.required' => 'Student University Number is required.',
-    ]);
 
     try {
         DB::beginTransaction();
 
         // ✅ Student Record Fetch
         $student = $this->student->builder()->where('id', $request->student_id)->firstOrFail();
-
         // ✅ Update Field
         $student->update([
-            'student_uni' => $request->student_uni,
+            'uni_no' => $request->student_uni,
+            'pen_no' => $request->student_pen_no,
         ]);
 
         DB::commit();
-
         // ✅ Success response
         ResponseService::successResponse('Student UNI Number updated successfully!');
     } catch (Throwable $e) {
@@ -1181,6 +1210,8 @@ public function searchStudent(Request $request)
             ->select(
                 'users.id as user_id',
                 'students.id as student_id',
+                'students.uni_no as uni_no',
+                'students.pen_no as pen_no',
                 'students.admission_no as gr_no',
                 'users.first_name',
                 'users.last_name',
@@ -1196,6 +1227,8 @@ public function searchStudent(Request $request)
                 'id'          => $student->student_id,
                 'text'        => $student->gr_no . ' - ' . $student->first_name . ' ' . $student->last_name,
                 'email'       => $student->email,
+                'uni_no'       => $student->uni_no,
+                'pen_no'       => $student->pen_no,
                 'first_name'  => $student->first_name,
                 'last_name'   => $student->last_name,
                 'mobile'      => $student->mobile,

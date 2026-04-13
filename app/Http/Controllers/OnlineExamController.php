@@ -153,7 +153,7 @@ class OnlineExamController extends Controller
 
                 } else {
                     $classSection = $this->classSection->builder()->where('id', $section_id)->with('class_subject')->first();
-                    $classSubject = $this->classSubjects->builder()->where('class_id', $classSection->class_id)->where('subject_id', $request->subject_id)->first();
+                    $classSubject = $this->classSubjects->builder()->currentSemesterData()->where('class_id', $classSection->class_id)->where('subject_id', $request->subject_id)->first();
                     $onlineExamCommonData['class_section_id'] = $section_id;
                     $onlineExamCommonData['class_subject_id'] = $classSubject->id;
                     $this->onlineExamCommon->create($onlineExamCommonData);
@@ -504,7 +504,6 @@ class OnlineExamController extends Controller
 
         $onlineExamCommonData = $this->onlineExamCommon->builder()->where('online_exam_id', $onlineExamId)->get();
         $excludeQuestionId = $this->onlineExamQuestionChoice->builder()->where('online_exam_id', $onlineExamId)->pluck('question_id');
-
         // Initialize arrays to hold section and subject IDs
         $classSectionIds = [];
         $classSubjectIds = [];

@@ -7,10 +7,11 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Storage;
 use App\Traits\DateFormatTrait;
+use App\Traits\LogsActivity;
 
 class CertificateTemplate extends Model
 {
-    use HasFactory, DateFormatTrait;
+    use HasFactory, DateFormatTrait,LogsActivity;
     protected $fillable = ['name','certificate_type_id','page_layout','height','width','user_image_shape','image_size','background_image','signature','description','fields','style','type','school_id'];
 
     protected static function boot() {

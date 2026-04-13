@@ -66,7 +66,7 @@
                                     </div>
                                     <div class="form-group col-sm-12 col-md-6 fixed-amount-field">
                                         <label for="">{{ __('fixed_amount') }}</label>
-                                        {!! Form::number('amount', null, ['class' => 'form-control','placeholder' => __('fixed_amount'), 'min' => '1']) !!}
+                                        {!! Form::number('amount', null, ['class' => 'form-control','placeholder' => __('fixed_amount'), 'min' => '0']) !!}
                                     </div>
                                     <div class="form-group col-sm-12 col-md-6 percentage-field" style="display: none;">
                                         <label for="">{{ __('percentage') }}</label>
@@ -185,7 +185,7 @@
                                     </div>
                                     <div class="form-group col-sm-12 col-md-12" id="amount-div" style="display: none">
                                         <label for="">{{ __('fixed_amount') }}</label>
-                                        {!! Form::number('amount', null, ['class' => 'form-control','placeholder' => __('fixed_amount'), 'id' => 'amount', 'min' => '1']) !!}
+                                        {!! Form::number('amount', null, ['class' => 'form-control','placeholder' => __('fixed_amount'), 'id' => 'amount', 'min' => '0']) !!}
                                     </div>
                                     <div class="form-group col-sm-12 col-md-12" id="percentage-div" style="display: none">
                                         <label for="">{{ __('percentage') }}</label>

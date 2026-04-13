@@ -166,7 +166,7 @@ Route::group(['prefix' => 'teacher'], static function () {
     //Non Authenticated APIs
     Route::post('login', [TeacherApiController::class, 'login']);
     //Authenticated APIs
-    Route::group(['middleware' => ['APISwitchDatabase', 'checkSchoolStatus']], static function () {
+    Route::group(['middleware' => ['APISwitchDatabase', 'checkSchoolStatus', 'teacherOnboarding']], static function () {
 
         Route::get('subjects', [TeacherApiController::class, 'subjects']);
 

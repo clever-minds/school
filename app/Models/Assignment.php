@@ -10,16 +10,18 @@ use App\Models\SessionYearsTracking;
 use Illuminate\Support\Facades\Storage;
 use App\Traits\DateFormatTrait;
 use App\Services\CachingService;
+use App\Traits\LogsActivity;
 
 /**
  * @mixin Builder
  */
 class Assignment extends Model {
-    use HasFactory, DateFormatTrait;
+    use HasFactory, DateFormatTrait,LogsActivity;
 
     protected $fillable = [
         'class_section_id',
         'class_subject_id',
+        'type',
         'name',
         'instructions',
         'due_date',

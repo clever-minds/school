@@ -17,6 +17,9 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Throwable;
 use Illuminate\Support\Facades\Auth;
+use App\Models\ClassSection;
+use Illuminate\Support\Str;
+use NumberFormatter;
 
 class CertificateTemplateController extends Controller
 {
@@ -436,6 +439,75 @@ class CertificateTemplateController extends Controller
         $settings = $this->cache->getSchoolSettings();
         $sessionYear = $this->cache->getDefaultSessionYear();
         // Define the placeholders and their replacements
+       // dd($user->student->attendance()->where('type',1)->count());
+        $dobWords = $this->dobToWords($user->dob);
+        // Pehli attendance record
+      $firstAttendance = $user->student->attendance1()
+    ->orderBy('date', 'asc')
+    ->first();
+        $admissionClass = '';
+
+        if ($firstAttendance) {
+            $classSection = ClassSection::with('class', 'section')
+                ->where('id', $firstAttendance->class_section_id)
+                ->first();
+
+            $admissionClass = $classSection?->full_name ?? '';
+        }      
+        $lastAttendance = $user->student->attendance1()
+                ->orderBy('date', 'desc')
+                ->first();
+        $lastStudiedClassFigure = '';
+        $lastStudiedClassWords = '';
+        $dob_in_words = '';
+      if ($lastAttendance) {
+
+        $classSection = ClassSection::with('class')->find($lastAttendance->class_section_id);
+
+        $lastStudiedClassFigure = '';
+        $lastStudiedClassWords  = '';
+        $dob_in_words = '';
+        if ($classSection && $classSection->class) {
+
+            $className = trim($classSection->class->name);
+
+            $lastStudiedClassFigure = $className;
+
+            if (is_numeric($className)) {
+                $fmt = new NumberFormatter('en', NumberFormatter::SPELLOUT);
+                $lastStudiedClassWords = Str::ucfirst($fmt->format((int)$className));
+            } else {
+                $lastStudiedClassWords = ucwords(strtolower($className));
+            }
+        }
+        if ($classSection && $classSection->class) {
+
+            $className = trim($classSection->class->name);
+
+            $lastStudiedClassFigure = $className;
+
+            if (is_numeric($className)) {
+                $fmt = new NumberFormatter('en', NumberFormatter::SPELLOUT);
+                $lastStudiedClassWords = Str::ucfirst($fmt->format((int)$className));
+            } else {
+                $lastStudiedClassWords = ucwords(strtolower($className));
+            }
+        }
+    }
+    if ($user->dob) {
+        $dob_in_words = $this->dobToWords($user->dob);
+    }
+       
+
+        $lastExam = $user->student->exam_result()
+            ->orderBy('created_at', 'desc')
+            ->first();
+             $latestExam = $user->student->exam_result()
+            ->orderBy('id', 'desc')
+            ->first();
+        $lastExamResult = $lastExam->result ?? '';
+        $qualifiedForHigherClass = (strtolower($lastExamResult) === 'pass') ? 'Yes' : 'No';     
+
         $placeholders = [
             '{full_name}' => $user->full_name,
             '{first_name}' => $user->first_name,
@@ -443,16 +515,41 @@ class CertificateTemplateController extends Controller
             '{class_section}' => $user->student->class_section->full_name,
             '{student_mobile}' => $user->mobile,
             '{dob}' => date($settings['date_format'],strtotime($user->dob)),
+            '{dob_words}' => $dobWords,
             '{roll_no}' => $user->student->roll_number,
             '{admission_no}' => $user->student->admission_no,
             '{current_address}' => $user->current_address,
             '{permanent_address}' => $user->permanent_address,
             '{gender}' => $user->gender,
+            '{nationality}' => $user->student->nationality,
+             '{dise_code}' => $settings['dise_code'] ?? '',
+             "{promotion_class_figure}"=>"",
+             '{reason_for_leaving}'=> "",
+            '{birth_place}' => $user->student->birth_place,
+            '{remark}' => $user->student->remarks,
+            '{application_date}' => date('d-m-Y'),
+            '{date_of_issue}'    => date('d-m-Y'),
+            '{dob_in_words}'=>$dob_in_words,
             '{admission_date}' => date($settings['date_format'],strtotime($user->student->admission_date)),
-            '{guardian_name}' => $user->student->guardian->full_name,
+            '{guardian_name}' => $user->student->guardian->first_name.' '.$user->student->guardian->last_name,
+            '{mother_name}' => $user->student->guardian->mother_name,
+            '{caste_subcaste}' => $user->student->cast,
             '{guardian_mobile}' => $user->student->guardian->mobile,
             '{guardian_email}' => $user->student->guardian->email,
             '{session_year}' => $sessionYear->name,
+            '{attendance_days}' => $user->student->attendance1()->where('type', 1)->count(),
+            '{attendance_out_of}' => $user->student->attendance1()->count(),
+            '{last_school_attended}'=> optional($user->student->attendance1()->where('type', 1)->latest('created_at') ->first() )->created_at?? '',
+            '{fees_paid_till}' => optional( $user->student->fees_paid()->latest('date')->first())->date ?? '',
+            '{admission_date_with_class}'=> date($settings['date_format'], strtotime($user->student->admission_date))
+        . ' - Class: ' . ($admissionClass ?: 'N/A'),
+            '{class}'  => $user->student->class_section->class->name,
+            '{student_uid}'=>$user->student->uni_no,
+            '{last_studied_class_figure}' => $lastStudiedClassFigure,
+            '{last_exam_result}'          => $lastExamResult,
+            '{last_studied_class_words}'  => $lastStudiedClassWords,
+            '{qualified_for_higher_class}' => $qualifiedForHigherClass,
+
             ...$this->extraFormFields($user)
             // Add more placeholders as needed
         ];
@@ -575,12 +672,15 @@ class CertificateTemplateController extends Controller
         $experience = $experience / 12;
 
         // Define the placeholders and their replacements
+        $dobWords = $this->dobToWords($user->dob);
+
         $placeholders = [
             '{full_name}' => $user->full_name,
             '{first_name}' => $user->first_name,
             '{last_name}' => $user->last_name,
             '{mobile}' => $user->mobile,
             '{dob}' => date($settings['date_format'],strtotime($user->dob)),
+            '{dob_words}' => $dobWords,
             '{current_address}' => $user->current_address,
             '{permanent_address}' => $user->permanent_address,
             '{gender}' => $user->gender,
@@ -601,4 +701,56 @@ class CertificateTemplateController extends Controller
 
         return $templateContent;
     }
+
+private function numberToWords($num)
+{
+    $ones = [
+        "", "One", "Two", "Three", "Four", "Five", "Six", "Seven", "Eight", "Nine",
+        "Ten", "Eleven", "Twelve", "Thirteen", "Fourteen", "Fifteen", "Sixteen",
+        "Seventeen", "Eighteen", "Nineteen"
+    ];
+
+    $tens = [
+        "", "", "Twenty", "Thirty", "Forty", "Fifty", "Sixty", "Seventy", "Eighty", "Ninety"
+    ];
+
+    if ($num < 20) {
+        return $ones[$num];
+    }
+
+    if ($num < 100) {
+        return $tens[intdiv($num, 10)] . (($num % 10) ? " " . $ones[$num % 10] : "");
+    }
+
+    return $num; // fallback
+}
+
+private function dobToWords($dob)
+{
+    if (!$dob) return '';
+
+    $date = date('d-m-Y', strtotime($dob));
+    list($day, $month, $year) = explode('-', $date);
+
+    $months = [
+        "01" => "January", "02" => "February", "03" => "March",
+        "04" => "April", "05" => "May", "06" => "June",
+        "07" => "July", "08" => "August", "09" => "September",
+        "10" => "October", "11" => "November", "12" => "December"
+    ];
+
+    $dayWords = $this->numberToWords(intval($day));
+    $monthWords = $months[$month];
+    $yearWords = $this->yearToWords($year);
+
+    return "$dayWords $monthWords $yearWords";
+}
+
+private function yearToWords($year)
+{
+    $y = str_split($year, 2);
+
+    return $this->numberToWords(intval($y[0])) . " " . $this->numberToWords(intval($y[1]));
+}
+
 }

@@ -9,11 +9,13 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
+use App\Traits\LogsActivity;
 
 class Exam extends Model {
     use HasFactory;
     use SoftDeletes;
     use DateFormatTrait;
+    use LogsActivity;
     
     protected $fillable = [
         'name',

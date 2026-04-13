@@ -1,57 +1,129 @@
 <?php
 
 use App\Models\User;
+use App\Models\Students;
+use App\Models\Notification;
+use App\Models\NotificationUser;
 use App\Services\CachingService;
 use Google\Client;
 
-function send_notification($user, $title, $body, $type, $customData = []) {
-    $FcmTokens = User::where('fcm_id', '!=', '')->whereIn('id', $user)->get()->pluck('fcm_id');
-
+function send_notification($userIds, $title, $body, $type, $customData = [])
+{
     $cache = app(CachingService::class);
+    $sessionYear = $cache->getDefaultSessionYear();
 
+    $schoolId = $customData['school_id'] ?? (auth()->user()->school_id ?? null);
+    if (!$schoolId) {
+        throw new Exception('School ID missing');
+    }
 
-    $project_id = $cache->getSystemSettings('firebase_project_id');
-    $url = 'https://fcm.googleapis.com/v1/projects/' . $project_id . '/messages:send';
+    /* =====================================
+     | 1️⃣ CREATE SINGLE MASTER NOTIFICATION
+     =====================================*/
+    $notification = Notification::create([
+        'school_id'       => $schoolId,
+        'title'           => $title,
+        'message'         => $body,
+        'send_to'         => 'multiple',
+        'event_date'      => $customData['event_date'] ?? null, 
+        'image'           => $customData['image'] ?? null,     
+        'session_year_id' => $sessionYear->id,
+    ]);
 
-    $access_token = getAccessToken();
-   
-    foreach ($FcmTokens as $FcmToken) {
+    /* =====================================
+     | 2️⃣ LOOP ALL USERS
+     =====================================*/
+    foreach ((array)$userIds as $uid) {
 
-        $data = [
+        $user = User::find((int)$uid);
+        if (!$user) {
+            continue;
+        }
+
+        /* =====================================
+         | STUDENT → PARENT
+         =====================================*/
+        if ($user->hasRole('Student')) {
+
+            $student = Students::where('user_id', $user->id)->first();
+            if (!$student || !$student->guardian_id) {
+                continue;
+            }
+
+            $receiver = User::find($student->guardian_id);
+            if (!$receiver) {
+                continue;
+            }
+
+            $studentName = trim(
+                ($user->first_name ?? '') . ' ' . ($user->last_name ?? '')
+            );
+
+            $finalTitle = $title . ' - ' . $studentName;
+            $studentId  = $student->id;
+
+        } else {
+            /* =====================================
+             | NON-STUDENT → SELF
+             =====================================*/
+            $receiver   = $user;
+            $finalTitle = $title;
+            $studentId  = null;
+        }
+        $userRole = $user->getRoleNames()->first(); 
+
+        /* =====================================
+         | notification_users (ALWAYS)
+         =====================================*/
+        NotificationUser::create([
+            'notification_id' => $notification->id,
+            'user_id'         => $receiver->id,
+            'user_role'       => $userRole,
+            'student_id'      => $studentId,
+            'sent_at'         => now(),
+        ]);
+
+        /* =====================================
+         | PUSH NOTIFICATION
+         =====================================*/
+        if (!$receiver->fcm_id) {
+            continue;
+        }
+
+        $projectId   = $cache->getSystemSettings('firebase_project_id');
+        $accessToken = getAccessToken();
+
+        $payload = [
             "message" => [
-                "token" => $FcmToken,
+                "token" => $receiver->fcm_id,
                 "notification" => [
-                    "title" => $title,
-                    "body" => $body
+                    "title" => $finalTitle,
+                    "body"  => $body
                 ],
                 "data" => [
-                    "title" => $title,
-                    "body" => $body,
-                    "type" => $type,
-                    ...$customData
+                    "title"           => $finalTitle,
+                    "body"            => $body,
+                    "type"            => $type,
+                    "notification_id" => (string)$notification->id,
+                    "student_id"      => $studentId ? (string)$studentId : "",
+                    "send_to"         => $receiver->getRoleNames()->first() ?? '',
+                    "custom_data"     => json_encode($customData),
                 ],
                 "android" => [
-                    "notification"=> [
-                        'click_action' => 'FLUTTER_NOTIFICATION_CLICK',
-                        "sound" => "default"  // This is for Android sound
-                    ],
-                    "priority" => "high"
-                   
+                    "priority" => "high",
+                    "notification" => [
+                        "sound" => "default",
+                        "click_action" => "FLUTTER_NOTIFICATION_CLICK"
+                    ]
                 ],
                 "apns" => [
                     "headers" => [
-                        "apns-priority" => "10" // Set APNs priority to 10 (high) for immediate delivery
+                        "apns-priority" => "10"
                     ],
                     "payload" => [
                         "aps" => [
-                            "alert" => [
-                                "title" => $title,
-                                "body" => $body,
-                            ],
-                            "type" => $type,
-                            ...$customData,
-                            "sound" => "default",  // This is for iOS sound
-                            "mutable-content" => 1, 
+                            "sound" => "default",
+                            "mutable-content" => 1,
                             "content-available" => 1
                         ]
                     ]
@@ -59,50 +131,42 @@ function send_notification($user, $title, $body, $type, $customData = []) {
             ]
         ];
 
-        $encodedData = json_encode($data);
-       
-        $headers = [
-            'Authorization: Bearer ' . $access_token,
-            'Content-Type: application/json',
-        ];
-
         $ch = curl_init();
-        curl_setopt($ch, CURLOPT_URL, $url);
-        curl_setopt($ch, CURLOPT_POST, true);
-        curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
-        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-        curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, 0);
-        curl_setopt($ch, CURLOPT_HTTP_VERSION, CURL_HTTP_VERSION_1_1);
+        curl_setopt_array($ch, [
+            CURLOPT_URL => "https://fcm.googleapis.com/v1/projects/{$projectId}/messages:send",
+            CURLOPT_POST => true,
+            CURLOPT_HTTPHEADER => [
+                'Authorization: Bearer ' . $accessToken,
+                'Content-Type: application/json',
+            ],
+            CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_SSL_VERIFYPEER => false,
+            CURLOPT_POSTFIELDS => json_encode($payload),
+        ]);
 
-        // Disabling SSL Certificate support temporarly
-        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
-        curl_setopt($ch, CURLOPT_POSTFIELDS, $encodedData);
-
-        // Execute post
-        $result = curl_exec($ch);
-        // dd($result);
-        if ($result == FALSE) {
-            die('Curl failed: ' . curl_error($ch));
-        }
-        // Close connection
+        curl_exec($ch);
         curl_close($ch);
-    }    
+    }
+
+    return true;
 }
 
+/* =====================================
+ | ACCESS TOKEN
+ =====================================*/
 function getAccessToken()
 {
     $cache = app(CachingService::class);
 
-    $file_name = $cache->getSystemSettings('firebase_service_file');
-    $data = explode("storage/", $file_name ?? '');
-    $file_name = end($data);
+    $file = $cache->getSystemSettings('firebase_service_file');
+    $file = explode("storage/", $file ?? '');
+    $file = end($file);
 
-    $file_path = base_path('public/storage/'. $file_name);
+    $path = base_path('public/storage/' . $file);
 
     $client = new Client();
-    $client->setAuthConfig($file_path);
+    $client->setAuthConfig($path);
     $client->setScopes(['https://www.googleapis.com/auth/firebase.messaging']);
-    $accessToken = $client->fetchAccessTokenWithAssertion()['access_token'];
 
-    return $accessToken;
+    return $client->fetchAccessTokenWithAssertion()['access_token'];
 }

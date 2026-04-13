@@ -80,6 +80,12 @@
                                                 {{ __('cheque') }}
                                             </label>
                                         </div>
+                                          <div class="form-check form-check-inline">
+                                                <label class="form-check-label">
+                                                    <input type="radio" name="mode" class="bank-compulsory-mode mode" value="3">
+                                                    {{ __('Bank') }}
+                                                </label>
+                                            </div>
                                     </div>
                                 </div>
                             </div>
@@ -87,6 +93,22 @@
                                 <label for="cheque_no">{{ __('cheque_no') }} <span class="text-danger">*</span></label>
                                 <input type="number" id="cheque_no" name="cheque_no" placeholder="{{ __('cheque_no') }}" class="form-control cheque-no" required/>
                             </div>
+                                <div class="form-group bank-no-container" style="display: none">
+                                    <label for="transaction_id">{{ __('Transaction Id') }} <span class="text-danger">*</span></label>
+                                    <input type="number" id="transaction_id" name="transaction_id" placeholder="{{ __('Transaction Id') }}" class="form-control bank-no" required/>
+                                </div>
+                                <div class="form-group bank-no-container" style="display: none">
+                                    <label for="bank_name">{{ __('Bank Name') }} <span class="text-danger">*</span></label>
+                                    <input type="text" id="bank_name" name="bank_name" placeholder="{{ __('Bank Name') }}" class="form-control bank-no" required/>
+                                </div>
+                                <div class="form-group">
+                                    <label for="remark">{{ __('Remarks') }}</label>
+                                    <textarea id="remark"
+                                    name="remark"
+                                    placeholder="{{ __('remark') }}"
+                                    class="form-control remark"
+                                    rows="3"></textarea>
+                                </div>
                             <input class="btn btn-theme float-right" type="submit" id="pay-button" disabled value={{ __('pay') }} />
                         </form>
                     </div>

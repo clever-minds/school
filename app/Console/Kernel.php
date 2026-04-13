@@ -8,7 +8,8 @@ use Illuminate\Foundation\Console\Kernel as ConsoleKernel;
 class Kernel extends ConsoleKernel
 {
 
-    protected $commands = [Commands\SubscriptionBillCron::class,\App\Console\Commands\AddPermissionToAllTenants::class,
+    protected $commands = [Commands\SubscriptionBillCron::class,\App\Console\Commands\AddPermissionToAllTenants::class,\App\Console\Commands\MigrateAllTenants::class,\App\Console\Commands\RollbackAllTenants::class,    \App\Console\Commands\TenantsRollbackStudentsExtraFields::class,
+
 ];
 
     /**
@@ -21,6 +22,9 @@ class Kernel extends ConsoleKernel
     {
         // $schedule->command('inspire')->hourly();
         $schedule->command('subscriptionBill:cron')->daily();
+        $schedule->command('event:send-notifications')->dailyAt('01:00');
+        $schedule->command('leave:reminders')->dailyAt('07:00');
+
     }
 
     /**

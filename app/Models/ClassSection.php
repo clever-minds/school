@@ -8,10 +8,11 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Facades\Auth;
 use App\Traits\DateFormatTrait;
+use App\Traits\LogsActivity;
 
 class ClassSection extends Model {
     use SoftDeletes;
-    use HasFactory, DateFormatTrait;
+    use HasFactory, DateFormatTrait,LogsActivity;
 
     protected $fillable = ['class_id', 'section_id', 'class_teacher_id', 'school_id', 'medium_id'];
     protected $appends = ['name', 'full_name'];
@@ -136,9 +137,9 @@ class ClassSection extends Model {
         if ($this->relationLoaded('class') && $this->class->relationLoaded('stream')) {
             $name .= isset($this->class->stream->name) ? ' ( ' . $this->class->stream->name . ' ) ' : '';
         }
-        if ($this->relationLoaded('medium')) {
-            $name .= ' - ' . $this->medium->name;
-        }
+        // if ($this->relationLoaded('medium')) {
+        //     $name .= ' - ' . $this->medium->name;
+        // }
         if ($this->relationLoaded('class') && $this->class->relationLoaded('shift')) {
             $name .= isset($this->class->shift->name) ? ' ( ' . $this->class->shift->name . ' ) ' : '';
         }

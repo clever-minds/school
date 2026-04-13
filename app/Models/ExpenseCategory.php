@@ -8,10 +8,11 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Facades\Auth;
 use App\Traits\DateFormatTrait;
+use App\Traits\LogsActivity;
 
 class ExpenseCategory extends Model
 {
-    use HasFactory, SoftDeletes, DateFormatTrait;
+    use HasFactory, SoftDeletes, DateFormatTrait,LogsActivity;
     protected $fillable = ['name', 'description', 'school_id'];
 
     public function scopeOwner()

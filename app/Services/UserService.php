@@ -54,7 +54,7 @@ class UserService {
      * @param null $image
      * @return Model|null
      */
-    public function createOrUpdateParent($first_name, $last_name, $email, $mobile, $gender, $image = null, $reset_password = null) {
+    public function createOrUpdateParent($first_name, $last_name,$mother_name, $email, $mobile, $gender, $image = null, $reset_password = null) {
         $password = $this->makeParentPassword($mobile);
 
         $parent = array(
@@ -62,6 +62,7 @@ class UserService {
             'last_name'  => $last_name,
             'mobile'     => $mobile,
             'gender'     => $gender,
+            'mother_name'=> $mother_name,
             'school_id'  => Auth::user()->school_id
         );
 
@@ -113,7 +114,7 @@ class UserService {
      * @throws Throwable
      */
 
-    public function createStudentUser(string $first_name,string $middle_name, string $last_name, string $admission_no, string|null $mobile, string $dob, string $gender, \Symfony\Component\HttpFoundation\File\UploadedFile|null $image, int $classSectionID, string $admissionDate, $current_address = null, $permanent_address = null, int $sessionYearID, int $guardianID, array $extraFields = [], int $status, $is_send_notification = null) {
+    public function createStudentUser(string $first_name,string $middle_name, string $last_name, string $admission_no, string|null $mobile, string $dob, string $gender, \Symfony\Component\HttpFoundation\File\UploadedFile|null $image, int $classSectionID, string $admissionDate, $current_address = null, $permanent_address = null, int $sessionYearID, int $guardianID, array $extraFields = [], int $status, $is_send_notification = null ,string $rte_status = 'NON_RTE',$cast,$nationality,$birth_place,$blood_group,$last_school,$last_cleared_class,$education_board,$remarks,$pen_no) {
         $password = $this->makeStudentPassword($dob);
         //Create Student User First
         $user = $this->user->create([
@@ -147,6 +148,16 @@ class UserService {
             'guardian_id'      => $guardianID,
             'session_year_id'  => $sessionYearID,
             'join_session_year_id' => $sessionYearID,
+            'rte_status' => $rte_status,
+            'cast'       => $cast,
+            'nationality'       => $nationality,
+            'blood_group'       => $blood_group,
+            'birth_place'       => $birth_place,
+            'last_school'       => $last_school,
+            'last_cleared_class'=> $last_cleared_class,
+            'education_board'   => $education_board,
+            'remarks'           => $remarks,
+            'pen_no'           => $pen_no,
             'leave_session_year_id' => null 
         ]);
 
@@ -198,18 +209,21 @@ class UserService {
      * @return Model|null
      * @throws JsonException
      */
-    public function updateStudentUser($userID, $first_name, $middle_name, $last_name, $mobile, $dob, $gender, $image, $sessionYearID, array $extraFields = [], $guardianID = null, $current_address = null, $permanent_address = null, $reset_password = null, $classSectionID) {
+    public function updateStudentUser($userID, $first_name, $middle_name, $last_name, $mobile, $dob, $gender, $image, $sessionYearID, array $extraFields = [], $guardianID = null, $current_address = null, $permanent_address = null, $reset_password = null, $classSectionID,$admission_no,$rte_status,$cast,$nationality,$birth_place,$blood_group,$last_school,$last_cleared_class,$education_board,$remarks,$pen_no) {
+       
+       
+       
         $studentUserData = array(
             'first_name'        => $first_name,
             'middle_name'       => $middle_name,
             'last_name'         => $last_name,
             'mobile'            => $mobile,
+            'email'             => $admission_no,
             'dob'               => date('Y-m-d', strtotime($dob)),
             'current_address'   => $current_address,
             'permanent_address' => $permanent_address,
             'gender'            => $gender,
         );
-
         if (!empty($current_address)) {
             $studentUserData['current_address'] = $current_address;
         }
@@ -232,7 +246,18 @@ class UserService {
         $studentData = array(
             'guardian_id'     => $guardianID,
             'session_year_id' => $sessionYearID,
-            'class_section_id' => $classSectionID
+            'class_section_id' => $classSectionID,
+            'admission_no'     => $admission_no,
+            'rte_status'       => $rte_status,
+            'cast'             => $cast,
+            'nationality'       => $nationality,
+            'blood_group'       => $blood_group,
+            'birth_place'       => $birth_place,
+            'last_school'       => $last_school,
+            'last_cleared_class'=> $last_cleared_class,
+            'education_board'   => $education_board,
+            'remarks'           => $remarks,
+            'pen_no'           => $pen_no,
         );
 
         $student = $this->student->update($user->student->id, $studentData);
@@ -450,7 +475,7 @@ class UserService {
 
 
     /* Backup Code for Student CreateOrUpdate
-    public function createOrUpdateStudentUser($first_name, $last_name, $admission_no, $mobile, $dob, $gender, $image, $classSectionID, $admissionDate, array $extraFields = [], $rollNumber = null, $guardianID = null) {
+    public function createOr($first_name, $last_name, $admission_no, $mobile, $dob, $gender, $image, $classSectionID, $admissionDate, array $extraFields = [], $rollNumber = null, $guardianID = null) {
         $password = $this->makeStudentPassword($dob);
         $userExists = $this->user->builder()->where('email', $admission_no)->first();
         if (!empty($rollNumber)) {

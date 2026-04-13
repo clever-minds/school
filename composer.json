@@ -56,7 +56,8 @@
         },
         "files": [
             "app/Helpers/settings_helper.php",
-            "app/Helpers/notification_helper.php"
+            "app/Helpers/notification_helper.php",
+            "app/Helpers/notification_helper_all.php"
         ]
     },
     "autoload-dev": {

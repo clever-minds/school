@@ -943,124 +943,293 @@ class ApiController extends Controller
         }
     }
 
-    public function sendMessage(Request $request)
-    {
+    // public function sendMessage(Request $request)
+    // {
          
-        $validator = Validator::make($request->all(), [
-            'to' => 'required'
-        ]);
+    //     $validator = Validator::make($request->all(), [
+    //         'to' => 'required'
+    //     ]);
 
-        if ($validator->fails()) {
-            ResponseService::validationError($validator->errors()->first());
-        }
-        $message = '';
+    //     if ($validator->fails()) {
+    //         ResponseService::validationError($validator->errors()->first());
+    //     }
+    //     $message = '';
 
-        try {
-            DB::beginTransaction();
-            $chat = $this->chat->builder()
-            ->where(function($q) use($request){
-                $q->where('sender_id', Auth::user()->id)->where('receiver_id',$request->to);
+    //     try {
+    //         DB::beginTransaction();
+    //         $chat = $this->chat->builder()
+    //         ->where(function($q) use($request){
+    //             $q->where('sender_id', Auth::user()->id)->where('receiver_id',$request->to);
+    //         })
+    //         ->orWhere(function($q) use($request){
+    //             $q->where('sender_id', $request->to)->where('receiver_id',Auth::user()->id);
+    //         })
+    //         ->first();
+
+    //         if (!$chat) {
+    //             $chat = $this->chat->create(['sender_id' => Auth::user()->id, 'receiver_id' => $request->to]);
+    //         }
+
+    //         $chat = $chat->load(['receiver']);
+
+    //         $message = $this->message->create(['chat_id' => $chat->id, 'sender_id' => Auth::user()->id, 'message' => $request->message]);
+
+    //         $data = [];
+    //         if ($request->hasFile('files')) {
+    //             foreach ($request->file('files') as $file) {
+    //                 $file_path = $file->store('chat_file','public');
+    //                 $data[] = [
+    //                     'message_id' => $message->id,
+    //                     'file' => $file_path,
+    //                     'file_type' => $file->getClientOriginalExtension()
+    //                 ];
+    //             }
+    //             $this->attachment->createBulk($data);
+                
+    //             // set attachment
+    //             $message['attachment'] = $message->load(['attachment'])->toArray();
+                
+    //             // send notification
+    //             $user[] = $request->to;
+    //             $title = 'New Message from ' . Auth::user()->full_name;
+
+    //             $fileNames = array_map(function($file) {
+    //                 return basename($file->getClientOriginalName());
+    //             }, $request->file('files'));
+                
+    //             $body = $request->message ? $request->message . ' (Files: ' . implode(', ', $fileNames) . ')'
+    //                                     : 'Files attached: ' . implode(', ', $fileNames);
+    //             $type = 'Message';
+                
+    //             DB::commit();
+
+    //             send_notification($user, $title, $body, $type);
+                
+    //             ResponseService::successResponse("Data Stored Successfully", $message);
+    //         } else {
+    //             // Only send notification if no files attached
+    //             $user[] = $request->to;
+    //             $title = 'New Message from ' . Auth::user()->full_name;
+    //             $body = $request->message ?? 'No message';
+    //             $type = 'Message';
+    //             DB::commit();
+    //             send_notification($user, $title, $body, $type);
+                
+    //             ResponseService::successResponse("Data Stored Successfully", $message);
+    //         }
+
+    //     } catch (\Throwable $th) {
+    //         $notificationStatus = app(GeneralFunctionService::class)->wrongNotificationSetup($th);
+    //         if ($notificationStatus) {
+    //             DB::rollBack();
+    //             ResponseService::logErrorResponse($th);
+    //             ResponseService::errorResponse();
+    //         } else {
+    //             DB::commit();
+    //             ResponseService::warningResponse("Data Stored successfully. But App push notification not send.", $message);
+    //         }
+    //     }
+    // }
+public function sendMessage(Request $request)
+{
+    $validator = Validator::make($request->all(), [
+        'to' => 'required|integer|exists:users,id',
+        'student_user_id'  => 'nullable|integer|exists:users,id'
+    ]);
+
+    if ($validator->fails()) {
+        ResponseService::validationError($validator->errors()->first());
+    }
+
+    try {
+        DB::beginTransaction();
+
+        // ✅ sender decide
+        $senderId =  Auth::user()->id;
+
+        // ✅ FIX: senderId closure me pass
+        $chat = $this->chat->builder()
+            ->where(function ($q) use ($request, $senderId) {
+                $q->where('sender_id', $senderId)
+                  ->where('receiver_id', $request->to);
             })
-            ->orWhere(function($q) use($request){
-                $q->where('sender_id', $request->to)->where('receiver_id',Auth::user()->id);
+            ->orWhere(function ($q) use ($request, $senderId) {
+                $q->where('sender_id', $request->to)
+                  ->where('receiver_id', $senderId);
             })
             ->first();
 
-            if (!$chat) {
-                $chat = $this->chat->create(['sender_id' => Auth::user()->id, 'receiver_id' => $request->to]);
-            }
-
-            $chat = $chat->load(['receiver']);
-
-            $message = $this->message->create(['chat_id' => $chat->id, 'sender_id' => Auth::user()->id, 'message' => $request->message]);
-
-            $data = [];
-            if ($request->hasFile('files')) {
-                foreach ($request->file('files') as $file) {
-                    $file_path = $file->store('chat_file','public');
-                    $data[] = [
-                        'message_id' => $message->id,
-                        'file' => $file_path,
-                        'file_type' => $file->getClientOriginalExtension()
-                    ];
-                }
-                $this->attachment->createBulk($data);
-                
-                // set attachment
-                $message['attachment'] = $message->load(['attachment'])->toArray();
-                
-                // send notification
-                $user[] = $request->to;
-                $title = 'New Message from ' . Auth::user()->full_name;
-
-                $fileNames = array_map(function($file) {
-                    return basename($file->getClientOriginalName());
-                }, $request->file('files'));
-                
-                $body = $request->message ? $request->message . ' (Files: ' . implode(', ', $fileNames) . ')'
-                                        : 'Files attached: ' . implode(', ', $fileNames);
-                $type = 'Message';
-                
-                DB::commit();
-
-                send_notification($user, $title, $body, $type);
-                
-                ResponseService::successResponse("Data Stored Successfully", $message);
-            } else {
-                // Only send notification if no files attached
-                $user[] = $request->to;
-                $title = 'New Message from ' . Auth::user()->full_name;
-                $body = $request->message ?? 'No message';
-                $type = 'Message';
-                DB::commit();
-                send_notification($user, $title, $body, $type);
-                
-                ResponseService::successResponse("Data Stored Successfully", $message);
-            }
-
-        } catch (\Throwable $th) {
-            $notificationStatus = app(GeneralFunctionService::class)->wrongNotificationSetup($th);
-            if ($notificationStatus) {
-                DB::rollBack();
-                ResponseService::logErrorResponse($th);
-                ResponseService::errorResponse();
-            } else {
-                DB::commit();
-                ResponseService::warningResponse("Data Stored successfully. But App push notification not send.", $message);
-            }
+        if (!$chat) {
+            $chat = $this->chat->create([
+                'sender_id' => $senderId,
+                'receiver_id' => $request->to
+            ]);
         }
-    }
 
-    public function getMessage(Request $request)
-    {
-        $validator = Validator::make($request->all(), [
-            'receiver_id' => 'required'
+        $chat = $chat->load(['receiver']);
+        $message=$request->message;
+        $message = $this->message->create([
+            'chat_id' => $chat->id,
+            'sender_id' => $senderId,
+            'student_user_id' => $request->student_user_id ?? null,
+            'message' => $message
         ]);
 
-        if ($validator->fails()) {
-            ResponseService::validationError($validator->errors()->first());
+        // ---------- Attachments ----------
+        if ($request->hasFile('files')) {
+            $data = [];
+            foreach ($request->file('files') as $file) {
+                $file_path = $file->store('chat_file', 'public');
+                $data[] = [
+                    'message_id' => $message->id,
+                    'file' => $file_path,
+                    'file_type' => $file->getClientOriginalExtension()
+                ];
+            }
+            $this->attachment->createBulk($data);
+            $message['attachment'] = $message->load(['attachment'])->toArray();
         }
 
-        try {
-            $data = [];
-            $data = $this->message->builder()->whereHas('chat',function($q) use($request) {
-                $q->where(function($q) use($request){
-                    $q->where('sender_id', Auth::user()->id)->where('receiver_id',$request->receiver_id);
-                })
-                ->orWhere(function($q) use($request){
-                    $q->where('sender_id', $request->receiver_id)->where('receiver_id',Auth::user()->id);
+        // ---------- Notification ----------
+        $user[] = $request->to;
+        $title = 'New Message from ' . Auth::user()->full_name;
+        $body = $request->message ?? 'New message';
+        $type = 'Message';
+        $customData = [
+            'sender_id'        => $senderId,
+            'receiver_id'      => $request->to,
+            'last_message'     => $message->message,
+            'student_user_id'  => $message->student_user_id
+        ];
+
+
+        DB::commit();
+        send_notification($user, $title, $body, $type,$customData);
+
+        ResponseService::successResponse("Data Stored Successfully", $message);
+
+    } catch (\Throwable $th) {
+        DB::rollBack();
+        ResponseService::logErrorResponse($th);
+        ResponseService::errorResponse();
+    }
+}
+
+    // public function getMessage(Request $request)
+    // {
+    //     $validator = Validator::make($request->all(), [
+    //         'receiver_id' => 'required'
+    //     ]);
+
+    //     if ($validator->fails()) {
+    //         ResponseService::validationError($validator->errors()->first());
+    //     }
+
+    //     try {
+    //         $data = [];
+    //         $data = $this->message->builder()->whereHas('chat',function($q) use($request) {
+    //             $q->where(function($q) use($request){
+    //                 $q->where('sender_id', Auth::user()->id)->where('receiver_id',$request->receiver_id);
+    //             })
+    //             ->orWhere(function($q) use($request){
+    //                 $q->where('sender_id', $request->receiver_id)->where('receiver_id',Auth::user()->id);
+    //             });
+    //         })
+    //         ->with('attachment')->orderBy('id','DESC')
+    //         ->paginate(10);
+            
+    //         ResponseService::successResponse("data_fetch_successfully",$data);
+
+    //     } catch (\Throwable $th) {
+    //         ResponseService::logErrorResponse($th);
+    //         ResponseService::errorResponse();
+    //     }
+    // }
+//     public function getMessage(Request $request)
+// {
+//     $validator = Validator::make($request->all(), [
+//         'receiver_id' => 'required|integer|exists:users,id',
+//         'student_user_id'  => 'nullable|integer|exists:users,id'
+//     ]);
+
+//     if ($validator->fails()) {
+//         ResponseService::validationError($validator->errors()->first());
+//     }
+
+//     try {
+//         $senderId = Auth::user()->id;
+
+//         $data = $this->message->builder()
+//             ->whereHas('chat', function ($q) use ($request, $senderId) {
+//                 $q->where(function ($q) use ($request, $senderId) {
+//                         $q->where('sender_id', $senderId)
+//                           ->where('receiver_id', $request->receiver_id);
+//                     })
+//                   ->orWhere(function ($q) use ($request, $senderId) {
+//                         $q->where('sender_id', $request->receiver_id)
+//                           ->where('receiver_id', $senderId);
+//                     });
+//             })
+//             ->with('attachment')
+//             ->orderBy('id', 'DESC')
+//             ->paginate(10);
+
+//         ResponseService::successResponse("data_fetch_successfully", $data);
+
+//     } catch (\Throwable $th) {
+//         ResponseService::logErrorResponse($th);
+//         ResponseService::errorResponse();
+//     }
+// }
+
+public function getMessage(Request $request)
+{
+    $validator = Validator::make($request->all(), [
+        'receiver_id'       => 'required|integer|exists:users,id',
+        'student_user_id'   => 'nullable|integer|exists:users,id'
+    ]);
+
+    if ($validator->fails()) {
+        ResponseService::validationError($validator->errors()->first());
+    }
+
+    try {
+        $senderId = Auth::user()->id;
+
+        $data = $this->message->builder()
+
+            // ✅ CHAT CONDITION (grouped properly)
+            ->where(function ($q) use ($request, $senderId) {
+                $q->whereHas('chat', function ($q) use ($request, $senderId) {
+                    $q->where(function ($q) use ($request, $senderId) {
+                            $q->where('sender_id', $senderId)
+                              ->where('receiver_id', $request->receiver_id);
+                        })
+                      ->orWhere(function ($q) use ($request, $senderId) {
+                            $q->where('sender_id', $request->receiver_id)
+                              ->where('receiver_id', $senderId);
+                        });
                 });
             })
-            ->with('attachment')->orderBy('id','DESC')
-            ->paginate(10);
-            
-            ResponseService::successResponse("data_fetch_successfully",$data);
 
-        } catch (\Throwable $th) {
-            ResponseService::logErrorResponse($th);
-            ResponseService::errorResponse();
-        }
+            // ✅ STUDENT FILTER (FORCED)
+            ->when($request->filled('student_user_id'), function ($q) use ($request) {
+                $q->where('student_user_id', $request->student_user_id);
+            })
+
+            ->with('attachment')
+            ->orderBy('id', 'DESC')
+            ->paginate(10);
+
+        ResponseService::successResponse("Data Fetch Successfully", $data);
+
+    } catch (\Throwable $th) {
+        ResponseService::logErrorResponse($th);
+        ResponseService::errorResponse();
     }
+}
+
+
 
     public function deleteMessage(Request $request)
     {
@@ -1160,10 +1329,28 @@ class ApiController extends Controller
                         if ($validator->fails()) {
                             ResponseService::validationError($validator->errors()->first());
                         } 
-                        $users = $users->role(['Guardian'])->whereHas('child',function($q) use($request) {
-                            $q->where('school_id',Auth::user()->school_id)
-                            ->where('class_section_id', $request->class_section_id);
-                        })->with('child:id,user_id,guardian_id,class_section_id','child.user:id,first_name,last_name,image');
+                        // $users = $users->role(['Guardian'])->whereHas('child',function($q) use($request) {
+                        //     $q->where('school_id',Auth::user()->school_id)
+                        //     ->where('class_section_id', $request->class_section_id);
+                        // })->with('child:id,user_id,guardian_id,class_section_id','child.user:id,first_name,last_name,image');
+
+                        $users = $users
+                        ->role(['Guardian'])
+                        ->whereHas('child', function ($q) use ($request) {
+                            $q->where('school_id', Auth::user()->school_id);
+
+                            if ($request->filled('class_section_id')) {
+                                $q->where('class_section_id', $request->class_section_id);
+                            }
+                        })
+                        ->with([
+                            'child' => function ($q) use ($request) {
+                                if ($request->filled('class_section_id')) {
+                                    $q->where('class_section_id', $request->class_section_id);
+                                }
+                            },
+                            'child.user:id,first_name,last_name,image'
+                        ]);
 
                     } else if($request->role == 'Staff') {
                         // Get staff list
@@ -1245,13 +1432,23 @@ class ApiController extends Controller
                 } else { // Staff login
                     $users = $users->where('school_id',Auth::user()->school_id);
                 }
-                if ($request->search) {
-                    $search = $request->search;
-                    $users->where(function($query) use ($search) {
-                        $query->where('first_name', 'LIKE', "%$search%")
-                        ->orWhere('last_name', 'LIKE', "%$search%");
-                    });
-                }
+               if ($request->search) {
+    $search = $request->search;
+
+    $users->where(function ($query) use ($search) {
+
+        // 🔍 Guardian/User name
+        $query->where('first_name', 'LIKE', "%{$search}%")
+              ->orWhere('last_name', 'LIKE', "%{$search}%")
+
+              // 🔍 OR Child name
+              ->orWhereHas('child.user', function ($q) use ($search) {
+                  $q->where('first_name', 'LIKE', "%{$search}%")
+                    ->orWhere('last_name', 'LIKE', "%{$search}%");
+              });
+    });
+}
+
                 if ($request->role == 'Staff') {
                     $users = $users->whereHas('roles',function($q) use($request){
                         $q->whereNotIn('name', ['Student','Guardian']);
@@ -1274,6 +1471,7 @@ class ApiController extends Controller
     {
         $validator = Validator::make($request->all(), [
             'role' => 'required|in:Guardian,Staff,Student,Teacher',
+            'student_id'  => 'nullable|integer|exists:users,id'
         ], [
             'role.required' => 'The role field is mandatory. Please select a role.',
             'role.in' => 'The selected role is invalid. Valid roles are: Guardian, Staff, Student, Teacher.',
@@ -1284,6 +1482,9 @@ class ApiController extends Controller
         }
         
         try {
+             $senderId = $request->filled('student_id')
+            ? $request->student_id
+            : Auth::user()->id;
             $data = [];
             if (Auth::user()) {
                 $search = $request->search;
@@ -1313,9 +1514,16 @@ class ApiController extends Controller
                                 });
                         }
                     })
-                    ->withCount(['message as unread_count' => function($q) {
-                        $q->where('read_at', null)->whereNot('sender_id', Auth::user()->id);
-                    }])
+                  ->withCount(['message as unread_count1' => function ($q) {
+    $q->whereNull('read_at')
+      ->whereNot('sender_id', Auth::id())
+      ->where(function ($query) {
+          $query->whereNull('student_user_id')
+                ->orWhereColumn('student_user_id', 'messages.student_user_id');
+      });
+}])
+
+
                     ->when($search, function ($q) use ($search) {
                         $q->whereHas('receiver', function($query) use($search) {
                             $query->where('first_name', 'LIKE', "%$search%")
@@ -1328,9 +1536,15 @@ class ApiController extends Controller
                     
                 } else if ($request->role == 'Student' || $request->role == 'Guardian') {
                     // Guardian, Student
-                    $data = Chat::where(function($q) {
-                        $q->where('sender_id',Auth::user()->id)->orWhere('receiver_id',Auth::user()->id);
-                    })
+                    $data = Chat::where(function ($q) use ($request, $senderId) {
+                        $q->where('sender_id',$senderId)->orWhere('receiver_id',$senderId);
+                    })   ->when($request->class_section_id, function ($q) use ($request) {
+                            $q->whereHas('message', function ($mq) use ($request) {
+                                $mq->join('students', 'students.user_id', '=', 'messages.student_user_id')
+                                ->where('students.class_section_id', $request->class_section_id);
+                            });
+                        })
+
                     ->where(function($q) use($request) {
                         $q->whereHas('receiver', function($q) use($request) {
                             $q->role([$request->role]);
@@ -1339,9 +1553,15 @@ class ApiController extends Controller
                             $q->role([$request->role]);
                         });
                     })
-                    ->withCount(['message as unread_count' => function($q) {
-                        $q->where('read_at',null)->whereNot('sender_id',Auth::user()->id);
-                    }])
+                   ->withCount(['message as unread_count1' => function ($q) {
+    $q->whereNull('read_at')
+      ->whereNot('sender_id', Auth::id())
+      ->where(function ($query) {
+          $query->whereNull('student_user_id')
+                ->orWhereColumn('student_user_id', 'messages.student_user_id');
+      });
+}])
+
                     ->when($search, function ($q) use ($search) {
                         $q->whereHas('receiver', function($query) use($search) {
                             $query->where('first_name', 'LIKE', "%$search%")
@@ -1352,7 +1572,7 @@ class ApiController extends Controller
                     ->paginate(10);
 
                 }
-                
+             
                 
             }
             

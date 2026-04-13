@@ -14,6 +14,10 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
 use Throwable;
 use App\Models\Expense;
+use App\Models\ManageExpense;
+use App\Models\ExpanceTransLog;
+use Carbon\Carbon;
+
 class ExpenseController extends Controller {
 
     private ExpenseInterface $expense;
@@ -50,26 +54,101 @@ class ExpenseController extends Controller {
     }
 
 
-    // public function store(Request $request) {
-    //     ResponseService::noFeatureThenSendJson('Expense Management');
-    //     ResponseService::noPermissionThenSendJson('expense-create');
-    //     try {
-    //         DB::beginTransaction();
-    //         $data = ['category_id' => $request->category_id, 'title' => $request->title, 'ref_no' => $request->ref_no, 'amount' => $request->amount, 'date' => date('Y-m-d', strtotime($request->date)), 'description' => $request->description, 'session_year_id' => $request->session_year_id];
-    //         $expense = $this->expense->create($data);
+    
 
-    //         $sessionYear = $this->cache->getDefaultSessionYear();
-    //         $this->sessionYearsTrackingsService->storeSessionYearsTracking('App\Models\Expense', $expense->id, Auth::user()->id, $sessionYear->id, Auth::user()->school_id, null);
+// public function store(Request $request)
+// {
+//     ResponseService::noFeatureThenSendJson('Expense Management');
+//     ResponseService::noPermissionThenSendJson('expense-create');
 
-    //         DB::commit();
-    //         ResponseService::successResponse('Data Stored Successfully');
-    //     } catch (Throwable $e) {
-    //         DB::rollBack();
-    //         ResponseService::logErrorResponse($e, "Expense Controller -> Store Method");
-    //         ResponseService::errorResponse();
-    //     }
-    // }
-public function store(Request $request) {
+//     $request->validate([
+//         'title' => 'required|string|max:255',
+//         'amount' => 'required|numeric|min:0',
+//         'category_id' => 'required|exists:expense_categories,id',
+//         'date' => 'required|date',
+//         'session_year_id' => 'required|exists:session_years,id',
+//     ]);
+
+//     try {
+//         DB::beginTransaction();
+
+//         // --- Calculate latest balance using debit & credit sum ---
+//         $totals = DB::table('manage_expenses')
+//             ->selectRaw("
+//                 SUM(CASE WHEN type = 'credit' THEN amount ELSE 0 END) as total_credit,
+//                 SUM(CASE WHEN type = 'debit' THEN amount ELSE 0 END) as total_debit
+//             ")
+//             ->first();
+
+//         $totalCredit = $totals->total_credit ?? 0;
+//         $totalDebit  = $totals->total_debit ?? 0;
+
+//         $latestBalance = $totalCredit - $totalDebit;
+
+//         $type = 'debit';
+//         $amount = $request->amount;
+
+//         $negativeLimit = DB::table('school_settings')
+//             ->where('name', 'expense_negative_limit')
+//             ->value('data') ?? 0;
+
+//         $newBalance = $latestBalance - $amount;
+
+//         if ($newBalance < -$negativeLimit) {
+//             DB::rollBack();
+//             return ResponseService::errorResponse('Insufficient Balance');
+//         }
+
+//         $data = [
+//             'category_id' => $request->category_id,
+//             'title' => $request->title,
+//             'ref_no' => $request->ref_no,
+//             'amount' => $amount,
+//             'date' => date('Y-m-d', strtotime($request->date)),
+//             'description' => $request->description,
+//             'session_year_id' => $request->session_year_id,
+//             'type' => $type,
+//             'balance' => $newBalance,
+//             'transaction_date' => now(),
+//             'created_at' => now(),
+//             'updated_at' => now(),
+//         ];
+
+//         $expense = $this->expense->create($data);
+
+//         DB::table('manage_expenses')->insert([
+//             'exp_id' => $expense->id,
+//             'title' => $request->title,
+//             'amount' => $amount,
+//             'description' => $request->description,
+//             'type' => $type,
+//             'balance' => $newBalance,
+//             'transaction_date' => now(),
+//             'created_at' => now(),
+//             'updated_at' => now(),
+//         ]);
+
+//         $sessionYear = $this->cache->getDefaultSessionYear();
+//         $this->sessionYearsTrackingsService->storeSessionYearsTracking(
+//             'App\Models\Expense',
+//             $expense->id,
+//             Auth::user()->id,
+//             $sessionYear->id,
+//             Auth::user()->school_id,
+//             null
+//         );
+
+//         DB::commit();
+//         ResponseService::successResponse('Data Stored Successfully');
+
+//     } catch (Throwable $e) {
+//         DB::rollBack();
+//         ResponseService::logErrorResponse($e, "Expense Controller -> Store Method");
+//         ResponseService::errorResponse();
+//     }
+// }
+public function store(Request $request)
+{
     ResponseService::noFeatureThenSendJson('Expense Management');
     ResponseService::noPermissionThenSendJson('expense-create');
 
@@ -83,23 +162,22 @@ public function store(Request $request) {
 
     try {
         DB::beginTransaction();
+    $school_id = auth()->user()->school_id;
 
-        // --- Get latest balance ---
-        $latestBalance = DB::table('manage_expenses')
-            ->orderBy('id', 'desc')
-            ->value('balance') ?? 0;
+        // 🔹 Calculate current balance
+        $totals = ManageExpense::selectRaw("
+            SUM(CASE WHEN type = 'credit' THEN amount ELSE 0 END) as total_credit,
+            SUM(CASE WHEN type = 'debit' THEN amount ELSE 0 END) as total_debit
+        ")->first();
 
-        $type = 'debit'; 
+        $latestBalance = ($totals->total_credit ?? 0) - ($totals->total_debit ?? 0);
+        $type = 'debit';
         $amount = $request->amount;
 
-        // --- Get allowed negative limit ---
+        // 🔹 Check for negative limit
         $negativeLimit = DB::table('school_settings')
             ->where('name', 'expense_negative_limit')
-            ->value('data');
-
-        if ($negativeLimit === null) {
-            $negativeLimit = 0;
-        }
+            ->value('data') ?? 0;
 
         $newBalance = $latestBalance - $amount;
 
@@ -108,8 +186,9 @@ public function store(Request $request) {
             return ResponseService::errorResponse('Insufficient Balance');
         }
 
-        $data = [
-            'category_id' => $request->category_id,
+        // 🔹 Create Expense record
+        $expense = Expense::create([
+             'category_id' => $request->category_id,
             'title' => $request->title,
             'ref_no' => $request->ref_no,
             'amount' => $amount,
@@ -118,18 +197,36 @@ public function store(Request $request) {
             'session_year_id' => $request->session_year_id,
             'type' => $type,
             'balance' => $newBalance,
+             'school_id'        => $school_id,
             'transaction_date' => now(),
             'created_at' => now(),
             'updated_at' => now(),
-        ];
+        ]);
 
-        $expense = $this->expense->create($data);
-        $data = [ 'exp_id'=>$expense->id,'title' => $request->title, 'amount' => $request->amount, 'description' => $request->description, 'type' => $type, 'balance' => $newBalance, 'transaction_date' => now(), 'created_at' => now(), 'updated_at' => now(), ];
-        DB::table('manage_expenses')->insert( $data);
-        // --- Optional: tracking session years ---
+        // 🔹 Create ManageExpense record
+        $manageExpense = ManageExpense::create([
+            'exp_id' => $expense->id,
+            'title' => $request->title,
+            'amount' => $amount,
+            'description' => $request->description,
+            'type' => $type,
+            'balance' => $newBalance,
+            'transaction_date' =>  date('Y-m-d', strtotime($request->date)),
+        ]);
+
+        // 🔹 Log the action
+        // ExpanceTransLog::create([
+        //     'expnace_trans_id' => $manageExpense->id,
+        //     'user_id' => Auth::id(),
+        //     'trans_type' => 'create',
+        //     'amount' => $amount,
+        //     'description' => 'Expense Added: ' . $request->description,
+        // ]);
+
+        // 🔹 Session Year Tracking
         $sessionYear = $this->cache->getDefaultSessionYear();
         $this->sessionYearsTrackingsService->storeSessionYearsTracking(
-            'App\Models\Expense',
+            Expense::class,
             $expense->id,
             Auth::user()->id,
             $sessionYear->id,
@@ -138,15 +235,14 @@ public function store(Request $request) {
         );
 
         DB::commit();
-        ResponseService::successResponse('Data Stored Successfully');
+        ResponseService::successResponse('Expense added successfully');
 
     } catch (Throwable $e) {
         DB::rollBack();
-        ResponseService::logErrorResponse($e, "Expense Controller -> Store Method");
+        ResponseService::logErrorResponse($e, "ExpenseTransController -> store()");
         ResponseService::errorResponse();
     }
 }
-
 
     public function show($id) {
         ResponseService::noFeatureThenRedirect('Expense Management');
@@ -158,6 +254,7 @@ public function store(Request $request) {
         $search = request('search');
         $category_id = request('category_id');
         $session_year_id = request('session_year_id');
+        $from_date = request('from_date');
         $month = request('month');
 
         // $sql = $this->expense->builder()->with('category')->select('*', DB::raw('SUM(amount) as total_salary'))->groupBy('month', 'date')->where(function ($query) use ($search) {
@@ -179,6 +276,9 @@ public function store(Request $request) {
                 });
             });
         });
+        if ($from_date) {
+            $sql->whereDate('date', $from_date);
+        }
 
         if ($category_id) {
             if ($category_id != 'salary') {
@@ -244,7 +344,114 @@ public function store(Request $request) {
     //     }
     // }
 
-  public function update(Request $request, $id)
+//   public function update(Request $request, $id)
+// {
+//     ResponseService::noFeatureThenRedirect('Expense Management');
+//     ResponseService::noPermissionThenSendJson('expense-edit');
+
+//     $request->validate([
+//         'title' => 'required|string|max:255',
+//         'amount' => 'required|numeric|min:0',
+//         'category_id' => 'required|exists:expense_categories,id',
+//         'date' => 'required|date',
+//         'session_year_id' => 'required|exists:session_years,id',
+//     ]);
+
+//     try {
+//         DB::beginTransaction();
+
+//         // 1️⃣ Old expense record fetch karo
+//         $oldExpense = Expense::find($id);
+//         $oldAmount = $oldExpense->amount;
+
+//         // 2️⃣ New amount aur difference nikalo
+//         $newAmount = $request->amount;
+//         $difference = $newAmount - $oldAmount;
+
+//         if ($difference == 0) {
+//             DB::rollBack();
+//             return ResponseService::successResponse('No changes in amount.');
+//         }
+
+//         // 3️⃣ Latest balance lo
+//         $latestBalance = DB::table('manage_expenses')
+//             ->orderBy('id', 'desc')
+//             ->value('balance') ?? 0;
+
+//         // 4️⃣ Negative limit check karo
+//         $negativeLimit = DB::table('school_settings')
+//             ->where('name', 'expense_negative_limit')
+//             ->value('data') ?? 0;
+
+//         // 5️⃣ New balance calculate karo
+//         $newBalance = $latestBalance - $difference;
+
+//         if ($newBalance < -$negativeLimit) {
+//             DB::rollBack();
+//             return ResponseService::errorResponse('Insufficient Balance');
+//         }
+
+//         // 6️⃣ Expense record update karo
+//         $data = [
+//             'category_id' => $request->category_id,
+//             'title' => $request->title,
+//             'ref_no' => $request->ref_no,
+//             'amount' => $newAmount,
+//             'date' => date('Y-m-d', strtotime($request->date)),
+//             'description' => $request->description,
+//             'session_year_id' => $request->session_year_id,
+//             'updated_at' => now(),
+//         ];
+//         $this->expense->update($id, $data);
+
+//         // 7️⃣ manage_expenses me naya row insert karo (sirf difference ke liye)
+//         $type = $difference > 0 ? 'debit' : 'credit'; // agar zyada hua to debit, kam hua to credit
+
+//         // DB::table('manage_expenses')->insert([
+//         //     'title' => 'Exp  Adj.: ' . $request->title." ₹ ". $oldExpense->amount ." -> ".$newAmount,
+//         //     'amount' => abs($difference),
+//         //     'description' => 'Edited expense adjustment',
+//         //     'type' => $type,
+//         //     'balance' => $newBalance,
+//         //     'transaction_date' => now(),
+//         //     'created_at' => now(),
+//         //     'updated_at' => now(),
+//         // ]);
+//           $expense = DB::table('manage_expenses')
+//             ->select('*')
+//             ->where('exp_id', $id)
+//             ->first();
+//         if (!$expense) {
+//             throw new \Exception('Expense not found.');
+//         }
+
+//           DB::table('manage_expenses')
+//             ->where('exp_id', $id)
+//             ->update([
+//                 'amount' => $request->amount,
+//                 'updated_at' => now(),
+//             ]);
+
+//         // 🔹 Step 2: expance_trans_log में नया record insert करो
+//         DB::table('expance_trans_log')->insert([
+//             'expnace_trans_id' =>  $expense->id,
+//             'user_id' => Auth::id(),
+//             'amount' => $expense->amount,
+//             'description' => "Privious Amount ".$expense->amount,
+//             'created_at' => now(),
+//             'updated_at' => now(),
+//         ]);
+
+//         DB::commit();
+//         ResponseService::successResponse('Expense and Balance Updated Successfully');
+
+//     } catch (Throwable $e) {
+//         DB::rollBack();
+//         ResponseService::logErrorResponse($e, "Expense Controller -> Update Method");
+//         ResponseService::errorResponse();
+//     }
+// }
+public function update(Request $request, $id)
 {
     ResponseService::noFeatureThenRedirect('Expense Management');
     ResponseService::noPermissionThenSendJson('expense-edit');
@@ -260,11 +467,8 @@ public function store(Request $request) {
     try {
         DB::beginTransaction();
 
-        // 1️⃣ Old expense record fetch karo
-        $oldExpense = Expense::find($id);
+        $oldExpense = Expense::findOrFail($id);
         $oldAmount = $oldExpense->amount;
-
-        // 2️⃣ New amount aur difference nikalo
         $newAmount = $request->amount;
         $difference = $newAmount - $oldAmount;
 
@@ -273,26 +477,20 @@ public function store(Request $request) {
             return ResponseService::successResponse('No changes in amount.');
         }
 
-        // 3️⃣ Latest balance lo
-        $latestBalance = DB::table('manage_expenses')
-            ->orderBy('id', 'desc')
-            ->value('balance') ?? 0;
+        $latestBalance = ManageExpense::orderByDesc('id')->value('balance') ?? 0;
 
-        // 4️⃣ Negative limit check karo
         $negativeLimit = DB::table('school_settings')
             ->where('name', 'expense_negative_limit')
             ->value('data') ?? 0;
 
-        // 5️⃣ New balance calculate karo
         $newBalance = $latestBalance - $difference;
-
         if ($newBalance < -$negativeLimit) {
             DB::rollBack();
             return ResponseService::errorResponse('Insufficient Balance');
         }
 
-        // 6️⃣ Expense record update karo
-        $data = [
+        // ✅ Update expense record
+        $oldExpense->update([
             'category_id' => $request->category_id,
             'title' => $request->title,
             'ref_no' => $request->ref_no,
@@ -300,50 +498,26 @@ public function store(Request $request) {
             'date' => date('Y-m-d', strtotime($request->date)),
             'description' => $request->description,
             'session_year_id' => $request->session_year_id,
-            'updated_at' => now(),
-        ];
-        $this->expense->update($id, $data);
+        ]);
 
-        // 7️⃣ manage_expenses me naya row insert karo (sirf difference ke liye)
-        $type = $difference > 0 ? 'debit' : 'credit'; // agar zyada hua to debit, kam hua to credit
+        // ✅ Update manage_expenses record
+        $manageExpense = ManageExpense::where('exp_id', $id)->firstOrFail();
+        $manageExpense->update([
+            'amount' => $newAmount,
+            'balance' => $newBalance,
+        ]);
 
-        // DB::table('manage_expenses')->insert([
-        //     'title' => 'Exp  Adj.: ' . $request->title." ₹ ". $oldExpense->amount ." -> ".$newAmount,
-        //     'amount' => abs($difference),
-        //     'description' => 'Edited expense adjustment',
-        //     'type' => $type,
-        //     'balance' => $newBalance,
-        //     'transaction_date' => now(),
-        //     'created_at' => now(),
-        //     'updated_at' => now(),
-        // ]);
-          $expense = DB::table('manage_expenses')
-            ->select('*')
-            ->where('exp_id', $id)
-            ->first();
-        if (!$expense) {
-            throw new \Exception('Expense not found.');
-        }
-
-          DB::table('manage_expenses')
-            ->where('exp_id', $id)
-            ->update([
-                'amount' => $request->amount,
-                'updated_at' => now(),
-            ]);
-
-        // 🔹 Step 2: expance_trans_log में नया record insert करो
-        DB::table('expance_trans_log')->insert([
-            'expnace_trans_id' =>  $expense->id,
+        // ✅ Log transaction
+        ExpanceTransLog::create([
+            'expnace_trans_id' => $manageExpense->id,
             'user_id' => Auth::id(),
-            'amount' => $expense->amount,
-            'description' => "Privious Amount ".$expense->amount,
-            'created_at' => now(),
-            'updated_at' => now(),
+            'trans_type' => $difference > 0 ? 'debit' : 'credit',
+            'amount' => abs($difference),
+            'description' => "Previous Amount ₹{$oldAmount} → Updated to ₹{$newAmount}",
         ]);
 
         DB::commit();
-        ResponseService::successResponse('Expense and Balance Updated Successfully');
+        ResponseService::successResponse('Expense Updated Successfully');
 
     } catch (Throwable $e) {
         DB::rollBack();
@@ -352,7 +526,59 @@ public function store(Request $request) {
     }
 }
 
-  public function destroy($id)
+//   public function destroy($id)
+// {
+//     ResponseService::noFeatureThenRedirect('Expense Management');
+//     ResponseService::noPermissionThenSendJson('expense-delete');
+
+//     try {
+//         DB::beginTransaction();
+
+//         // 1️⃣ Expense record fetch karo
+//         $expense = Expense::find($id);
+//         if (!$expense) {
+//             DB::rollBack();
+//             return ResponseService::errorResponse('Expense not found.');
+//         }
+
+//         $amount = $expense->amount;
+
+//         // 2️⃣ Latest balance fetch karo
+//         $latestBalance = DB::table('manage_expenses')
+//             ->orderBy('id', 'desc')
+//             ->value('balance') ?? 0;
+
+//         // 3️⃣ New balance calculate karo (delete -> credit)
+//         $newBalance = $latestBalance + $amount; // delete karne par credit
+
+//         // 4️⃣ Expense delete karo
+//         $this->expense->deleteById($id);
+
+//         // 5️⃣ Manage_expenses me adjustment entry add karo
+//         DB::table('manage_expenses')->where('exp_id', $expense->id)->delete();
+
+//         // 6️⃣ Session year tracking
+//         $sessionYear = $this->cache->getDefaultSessionYear();
+//         $this->sessionYearsTrackingsService->storeSessionYearsTracking(
+//             'App\Models\Expense',
+//             $id,
+//             Auth::user()->id,
+//             $sessionYear->id,
+//             Auth::user()->school_id,
+//             null
+//         );
+
+//         DB::commit();
+//         ResponseService::successResponse('Expense Deleted and Balance Adjusted Successfully');
+
+//     } catch (Throwable $e) {
+//         DB::rollBack();
+//         ResponseService::logErrorResponse($e, "Expense Controller -> Destroy Method");
+//         ResponseService::errorResponse();
+//     }
+// }
+
+public function destroy($id)
 {
     ResponseService::noFeatureThenRedirect('Expense Management');
     ResponseService::noPermissionThenSendJson('expense-delete');
@@ -360,30 +586,31 @@ public function store(Request $request) {
     try {
         DB::beginTransaction();
 
-        // 1️⃣ Expense record fetch karo
-        $expense = Expense::find($id);
-        if (!$expense) {
-            DB::rollBack();
-            return ResponseService::errorResponse('Expense not found.');
-        }
-
+        $expense = Expense::findOrFail($id);
         $amount = $expense->amount;
 
-        // 2️⃣ Latest balance fetch karo
-        $latestBalance = DB::table('manage_expenses')
-            ->orderBy('id', 'desc')
-            ->value('balance') ?? 0;
+        $latestBalance = ManageExpense::orderByDesc('id')->value('balance') ?? 0;
+        $newBalance = $latestBalance + $amount;
 
-        // 3️⃣ New balance calculate karo (delete -> credit)
-        $newBalance = $latestBalance + $amount; // delete karne par credit
+        // Delete manage_expense entry
+        $manageExpense = ManageExpense::where('exp_id', $expense->id)->first();
+        if ($manageExpense) {
+            $manageExpense->delete();
+        }
 
-        // 4️⃣ Expense delete karo
-        $this->expense->deleteById($id);
+        // Delete expense
+        $expense->delete();
 
-        // 5️⃣ Manage_expenses me adjustment entry add karo
-        DB::table('manage_expenses')->where('exp_id', $expense->id)->delete();
+        // Log transaction
+        ExpanceTransLog::create([
+            'expnace_trans_id' => $manageExpense->id ?? null,
+            'user_id' => Auth::id(),
+            'trans_type' => 'credit',
+            'amount' => $amount,
+            'description' => "Expense deleted and ₹{$amount} credited back to balance",
+        ]);
 
-        // 6️⃣ Session year tracking
+        // Session tracking
         $sessionYear = $this->cache->getDefaultSessionYear();
         $this->sessionYearsTrackingsService->storeSessionYearsTracking(
             'App\Models\Expense',
@@ -403,7 +630,6 @@ public function store(Request $request) {
         ResponseService::errorResponse();
     }
 }
-
 
     public function filter_graph($session_year_id)
     {

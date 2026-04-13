@@ -8,9 +8,12 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Facades\Auth;
 use JsonException;
 use App\Traits\DateFormatTrait;
+use App\Traits\LogsActivity;
+
 class FormField extends Model {
     use HasFactory, DateFormatTrait;
     use SoftDeletes;
+    use LogsActivity;
 
     protected $fillable = [
         'name',

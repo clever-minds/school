@@ -57,6 +57,7 @@ use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\Hash;
 use PDF;
 use Str;
+use Illuminate\Support\Facades\Log;
 
 //use App\Models\Parents;
 
@@ -325,6 +326,7 @@ class TeacherApiController extends Controller
             "points"                      => 'nullable',
             "resubmission"                => 'nullable|boolean',
             "extra_days_for_resubmission" => 'nullable|numeric',
+            "type" => "required|in:Homework,Assignment",
             "file"                       => 'nullable|array',
             "file.*"                => ['nullable', new DynamicMimes, new MaxFileSize($file_upload_size_limit) ],
         ],[
@@ -347,6 +349,7 @@ class TeacherApiController extends Controller
                 'resubmission'                => $request->resubmission ? 1 : 0,
                 'extra_days_for_resubmission' => $request->resubmission ? $request->extra_days_for_resubmission : null,
                 'session_year_id'             => $sessionYear->id,
+                'type' => lcfirst($request->type ?? 'homework') ?? 'homework',
                 'created_by'                  => Auth::user()->id,
             );
             $section_ids = is_array($request->class_section_id) ? $request->class_section_id : [$request->class_section_id];
@@ -363,13 +366,14 @@ class TeacherApiController extends Controller
 
             // Create assignment_commons for each section
             foreach ($section_ids as $section_id) {
-                $classSubject_ids = $this->classSubject->builder()->where('id',$request->class_subject_id)->first();
+                $classSubject_ids = $this->classSubject->builder()->currentSemesterData()->where('id',$request->class_subject_id)->first();
+                
                 $classSection = $this->classSection->builder()->where('id', $section_id)->with('class')->first();
-                $classSubjects = $this->classSubject->builder()->where('class_id', $classSection->class->id)->where('subject_id',$classSubject_ids->subject_id)->first();
+                $classSubjects = $this->classSubject->builder()->currentSemesterData()->where('class_id', $classSection->class->id)->where('subject_id',$classSubject_ids->subject_id)->first();
                 $assignmentCommonData['assignment_id'] = $assignment->id;
                 $assignmentCommonData['class_section_id'] = $section_id;
                 $assignmentCommonData['class_subject_id'] = $classSubjects->id;
-                $this->assignmentCommon->create($assignmentCommonData);
+               $assignmentCommonData1= $this->assignmentCommon->create($assignmentCommonData);
             }
         
             // Handle File Upload
@@ -426,11 +430,28 @@ class TeacherApiController extends Controller
             } else {
                 $this->sessionYearsTrackingsService->storeSessionYearsTracking('App\Models\Assignment', $assignment->id, Auth::user()->id, $sessionYear->id, Auth::user()->school_id, null);
             }
+            $classSection = $this->classSection
+            ->builder()
+            ->with(['class:id,name', 'section:id,name'])
+            ->where('id', $request->class_section_id)
+            ->first();
+
+        $classSectionName = $classSection
+            ? $classSection->class->name . ' ' . $classSection->section->name
+            : '';
+        
+           $title = '';
+
+            if (!empty($classSectionName)) {
+                $title .= 'For ' . $classSectionName . ' ';
+            }
+
 
             $subjectName = $this->subject->builder()->select('name')->where('id', $request->subject_id)->pluck('name')->first();
-            $title = 'New assignment added in ' . $subjectName;
+            $title .= 'New '.$request->type.' added ' . $subjectName;
+           
             $body = $request->name;
-            $type = "assignment";
+            $type = $request->type;
             $students = $this->student->builder()->select('user_id')->where('class_section_id', $request->class_section_id)->get();
             $guardian_id = $students->pluck('guardian_id')->toArray();
             $student_id = $students->pluck('user_id')->toArray();
@@ -1510,7 +1531,10 @@ class TeacherApiController extends Controller
 
             $announcement = $this->announcement->create($announcementData); // Store Data
             $announcementClassData = array();
-
+  Log::info('Subject ID received in request', [
+        'subject_id' => $request->subject_id,
+        'request_data' => $request->all()
+    ]);
             if (!empty($request->subject_id)) {
 
                 foreach ($request->class_section_id as $section_id) {
@@ -2079,14 +2103,14 @@ class TeacherApiController extends Controller
             ResponseService::validationError($validator->errors()->first());
         }
         try {
-            $student_data = $this->student->findById($request->student_id, ['user_id', 'class_section_id', 'guardian_id'], ['user', 'guardian']);
+            $student_data = $this->student->findById($request->student_id, ['user_id','admission_no','uni_no','rte_status','cast','application_type','roll_number','admission_date','application_status','class_section_id', 'guardian_id'], ['user', 'guardian']);
 
             $student_total_present = $this->attendance->builder()->where('student_id', $student_data->user_id)->where('type', 1)->count();
             $student_total_absent = $this->attendance->builder()->where('student_id', $student_data->user_id)->where('type', 0)->count();
 
             $today_date_string = Carbon::now();
             $today_date_string->toDateTimeString();
-            $today_date = date('Y-m-d', strtotime($today_date_string));
+            $today_date = date('Y-m-d', strtotime($today_date_string)); 
 
             $student_today_attendance = $this->attendance->builder()->where('student_id', $student_data->user_id)->where('date', $today_date)->first();
 

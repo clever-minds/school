@@ -23,21 +23,21 @@ class InstallerController extends Controller {
             $app_url = (string)url('/');
             $app_url = preg_replace('#^https?://#i', '', $app_url);
 
-            $curl = curl_init();
-            curl_setopt_array($curl, array(
-                CURLOPT_URL            => 'https://validator.wrteam.in/eschoolsaas_validator?purchase_code=' . $request->input('purchase_code') . '&domain_url=' . $app_url,
-                CURLOPT_RETURNTRANSFER => true,
-                CURLOPT_MAXREDIRS      => 10,
-                CURLOPT_FOLLOWLOCATION => true,
-                CURLOPT_HTTP_VERSION   => CURL_HTTP_VERSION_1_1,
-                CURLOPT_CUSTOMREQUEST  => 'GET',
-            ));
-            $response = curl_exec($curl);
-            curl_close($curl);
-            $response = json_decode($response, true, 512, JSON_THROW_ON_ERROR);
-            if ($response['error']) {
-                return view('installer::steps.purchase-code', ['error' => $response["message"]]);
-            }
+            // $curl = curl_init();
+            // curl_setopt_array($curl, array(
+            //     CURLOPT_URL            => 'https://validator.wrteam.in/eschoolsaas_validator?purchase_code=' . $request->input('purchase_code') . '&domain_url=' . $app_url,
+            //     CURLOPT_RETURNTRANSFER => true,
+            //     CURLOPT_MAXREDIRS      => 10,
+            //     CURLOPT_FOLLOWLOCATION => true,
+            //     CURLOPT_HTTP_VERSION   => CURL_HTTP_VERSION_1_1,
+            //     CURLOPT_CUSTOMREQUEST  => 'GET',
+            // ));
+            // $response = curl_exec($curl);
+            // curl_close($curl);
+            // $response = json_decode($response, true, 512, JSON_THROW_ON_ERROR);
+            // if ($response['error']) {
+            //     return view('installer::steps.purchase-code', ['error' => $response["message"]]);
+            // }
             
             EnvSet::setKey('APPSECRET', $request->input('purchase_code'));
             EnvSet::setKey('APP_URL', (string)url('/'));

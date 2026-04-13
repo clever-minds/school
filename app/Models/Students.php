@@ -10,13 +10,16 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Facades\Auth;
 use App\Models\SessionYearsTracking;
 use App\Traits\DateFormatTrait;
+use App\Traits\LogsActivity;
 
 class Students extends Model {
-    use SoftDeletes;
-    use HasFactory, DateFormatTrait;
+    use SoftDeletes ;
+    use HasFactory, DateFormatTrait,LogsActivity;
 
     protected $fillable = [
         'user_id',
+        'rte_status',
+        'cast',
         'class_id',
         'class_section_id',
         'admission_no',
@@ -28,7 +31,18 @@ class Students extends Model {
         'application_type',
         'application_status',
         'join_session_year_id',
-        'leave_session_year_id'
+        'leave_session_year_id',
+        'uni_no',
+        'pen_no',
+        'blood_group',
+        'nationality',
+        'birth_place',
+        'last_school',
+        'last_cleared_class',
+        'education_board',
+        'remarks',
+
+
     ];
     protected $appends = ['first_name','last_name','full_name'];
 
@@ -238,6 +252,10 @@ class Students extends Model {
     public function attendance()
     {
         return $this->hasMany(Attendance::class, 'student_id', 'user_id');
+    }
+     public function attendance1()
+    {
+        return $this->hasMany(Attendance::class, 'student_id', 'id');
     }
 
     public function session_year() {

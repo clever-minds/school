@@ -7,10 +7,11 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Facades\Auth;
 use App\Traits\DateFormatTrait;
+use App\Traits\LogsActivity;
 
 class Fee extends Model {
     use HasFactory;
-    use SoftDeletes, DateFormatTrait;
+    use SoftDeletes, DateFormatTrait,LogsActivity;
 
     protected $fillable = [
         'name',

@@ -751,12 +751,19 @@ $('#verify_email').on('submit', function (e) {
 // });
 $('.mode').on('change', function (e) {
     e.preventDefault();
+
+    // Pehle dono hide karo
+    $('.cheque-no-container').hide(200);
+    $('.bank-no-container').hide(200);
+
     if ($(this).val() == 2) {
         $('.cheque-no-container').show(200);
-    } else {
-        $('.cheque-no-container').hide(200);
+    } 
+    else if ($(this).val() == 3) {
+        $('.bank-no-container').show(200);
     }
 });
+
 $('.pay_student_fees_offline').on('submit', function (e) {
     e.preventDefault();
     let formElement = $(this);
@@ -1964,6 +1971,7 @@ $(document).ready(function () {
     $('#transfer_class_section').trigger('change');
     $('#filter-class-section-id').trigger('change');
     $('#filter_fees_id').trigger('change');
+
 });
 
 $('#class-section-id').on('change', function () {
@@ -2026,6 +2034,7 @@ $('#filter-class-section-id').on('change', function () {
 
 $('#filter_fees_id').on('change', function () {
     var selectedOption = $(this).find(':selected');
+
     var dataId = selectedOption.data('class-section-id');
     getFeesClassOptionsList('#filter-class-section-id', dataId)
 });

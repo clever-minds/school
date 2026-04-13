@@ -94,13 +94,14 @@ class SchoolSettingsController extends Controller {
             'roll_number_sort_column' => 'nullable|in:first_name,last_name',
             'roll_number_sort_order'  => 'nullable|in:asc,desc',
             'change_roll_number'      => 'nullable',
+            'dise_code'               => 'nullable',
             'school_tagline'          => 'required',
             'date_format'             => 'required',
             'time_format'             => 'required',
             'domain'                  => 'nullable|unique:schools,domain,'.Auth::user()->school_id,
             'google_map_link'         => 'nullable',
             'fees_remainder_duration' => 'required',
-             'expense_negative_limit' => 'required'
+            'expense_negative_limit' => 'required'
 
         ];
         $validator = Validator::make($request->all(), $settings);
@@ -147,7 +148,8 @@ class SchoolSettingsController extends Controller {
                 'domain' => $request->domain,
                 'domain_type' => $request->domain_type,
                 'fees_remainder_duration' => $request->fees_remainder_duration,
-                'expense_negative_limit'=>$request->expense_negative_limit
+                'expense_negative_limit'=>$request->expense_negative_limit,
+                'dise_code'=>$request->dise_code
             ];
             if ($request->hasFile('vertical_logo') && Auth::user()->school_id) {
                 $school = $this->school->findById(Auth::user()->school_id);

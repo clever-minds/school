@@ -106,7 +106,7 @@
                     <td>{{ $result->user->student->admission_no ?? 'N/A' }}</td>
                 </tr>
                 <tr>
-                    <th class="text-left">Guardian Name :</th>
+                    <th class="text-left">Father name :</th>
                     <td>{{ $result->user->student->guardian->full_name ?? 'N/A' }}</td>
                     <th class="text-left">Class :</th>
                     <td>{{ $result->class_section->full_name ?? 'N/A' }}</td>

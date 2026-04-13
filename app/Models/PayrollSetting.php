@@ -8,9 +8,11 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Facades\Auth;
 use App\Models\SessionYearsTracking;
 use App\Traits\DateFormatTrait;
+use App\Traits\LogsActivity;
+
 class PayrollSetting extends Model
 {
-    use HasFactory, SoftDeletes, DateFormatTrait;
+    use HasFactory, SoftDeletes, DateFormatTrait,LogsActivity;
 
     protected $fillable = [
         'id',

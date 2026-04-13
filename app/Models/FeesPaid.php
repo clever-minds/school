@@ -8,12 +8,14 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use App\Traits\DateFormatTrait;
+use App\Traits\LogsActivity;
 
 
 class FeesPaid extends Model
 {
     use HasFactory, DateFormatTrait;
     use SoftDeletes;
+    use LogsActivity;
 
     protected $fillable = [
         'fees_id',

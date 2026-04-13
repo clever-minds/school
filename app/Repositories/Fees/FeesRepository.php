@@ -9,4 +9,10 @@ class FeesRepository extends SaaSRepository implements FeesInterface {
     public function __construct(Fee $model) {
         parent::__construct($model);
     }
+     public function getByIds(array $ids)
+    {
+        return $this->defaultModel()
+            ->whereIn('id', $ids)
+            ->get();
+    }
 }

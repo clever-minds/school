@@ -16,17 +16,20 @@ trait DateFormatTrait
      */
     protected function formatDateValue($value, $key = null)
     {
+
         if (!$value) {
             return $value;
         }
 
         try {
             // Convert to Carbon instance if it's not already
+
             if (!($value instanceof Carbon)) {
                 $value = Carbon::parse($value, 'UTC'); // Treat DB time as UTC
             }
 
             $cache = app(CachingService::class);
+
             $schoolSettings = $cache->getSchoolSettings();
             $systemSettings = $cache->getSystemSettings();
 
@@ -74,7 +77,9 @@ trait DateFormatTrait
         $value = Carbon::parse($value, 'UTC'); // Treat DB time as UTC
 
         $cache = app(CachingService::class);
+
         $schoolSettings = $cache->getSchoolSettings();
+
         $systemSettings = $cache->getSystemSettings();
 
         $date_format = $schoolSettings['date_format'] ?? $systemSettings['date_format'] ?? 'Y-m-d';

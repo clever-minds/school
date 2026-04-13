@@ -6,9 +6,10 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Support\Facades\Auth;
 use Spatie\Permission\Models\Permission as BasePermission;
+use App\Traits\LogsActivity;
 
 class Permission extends BasePermission {
-    use HasFactory;
+    use HasFactory,LogsActivity;
 
     protected static function booted() {
         static::addGlobalScope('school', static function (Builder $builder) {

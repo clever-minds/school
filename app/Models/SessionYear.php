@@ -7,9 +7,10 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Facades\Auth;
 use App\Traits\DateFormatTrait;
+use App\Traits\LogsActivity;
 
 class SessionYear extends Model {
-    use SoftDeletes, DateFormatTrait;
+    use SoftDeletes, DateFormatTrait,LogsActivity;
     use HasFactory;
 
     protected $fillable = [

@@ -1,195 +1,209 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-    <!-- Required meta tags -->
-    <meta charset="utf-8">
-    <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
-    <style>
-        * {
-            font-family: DejaVu Sans, sans-serif;
-        }
-    </style>
-    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-    <title>Fees Receipt || {{ config('app.name') }}</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/4.6.0/css/bootstrap.min.css" crossorigin="anonymous" referrerpolicy="no-referrer"/>
+<meta charset="utf-8">
+<style>
+    * {
+        font-family: DejaVu Sans, sans-serif;
+        font-size: 12px;
+    }
+
+    body {
+        margin: 0;
+        padding: 0;
+    }
+
+    @page {
+        margin: 25px;
+    }
+
+    .page-break {
+        page-break-after: always;
+    }
+
+    .page-break:last-child {
+        page-break-after: auto;
+    }
+
+    .text-center { text-align: center; }
+    .text-left { text-align: left; }
+    .text-right { text-align: right; }
+
+    table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+
+    th, td {
+        padding: 6px;
+        border: 1px solid #000;
+    }
+
+    .no-border td {
+        border: none;
+    }
+
+    .header-line {
+        border-bottom: 2px solid #000;
+        margin-top: 5px;
+        margin-bottom: 10px;
+    }
+
+</style>
+<title>Fee Receipt</title>
 </head>
+
 <body>
-<div class="container ">
-    <div class="row mt-4">
-        <div class="col">
-            <div class="row">
-                <div class="col">
-                    <div class="text-center">
-                        <div>
-                            @if ($school['horizontal_logo'] ?? '')
-                                <img style="height: 5rem;width: 5rem;" src="{{ public_path('storage/') . $school['horizontal_logo'] }}" alt="">                    
-                            @else
-                                <img style="height: 5rem;width: 5rem;" src="{{ public_path('assets/horizontal-logo2.svg') }}" alt="">
-                            @endif
-                        </div>
 
-                        <span class="text-default-d3 ml-4" style="font-size:1.5rem"><strong>{{$school['school_name'] ?? ''}}</strong></span><br>
-                        <span class="text-default-d3 ml-4" style="font-size:1rem">{{$school['school_address'] ?? ''}}</span>
-                        <hr style="border: 1px solid">
-                        <h4>Fee Receipt</h4>
-                    </div>
-                </div>
-            </div>
-            <div class="row">
-                <div class="col-sm-6">
-                </div>
+@php
+    $compulsoryFeesType = $feesPaid->fees->compulsory_fees->pluck('fees_type_name');
+    $compulsoryFeesType = implode(" , ", $compulsoryFeesType->toArray());
+@endphp
 
-                <div class="col-sm-6 align-self-start d-sm-flex justify-content-end">
-                    <div class="text-grey-m2 mt-2 ml-3">
-                        <p><strong><u>Invoice</u></strong><br>
-                            <strong>Fee Receipt</strong> :- {{$feesPaid->id ?? ''}}<br>
-                        </p>
-                    </div>
-                </div>
-            </div>
-            <hr style="border: 1px solid">
-            <div class="row ml-3">
-                <div class="col-sm-6 align-self-start">
-                    <div class="row text-black">
-                        <p><strong><u>Student Details :- </u></strong><br>
+@if(isset($feesPaid->compulsory_fee) && $feesPaid->compulsory_fee->isNotEmpty())    
+@foreach ($feesPaid->compulsory_fee as $compulsoryFee)
 
-                            <strong>Name</strong> :- {{$student->user->full_name}} <br>
-                            {{--                            <strong>Session</strong> :- {{isset($feesPaid) ? $feesPaid->session_year->name : '-'}} <br>--}}
-                            <strong>Class</strong> :- {{$student->class_section->full_name ?? ''}}<br>
-                    </div>
-                </div>
-            </div>
-            <div class="mt-4 ml-4">
-                <table class="table" style="text-align: center">
-                    <thead>
-                    <tr>
-                        <th scope="col">Sr no.</th>
-                        <th scope="col" colspan="2">Fee Type</th>
-                        <th scope="col">Amount</th>
-                    </tr>
-                    </thead>
-                    @php
-                        $no = 1;
-                        $total_fees = 0;
-                        $total_optional_fees = 0;
-                        $due_charges = 0;
-                    @endphp
-                    <tbody>
-                    @php
-                        $compulsoryFeesType = $feesPaid->fees->compulsory_fees->pluck('fees_type_name');
-                        $compulsoryFeesType = implode(" , ",$compulsoryFeesType->toArray());
-                    @endphp
-                    {{--Compulsory Fees Listing --}}
-                    @if(isset($feesPaid->compulsory_fee) && $feesPaid->compulsory_fee->isNotEmpty())
-                        @foreach ($feesPaid->compulsory_fee as $index => $compulsoryFee)
-                            @if($compulsoryFee->type == "Full Payment")
-                                {{-- @foreach ($feesPaid->compulsory_fee as $data) --}}
-                                    <tr>
-                                        <th scope="row" class="text-left">{{$no++}}</th>
-                                        <td colspan="2" class="text-left">
-                                            {{$compulsoryFee->type}}<br>
-                                            <small class="font-weight-bold">( {{$compulsoryFeesType}} )</small><br>
-                                            <small>Mode : <span class="font-weight-bold">({{ $compulsoryFee->mode}})</span></small><br>
-                                            <small>Date &nbsp;: <span class="font-weight-bold">{{date('d-m-Y',strtotime($compulsoryFee->date))}} </span></small><br>
-                                            {{-- <small>Due Charges : <b>{{$compulsoryFee->due_charges ?? 0}}</b></small> --}}
-                                        </td>
-                                        <td class="text-right">
-                                            {{$compulsoryFee->amount}} {{$school['currency_symbol'] ?? ''}}<br><br><br><br><br>
-                                            
-                                            {{-- <hr> --}}
-                                            {{-- {{$data->amount + $compulsoryFee->due_charges}} {{$school['currency_symbol'] ?? ''}} --}}
-                                        </td>
-                                    </tr>
-                                    @if ($index === count($feesPaid->compulsory_fee) - 1 && $compulsoryFee->due_charges)
-                                        <tr>
-                                            <th scope="row" class="text-left">{{$no++}}</th>
-                                            <td colspan="2" class="text-left">
-                                            Due Charges :
-                                            </td>
-                                            <td class="text-right">
-                                                {{$compulsoryFee->due_charges ?? 0}} {{$school['currency_symbol'] ?? ''}}<br><br><br><br><br>
-                                                @php
-                                                    $due_charges += $compulsoryFee->due_charges ?? 0;
-                                                @endphp
-                                            </td>
-                                        </tr>
-                                    @endif
-                                {{-- @endforeach --}}
-                                {{--                                <tr>--}}
-                                {{--                                    <th scope="row" class="text-left">{{$no++}}</th>--}}
-                                {{--                                    <td colspan="2" class="text-left">Due Charges</td>--}}
-                                {{--                                    <td class="text-right">{{$compulsoryFee->due_charges ?? 0}} {{$school['currency_symbol'] ?? ''}}</td>--}}
-                                {{--                                </tr>--}}
-                            @elseif($compulsoryFee->type == "Installment Payment")
-                                <tr>
-                                    <th scope="row" class="text-left">{{$no++}}</th>
-                                    <td colspan="2" class="text-left">{{$compulsoryFee->installment_fee->name}}
-                                        <br><small>Mode : <span class="font-weight-bold">({{ $compulsoryFee->mode}})</span></small>
-                                        <br><small>Date &nbsp;: <span class="font-weight-bold">{{date('d-m-Y',strtotime($compulsoryFee->date))}} </span></small>
-                                        <br><small>Includes : <span class="font-weight-bold">{{$compulsoryFeesType}} </span></small>
+<div class="page-break">
 
-                                        @if ((float)$compulsoryFee->due_charges > 0)
-                                            <br><small>Due Charges: <b>{{ $compulsoryFee->due_charges }}</b></small>
-                                        @endif
-                                        @php
-                                            $due_charges += $compulsoryFee->due_charges ?? 0;
-                                        @endphp
-                                    </td>
-                                    <td class="text-right">{{$compulsoryFee->amount + $compulsoryFee->due_charges}} {{$school['currency_symbol'] ?? ''}}</td>
-                                </tr>
-                            @endif
+    <!-- Header -->
+    <div class="text-center">
+        @if ($school['horizontal_logo'] ?? '')
+            <img src="{{ public_path('storage/') . $school['horizontal_logo'] }}" style="height:60px; max-width:100%;">
+        @endif
 
-                            @php
-                                $total_fees += $compulsoryFee->amount;
-                            @endphp
+      {{--  <div style="font-size:16px; font-weight:bold;">
+            {{ $school['school_name'] ?? '' }}
+        </div>--}}</br></br>
 
-                        @endforeach
-                    @endif
-
-                    {{-- Optional Fees Listing --}}
-                    @if(isset($feesPaid->optional_fee) && $feesPaid->optional_fee->isNotEmpty())
-                        @foreach ($feesPaid->optional_fee as $optionalFee)
-                            <tr>
-                                <th scope="row" class="text-left">{{$no++}}</th>
-                                <td colspan="2" class="text-left">{{ $optionalFee->fees_class_type->fees_type_name}} <small class="font-weight-bold">({{__("optional")}})</small>
-                                    <br><small>Mode : <span class="font-weight-bold">({{ $optionalFee->mode }})</span></small>
-                                    <br><small>Date &nbsp;: <span class="font-weight-bold">{{date('d-m-Y',strtotime($optionalFee->date))}} </span></small>
-                                </td>
-                                <td class="text-right">{{$optionalFee->amount}} {{$school['currency_symbol'] ?? ''}}</td>
-                            </tr>
-                            @php
-                                $total_fees += $optionalFee->amount;
-                                $total_optional_fees += $optionalFee->amount;
-                            @endphp
-                        @endforeach
-                    @endif
-                    <tr>
-                        <th scope="row"></th>
-                        <td colspan="2" class="text-left"><strong>Total Amount</strong></td>
-                        <td class="text-right">{{$total_fees + $due_charges}} {{$school['currency_symbol'] ?? ''}}</td>
-                    </tr>
-
-                    @if (($feesPaid->fees->total_compulsory_fees + $due_charges) != ($total_fees - $total_optional_fees))
-                        <tr>
-                            <th scope="row"></th>
-                            <td colspan="2" class="text-left"><strong>Total Compulsory Fees Amount</strong></td>
-                            <td class="text-right">{{ $feesPaid->fees->total_compulsory_fees + $due_charges }} {{$school['currency_symbol'] ?? ''}}</td>
-                        </tr>
-
-                        <tr>
-                            <th scope="row"></th>
-                            <td colspan="2" class="text-left"><strong>Remaining Fees Amount</strong></td>
-                            <td class="text-right">{{ ($feesPaid->fees->total_compulsory_fees - $total_fees + $total_optional_fees) }} {{$school['currency_symbol'] ?? ''}}</td>
-                        </tr>
-                    @endif
-                    
-                    </tbody>
-                </table>
-            </div>
+        <div>
+            {{ $school['school_address'] ?? '' }}
         </div>
+
+        <div class="header-line"></div>
+        <h3>FEE RECEIPT</h3>
     </div>
+
+    <!-- Student & Receipt Details -->
+    <table class="no-border" style="margin-top:15px;">
+        <tr>
+            <td width="50%" style="vertical-align:top; text-align:left; padding:0;">
+                <strong>Student Details</strong><br><br>
+                <strong>Name:</strong> {{ $student->user->full_name }}<br>
+                <strong>Class:</strong> {{ $student->class_section->full_name ?? '' }}<br>
+                <strong>GR No:</strong> {{ $student->user->email }}<br>
+            </td>
+
+            <td width="50%" style="vertical-align:top; text-align:left; padding:0;">
+                <strong>Receipt Details</strong><br><br>
+                <strong>Receipt No:</strong> C-{{ $compulsoryFee->id ?? '' }}<br>
+                <strong>Date:</strong> {{ date('d-m-Y', strtotime($compulsoryFee->date)) }}
+            </td>
+        </tr>
+    </table>
+
+    <!-- Fees Table -->
+    <table style="margin-top:20px;">
+        <thead>
+            <tr>
+                <th>Fee Type</th>
+                <th width="20%">Amount</th>
+                <th width="25%">Remark</th>
+            </tr>
+        </thead>
+        <tbody>
+
+            @if($compulsoryFee->type == "Full Payment")
+
+                <tr>
+                    <td class="text-left">
+                        <strong>{{ $compulsoryFee->type }}</strong><br>
+                        <small>( {{ $compulsoryFeesType }} )</small><br><br>
+
+                        <strong>Mode:</strong> 
+                        {{ !empty($compulsoryFee->bank_name) ? 'Bank' : $compulsoryFee->mode }}<br>
+
+                        @if($compulsoryFee->mode === "Online")
+                            <strong>Bank:</strong> {{ $compulsoryFee->bank_name ?? '-' }}<br>
+                            <strong>Txn ID:</strong> {{ $compulsoryFee->transaction_id ?? '-' }}<br>
+                        @endif
+
+                        @if($compulsoryFee->mode === "chaque")
+                            <strong>Cheque No:</strong> {{ $compulsoryFee->chaque_no ?? '-' }}<br>
+                        @endif
+                    </td>
+
+                    <td class="text-right">
+                        {{ number_format($compulsoryFee->amount,2) }} {{ $school['currency_symbol'] ?? '' }}
+                    </td>
+
+                    <td class="text-left">
+                        {{ $compulsoryFee->remark }}
+                    </td>
+                </tr>
+
+                @if ($compulsoryFee->due_charges > 0)
+                <tr>
+                    <td class="text-left">Due Charges</td>
+                    <td class="text-right">
+                        {{ number_format($compulsoryFee->due_charges,2) }} {{ $school['currency_symbol'] ?? '' }}
+                    </td>
+                    <td></td>
+                </tr>
+                @endif
+
+            @elseif($compulsoryFee->type == "Installment Payment")
+
+                <tr>
+                    <td class="text-left">
+                        <strong>{{ $compulsoryFee->installment_fee->name }}</strong><br>
+                        <small>Includes: {{ $compulsoryFeesType }}</small><br>
+                        <strong>Mode:</strong> {{ $compulsoryFee->mode }}
+                    </td>
+
+                    <td class="text-right">
+                        {{ number_format($compulsoryFee->amount + $compulsoryFee->due_charges,2) }}
+                        {{ $school['currency_symbol'] ?? '' }}
+                    </td>
+
+                    <td></td>
+                </tr>
+
+            @endif
+
+            <!-- Total -->
+            <tr>
+                <td class="text-left"><strong>Total Amount</strong></td>
+                <td class="text-right">
+                    <strong>
+                        {{ number_format($compulsoryFee->amount + ($compulsoryFee->due_charges ?? 0),2) }}
+                        {{ $school['currency_symbol'] ?? '' }}
+                    </strong>
+                </td>
+                <td></td>
+            </tr>
+
+        </tbody>
+    </table>
+
+    <!-- Signature Section -->
+    <table class="no-border" style="margin-top:50px;">
+        <tr>
+            <td width="50%" class="text-left">
+                <strong>Authorized Signature</strong><br><br><br>
+                ______________________
+            </td>
+
+            <td width="50%" class="text-right">
+                <strong>Receiver Signature</strong><br><br><br>
+                ______________________
+            </td>
+        </tr>
+    </table>
+
 </div>
 
-</body>
+@endforeach
+@endif
 
+</body>
 </html>

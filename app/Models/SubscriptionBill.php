@@ -8,10 +8,11 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use App\Traits\DateFormatTrait;
+use App\Traits\LogsActivity;
 
 class SubscriptionBill extends Model
 {
-    use HasFactory, DateFormatTrait;
+    use HasFactory, DateFormatTrait,LogsActivity;
     protected $connection = 'mysql';
     protected $fillable = ['subscription_id','amount','total_student','total_staff','payment_transaction_id','due_date','school_id'];
     protected $appends = ['format_due_date'];

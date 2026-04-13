@@ -6,11 +6,14 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Auth;
 use App\Traits\DateFormatTrait;
+use App\Traits\LogsActivity;
 
 class Holiday extends Model {
-    use HasFactory, DateFormatTrait;
+    use HasFactory, DateFormatTrait,LogsActivity;
 
     protected $fillable = [
+        'type',
+        'class_ids',
         'date',
         'title',
         'description',
@@ -64,4 +67,5 @@ class Holiday extends Model {
     public function getDateAttribute() {
         return $this->formatDateOnly($this->getRawOriginal('date'));
     }
+   
 }

@@ -90,6 +90,7 @@ class AssignmentController extends Controller
             "resubmission"                => 'nullable|boolean',
             "extra_days_for_resubmission" => 'nullable|numeric',
             'file'                        => 'nullable|array',
+            "type" => "required|in:homework,assignment",
             'file.*'                      => ['mimes:jpeg,png,jpg,gif,svg,webp,pdf,doc,docx,xml', new MaxFileSize($file_upload_size_limit) ],
             'add_url'          => $request->checkbox_add_url ? 'required' : 'nullable',
         ],[
@@ -108,6 +109,7 @@ class AssignmentController extends Controller
                 'resubmission'                => $request->resubmission ? 1 : 0,
                 'extra_days_for_resubmission' => $request->resubmission ? $request->extra_days_for_resubmission : null,
                 'session_year_id'             => $sessionYear->id,
+                'type' => $request->type ?? 'homework',
                 'created_by'                  => Auth::user()->id,
             );
 
@@ -198,7 +200,7 @@ class AssignmentController extends Controller
             $subjectName = $this->subject->builder()->select('name')->where('id', $request->subject_id)->pluck('name')->first();
             $title = 'New assignment added in ' . $subjectName;
             $body = $request->name;
-            $type = "assignment";
+            $type = $request->type;
         
             // Get student and guardian IDs for notifications
             $students = $this->student->builder()->where('class_section_id', $request->class_section_id)->get();
@@ -260,6 +262,7 @@ class AssignmentController extends Controller
                     $query->where(function ($query) use ($search) {
                         $query->where('id', 'LIKE', "%$search%")
                             ->orwhere('name', 'LIKE', "%$search%")
+                            ->orwhere('type', 'LIKE', "%$search%")
                             ->orwhere('instructions', 'LIKE', "%$search%")
                             ->orwhere('points', 'LIKE', "%$search%")
                             ->orwhere('session_year_id', 'LIKE', "%$search%")
@@ -366,7 +369,8 @@ class AssignmentController extends Controller
             "name"                        => 'required',
             "description"                 => 'nullable',
             "due_date"                    => 'required|date',
-            "points"                      => 'required',
+            "type" => "required|in:homework,assignment",
+            "points" => "required_if:type,assignment|nullable|numeric|min:0",
             "resubmission"                => 'nullable|boolean',
             "extra_days_for_resubmission" => 'nullable|numeric',
             'file'                        => 'nullable|array',
@@ -381,7 +385,6 @@ class AssignmentController extends Controller
 
             // $sessionYearId = getSchoolSettings('session_year');
             $sessionYear = $this->cache->getDefaultSessionYear();
-
             $classID = $this->classSection->builder()->where('id', $request->class_section_id)->pluck('class_id')->first();
             $classSubject = $this->class_subjects->builder()->where('class_id', $classID)->where('subject_id', $request->class_subject_id)->first();
             $assignmentData = array(
@@ -393,13 +396,13 @@ class AssignmentController extends Controller
                 'session_year_id'             => $sessionYear->id,
                 'edited_by'                   => Auth::user()->id,
             );
-            
+
             $section_ids = is_array($request->class_section_id) ? $request->class_section_id : [$request->class_section_id];
             foreach ($section_ids as $section_id) {
                 $assignmentData = array_merge($assignmentData, ['class_section_id' => $section_id]);
             }
 
-            // DB::enableQueryLog();
+            DB::enableQueryLog();
             $assignment = $this->assignment->update($id, $assignmentData);
             // dd(DB::getQueryLog());
             // If File Exists
@@ -442,7 +445,7 @@ class AssignmentController extends Controller
             $subject_name = $this->subject->builder()->select('name')->where('id', $request->subject_id)->pluck('name')->first();
             $title = 'Update assignment in ' . $subject_name;
             $body = $request->name;
-            $type = "assignment";
+            $type = $request->type;
             $user = $this->student->builder()->select('user_id')->where('class_section_id', $request->class_section_id)->get()->pluck('user_id');
             $assignment->save();
 

@@ -50,9 +50,9 @@
                 <div class="row flex-grow">
                     <div class="col-xl-6 mx-auto auth-form-light p-4 m-4">
                         @if (env('DEMO_MODE'))
-                        <div class="alert alert-info text-center" role="alert">
+                        <!-- <div class="alert alert-info text-center" role="alert">
                             NOTE : <a target="_blank" href="https://eschool-saas.wrteam.me/login">-- Click Here --</a> if you cannot login.
-                        </div>
+                        </div> -->
                         @endif
                         <div class="rounded-lg text-left p-5">
                             <div class="brand-logo text-center">

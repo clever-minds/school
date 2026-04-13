@@ -688,20 +688,20 @@ class FeesController extends Controller
     }
 
     /* START : Fees Paid Module */
-    public function feesPaidListIndex()
-    {
-        ResponseService::noFeatureThenRedirect('Fees Management');
-        ResponseService::noPermissionThenRedirect('fees-paid');
+        public function feesPaidListIndex()
+        {
+            ResponseService::noFeatureThenRedirect('Fees Management');
+            ResponseService::noPermissionThenRedirect('fees-paid');
 
-        // Fees Data With Few Selected Data
-        $fees = $this->fees->builder()->select(['id', 'name','class_id'])->get();
-        $classes = $this->classes->all(['*'], ['medium', 'sections']);
-        //        $session_year_all = $this->sessionYear->builder()->where('default', 1)->get();
-        $session_year_all = $this->sessionYear->all(['id', 'name', 'default']);
-        $class_section = $this->classSection->builder()->with('class', 'class.stream', 'section', 'medium')->get();
-        $months = sessionYearWiseMonth();
-        return response(view('fees.fees_paid', compact('fees', 'classes', 'session_year_all', 'months', 'class_section')));
-    }
+            // Fees Data With Few Selected Data
+            $fees = $this->fees->builder()->select(['id', 'name','class_id'])->get();
+            $classes = $this->classes->all(['*'], ['medium', 'sections']);
+            //        $session_year_all = $this->sessionYear->builder()->where('default', 1)->get();
+            $session_year_all = $this->sessionYear->all(['id', 'name', 'default']);
+            $class_section = $this->classSection->builder()->with('class', 'class.stream', 'section', 'medium')->get();
+            $months = sessionYearWiseMonth();
+            return response(view('fees.fees_paid', compact('fees', 'classes', 'session_year_all', 'months', 'class_section')));
+        }
 
     public function feesPaidList(Request $request)
     {
@@ -716,7 +716,7 @@ class FeesController extends Controller
         $class_section_id = request('class_section_id');
         $class_id = request('class_id');
         $settings = $this->cache->getSchoolSettings();
-
+        $student_id=(int)request('student_id');
         $sessionYearId = $requestSessionYearId ?? $this->cache->getDefaultSessionYear()->id;
         $fees = null;
         if ($feesId) {
@@ -758,6 +758,11 @@ class FeesController extends Controller
                     }
                 });
                 
+                if (!empty($student_id)) {
+                    $sql->whereHas('student', function ($q) use ($student_id) {
+                        $q->where('id', $student_id);
+                    });
+                }
 
             if (!empty($_GET['search'])) {
                 $search = $_GET['search'];
@@ -939,8 +944,7 @@ class FeesController extends Controller
                     ]);
                 }
             ])->firstOrFail();
-
-            $student = $this->student->builder()->with('user:id,first_name,last_name', 'class_section.class.stream', 'class_section.section', 'class_section.medium')->whereHas('user', function ($q) use ($feesPaid) {
+            $student = $this->student->builder()->with('user:id,first_name,last_name,email', 'class_section.class.stream', 'class_section.section', 'class_section.medium')->whereHas('user', function ($q) use ($feesPaid) {
                 $q->where('id', $feesPaid->student_id);
             })->firstOrFail();
 
@@ -955,7 +959,94 @@ class FeesController extends Controller
                 $school['horizontal_logo'] = end($data);
             }
 
-            $pdf = Pdf::loadView('fees.fees_receipt', compact('school', 'feesPaid', 'student'));
+            $pdf = Pdf::loadView('fees.fees_receipt', compact('school', 'feesPaid', 'student'))->setPaper('a5');
+            return $pdf->stream('fees-receipt.pdf');
+        } catch (Throwable $e) {
+            return $e;
+            ResponseService::errorRedirectResponse();
+            return false;
+        }
+    }
+// public function feesPaidReceiptPDF1($feesPaidId)
+// {
+//     ResponseService::noFeatureThenRedirect('Fees Management');
+//     ResponseService::noPermissionThenRedirect('fees-paid');
+//     try {
+//         $feesPaid = $this->feesPaid->builder()
+//             ->whereHas('compulsory_fee', function ($q) use ($feesPaidId) {
+//                 $q->where('id', $feesPaidId);
+//             })
+//             ->with([
+//                 'compulsory_fee:id'
+//             ])
+//             ->firstOrFail();
+
+//         $student = $this->student->builder()
+//             ->with('user:id,first_name,last_name,email', 'class_section.class.stream', 'class_section.section', 'class_section.medium')
+//             ->whereHas('user', function ($q) use ($feesPaid) {
+//                 $q->where('id', $feesPaid->student_id);
+//             })
+//             ->firstOrFail();
+
+//         $school = $this->cache->getSchoolSettings();
+
+//         $data = explode("storage/", $school['horizontal_logo'] ?? '');
+//         $school['horizontal_logo'] = end($data);
+
+//         if ($school['horizontal_logo'] == null) {
+//             $systemSettings = $this->cache->getSystemSettings();
+//             $data = explode("storage/", $systemSettings['horizontal_logo'] ?? '');
+//             $school['horizontal_logo'] = end($data);
+//         }
+
+//         $pdf = Pdf::loadView('fees.fees_receipt', compact('school', 'feesPaid', 'student'));
+//         return $pdf->stream('fees-receipt.pdf');
+//     } catch (Throwable $e) {
+//         dd($e);
+//         ResponseService::errorRedirectResponse();
+//         return false;
+//     }
+// }
+public function feesPaidReceiptPDF1($feesPaidId)
+    {
+        ResponseService::noFeatureThenRedirect('Fees Management');
+        ResponseService::noPermissionThenRedirect('fees-paid');
+
+        try {
+            DB::enableQueryLog();
+           $feesPaid = $this->feesPaid->builder()
+    ->whereHas('compulsory_fee', function ($q) use ($feesPaidId) {
+        $q->where('id', $feesPaidId);   // ✅ compulsory_fees.id
+    })
+    ->with([
+        'fees.fees_class_type.fees_type',
+
+        'compulsory_fee' => function ($q) use ($feesPaidId) {
+            $q->where('id', $feesPaidId)   // ✅ THIS WAS MISSING
+              ->with('installment_fee:id,name');
+        },
+
+        'optional_fee.fees_class_type.fees_type:id,name'
+    ])
+    ->firstOrFail();
+
+
+            $student = $this->student->builder()->with('user:id,first_name,last_name,email', 'class_section.class.stream', 'class_section.section', 'class_section.medium')->whereHas('user', function ($q) use ($feesPaid) {
+                $q->where('id', $feesPaid->student_id);
+            })->firstOrFail();
+
+            $school = $this->cache->getSchoolSettings();
+
+            $data = explode("storage/", $school['horizontal_logo'] ?? '');
+            $school['horizontal_logo'] = end($data);
+
+            if ($school['horizontal_logo'] == null) {
+                $systemSettings = $this->cache->getSystemSettings();
+                $data = explode("storage/", $systemSettings['horizontal_logo'] ?? '');
+                $school['horizontal_logo'] = end($data);
+            }
+
+            $pdf = Pdf::loadView('fees.fees_receipt', compact('school', 'feesPaid', 'student'))->setPaper('a5');
             return $pdf->stream('fees-receipt.pdf');
         } catch (Throwable $e) {
             return $e;
@@ -964,6 +1055,7 @@ class FeesController extends Controller
         }
     }
 
+
     public function payCompulsoryFeesIndex($feesID, $studentID)
     {
         ResponseService::noFeatureThenRedirect('Fees Management');
@@ -971,7 +1063,7 @@ class FeesController extends Controller
         $fees = $this->fees->findById($feesID, ['*'], ['fees_class_type.fees_type:id,name', 'installments:id,name,due_date,due_charges,due_charges_type,fees_id']);
         $oneInstallmentPaid = false;
 
-        $student = $this->user->builder()->role('Student')->select('id', 'first_name', 'last_name')
+        $student = $this->user->builder()->role('Student')->select('id', 'first_name', 'last_name','email')
             ->with(['student' => function ($query) {
                 $query->select('id', 'class_section_id', 'user_id', 'guardian_id')->with(['class_section' => function ($query) {
                     $query->select('id', 'class_id', 'section_id', 'medium_id')->with('class:id,name', 'section:id,name', 'medium:id,name');
@@ -1114,7 +1206,10 @@ class FeesController extends Controller
                             'type'           => 'Installment Payment',
                             'installment_id' => $installment_fee['id'],
                             'mode'           => $request->mode,
+                            'remark'           => $request->remark,
                             'cheque_no'      => $request->mode == 2 ? $request->cheque_no : null,
+                            'transaction_id' => $request->mode == 3 ? $request->transaction_id : null,
+                            'bank_name'      => $request->mode == 3 ? $request->bank_name : null,
                             'amount'         => $installment_fee['amount'],
                             'due_charges'    => $installment_fee['due_charges'] ?? null,
                             'fees_paid_id'   => $feesPaidResult->id,
@@ -1133,7 +1228,10 @@ class FeesController extends Controller
                     'type'         => 'Full Payment',
                     'student_id'   => $request->student_id,
                     'mode'         => $request->mode,
+                    'remark'         => $request->remark,
                     'cheque_no'    => $request->mode == 2 ? $request->cheque_no : null,
+                    'transaction_id' => $request->mode == 3 ? $request->transaction_id : null,
+                    'bank_name'      => $request->mode == 3 ? $request->bank_name : null,
                     'amount'       => $amount,
                     'due_charges'  => $request->due_charges_amount ?? null,
                     'fees_paid_id' => $feesPaidResult->id,
@@ -1255,8 +1353,11 @@ class FeesController extends Controller
                             'fees_class_id' => $feesClassType['id'],
                             'mode'          => $request->mode,
                             'cheque_no'     => $request->mode == 2 ? $request->cheque_no : null,
+                            'transaction_id' => $request->mode == 3 ? $request->transaction_id : null,
+                            'bank_name'      => $request->mode == 3 ? $request->bank_name : null,
                             'amount'        => $feesClassType['amount'],
                             'fees_paid_id'  => $feesPaidResult->id,
+                            'remark'          => $request->remark,
                             'date'          => date('Y-m-d', strtotime($request->date)),
                             'status'        => "Success",
                             'created_at'    => now(),

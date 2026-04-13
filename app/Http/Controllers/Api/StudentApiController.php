@@ -874,14 +874,28 @@ class StudentApiController extends Controller {
 
     public function getOnlineExamList(Request $request) {
         $validator = Validator::make($request->all(), [
-            'class_subject_id' => 'nullable|numeric'
+            'class_subject_id' => 'nullable|numeric',
+            'child_id' => 'required|numeric',
         ]);
 
         if ($validator->fails()) {
             ResponseService::validationError($validator->errors()->first());
         }
         try {
-            $student = Auth::user()->student;
+             if(!empty($request->child_id)){
+                  $student = Students::find($request->child_id);
+
+                    if(!$student){
+                        return response()->json([
+                            'status' => false,
+                            'message' => 'Child not found'
+                        ], 404);
+                    }
+
+                    $student = $student;
+                } else {
+                    $student = Auth::user()->student->user_id;
+                }
             $classSectionId = $student->class_section->id;
             $sessionYear = $this->cache->getDefaultSessionYear();
 
@@ -924,13 +938,30 @@ class StudentApiController extends Controller {
         $validator = Validator::make($request->all(), [
             'exam_id'  => 'required',
             'exam_key' => 'required',
+            'child_id' => 'nullable|integer',
         ]);
 
         if ($validator->fails()) {
             ResponseService::validationError($validator->errors()->first());
         }
         try {
-            $student = Auth::user()->student;
+
+                if(!empty($request->child_id)){
+                  $student =Students::find($request->child_id);
+
+                    if(!$student){
+                        return response()->json([
+                            'status' => false,
+                            'message' => 'Child not found'
+                        ], 404);
+                    }
+
+                    $student = $student;
+                } else {
+                    $student = Auth::user()->student->user_id;
+                }
+
+
             // Checks Student Exam Status
             if ($this->studentOnlineExamStatus->builder()
                 ->where(['online_exam_id' => $request->exam_id, 'student_id' => $student->user_id])
@@ -1014,6 +1045,7 @@ class StudentApiController extends Controller {
         $validator = Validator::make($request->all(), [
             'online_exam_id' => 'required|numeric',
             'answers_data'   => 'nullable|array',
+            'child_id' => 'nullable|integer',
             //            'answers_data.*.question_id'    => 'required|numeric',
         ]);
 
@@ -1021,8 +1053,19 @@ class StudentApiController extends Controller {
             ResponseService::validationError($validator->errors()->first());
         }
         try {
-            $student = Auth::user()->student;
+             if(!empty($request->child_id)){
+                   $student = Students::find($request->child_id);
+                    if(!$student){
+                        return response()->json([
+                            'status' => false,
+                            'message' => 'Child not found'
+                        ], 404);
+                    }
 
+                    $student = $student;
+                } else {
+                    $student = Auth::user()->student->user_id;
+                } 
             DB::beginTransaction();
             // Check Online Exam Exists or not
 //            $onlineExamData = $this->onlineExam->findById($request->online_exam_id);
@@ -1083,14 +1126,28 @@ class StudentApiController extends Controller {
 
     public function getOnlineExamResultList(Request $request) {
         $validator = Validator::make($request->all(), [
-            'class_subject_id' => 'nullable|numeric'
+            'class_subject_id' => 'nullable|numeric',
+            'child_id' => 'required|numeric',
         ]);
 
         if ($validator->fails()) {
             ResponseService::validationError($validator->errors()->first());
         }
         try {
-            $student = Auth::user()->student;
+             if(!empty($request->child_id)){
+                  $student = Students::find($request->child_id);
+
+                    if(!$student){
+                        return response()->json([
+                            'status' => false,
+                            'message' => 'Child not found'
+                        ], 404);
+                    }
+
+                    $student = $student;
+                } else {
+                    $student = Auth::user()->student->user_id;
+                }
             $classSectionId = $student->class_section_id;
             $sessionYear = $this->cache->getDefaultSessionYear();
 

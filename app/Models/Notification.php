@@ -7,11 +7,12 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Storage;
 use App\Traits\DateFormatTrait;
+use App\Traits\LogsActivity;
 
 class Notification extends Model
 {
-    use HasFactory, DateFormatTrait;
-    protected $fillable = ['title','message','image','send_to','session_year_id','school_id'];
+    use HasFactory, DateFormatTrait,LogsActivity;
+    protected $fillable = ['title','message','image','send_to','session_year_id','school_id','event_date'];
 
     protected static function boot() {
         parent::boot();
@@ -58,5 +59,9 @@ class Notification extends Model
         return $this->formatDateValue($this->getRawOriginal('updated_at'));
     }
     
+ public function notificationUsers()
+    {
+        return $this->hasMany(NotificationUser::class);
+    }
 
 }

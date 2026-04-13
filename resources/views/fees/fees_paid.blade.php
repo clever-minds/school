@@ -95,9 +95,11 @@
                                 <div class="form-group col-md-4">
                                     <label class="filter-menu" for="filter_fees_id">{{ __('Fees') }}</label>
                                     <select name="filter_fees_id" id="filter_fees_id" class="form-control">
+                                                <option value="">{{ __('all') }}</option>
                                         @foreach ($fees as $key => $fee)
                                             <option value="{{ $fee->id }}" data-class-section-id="{{ $fee->class_id }}" {{ $key == 0 ? 'selected' : '' }}>
-                                                {{ $fee->name }}</option>
+                                                {{ $fee->name }}</option> 
+                                               
                                         @endforeach
                                     </select>
                                 </div>
@@ -105,8 +107,10 @@
                                 <div class="form-group col-md-4">
                                     <label for="filter-class-section-id"
                                         class="filter-menu">{{ __('Class Section') }}</label>
+                                        
                                     <select name="filter-class-section-id" id="filter-class-section-id"
                                         class="form-control">
+
                                         <option value="">{{ __('all') }}</option>
                                         @foreach ($class_section as $class)
                                             <option value="{{ $class->id }}" data-class-section-id="{{ $class->class_id }}">
@@ -125,6 +129,13 @@
                                         
                                     </select>
                                 </div>
+                                    <div class="form-group col-md-3">
+                                    <label class="filter-menu" for="filter_paid_status"> {{ __('GR Number') }} </label>
+                               
+                                    <select class="grno-search form-control" id="gr_no"><option>search</option></select>
+                                    <input type="hidden" id="student_id" class="student_id" name="student_id">
+                                </div>
+
                             </div>
 
                             {{-- Paid filter --}}
@@ -184,7 +195,10 @@
 @endsection
 @section('js')
     <script>
-
+    $('#gr_no').on('change', function () {
+        $('#student_id').val($(this).val()); // student id set
+        $('#table_list').bootstrapTable('refresh');
+    });
         $('#filter_paid_status').change(function (e) { 
             e.preventDefault();
             $('.paid-filter').hide(500);
@@ -204,11 +218,11 @@
             ajaxRequest('GET', baseUrl + '/fees/search', {
                 'session_year_id': $(this).val()
             }, null, function(response) {
-                let feesDropdown = "";
+                let feesDropdown = '';
+
                 response.data.forEach(function(value, index) {
                     feesDropdown += "<option value='" + value.id + "' data-class-section-id='" + value.class_id + "'>" + value.name + "</option>";
                 })
-
                 $('#filter_fees_id').html(feesDropdown);
                 $('#table_list').bootstrapTable('refresh');
             }, null, null, true)

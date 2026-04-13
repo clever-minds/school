@@ -519,7 +519,8 @@ select2Search($(".edit-school-admin-search"), baseUrl + "/schools/admin/search",
 });
 
 //Guardian Search
-select2Search($(".guardian-search"), baseUrl + "/guardian/search", null, 'Search for Guardian Email', Select2SearchDesignTemplate, function (repo) {
+select2Search($(".guardian-search"), baseUrl + "/guardian/search", null, 'Search for Guardian Mobile', Select2SearchDesignTemplatemob, function (repo) {
+   
     if (!repo.text) {
         $('.guardian_email').val(repo.email);
         $('#guardian_first_name').val(repo.first_name).prop('readonly', true);
@@ -547,16 +548,16 @@ select2Search($(".guardian-search"), baseUrl + "/guardian/search", null, 'Search
         $('.guardian_email').val(repo.text).prop('readonly', false);
         $('#guardian_first_name').val('').prop('readonly', false);
         $('#guardian_last_name').val('').prop('readonly', false);
-        $('#guardian_mobile').val('').prop('readonly', false);
+        $('#guardian_mobile').val(repo.text);
         $('#guardian-image-tag').attr('src', '');
         $('#guardian_image').siblings('span').find('button').prop('disabled', false);
         $('#guardian_male').unbind('click');
         $('#guardian_female').unbind('click');
     }
-    return repo.email || repo.text;
+    return repo.mobile || repo.text;
 });
 
-select2Search($(".edit-guardian-search"), baseUrl + "/guardian/search", null, 'Search for Guardian Email', Select2SearchDesignTemplate, function (repo) {
+select2Search($(".edit-guardian-search"), baseUrl + "/guardian/search", null, 'Search for Guardian Mobile', Select2SearchDesignTemplatemob, function (repo) {
     if (!repo.text) {
         $('#edit_guardian_email').val(repo.email);
         $('#edit_guardian_first_name').val(repo.first_name);
@@ -572,18 +573,18 @@ select2Search($(".edit-guardian-search"), baseUrl + "/guardian/search", null, 'S
         $('#edit_guardian_dob').val(repo.dob);
         $('#edit-guardian-image-tag').attr('src', repo.image);
     } else {
-        $('#edit_guardian_email').val(repo.text);
+        $('#edit_guardian_email').val(repo.email);
         $('#edit_guardian_first_name').val('');
         $('#edit_guardian_last_name').val('');
         $('#edit_guardian_mobile').val('');
     }
-    return repo.email || repo.text;
+
+    return repo.mobile || repo.text;
 });
 
 
 
-select2Search($(".grno-search"), baseUrl + "/student/search", null,
-  "Search for GR NO. Student", Select2SearchDesignTemplate, function (repo) {
+select2Search($(".grno-search"), baseUrl + "/student/search", null,"Search for GR NO. Student", Select2SearchDesignTemplate, function (repo) {
         if (!repo || !repo.id) return;
     if (repo && repo.text) {
       $("#student_id").val(repo.id || "");
@@ -591,6 +592,8 @@ select2Search($(".grno-search"), baseUrl + "/student/search", null,
       $("#edit_guardian_last_name").val(repo.last_name || "");
       $("#edit_guardian_mobile").val(repo.mobile || "");
       $("#edit_guardian_dob").val(repo.dob || "");
+      $("#student_uni").val(repo.uni_no || "");
+      $("#student_pen_no").val(repo.pen_no || "");
 
       if (repo.gender === "male") {
         $("#edit-guardian-male").prop("checked", true);
@@ -936,12 +939,19 @@ $('#verify_email').on('submit', function (e) {
 // });
 $('.mode').on('change', function (e) {
     e.preventDefault();
+
+    // Pehle dono hide karo
+    $('.cheque-no-container').hide(200);
+    $('.bank-no-container').hide(200);
+
     if ($(this).val() == 2) {
         $('.cheque-no-container').show(200);
-    } else {
-        $('.cheque-no-container').hide(200);
+    } 
+    else if ($(this).val() == 3) {
+        $('.bank-no-container').show(200);
     }
 });
+
 $('.pay_student_fees_offline').on('submit', function (e) {
     e.preventDefault();
     let formElement = $(this);
@@ -2491,7 +2501,8 @@ $('#filter-class-section-id').on('change', function () {
 
 $('#filter_fees_id').on('change', function () {
     var selectedOption = $(this).find(':selected');
-    var dataId = selectedOption.data('class-section-id');
+    var dataId = selectedOption.attr('data-class-section-id'); // ✅ CHANGE HERE
+    console.log(dataId);
     getFeesClassOptionsList('#filter-class-section-id', dataId)
 });
 

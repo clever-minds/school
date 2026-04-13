@@ -276,10 +276,10 @@
                                 {!! Form::select('session_year_id', $sessionYear, $defaultSessionYear->id, ['class' => 'form-control', 'id' => 'filter_session_year_id']) !!}
                             </div>
 
-                            <div class="form-group col-sm-12 col-md-3">
+                            {{--<div class="form-group col-sm-12 col-md-3">
                                 <label for="filter-medium_id" class="filter-menu">{{__("medium")}}</label>
                                 {!! Form::select('medium_id', $mediums, null, ['class' => 'form-control', 'id' => 'filter_medium_id', 'placeholder' => __('all')]) !!}
-                            </div>
+                            </div>--}}
                         </div>
                         <div class="col-12 text-right">
                             <b><a href="#" class="table-list-type active mr-2" data-id="0">{{__('all')}}</a></b> | <a

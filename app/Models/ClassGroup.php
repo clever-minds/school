@@ -7,10 +7,11 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use App\Traits\DateFormatTrait;
 use Storage;
+use App\Traits\LogsActivity;
 
 class ClassGroup extends Model
 {
-    use HasFactory, DateFormatTrait;
+    use HasFactory, DateFormatTrait,LogsActivity;
     protected $fillable = ['name','description','image','class_ids','school_id'];
 
     protected $appends = ['class_name'];

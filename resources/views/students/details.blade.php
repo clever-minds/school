@@ -37,24 +37,20 @@
                                     @endforeach
                                 </select>
                             </div>
-                            @can('student-delete')
                                 <div class="form-group col-12">
                                     <button id="update-status" class="btn btn-secondary" disabled><span class="update-status-btn-name">{{ __('Inactive') }}</span></button>
                                 </div>
-                            @endcan
                         </div>
 
-                        @can('student-delete')
                             <div class="col-12 mt-4 text-right">
                                 <b><a href="#" class="table-list-type active mr-2" data-id="0">{{__('active')}}</a></b> | <a href="#" class="ml-2 table-list-type" data-id="1">{{__("Inactive")}}</a>
                             </div>
-                        @endcan
                         <div class="row">
                             <div class="col-12">
                                 <table aria-describedby="mydesc" class='table' id='table_list'
                                        data-toggle="table" data-url="{{ route('students.show',[1]) }}" data-click-to-select="true"
                                        data-side-pagination="server" data-pagination="true"
-                                       data-page-list="[5, 10, 20, 50, 100, 200]" data-search="true"
+                                       data-page-list="[10, 20, 50, 100, 200]" data-search="true"
                                        data-toolbar="#toolbar" data-show-columns="true" data-show-refresh="true" data-fixed-columns="false"
                                        data-trim-on-search="false" data-mobile-responsive="true" data-sort-name="id"
                                        data-sort-order="desc" data-maintain-selected="true" data-export-types="['pdf','json', 'xml', 'csv', 'txt', 'sql', 'doc', 'excel']" data-show-export="true"
@@ -64,11 +60,14 @@
                                     <tr>
                                         <th data-field="state" data-checkbox="true"></th>
                                         <th scope="col" data-field="id" data-sortable="true" data-visible="false">{{ __('id') }}</th>
-                                        <th scope="col" data-field="no">{{ __('no.') }}</th>
+                                        <th scope="col" data-field="rte_status" data-sortable="true" data-visible="false">{{ __('RTE/NON Rte') }}</th>
+                                        <th scope="col" data-field="no" data-formatter="indexFormatter">{{ __('no.') }}</th>
                                         <th scope="col" data-field="user.id" data-visible="false">{{ __('User Id') }}</th>
-                                        <th scope="col" data-field="user.full_name" data-formatter="StudentNameFormatter">{{ __('name') }}</th>
+                                        <th scope="col" data-field="user.full_name">{{ __('name') }}</th>
+                                        <th scope="col" data-field="cast" data-sortable="true" data-visible="false">{{ __('Cast') }}</th>
+                                        <th scope="col" data-field="user.email" data-visible="true">{{ __('GR NO.') }}</th>
                                         <th scope="col" data-field="user.dob" >{{ __('dob') }}</th>
-                                        <th scope="col" data-field="class_section.full_name">{{ __('class_section') }}</th>
+                                        <th scope="col" data-field="class_section.full_name" data-formatter="classSectionFormatter">{{ __('class_section') }}</th>
                                         <th scope="col" data-field="roll_number">{{ __('roll_no') }}</th>
                                         <th scope="col" data-field="user.gender">{{ __('gender') }}</th>
                                         <th scope="col" data-field="admission_date" >{{ __('admission_date') }}</th>
@@ -76,6 +75,8 @@
                                         <th scope="col" data-field="guardian.full_name">{{ __('guardian') . ' ' . __('name') }}</th>
                                         <th scope="col" data-field="guardian.mobile">{{ __('guardian') . ' ' . __('mobile') }}</th>
                                         <th scope="col" data-field="guardian.gender">{{ __('guardian') . ' ' . __('gender') }}</th>
+                                        <th scope="col" data-field="uid_no">{{ __('UID NO.') }}</th>
+                                        <th scope="col" data-field="pen_no">{{ __('Pen NO.') }}</th>
 
                                         {{-- Admission form fields --}}
                                         @foreach ($extraFields as $field)
@@ -115,7 +116,10 @@
                                 <div class="form-group col-sm-12 col-md-12 col-lg-6 col-xl-4">
                                     <label>{{ __('GR Number') }} <span class="text-danger">*</span></label>
                                     {!! Form::text('admission_no', null, ['placeholder' => __('GR Number'), 'class' => 'form-control', 'id' => 'edit_admission_no' ,'readonly'=>false]) !!}
-
+                                </div>
+                                 <div class="form-group col-sm-12 col-md-12 col-lg-6 col-xl-4">
+                                    <label>{{ __('Pen Number') }} <span class="text-danger">*</span></label>
+                                    {!! Form::text('pen_no', null, ['placeholder' => __('Pen Number'), 'class' => 'form-control', 'id' => 'edit_pen_no' ,'readonly'=>false]) !!}
                                 </div>
 
                                 <div class="form-group col-sm-12 col-md-12 col-lg-6 col-xl-4">
@@ -136,8 +140,109 @@
                                         @endforeach
                                     </select>
                                 </div>
+                                <div class="form-group col-sm-12 col-md-12 col-lg-6 col-xl-4">
+                                    <label>RTE Status <span class="text-danger">*</span></label>
+                                    <select name="rte_status" id="edit_rte_status" class="form-control">
+                                        <option value="">Select RTE Status</option>
+                                        <option value="RTE">RTE</option>
+                                        <option value="NON_RTE">NON RTE</option>
+                                    </select>
+                                </div>
+                                <div class="form-group col-sm-12 col-md-12 col-lg-6 col-xl-4">
+                                    <label>CAST <span class="text-danger">*</span></label>
+                                    <select name="cast" id="edit_cast" class="form-control">
+                                        <option value="">Select CAST</option>
+                                        <option value="GENERAL">GENERAL</option>
+                                        <option value="OBC">OBC</option>
+                                        <option value="SC">SC</option>
+                                        <option value="ST">ST</option>
+                                        <option value="EWS">EWS</option>
+                                    </select>
+                                </div>
+                                  <div class="form-group col-sm-12 col-md-12 col-lg-6 col-xl-4">
+                                        <label>{{ __('Nationality') }} <span class="text-danger">*</span></label>
 
+                                        {!! Form::select(
+                                            'nationality',
+                                            [
+                                                '' => __('Select Nationality'),
+                                                'Indian' => 'Indian',
+                                                'American' => 'American',
+                                                'British' => 'British',
+                                                'Canadian' => 'Canadian',
+                                                'Australian' => 'Australian',
+                                                'Other' => 'Other',
+                                            ],
+                                            null,
+                                            [
+                                                "id"  =>      "edit_nationality",
+                                                'class' => 'form-control',
+                                                'required' => true
+                                            ]
+                                        ) !!}
+                                    </div>
+                                    <div class="form-group col-sm-12 col-md-12 col-lg-6 col-xl-4">
+                                        <label>{{ __('Last School Attended') }} <span class="text-danger">*</span></label>
+
+                                        {!! Form::text(
+                                            'last_school',
+                                            null,
+                                            [
+                                                "id"  =>      "edit_last_school",
+                                                'placeholder' => __('Enter Last School Attended'),
+                                                'class' => 'form-control',
+                                                'required' => true,
+                                                'autocomplete' => 'off'
+                                            ]
+                                        ) !!}
+                                    </div>
+                                    <div class="form-group col-sm-12 col-md-12 col-lg-6 col-xl-4">
+                                        <label>{{ __('Last Cleared Class') }} <span class="text-danger">*</span></label>
+
+                                        {!! Form::text(
+                                            'last_cleared_class',
+                                            null,
+                                            [
+                                                "id"  =>      "edit_last_cleared_class",
+                                                'placeholder' => __('Enter Last Cleared Class'),
+                                                'class' => 'form-control',
+                                                'required' => true,
+                                                'autocomplete' => 'off'
+                                            ]
+                                        ) !!}
+                                    </div>
+                                    <div class="form-group col-sm-12 col-md-12 col-lg-6 col-xl-4">
+                                        <label>{{ __('Education Board of Last Cleared Class') }} <span class="text-danger">*</span></label>
+
+                                        {!! Form::text(
+                                            'education_board',
+                                            null,
+                                            [
+                                                 "id"  =>      "edit_education_board",
+                                                'placeholder' => __('Enter Education Board'),
+                                                'class' => 'form-control',
+                                                'required' => true,
+                                                'autocomplete' => 'off'
+                                            ]
+                                        ) !!}
+                                    </div>
+                                    <div class="form-group col-sm-12 col-md-12 col-lg-12 col-xl-12">
+                                        <label>{{ __('Remarks') }} <span class="text-danger">*</span></label>
+
+                                        {!! Form::textarea(
+                                            'remarks',
+                                            null,
+                                            [
+                                                 "id"  =>      "edit_remarks",
+                                                'placeholder' => __('Enter Remarks'),
+                                                'class' => 'form-control',
+                                                'rows' => 3,
+                                                'required' => true
+                                            ]
+                                        ) !!}
+                                    </div>
                             </div>
+                            
                             <hr>
                             <div class="row mt-5">
                                 <div class="form-group col-sm-12 col-md-12 col-lg-6 col-xl-4">
@@ -159,6 +264,41 @@
                                     {!! Form::text('dob', null, ['placeholder' => __('dob'), 'class' => 'datepicker-popup-no-future form-control', 'id' => 'edit_dob']) !!}
                                     <span class="input-group-addon input-group-append">
                                     </span>
+                                </div>
+                                  <div class="form-group col-sm-12 col-md-12 col-lg-6 col-xl-4">
+                                    <label>{{ __('Birth Place') }} <span class="text-danger">*</span></label>
+
+                                    {!! Form::text(
+                                        'birth_place',
+                                        null,
+                                        [
+                                            'id' => 'edit_birth_place', 
+                                            'placeholder' => __('Enter Birth Place'),
+                                            'class' => 'form-control',
+                                            'required' => true,
+                                            'autocomplete' => 'off'
+                                        ]
+                                    ) !!}
+                                </div>
+                                <div class="form-group col-sm-12 col-md-12 col-lg-6 col-xl-4">
+                                        <label>{{ __('blood_group') }} <span class="text-danger">*</span></label>
+
+                                        {!! Form::select(
+                                            'blood_group',
+                                            [
+                                                '' => __('Select Blood Group'),
+                                                'A+' => 'A+',
+                                                'A-' => 'A-',
+                                                'B+' => 'B+',
+                                                'B-' => 'B-',
+                                                'AB+' => 'AB+',
+                                                'AB-' => 'AB-',
+                                                'O+' => 'O+',
+                                                'O-' => 'O-',
+                                            ],
+                                            null,
+                                            ['id' => 'edit_blood_group','class' => 'form-control']
+                                        ) !!}
                                 </div>
 
                                 <div class="form-group col-sm-12 col-md-4">
@@ -322,25 +462,33 @@
                             {{-- Guardian Details --}}
                             <div class="row mt-5">
                                 <div class="form-group col-sm-12 col-md-12">
-                                    <label>{{ __('guardian') . ' ' . __('email') }} <span class="text-danger">*</span></label>
+                                    <label>{{ __('Father') . ' ' . __('mobile') }} <span class="text-danger">*</span></label>
                                     <select class="edit-guardian-search form-control" name="guardian_id"></select>
-                                    <input type="hidden" id="edit_guardian_email" name="guardian_email">
+                                    <input type="hidden" id="edit_guardian_mobile" name="guardian_mobile">
                                 </div>
 
                                 <div class="form-group col-sm-12 col-md-12 col-lg-6 col-xl-4">
-                                    <label>{{ __('guardian') . ' ' . __('first_name') }} <span class="text-danger">*</span></label>
+                                    <label>{{ __('Father') . ' ' . __('first_name') }} <span class="text-danger">*</span></label>
                                     {!! Form::text('guardian_first_name', null, ['placeholder' => __('guardian') . ' ' . __('first_name'), 'class' => 'form-control', 'id' => 'edit_guardian_first_name']) !!}
                                 </div>
 
                                 <div class="form-group col-sm-12 col-md-12 col-lg-6 col-xl-4">
-                                    <label>{{ __('guardian') . ' ' . __('last_name') }} <span class="text-danger">*</span></label>
+                                    <label>{{ __('Father') . ' ' . __('last_name') }} <span class="text-danger">*</span></label>
                                     {!! Form::text('guardian_last_name', null, ['placeholder' => __('guardian') . ' ' . __('last_name'), 'class' => 'form-control', 'id' => 'edit_guardian_last_name']) !!}
                                 </div>
-                                <div class="form-group col-sm-12 col-md-12 col-lg-6 col-xl-4">
-                                    <label>{{ __('guardian') . ' ' . __('mobile') }} <span class="text-danger">*</span></label>
-                                    {!! Form::number('guardian_mobile', null, ['placeholder' => __('guardian') . ' ' . __('mobile'), 'class' => 'form-control remove-number-increment', 'min' => 1  ,'id' => 'edit_guardian_mobile']) !!}
+                                 <div class="form-group col-sm-12 col-md-12 col-lg-6 col-xl-4">
+                                    <label>{{ __('Mother') . ' ' . __('Name') }} <span class="text-danger">*</span></label>
+                                    {!! Form::text('student_mother_name', null, ['placeholder' => __('Mother Name') , 'class' => 'form-control', 'id' => 'edit_student_mother_name']) !!}
                                 </div>
-                                <div class="form-group col-sm-12 col-md-12">
+                                <div class="form-group col-sm-12 col-md-12 col-lg-6 col-xl-4">
+                                    <label>{{ __('Father') . ' ' . __('email') }} </label>
+                                    {!! Form::email('guardian_email', null, [
+                                        'placeholder' => __('guardian') . ' ' . __('email'),
+                                        'class' => 'form-control',
+                                        'id' => 'edit_guardian_email'
+                                    ]) !!}
+                                </div>
+                                <div class="form-group col-sm-12 col-md-12" style="display:none;">
                                     <label>{{ __('gender') }} <span class="text-danger">*</span></label><br>
                                     <div class="d-flex">
                                         <div class="form-check form-check-inline">
@@ -472,5 +620,21 @@
                 }
             })
         })
+        function indexFormatter(value, row, index) {
+            const table = $('#table_list');
+
+            const options = table.bootstrapTable('getOptions');
+            const pageSize = options.pageSize;
+            const pageNumber = options.pageNumber;
+
+            return (pageSize * (pageNumber - 1)) + (index + 1);
+        }
+        function classSectionFormatter(value, row, index) {
+            if (!value) return '';
+
+            // Force Excel to treat the value as TEXT
+             return value.replace(" ", "\u200B");
+        }
+
     </script>
 @endsection

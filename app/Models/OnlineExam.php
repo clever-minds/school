@@ -10,12 +10,12 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Facades\Auth;
 use App\Traits\DateFormatTrait;
-
+use App\Traits\LogsActivity;
 
 class OnlineExam extends Model
 {
     use HasFactory, DateFormatTrait;
-    use SoftDeletes;
+    use SoftDeletes,LogsActivity;
 
     protected $fillable = [
         'class_section_id',
@@ -162,15 +162,15 @@ class OnlineExam extends Model
         return $this->belongsTo(SubjectTeacher::class, 'class_subject_id','class_subject_id');
     }
 
-    public function getStartDateAttribute($value)
-    {
-        return $this->formatDateValue($value);
-    }
+    // public function getStartDateAttribute($value)
+    // {
+    //     return $this->formatDateValue($value);
+    // }
 
-    public function getEndDateAttribute($value)
-    {
-        return $this->formatDateValue($value);
-    }
+    // public function getEndDateAttribute($value)
+    // {
+    //     return $this->formatDateValue($value);
+    // }
 
     public function getCreatedAtAttribute()
     {
@@ -182,13 +182,23 @@ class OnlineExam extends Model
         return $this->formatDateValue($this->getRawOriginal('updated_at'));
     }
 
-    public function getStartDateIsoAttribute()
-    {
-        return Carbon::parse($this->getRawOriginal('start_date'))->format('Y-m-d H:i:s');
-    }
+ public function getStartDateIsoAttribute()
+{
+    return Carbon::parse($this->getRawOriginal('start_date'))->format('Y-m-d H:i:s');
+}
 
-    public function getEndDateIsoAttribute()
-    {
-        return Carbon::parse($this->getRawOriginal('end_date'))->format('Y-m-d H:i:s');
-    }    
+public function getEndDateIsoAttribute()
+{
+    return Carbon::parse($this->getRawOriginal('end_date'))->format('Y-m-d H:i:s');
+}
+ public function getStartDateAttribute()
+{
+    return Carbon::parse($this->getRawOriginal('start_date'))->format('Y-m-d H:i:s');
+}
+
+public function getEndDateAttribute()
+{
+    return Carbon::parse($this->getRawOriginal('end_date'))->format('Y-m-d H:i:s');
+}
+
 }

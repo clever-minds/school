@@ -117,6 +117,8 @@ class AnnouncementController extends Controller {
                     $classSubjects = $this->classSubject->builder()->where('class_id', $classSection->class->id)->where('subject_id', $request->subject_id)->first();
                 }
                 // When Subject is passed then Store the data according to Subject Teacher
+                DB::enableQueryLog();
+
                 $teacherId = Auth::user()->id; // Teacher ID
                 $subjectTeacherData = $this->subjectTeacher->builder()->with('subject')->whereIn('class_section_id', $request->class_section_id)->where(['teacher_id' => $teacherId, 'class_subject_id' => $classSubjects->id])->first(); // Get the Subject Teacher Data
                 $subjectName = $subjectTeacherData->subject_with_name; // Subject Name

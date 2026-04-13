@@ -118,7 +118,7 @@
                                 </div>
 
                                 @if(count($extraFields))
-                                <div class="row other-details mx-2 pe-4">
+                                <div class="row formWapper">
 
                                     {{-- Loop the FormData --}}
                                     @foreach ($extraFields as $key => $data)
@@ -128,8 +128,8 @@
                                             {{-- Form Field ID --}}
                                             {{ Form::hidden('extra_fields['.$key.'][form_field_id]', $data->id, ['id' => $data->type.'_'.$key.'_id']) }}
 
-                                            <div class='form-group col-md-12 col-lg-6 col-xl-4 col-sm-12'>
-
+                                            <div class='row formDiv form-group col-md-12 col-lg-6 col-xl-4 col-sm-12 '>
+                                                <div class="inputWrapper">
                                                 {{-- Add lable to all the elements excluding checkbox --}}
                                                 @if($data->type != 'radio' && $data->type != 'checkbox')
                                                     <label>{{$data->name}} @if($data->is_required)
@@ -208,6 +208,7 @@
 
                                                     @endif
                                                 </div>
+                                                 </div>
                                     @endforeach
                                 </div>
                             @endif

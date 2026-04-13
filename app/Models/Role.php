@@ -6,9 +6,10 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Support\Facades\Auth;
 use Spatie\Permission\Models\Role as BaseRole;
+use App\Traits\LogsActivity;
 
 class Role extends BaseRole {
-    use HasFactory;
+    use HasFactory,LogsActivity;
 
     protected static function booted() {
         static::addGlobalScope('school', static function (Builder $builder) {

@@ -7,11 +7,12 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Facades\Auth;
 use App\Traits\DateFormatTrait;
+use App\Traits\LogsActivity;
 
 class OptionalFee extends Model
 {
     use HasFactory, DateFormatTrait;
-    use SoftDeletes;
+    use SoftDeletes,LogsActivity;
 
     protected $fillable = [
         'student_id',
@@ -20,8 +21,11 @@ class OptionalFee extends Model
         'fees_class_id',
         'mode',
         'cheque_no',
+        'transaction_id',
+        'bank_name',
         'amount',
         'fees_paid_id',
+        'remark',
         'date',
         'session_year_id',
         'school_id',

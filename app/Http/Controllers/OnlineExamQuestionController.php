@@ -55,7 +55,7 @@ class OnlineExamQuestionController extends Controller {
         $subjectTeachers = array();
         $classSubjects = array();
         if (Auth::user()->hasRole('School Admin')) {
-            $classSubjects = $this->classSubjects->builder()->with('subject')->get();
+            $classSubjects = $this->classSubjects->builder()->currentSemesterData()->with('subject')->get();
         } else {
             $subjectTeachers = $this->subjectTeacher->builder()->with('subject')->get();
         }
@@ -358,7 +358,7 @@ class OnlineExamQuestionController extends Controller {
         $subjectTeachers = array();
         $classSubjects = array();
         if (Auth::user()->hasRole('School Admin')) {
-            $classSubjects = $this->classSubjects->builder()->with('subject')->get();
+            $classSubjects = $this->classSubjects->builder()->currentSemesterData()->with('subject')->get();
         } else {
             $subjectTeachers = $this->subjectTeacher->builder()->with('subject')->get();    
         }

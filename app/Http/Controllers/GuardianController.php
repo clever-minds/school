@@ -48,10 +48,10 @@ class GuardianController extends Controller {
         ResponseService::noPermissionThenRedirect('guardian-create');
         $request->validate([
             'first_name' => 'required',
-            'email'      => 'required|unique:users,email',
+            'email'      => 'required',
             'last_name'  => 'required',
             'gender'     => 'required',
-            'mobile'     => 'required',
+            'mobile'     => 'required|unique:users,mobile',
         ]);
         try {
             DB::beginTransaction();
@@ -128,44 +128,85 @@ class GuardianController extends Controller {
         return response()->json($bulkData);
     }
 
+    // public function update(Request $request) {
+    //     ResponseService::noPermissionThenSendJson('guardian-edit');
+    //     $request->validate([
+    //         'edit_id'    => 'required',
+    //         'first_name' => 'required',
+    //         'email'      => 'required|unique:users,email,' . $request->edit_id,
+    //         'last_name'  => 'required',
+    //         'gender'     => 'required',
+    //         'mobile'     => 'required',
+    //         'image'      => 'nullable|image|mimes:jpeg,png,jpg,svg,gif,webp',
+    //     ]);
+    //     try {
+    //         $data = $request->except('_token', 'edit_id', '_method','reset_password');
+    //         $guardian = $this->user->guardian()->where('id', $request->edit_id)->firstOrFail();
+    //         if (!empty($request->image)) {
+    //             if ($guardian->image) {
+    //                 UploadService::delete($guardian->getRawOriginal('image'));
+    //             }
+    //             $data['image'] = UploadService::upload($request->image, 'guardian');
+    //         }
+
+    //         if ($request->reset_password) {
+    //             $data['password'] = Hash::make($request->mobile);
+    //         }
+
+    //         $this->user->guardian()->where('id', $request->edit_id)->update($data);
+    //         $guardian->assignRole('Guardian');
+    //         ResponseService::successResponse('Data Updated Successfully');
+    //     } catch (Throwable $e) {
+    //         ResponseService::logErrorResponse($e, "Guardian Controller -> Update method");
+    //         ResponseService::errorResponse();
+    //     }
+    // }
     public function update(Request $request) {
-        ResponseService::noPermissionThenSendJson('guardian-edit');
-        $request->validate([
-            'edit_id'    => 'required',
-            'first_name' => 'required',
-            'email'      => 'required|unique:users,email,' . $request->edit_id,
-            'last_name'  => 'required',
-            'gender'     => 'required',
-            'mobile'     => 'required',
-            'image'      => 'nullable|image|mimes:jpeg,png,jpg,svg,gif,webp',
-        ]);
-        try {
-            $data = $request->except('_token', 'edit_id', '_method','reset_password');
-            $guardian = $this->user->guardian()->where('id', $request->edit_id)->firstOrFail();
-            if (!empty($request->image)) {
-                if ($guardian->image) {
-                    UploadService::delete($guardian->getRawOriginal('image'));
-                }
-                $data['image'] = UploadService::upload($request->image, 'guardian');
-            }
+    ResponseService::noPermissionThenSendJson('guardian-edit');
+    $request->validate([
+        'edit_id'    => 'required',
+        'first_name' => 'required',
+        'email'      => 'required',
+        'last_name'  => 'required',
+        'gender'     => 'required',
+        'mobile'     => 'required|unique:users,email,' . $request->edit_id,
+        'image'      => 'nullable|image|mimes:jpeg,png,jpg,svg,gif,webp',
+    ]);
 
-            if ($request->reset_password) {
-                $data['password'] = Hash::make($request->mobile);
-            }
+    try {
+        $data = $request->except('_token', 'edit_id', '_method','reset_password');
+        $guardian = $this->user->guardian()->where('id', $request->edit_id)->firstOrFail();
 
-            $this->user->guardian()->where('id', $request->edit_id)->update($data);
-            $guardian->assignRole('Guardian');
-            ResponseService::successResponse('Data Updated Successfully');
-        } catch (Throwable $e) {
-            ResponseService::logErrorResponse($e, "Guardian Controller -> Update method");
-            ResponseService::errorResponse();
+        // Agar nayi image hai to purani delete karke nayi upload karo
+        if ($request->hasFile('image')) {
+            if ($guardian->getRawOriginal('image')) {
+                UploadService::delete($guardian->getRawOriginal('image'));
+            }
+            $data['image'] = UploadService::upload($request->image, 'guardian');
         }
+
+        // Reset password karna ho to
+        if ($request->reset_password) {
+            $data['password'] = Hash::make($request->mobile);
+        }
+
+        // ✅ Yeh line se LogsActivity kaam karega
+        $guardian->update($data);
+
+        $guardian->assignRole('Guardian');
+
+        ResponseService::successResponse('Data Updated Successfully');
+    } catch (Throwable $e) {
+        ResponseService::logErrorResponse($e, "Guardian Controller -> Update method");
+        ResponseService::errorResponse();
     }
+}
+
 
     public function search(Request $request) {
         ResponseService::noAnyPermissionThenSendJson(['student-create', 'student-edit']);
         $parent = $this->user->guardian()->where(function ($query) use ($request) {
-            $query->where('email', 'like', '%' . $request->email . '%')
+            $query->where('mobile', 'like', '%' . $request->email . '%')
                 ->orWhere('first_name', 'like', '%' . $request->email . '%')
                 ->orWhere('last_name', 'like', '%' . $request->email . '%');
         })->get();

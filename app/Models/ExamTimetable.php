@@ -7,11 +7,13 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Auth;
 use App\Traits\DateFormatTrait;
+use App\Traits\LogsActivity;
 
 class ExamTimetable extends Model {
     use HasFactory;
     use Compoships;
     use DateFormatTrait;
+    use LogsActivity;
     
     protected $fillable = [
         'exam_id',

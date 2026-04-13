@@ -26,6 +26,10 @@
                                     <label>{{ __('Gr Number') }} <span class="text-danger">*</span></label>
                                     {!! Form::text('admission_no', "", ['','placeholder' => __('Gr Number'), 'class' => 'form-control']) !!}
                                 </div>
+                                 <div class="form-group col-sm-12 col-md-12 col-lg-6 col-xl-3">
+                                    <label>{{ __('Pen Number') }} <span class="text-danger">*</span></label>
+                                    {!! Form::text('pen_no', "", ['','placeholder' => __('Pen Number'), 'class' => 'form-control']) !!}
+                                </div>
 
                                 <div class="form-group col-sm-12 col-md-12 col-lg-6 col-xl-3">
                                     <label for="class_section">{{ __('class_section') }} <span class="text-danger">*</span></label>
@@ -56,7 +60,103 @@
                                     <span class="input-group-addon input-group-append">
                                     </span>
                                 </div>
+                                    <div class="form-group col-sm-12 col-md-12 col-lg-6 col-xl-3">
+                                        <label>RTE Status <span class="text-danger">*</span></label>
+                                        {!! Form::select('rte_status', ['RTE' => 'RTE', 'NON_RTE' => 'NON RTE'], null,
+                                            ['class' => 'form-control', 'placeholder' => 'Select RTE Status']) !!}
+                                    </div>
+                                    <div class="form-group col-sm-12 col-md-12 col-lg-6 col-xl-3">
+                                        <label>CAST <span class="text-danger">*</span></label>
+                                        {!! Form::select(
+                                            'cast',
+                                            [
+                                                'GENERAL' => 'GENERAL',
+                                                'OBC' => 'OBC',
+                                                'SC' => 'SC',
+                                                'ST' => 'ST',
+                                                'EWS' => 'EWS',
+                                            ],
+                                            null,
+                                            ['class' => 'form-control', 'placeholder' => 'Select CAST']
+                                        ) !!}
+                                    </div>
+                                    <div class="form-group col-sm-12 col-md-12 col-lg-6 col-xl-3">
+                                        <label>{{ __('Nationality') }} <span class="text-danger">*</span></label>
 
+                                        {!! Form::select(
+                                            'nationality',
+                                            [
+                                                '' => __('Select Nationality'),
+                                                'Indian' => 'Indian',
+                                                'American' => 'American',
+                                                'British' => 'British',
+                                                'Canadian' => 'Canadian',
+                                                'Australian' => 'Australian',
+                                                'Other' => 'Other',
+                                            ],
+                                            null,
+                                            [
+                                                'class' => 'form-control',
+                                                'required' => true
+                                            ]
+                                        ) !!}
+                                    </div>
+                                <div class="form-group col-sm-12 col-md-12 col-lg-6 col-xl-4">
+                                    <label>{{ __('Last School Attended') }} <span class="text-danger">*</span></label>
+
+                                    {!! Form::text(
+                                        'last_school',
+                                        null,
+                                        [
+                                            'placeholder' => __('Enter Last School Attended'),
+                                            'class' => 'form-control',
+                                            'required' => true,
+                                            'autocomplete' => 'off'
+                                        ]
+                                    ) !!}
+                                </div>
+                                <div class="form-group col-sm-12 col-md-12 col-lg-6 col-xl-4">
+                                    <label>{{ __('Last Cleared Class') }} <span class="text-danger">*</span></label>
+
+                                    {!! Form::text(
+                                        'last_cleared_class',
+                                        null,
+                                        [
+                                            'placeholder' => __('Enter Last Cleared Class'),
+                                            'class' => 'form-control',
+                                            'required' => true,
+                                            'autocomplete' => 'off'
+                                        ]
+                                    ) !!}
+                                </div>
+                                <div class="form-group col-sm-12 col-md-12 col-lg-6 col-xl-4">
+                                    <label>{{ __('Education Board of Last Cleared Class') }} <span class="text-danger">*</span></label>
+
+                                    {!! Form::text(
+                                        'education_board',
+                                        null,
+                                        [
+                                            'placeholder' => __('Enter Education Board'),
+                                            'class' => 'form-control',
+                                            'required' => true,
+                                            'autocomplete' => 'off'
+                                        ]
+                                    ) !!}
+                                </div>
+                                <div class="form-group col-sm-12 col-md-12 col-lg-12 col-xl-12">
+                                    <label>{{ __('Remarks') }} <span class="text-danger">*</span></label>
+
+                                    {!! Form::textarea(
+                                        'remarks',
+                                        null,
+                                        [
+                                            'placeholder' => __('Enter Remarks'),
+                                            'class' => 'form-control',
+                                            'rows' => 3,
+                                            'required' => true
+                                        ]
+                                    ) !!}
+                                </div>
 
                                 @if(!empty($features) )
                                     <div class="form-group col-sm-12 col-md-12 col-lg-6 col-xl-4">
@@ -101,7 +201,40 @@
                                     <span class="input-group-addon input-group-append">
                                     </span>
                                 </div>
+                                <div class="form-group col-sm-12 col-md-12 col-lg-6 col-xl-4">
+                                    <label>{{ __('Birth Place') }} <span class="text-danger">*</span></label>
 
+                                    {!! Form::text(
+                                        'birth_place',
+                                        null,
+                                        [
+                                            'placeholder' => __('Enter Birth Place'),
+                                            'class' => 'form-control',
+                                            'required' => true,
+                                            'autocomplete' => 'off'
+                                        ]
+                                    ) !!}
+                                </div>
+                                <div class="form-group col-sm-12 col-md-12 col-lg-6 col-xl-4">
+                                        <label>{{ __('blood_group') }} <span class="text-danger">*</span></label>
+
+                                        {!! Form::select(
+                                            'blood_group',
+                                            [
+                                                '' => __('Select Blood Group'),
+                                                'A+' => 'A+',
+                                                'A-' => 'A-',
+                                                'B+' => 'B+',
+                                                'B-' => 'B-',
+                                                'AB+' => 'AB+',
+                                                'AB-' => 'AB-',
+                                                'O+' => 'O+',
+                                                'O-' => 'O-',
+                                            ],
+                                            null,
+                                            ['class' => 'form-control']
+                                        ) !!}
+                                    </div>
                                 <div class="form-group col-sm-12 col-md-12 col-lg-6 col-xl-4">
                                     <label>{{ __('gender') }} <span class="text-danger">*</span></label><br>
                                     <div class="d-flex">
@@ -121,7 +254,7 @@
                                 </div>
                                 <div class="form-group col-sm-12 col-md-12 col-lg-6 col-xl-4">
                                     <label for="image">{{ __('image') }} </label>
-                                    <input type="file" name="image" accept=".jpg,.jpeg,.png" class="file-upload-default"/>
+                                    <input type="file" name="image" accept="image/jpeg,image/png" class="file-upload-default"/>
                                     <div class="input-group col-xs-12">
                                         <input type="text" id="image" class="form-control file-upload-info" disabled="" placeholder="{{ __('image') }}"/>
                                         <span class="input-group-append">
@@ -241,26 +374,34 @@
                             <hr>
                             {{-- Guardian Details --}}
                             <div class="row mt-5">
-                                <div class="form-group col-sm-12 col-md-12">
-                                    <label for="guardian_email">{{ __('guardian') . ' ' . __('email') }} <span class="text-danger">*</span></label>
-                                    <select class="guardian-search form-control guardian_email" id="guardian_email"></select>
-                                    <input type="hidden" id="guardian_email" class="guardian_email" name="guardian_email">
+                                 <div class="form-group col-sm-12 col-md-12">
+                                    <label>{{ __('Father') . ' ' . __('mobile') }} <span class="text-danger">*</span></label>
+                                    <select class="guardian-search form-control" name="guardian_id"></select>
+                                    <input type="hidden" id="guardian_mobile" name="guardian_mobile">
                                 </div>
 
                                 <div class="form-group col-sm-12 col-md-12 col-lg-6 col-xl-4">
-                                    <label>{{ __('guardian') . ' ' . __('first_name') }} <span class="text-danger">*</span></label>
+                                    <label>{{ __('Father') . ' ' . __('first_name') }} <span class="text-danger">*</span></label>
                                     {!! Form::text('guardian_first_name', null, ['placeholder' => __('guardian') . ' ' . __('first_name'), 'class' => 'form-control', 'id' => 'guardian_first_name']) !!}
                                 </div>
 
                                 <div class="form-group col-sm-12 col-md-12 col-lg-6 col-xl-4">
-                                    <label>{{ __('guardian') . ' ' . __('last_name') }} <span class="text-danger">*</span></label>
+                                    <label>{{ __('Father') . ' ' . __('last_name') }} <span class="text-danger">*</span></label>
                                     {!! Form::text('guardian_last_name', null, ['placeholder' => __('guardian') . ' ' . __('last_name'), 'class' => 'form-control', 'id' => 'guardian_last_name']) !!}
                                 </div>
-                                <div class="form-group col-sm-12 col-md-12 col-lg-6 col-xl-4">
-                                    <label>{{ __('guardian') . ' ' . __('mobile') }} <span class="text-danger">*</span></label>
-                                    {!! Form::number('guardian_mobile', null, ['placeholder' => __('guardian') . ' ' . __('mobile'), 'class' => 'form-control remove-number-increment', 'id' => 'guardian_mobile','min' => 1 ]) !!}
+                                 <div class="form-group col-sm-12 col-md-12 col-lg-6 col-xl-4">
+                                    <label>{{ __('Mother') . ' ' . __('Name') }} <span class="text-danger">*</span></label>
+                                    {!! Form::text('student_mother_name', null, ['placeholder' => __('Mother Name') , 'class' => 'form-control', 'id' => 'student_mother_name']) !!}
                                 </div>
-                                <div class="form-group col-sm-12 col-md-12 col-lg-12">
+                              <div class="form-group col-sm-12 col-md-12 col-lg-12 col-xl-12">
+                                    <label>{{ __('Father') . ' ' . __('email') }} </label>
+                                    {!! Form::email('guardian_email', null, [
+                                        'placeholder' => __('guardian') . ' ' . __('email'),
+                                        'class' => 'form-control',
+                                        'id' => 'guardian_email'
+                                    ]) !!}
+                                </div>
+                                <div class="form-group col-sm-12 col-md-12 col-lg-12" style="display:none;">
                                     <label>{{ __('gender') }} <span class="text-danger">*</span></label><br>
                                     <div class="d-flex">
                                         <div class="form-check form-check-inline">
@@ -279,7 +420,7 @@
                                 </div>
                                 <div class="form-group col-sm-12 col-md-4 col-lg-6 col-xl-4">
                                     <label for="guardian_image">{{ __('image') }} </label>
-                                    <input type="file" name="guardian_image" accept=".jpg,.jpeg,.png" class="file-upload-default"/>
+                                    <input type="file" name="guardian_image" accept="image/jpeg,image/png" class="file-upload-default"/>
                                     <div class="input-group col-xs-12">
                                         <input type="text" id="guardian_image" class="form-control file-upload-info" disabled="" placeholder="{{ __('image') }}"/>
                                         <span class="input-group-append">

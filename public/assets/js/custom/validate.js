@@ -304,10 +304,10 @@ $(".student-registration-form").validate({
         'class_section_id': "required",
         'admission_no': "required",
         'admission_date': "required",
-        'guardian_email': {
-            "required": true,
-            "email": true,
-        },
+        // 'guardian_email': {
+        //     "required": true,
+        //     "email": true,
+        // },
         'guardian_first_name': "required",
         'guardian_last_name': "required",
         'guardian_mobile': {
@@ -336,7 +336,7 @@ $(".edit-student-registration-form").validate({
         'admission_no': "required",
         'roll_number': "required",
         'admission_date': "required",
-        'guardian_email': "required",
+        //'guardian_email': "required",
         'guardian_first_name': "required",
         'guardian_last_name': "required",
         'guardian_mobile': {

@@ -8,12 +8,14 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Facades\Storage;
 use App\Traits\DateFormatTrait;
+use App\Traits\LogsActivity;
 
 class School extends Model
 {
     use SoftDeletes;
     use HasFactory;
     use DateFormatTrait;
+    use LogsActivity;
     protected $fillable = [
         'name',
         'address',
@@ -26,6 +28,7 @@ class School extends Model
         'domain',
         'database_name',
         'code',
+        'dise_code',
         'type',
         'domain_type',
         'installed'

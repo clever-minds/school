@@ -174,6 +174,7 @@ window.assignmentEvents = {
         $('#edit-subject-id').val(row.class_subject_id);
         $('#edit_name').val(row.name);
         $('#edit_instructions').val(row.instructions);
+        $('#edit_type_ass').val(row.type).trigger('change');
 
         // set the class section and subject id
         $('.edit_class_section_id').val(classSectionIds).trigger('change');
@@ -214,7 +215,17 @@ window.assignmentEvents = {
         }
     }
 };
-
+$('#edit_type_ass').on('change', function () {
+    togglePoints($(this).val());
+});
+function togglePoints(type) {
+    if (type === 'homework') {
+        $('#edit_points_wrapper').hide();
+        $('#edit_points').val(''); // optional reset
+    } else if (type === 'assignment') {
+        $('#edit_points_wrapper').show();
+    }
+}
 window.announcementEvents = {
     'click .edit-data': function (e, value, row) {
         let html_file = '';
@@ -285,15 +296,33 @@ window.studentEvents = {
         $('#edit_middle_name').val(row.user.middle_name);
         $('#edit_last_name').val(row.user.last_name);
         $('#edit_mobile').val(row.user.mobile);
-        $('#edit_dob').val(moment(row.dob_org, 'YYYY-MM-DD').format('DD-MM-YYYY'));
+        let dob = row.dob_org ?? row.user?.dob;
+
+        if (dob) {
+            $('#edit_dob').val(moment(dob, 'YYYY-MM-DD').format('DD-MM-YYYY'));
+        }
         $('#session_year_id').val(row.session_year_id);
         $('#edit_admission_no').val(row.admission_no);
         $('#edit-student-image-tag').attr('src', row.user.image);
         $('#edit-current-address').val(row.user.current_address);
         $('#edit-permanent-address').val(row.user.permanent_address);
         $('#edit_student_class_section_id').val(row.class_section_id);
+        $('#edit_last_school').val(row.last_school);
+        $('#edit_last_cleared_class').val(row.last_cleared_class);
+        $('#edit_education_board').val(row.education_board);
+        $('#edit_pen_no').val(row.pen_no);
+        $('#edit_birth_place').val(row.birth_place);
+        $('#edit_remarks').val(row.remarks);
         $('#edit_student_class_id').val(row.class_id).trigger('change');
+        $('#edit_student_class_id').val(row.class_id).trigger('change');
+        $('#edit_cast').val(row.cast).trigger('change');
+        $('#edit_rte_status').val(row.rte_status).trigger('change');
+        $('#edit_nationality').val(row.nationality).trigger('change');
+        $('#edit_blood_group').val(row.blood_group).trigger('change');
 
+        
+
+        
         // Set gender radio button
         if (row.eng_student_gender == 'male') {
             $('#male').prop('checked', true);
@@ -363,17 +392,19 @@ window.studentEvents = {
         $(".edit-guardian-search").select2("trigger", "select", {
             data: {
                 id: row.guardian_id || "",
-                text: row.guardian.email || "",
+                text: row.guardian.mobile || "",
                 edit_data: true,
             }
         });
 
         setTimeout(function () {
             $('#edit_guardian_first_name').val(row.guardian.first_name);
+            $('#edit_guardian_first_name').val(row.guardian.first_name);
             $('#edit_guardian_last_name').val(row.guardian.last_name);
             $('#edit_guardian_mobile').val(row.guardian.mobile);
-            $('#edit-guardian-image-tag').attr('src', row.guardian.image);
+            $('#edit_student_mother_name').val(row.guardian.mother_name);
 
+            $('#edit-guardian-image-tag').attr('src', row.guardian.image);
             // Set guardian gender radio button
             if (row.eng_guardian_gender == 'male') {
                 $('#edit-guardian-male').prop('checked', true);
@@ -1135,13 +1166,36 @@ window.formFieldsEvents = {
 };
 window.holidayEvents = {
     'click .edit-data': function (e, value, row) {
-        $('#id').val(row.id);
-        $('#edit-date').val(moment(row.date, 'YYYY-MM-DD').format('DD-MM-YYYY'));
+        // Hidden ID
+        $('#edit-id').val(row.id);
+
+        // Type dropdown
+        $('#edit-type').val(row.type).trigger('change');
+
+        // Date field
+        if(row.type === 'holiday') {
+            $('.edit-date-box').show();
+            $('#edit-date').val(moment(row.date, 'YYYY-MM-DD').format('DD-MM-YYYY'));
+        } else {
+            $('.edit-date-box').hide();
+            $('#edit-date').val('');
+        }
+
+        // Title & Description
         $('#edit-title').val(row.title);
         $('#edit-description').val(row.description);
+
+        // Classes prefill (Select2)
+         let $select = $('#edit-class-ids');
+        $select.val(null).trigger('change'); // clear first
+        if(row.class_ids) {
+            let selected = row.class_ids.split(','); // "1,2,3"
+            $select.val(selected).trigger('change'); // set selected options
+        }
+        // Open Modal
+        $('#editModal').modal('show');
     }
 };
-
 
 window.galleryEvents = {
     'click .edit-data': function (e, value, row) {
@@ -1174,8 +1228,10 @@ window.leaveEvents = {
     'click .edit-data': function (e, value, row) {
         let html_file = '';
         $('#id').val(row.id);
-        $('#edit_from_date').val(moment(row.from_date, 'YYYY-MM-DD').format('DD-MM-YYYY'));
-        $('#edit_to_date').val(moment(row.to_date, 'YYYY-MM-DD').format('DD-MM-YYYY'));
+        // $('#edit_from_date').val(moment(row.from_date, 'YYYY-MM-DD').format('DD-MM-YYYY'));
+        // $('#edit_to_date').val(moment(row.to_date, 'YYYY-MM-DD').format('DD-MM-YYYY'));
+         $('#edit_from_date').val(moment(row.from_date, 'DD-MM-YYYY').format('DD-MM-YYYY'));
+        $('#edit_to_date').val(moment(row.to_date, 'DD-MM-YYYY').format('DD-MM-YYYY'));
         $('#edit_reason').val(row.reason);
 
         if (row.file) {
@@ -1409,7 +1465,7 @@ window.staffEvents = {
         $('#edit_role_id').val(row.roles[0].id);
         $('#edit_staff_image').attr('src',row.image);
         $('.edit-dob').val(moment(row.dob_org, 'YYYY-MM-DD').format('DD-MM-YYYY'));
-        
+
         $('#edit_joining_date').val(moment(row.staff.joining_date, 'YYYY-MM-DD').format('DD-MM-YYYY'));
 
         if (row.two_factor_enabled == 1) {

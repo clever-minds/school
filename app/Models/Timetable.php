@@ -7,9 +7,10 @@ use App\Services\CachingService;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Auth;
 use App\Traits\DateFormatTrait;
+use App\Traits\LogsActivity;
 
 class Timetable extends Model {
-    use DateFormatTrait;
+    use DateFormatTrait,LogsActivity;
     
     protected $fillable = [
         "subject_teacher_id",

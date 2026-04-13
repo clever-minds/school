@@ -17,8 +17,15 @@
                 <span class="menu-title">{{ __('dashboard') }}</span>
             </a>
         </li>
+        {{-- student pickup --}}
+        <li class="nav-item">
+            <a class="nav-link" href="{{ route('student-pickup.index') }}">
+                <i class="fa fa-handshake-o menu-icon"></i>
+                <span class="menu-title">{{ __('Student Pickup') }}</span>
+            </a>
+        </li>
         {{-- Academics --}}
-        @canany(['medium-list','section-list','subject-list','class-list','subject-list','promote-student-list','transfer-student-list'])
+        @canany(['medium-list','assign-roll-no','section-list','subject-list','class-list','subject-list','promote-student-list','transfer-student-list'])
             <li class="nav-item">
                 <a class="nav-link" data-toggle="collapse" href="#academics-menu" aria-expanded="false" aria-controls="academics-menu">
                     <i class="fa fa-university menu-icon"></i>
@@ -74,7 +81,7 @@
                             <li class="nav-item"><a href="{{ route('promote-student.index') }}" class="nav-link text-wrap">{{ __('Transfer & Promote Students') }}</a></li>
                         @endcan
 
-                        @can('student-list')
+                        @can('assign-roll-no')
                             <li class="nav-item"><a href="{{ route('students.roll-number.index') }}" class="nav-link">{{ __('assign') }} {{ __('roll_no') }}</a></li>
                         @endcan
                     </ul>
@@ -129,8 +136,9 @@
                         @canany(['student-list', 'class-teacher'])
                             <li class="nav-item"><a href="{{ route('students.index') }}" class="nav-link">{{ __('student_details') }}</a></li>
                         @endcanany
-                            <li class="nav-item"><a href="{{ route('students.showUpdateUniForm') }}" class="nav-link">{{ __('UNI') }}</a></li>
-
+                         @canany(['update-student-uni'])
+                            <li class="nav-item"><a href="{{ route('students.showUpdateUniForm') }}" class="nav-link">{{ __('UID No / Pen No') }}</a></li>
+                        @endcan
                         @can('student-reset-password')
                             <li class="nav-item"><a href="{{ route('students.reset-password.index') }}" class="nav-link">{{ __('Parents') . ' ' . __('reset_password') }}</a></li>
                         @endcan
@@ -173,6 +181,16 @@
                         <li class="nav-item">
                             <a href="{{ route('teachers.create-bulk-upload') }}" class="nav-link">
                                 <span class="menu-title">{{ __('bulk upload') }}</span>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="{{ route('teacher-onboarding.jd.index') }}" class="nav-link">
+                                <span class="menu-title">{{ __('Teacher JD') }}</span>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="{{ route('teacher-onboarding.questions.index') }}" class="nav-link">
+                                <span class="menu-title">{{ __('Onboarding Questions') }}</span>
                             </a>
                         </li>
 
@@ -766,7 +784,7 @@
         @endcan
 
         {{-- Certificate --}}
-        @canany(['certificate-create', 'certificate-list','certificate-edit', 'certificate-delete','student-list', 'class-teacher','id-card-settings'])
+        @canany(['certificate-create', 'certificate-list','certificate-edit', 'certificate-delete', 'class-teacher','id-card-settings','generate-student-id-card','generate-staff-id-card'])
             <li class="nav-item">
                 <a class="nav-link" data-toggle="collapse" href="#certificate-menu" aria-expanded="false" aria-controls="certificate-menu" data-access="@hasFeatureAccess('ID Card - Certificate Generation')">
                     <i class="fa fa-trophy menu-icon"></i>
@@ -806,11 +824,11 @@
                             </li>
                         @endcan
 
-                        @canany(['student-list', 'class-teacher'])
+                        @canany(['generate-student-id-card', 'class-teacher'])
                             <li class="nav-item"><a href="{{ route('students.generate-id-card-index') }}" class="nav-link" data-name="{{ Auth::user()->getRoleNames()[0] }}" data-access="@hasFeatureAccess('ID Card - Certificate Generation')">{{ __('student_id_card') }}</a></li>
                         @endcanany
 
-                        @can('staff-list')
+                        @can('generate-staff-id-card')
                                 <li class="nav-item">
                                     <a href="{{ route('staff.id-card') }}" class="nav-link" data-name="{{ Auth::user()->getRoleNames()[0] }}" data-access="@hasFeatureAccess('ID Card - Certificate Generation')">{{ __('staff_id_card') }}</a>
                                 </li>
@@ -910,6 +928,7 @@
 
         {{-- Subscription Plans & Addons --}}
         @role('School Admin')
+       
         <!-- <li class="nav-item">
             <a class="nav-link" data-toggle="collapse" href="#subscription" aria-expanded="false"
                aria-controls="subscription-menu">
@@ -989,7 +1008,7 @@
 
         {{-- School web page setttings --}}
         @can('school-web-settings')
-            <!-- <li class="nav-item">
+            <li class="nav-item">
                 <a class="nav-link" data-toggle="collapse" href="#web_settings" aria-expanded="false"
                 aria-controls="web_settings-menu" data-access="@hasFeatureAccess('Website Management')">
                 <i class="fa fa-cogs menu-icon"></i>
@@ -1009,7 +1028,7 @@
                         @endcanany
                     </ul>
                 </div>
-            </li> -->
+            </li>
         @endcan
     
         
@@ -1211,8 +1230,14 @@
         @endif
 
         @if (Auth::user()->hasRole(['Super Admin']))
+         <li class="nav-item">
+                <a href="{{ route('activity.logs') }}" class="nav-link">
+                    <i class="fa fa-envelope menu-icon"></i>
+                    <span class="menu-title">{{ __('School Activity Log') }}</span>
+                </a>
+            </li>
             <li class="nav-item">
-                <a class="nav-link" href="https://wrteam-in.github.io/eSchool-SaaS-Doc/" target="_blank">
+                <a class="nav-link" href="https://lcis.in/CleverSchool/schooladmin/academics/medium/" target="_blank">
                     <i class="fa fa-book menu-icon"></i>
                     <span class="menu-title">{{ __('Documentation') }}</span>
                 </a>
