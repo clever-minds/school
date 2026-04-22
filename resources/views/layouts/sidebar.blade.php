@@ -101,7 +101,6 @@
             @endcan
         @endrole
 
-        {{-- Class Section For Teacher --}}
         @role('Teacher')
         <li class="nav-item">
             <a class="nav-link" href="{{ route('class-section.index') }}">
@@ -109,6 +108,14 @@
                 <span class="menu-title"> {{ __('Class Section') }} </span>
             </a>
         </li>
+        @can('staff-kyc-upload')
+            <li class="nav-item">
+                <a class="nav-link" href="{{ route('teacher.kyc.index') }}">
+                    <i class="fa fa-file-text-o menu-icon"></i>
+                    <span class="menu-title"> {{ __('KYC Documents') }} </span>
+                </a>
+            </li>
+        @endcan
         @endrole
 
         {{-- student --}}
@@ -193,6 +200,18 @@
                                 <span class="menu-title">{{ __('Onboarding Questions') }}</span>
                             </a>
                         </li>
+                        @can('staff-kyc-manage')
+                            <li class="nav-item">
+                                <a href="{{ route('staff.kyc.index') }}" class="nav-link">
+                                    <span class="menu-title">{{ __('Teacher KYC') }}</span>
+                                </a>
+                            </li>
+                        @endcan
+                        <li class="nav-item">
+                            <a href="{{ route('school-policy.index') }}" class="nav-link">
+                                <span class="menu-title">{{ __('School Policies') }}</span>
+                            </a>
+                        </li>
 
                     </ul>
                 </div>
@@ -271,9 +290,39 @@
                 @can('holiday-list')
                     <a href="{{ route('holiday.index') }}" class="nav-link" data-name="{{ Auth::user()->getRoleNames()[0] }}" data-access="@hasFeatureAccess('Holiday Management')">
                         <i class="fa fa-calendar-check-o menu-icon"></i>
-                        <span class="menu-title">{{ __('holiday_list') }}</span>
+                        <span class="menu-title">{{ __('holiday') }}</span>
                     </a>
                 @endcan
+            </li>
+        @endcanany
+
+        {{-- Events --}}
+        @canany(['event-create', 'event-list'])
+            <li class="nav-item">
+                <a href="{{ route('events.index') }}" class="nav-link">
+                    <i class="fa fa-calendar menu-icon"></i>
+                    <span class="menu-title">{{ __('event') }}</span>
+                </a>
+            </li>
+        @endcanany
+
+        {{-- Reminders --}}
+        @canany(['reminder-create', 'reminder-list'])
+            <li class="nav-item">
+                <a href="{{ route('reminders.index') }}" class="nav-link">
+                    <i class="fa fa-bell menu-icon"></i>
+                    <span class="menu-title">{{ __('reminder') }}</span>
+                </a>
+            </li>
+        @endcanany
+
+        {{-- Schedules --}}
+        @canany(['schedule-create', 'schedule-list'])
+            <li class="nav-item">
+                <a href="{{ route('schedules.index') }}" class="nav-link">
+                    <i class="fa fa-clock-o menu-icon"></i>
+                    <span class="menu-title">{{ __('schedule') }}</span>
+                </a>
             </li>
         @endcanany
         {{-- subject lesson --}}
@@ -389,6 +438,34 @@
                 </div>
             </li>
         @endcanany
+        
+        {{-- Staff Attendance --}}
+        @if (Auth::user()->school_id)
+            <li class="nav-item">
+                <a class="nav-link" data-toggle="collapse" href="#staff-attendance-menu" aria-expanded="false"
+                   aria-controls="staff-attendance-menu">
+                   <i class="fa fa-clock-o menu-icon"></i>
+                   <span class="menu-title">{{ __('Staff Attendance') }}</span>
+                   <i class="menu-arrow"></i>
+                </a>
+                <div class="collapse" id="staff-attendance-menu">
+                    <ul class="nav flex-column sub-menu">
+                        <li class="nav-item">
+                            <a href="{{ route('staff-attendance.my') }}" class="nav-link">
+                                {{ __('My Attendance') }}
+                            </a>
+                        </li>
+                        @if(Auth::user()->hasRole('School Admin'))
+                            <li class="nav-item">
+                                <a href="{{ route('staff-attendance.index') }}" class="nav-link">
+                                    {{ __('All Staff Attendance') }}
+                                </a>
+                            </li>
+                        @endif
+                    </ul>
+                </div>
+            </li>
+        @endif
 
         {{-- announceent --}}
         @can('announcement-list')

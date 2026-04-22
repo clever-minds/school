@@ -203,7 +203,12 @@ use App\Repositories\SessionYearsTrackings\SessionYearsTrackingsInterface;
 use App\Repositories\SessionYearsTrackings\SessionYearsTrackingsRepository;
 use App\Repositories\StudentPickup\StudentPickupInterface;
 use App\Repositories\StudentPickup\StudentPickupRepository;
+use App\Repositories\StaffAttendance\StaffAttendanceInterface;
+use App\Repositories\StaffAttendance\StaffAttendanceRepository;
+use App\Repositories\SchoolPolicy\SchoolPolicyInterface;
+use App\Repositories\SchoolPolicy\SchoolPolicyRepository;
 use Notification;
+
 
 class RepositoryServiceProvider extends ServiceProvider {
     /**
@@ -312,6 +317,9 @@ class RepositoryServiceProvider extends ServiceProvider {
         $this->app->bind(DiaryInterface::class, DiaryRepository::class);
         $this->app->bind(DiaryStudentInterface::class, DiaryStudentRepository::class); 
         $this->app->bind(StudentPickupInterface::class, StudentPickupRepository::class);
+        $this->app->bind(StaffAttendanceInterface::class, StaffAttendanceRepository::class);
+        $this->app->bind(SchoolPolicyInterface::class, SchoolPolicyRepository::class);
+
     }
 
     /**

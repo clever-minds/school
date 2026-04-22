@@ -383,7 +383,9 @@ class SchoolDataService {
             ['name' => 'reports-exam'],
 
             ...self::permission('student-diary'),
-            
+            ['name' => 'staff-kyc-manage'],
+            ['name' => 'staff-kyc-upload'],
+
 
         ];
         $permissions = array_map(static function ($data) {
@@ -640,8 +642,7 @@ class SchoolDataService {
             'student-diary-delete',
 
             'manage-expense-add',
-            'manage-expense-list',
-            'manage-expense-add',
+            'staff-kyc-manage'
 
         ];
         
@@ -695,6 +696,7 @@ class SchoolDataService {
             'student-diary-create',
             'student-diary-edit',
             'student-diary-delete',
+            'staff-kyc-upload'
         ];
         $teacher_role->syncPermissions($TeacherHasAccessTo);
     }

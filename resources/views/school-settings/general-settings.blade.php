@@ -57,6 +57,19 @@
                                         <label for="school_address">{{ __('school_address') }} <span class="text-danger">*</span></label>
                                         <textarea name="school_address" id="school_address" required placeholder="{{ __('school_address') }}" class="form-control">{{ $settings['school_address'] ?? '' }}</textarea>
                                     </div>
+                                    <div class="form-group col-md-4 col-sm-12">
+                                        <label for="latitude">{{ __('latitude') }}</label>
+                                        <div class="input-group">
+                                            <input name="latitude" id="latitude" value="{{ $settings['latitude'] ?? '' }}" type="text" placeholder="{{ __('latitude') }}" class="form-control"/>
+                                            <div class="input-group-append">
+                                                <button class="btn btn-primary" type="button" onclick="getCurrentLocation('latitude', 'longitude')" title="{{ __('get_current_location') }}"><i class="fa fa-map-marker"></i></button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="form-group col-md-4 col-sm-12">
+                                        <label for="longitude">{{ __('longitude') }}</label>
+                                        <input name="longitude" id="longitude" value="{{ $settings['longitude'] ?? '' }}" type="text" placeholder="{{ __('longitude') }}" class="form-control"/>
+                                    </div>
 
                                     <div class="form-group col-md-4 col-sm-12">
                                         <label for="date_format">{{ __('date_format') }}</label>
@@ -252,6 +265,19 @@
 @endsection
 @section('script')
 <script>
+    function getCurrentLocation(latId, longId) {
+        if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition(function(position) {
+                $('#' + latId).val(position.coords.latitude);
+                $('#' + longId).val(position.coords.longitude);
+            }, function(error) {
+                alert('Error getting geolocation: ' + error.message);
+            });
+        } else {
+            alert('Geolocation is not supported by this browser.');
+        }
+    }
+
     function formSuccessFunction(response) {
         setTimeout(() => {
             window.location.reload();

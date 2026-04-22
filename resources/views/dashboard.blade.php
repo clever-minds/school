@@ -21,6 +21,40 @@
                 </span> {{ __('dashboard') }}
             </h3>
         </div>
+
+        {{-- Staff Attendance Widget --}}
+        @if (Auth::user()->school_id)
+            <div class="row">
+                <div class="col-md-12 grid-margin stretch-card">
+                    <div class="card">
+                        <div class="card-body py-3">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <h4 class="card-title mb-1">{{ __('Staff Attendance') }}</h4>
+                                    <p class="text-muted mb-0">Today's Date: {{ date('F d, Y') }}</p>
+                                </div>
+                                <div id="dashboard-attendance-actions" class="d-flex align-items-center">
+                                    @if (!$staffAttendance)
+                                        <button class="btn btn-success btn-sm" onclick="handleDashboardAttendance('in')">
+                                            <i class="fa fa-sign-in"></i> {{ __('Check In') }}
+                                        </button>
+                                    @elseif (!$staffAttendance->check_out)
+                                        <button class="btn btn-danger btn-sm" onclick="handleDashboardAttendance('out')">
+                                            <i class="fa fa-sign-out"></i> {{ __('Check Out') }}
+                                        </button>
+                                        <span class="badge badge-success ml-2">Checked In at {{ Carbon\Carbon::parse($staffAttendance->check_in)->format('H:i') }}</span>
+                                    @else
+                                        <span class="badge badge-info">{{ __('Attendance Completed') }}</span>
+                                        <span class="badge badge-success ml-2">In: {{ Carbon\Carbon::parse($staffAttendance->check_in)->format('H:i') }}</span>
+                                        <span class="badge badge-danger ml-2">Out: {{ Carbon\Carbon::parse($staffAttendance->check_out)->format('H:i') }}</span>
+                                    @endif
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        @endif
         {{-- School Dashboard --}}
         @if (Auth::user()->hasRole('School Admin') || Auth::user()->school_id)
             <div class="row">
@@ -805,4 +839,47 @@
     gender_ratio(<?php echo $boys; ?>, <?php echo $girls; ?>, <?php echo $total_students; ?>);
 </script>
 @endif
+
+<script>
+    function handleDashboardAttendance(type) {
+        if (!navigator.geolocation) {
+            showErrorToast("Geolocation is not supported by your browser");
+            return;
+        }
+
+        navigator.geolocation.getCurrentPosition(
+            (position) => {
+                const lat = position.coords.latitude;
+                const lng = position.coords.longitude;
+
+                $.ajax({
+                    url: "{{ route('staff-attendance.check') }}",
+                    type: "POST",
+                    data: {
+                        type: type,
+                        latitude: lat,
+                        longitude: lng,
+                        _token: "{{ csrf_token() }}"
+                    },
+                    success: function(response) {
+                        if (!response.error) {
+                            showSuccessToast(response.message);
+                            setTimeout(() => {
+                                location.reload();
+                            }, 1000);
+                        } else {
+                            showErrorToast(response.message);
+                        }
+                    },
+                    error: function() {
+                        showErrorToast("Something went wrong");
+                    }
+                });
+            },
+            (error) => {
+                showErrorToast("Permission denied or location unavailable");
+            }
+        );
+    }
+</script>
 @endsection

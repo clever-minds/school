@@ -31,7 +31,9 @@ class School extends Model
         'dise_code',
         'type',
         'domain_type',
-        'installed'
+        'installed',
+        'latitude',
+        'longitude'
     ];
 
     protected $hidden = ['database_name'];

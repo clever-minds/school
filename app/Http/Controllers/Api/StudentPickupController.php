@@ -116,8 +116,11 @@ class StudentPickupController extends Controller
                 'verified_at' => Carbon::now(),
             ]);
 
+            $pickupRequest->load('student');
+
             ResponseService::successResponse('OTP verified successfully. You can allow the pickup.', [
                 'student_id' => $pickupRequest->student_id,
+                'student_name' => $pickupRequest->student->full_name,
                 'pickup_person_name' => $pickupRequest->pickup_person_name,
             ]);
         } catch (Throwable $e) {

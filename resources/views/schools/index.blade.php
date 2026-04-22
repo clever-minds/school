@@ -78,6 +78,19 @@
                                         <label for="school_address">{{ __('address')}} <span class="text-danger">*</span></label>
                                         <textarea name="school_address" id="school_address" cols="30" rows="3" class="form-control" placeholder="{{__('address')}}" required></textarea>
                                     </div>
+                                    <div class="form-group col-sm-12 col-md-3">
+                                        <label for="latitude">{{ __('latitude')}}</label>
+                                        <div class="input-group">
+                                            <input type="text" name="latitude" id="latitude" placeholder="{{__('latitude')}}" class="form-control">
+                                            <div class="input-group-append">
+                                                <button class="btn btn-primary" type="button" onclick="getCurrentLocation('latitude', 'longitude')" title="{{ __('get_current_location') }}"><i class="fa fa-map-marker"></i></button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="form-group col-sm-12 col-md-3">
+                                        <label for="longitude">{{ __('longitude')}}</label>
+                                        <input type="text" name="longitude" id="longitude" placeholder="{{__('longitude')}}" class="form-control">
+                                    </div>
 
                                     {{-- <div class="form-group col-sm-12 col-md-3">
                                         <label for="assign_package">{{ __('assign_package')}} </label>
@@ -357,8 +370,21 @@
                                 <textarea name="edit_school_tagline" id="edit_school_tagline" cols="30" rows="3" class="form-control" placeholder="{{__('tagline')}}" required></textarea>
                             </div>
                             <div class="form-group col-sm-12 col-md-6">
-                                <label for="edit_school_address">{{ __('address')}} <span class="text-danger">*</span></label>
-                                <textarea name="edit_school_address" id="edit_school_address" cols="30" rows="3" class="form-control" placeholder="{{__('address')}}" required></textarea>
+                                        <label for="edit_school_address">{{ __('address')}} <span class="text-danger">*</span></label>
+                                        <textarea name="edit_school_address" id="edit_school_address" cols="30" rows="3" class="form-control" placeholder="{{__('address')}}" required></textarea>
+                            </div>
+                            <div class="form-group col-sm-12 col-md-3">
+                                        <label for="edit_latitude">{{ __('latitude')}}</label>
+                                        <div class="input-group">
+                                            <input type="text" name="edit_latitude" id="edit_latitude" placeholder="{{__('latitude')}}" class="form-control">
+                                            <div class="input-group-append">
+                                                <button class="btn btn-primary" type="button" onclick="getCurrentLocation('edit_latitude', 'edit_longitude')" title="{{ __('get_current_location') }}"><i class="fa fa-map-marker"></i></button>
+                                            </div>
+                                        </div>
+                            </div>
+                            <div class="form-group col-sm-12 col-md-3">
+                                <label for="edit_longitude">{{ __('longitude')}}</label>
+                                <input type="text" name="edit_longitude" id="edit_longitude" placeholder="{{__('longitude')}}" class="form-control">
                             </div>
 
                             
@@ -736,6 +762,19 @@
             e.stopPropagation();
         });
     });
+
+    function getCurrentLocation(latId, longId) {
+        if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition(function(position) {
+                $('#' + latId).val(position.coords.latitude);
+                $('#' + longId).val(position.coords.longitude);
+            }, function(error) {
+                alert('Error getting geolocation: ' + error.message);
+            });
+        } else {
+            alert('Geolocation is not supported by this browser.');
+        }
+    }
 </script>
     
 @endsection

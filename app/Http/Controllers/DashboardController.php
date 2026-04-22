@@ -93,6 +93,12 @@ class DashboardController extends Controller
         $paymentConfiguration = '';
         $settings = app(CachingService::class)->getSystemSettings();
         $system_settings = $settings;
+
+        $staffAttendance = null;
+        if (Auth::user()->staff || Auth::user()->hasRole('Teacher')) {
+            $staffAttendance = \App\Models\StaffAttendance::where('user_id', Auth::user()->id)->where('date', Carbon::now()->toDateString())->first();
+        }
+
         // School Admin Dashboard
         if (Auth::user()->hasRole('School Admin') || Auth::user()->school_id) {
             // Counters
@@ -285,10 +291,10 @@ class DashboardController extends Controller
         }
 
         if ((Auth::user()->hasRole('School Admin') || Auth::user()->school_id) && (!Auth::user()->hasRole('Teacher') && !Auth::user()->hasRole('Super Admin'))) {
-            return view('dashboard', compact('teacher', 'parent', 'student', 'announcement', 'teachers', 'boys', 'girls', 'total_students', 'license_expire', 'subscription', 'previous_subscriptions', 'holiday', 'classData', 'prepiad_upcoming_plan', 'prepiad_upcoming_plan_type', 'check_payment', 'sessionYear', 'classes_counter', 'streams', 'exams', 'fees_detail', 'settings', 'class_names', 'paymentConfiguration', 'system_settings', 'class_section_names', 'student_pickup_count'));
+            return view('dashboard', compact('teacher', 'parent', 'student', 'announcement', 'teachers', 'boys', 'girls', 'total_students', 'license_expire', 'subscription', 'previous_subscriptions', 'holiday', 'classData', 'prepiad_upcoming_plan', 'prepiad_upcoming_plan_type', 'check_payment', 'sessionYear', 'classes_counter', 'streams', 'exams', 'fees_detail', 'settings', 'class_names', 'paymentConfiguration', 'system_settings', 'class_section_names', 'student_pickup_count', 'staffAttendance'));
         }
         if (Auth::user()->hasRole('Teacher')) {
-            return view('teacher_dashboard', compact('teacher', 'parent', 'student', 'announcement', 'teachers', 'boys', 'girls', 'holiday', 'timetables', 'classData', 'sessionYear', 'classes_counter', 'streams', 'class_names', 'total_students', 'exams'));
+            return view('teacher_dashboard', compact('teacher', 'parent', 'student', 'announcement', 'teachers', 'boys', 'girls', 'holiday', 'timetables', 'classData', 'sessionYear', 'classes_counter', 'streams', 'class_names', 'total_students', 'exams', 'staffAttendance'));
         }
 
         if (Auth::user()->hasRole('Super Admin') || Auth::user()->school_id == null) {

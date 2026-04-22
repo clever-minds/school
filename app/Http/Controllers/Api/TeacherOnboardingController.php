@@ -73,7 +73,7 @@ class TeacherOnboardingController extends Controller
                 Staff::where('user_id', $user->id)->update(['onboarding_completed' => 1]);
                 return ResponseService::successResponse('Test passed! Onboarding completed.', ['score' => $score]);
             } else {
-                return ResponseService::successResponse('Test failed. Please try again.', ['score' => $score], true);
+                return ResponseService::successResponse('Test failed. Please try again.', ['score' => $score]);
             }
 
         } catch (Throwable $e) {

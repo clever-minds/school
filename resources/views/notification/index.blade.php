@@ -156,6 +156,9 @@
                             </tr>
                             </thead>
                         </table>
+                        <div class="mt-3 text-danger font-weight-bold">
+                            * {{ __('Event or schedule dates may change as per situation, so cooperation is required.') }}
+                        </div>
                     </div>
                 </div>
             </div>

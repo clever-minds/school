@@ -1658,4 +1658,74 @@ class StudentApiController extends Controller {
             ResponseService::errorResponse();
         }
     }
+
+    public function dashboard(Request $request) {
+        try {
+            $user = Auth::user();
+            $student = $user->student;
+            $sessionYear = $this->cache->getDefaultSessionYear();
+
+            // 1. Sliders
+            $sliders = $this->sliders->builder()->where('school_id', $user->school_id)->whereIn('type',[1,3])->get();
+
+            // 2. Profile Summary
+            $profile = [
+                'full_name' => $user->full_name,
+                'image' => $user->image,
+                'class_name' => $student->class_section->full_name,
+                'roll_number' => $student->roll_number,
+                'admission_no' => $student->admission_no,
+            ];
+
+            // 3. Attendance Summary (Current Month)
+            $attendance = $this->attendance->builder()
+                ->where(['student_id' => $user->id, 'session_year_id' => $sessionYear->id])
+                ->whereMonth('date', date('m'))
+                ->get();
+            
+            $present = $attendance->where('type', 1)->count();
+            $total = $attendance->count();
+            $attendance_percentage = $total > 0 ? number_format(($present * 100) / $total, 2) : "100";
+
+            // 4. Upcoming Holidays (Next 30 days)
+            $holidays = $this->holiday->builder()
+                ->whereDate('date', '>=', date('Y-m-d'))
+                ->whereDate('date', '<=', date('Y-m-d', strtotime('+30 days')))
+                ->orderBy('date', 'asc')
+                ->limit(5)
+                ->get();
+
+            // 5. Statistics / Counts
+            $assignments_count = $this->assignment->builder()
+                ->whereHas('assignment_commons', function ($query) use ($student) {
+                    $query->where('class_section_id', $student->class_section_id);
+                })
+                ->whereDoesntHave('submission', function ($q) use ($user) {
+                    $q->where('student_id', $user->id);
+                })
+                ->count();
+
+            $exams_count = $this->exam->builder()
+                ->where(['class_id' => $student->class_section->class_id, 'session_year_id' => $sessionYear->id])
+                ->whereDate('start_date', '>=', date('Y-m-d'))
+                ->count();
+
+            $data = [
+                'sliders' => $sliders,
+                'profile' => $profile,
+                'attendance_percentage' => $attendance_percentage,
+                'upcoming_holidays' => $holidays,
+                'counts' => [
+                    'pending_assignments' => $assignments_count,
+                    'upcoming_exams' => $exams_count,
+                ],
+                'session_year' => $sessionYear->name
+            ];
+
+            ResponseService::successResponse("Dashboard Data Fetched Successfully", $data);
+        } catch (Throwable $e) {
+            ResponseService::logErrorResponse($e);
+            ResponseService::errorResponse();
+        }
+    }
 }

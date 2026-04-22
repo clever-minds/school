@@ -8,4 +8,10 @@ use Illuminate\Database\Eloquent\Model;
 class Reminder extends Model
 {
     use HasFactory;
+    protected $fillable = ['title', 'description', 'date', 'school_id'];
+
+    public function scopeOwner($query)
+    {
+        return $query->where('school_id', auth()->user()->school_id);
+    }
 }

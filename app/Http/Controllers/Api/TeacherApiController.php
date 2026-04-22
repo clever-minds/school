@@ -202,7 +202,11 @@ class TeacherApiController extends Controller
             } else {
                 $user = $auth->load(['staff','staff.staffSalary.payrollSetting']);
             }
-            ResponseService::successResponse('User logged-in!', $user, ['token' => $token], config('constants.RESPONSE_CODE.LOGIN_SUCCESS'));
+            ResponseService::successResponse('User logged-in!', $user, [
+                'token' => $token,
+                'latitude' => $school->latitude,
+                'longitude' => $school->longitude
+            ], config('constants.RESPONSE_CODE.LOGIN_SUCCESS'));
         }
 
         ResponseService::errorResponse('Invalid Login Credentials', null, config('constants.RESPONSE_CODE.INVALID_LOGIN'));

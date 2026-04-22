@@ -942,6 +942,8 @@ window.schoolEvents = {
         $('#edit_school_support_phone').val(row.support_phone);
         $('#edit_school_address').val(row.address);
         $('#edit_school_tagline').val(row.tagline);
+        $('#edit_latitude').val(row.latitude);
+        $('#edit_longitude').val(row.longitude);
 
 
         // set the school url based on the domain type

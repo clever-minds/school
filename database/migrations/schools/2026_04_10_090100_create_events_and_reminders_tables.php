@@ -11,8 +11,30 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('events_and_reminders_tables', function (Blueprint $table) {
+        Schema::create('events', function (Blueprint $table) {
             $table->id();
+            $table->string('title');
+            $table->text('description')->nullable();
+            $table->date('date');
+            $table->integer('school_id');
+            $table->timestamps();
+        });
+
+        Schema::create('reminders', function (Blueprint $table) {
+            $table->id();
+            $table->string('title');
+            $table->text('description')->nullable();
+            $table->date('date');
+            $table->integer('school_id');
+            $table->timestamps();
+        });
+
+        Schema::create('schedules', function (Blueprint $table) {
+            $table->id();
+            $table->string('title');
+            $table->text('description')->nullable();
+            $table->date('date');
+            $table->integer('school_id');
             $table->timestamps();
         });
     }
@@ -22,6 +44,8 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('events_and_reminders_tables');
+        Schema::dropIfExists('events');
+        Schema::dropIfExists('reminders');
+        Schema::dropIfExists('schedules');
     }
 };

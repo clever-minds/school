@@ -5,6 +5,7 @@ use App\Http\Controllers\Api\ParentApiController;
 use App\Http\Controllers\Api\StaffApiController;
 use App\Http\Controllers\Api\StudentApiController;
 use App\Http\Controllers\Api\TeacherApiController;
+use App\Http\Controllers\Api\StudentPickupController;
 use App\Http\Controllers\SubscriptionWebhookController;
 use Illuminate\Support\Facades\Route;
 
@@ -85,7 +86,7 @@ Route::group(['prefix' => 'student'], static function () {
         // student diaries
         Route::get('/diaries', [StudentApiController::class, 'getStudentDiaries']);
         Route::get('/diary-details', [StudentApiController::class, 'showStudentDiaryDetail']);
-        
+        Route::get('dashboard', [StudentApiController::class, 'dashboard']);
     });
 });
 
@@ -154,6 +155,10 @@ Route::group(['prefix' => 'parent'], static function () {
                 // student diaries
                 Route::get('/diaries', [ParentApiController::class, 'getStudentDiaries']);
                 Route::get('/diary-details', [ParentApiController::class, 'showStudentDiaryDetail']);
+
+                // Student Pickup
+                Route::get('student-pickup-request', [StudentPickupController::class, 'getStudentPickupRequests']);
+                Route::post('student-pickup-request', [StudentPickupController::class, 'createPickupRequest']);
             });
         });
     // });
@@ -239,6 +244,23 @@ Route::group(['prefix' => 'teacher'], static function () {
         Route::post('/create-diary', [TeacherApiController::class, 'createStudentDiary']);
         Route::post('/delete-diary', [TeacherApiController::class, 'deleteStudentDiary']);
         Route::post('/remove-student', [TeacherApiController::class, 'removeStudent']);
+
+        // KYC
+        Route::get('get-kyc-status', [\App\Http\Controllers\Api\TeacherKycController::class, 'getKycStatus']);
+        Route::post('upload-kyc-document', [\App\Http\Controllers\Api\TeacherKycController::class, 'uploadDocument']);
+
+        // Onboarding
+        Route::group(['prefix' => 'onboarding'], function () {
+            Route::get('jd', [\App\Http\Controllers\Api\TeacherOnboardingController::class, 'getJd']);
+            Route::get('questions', [\App\Http\Controllers\Api\TeacherOnboardingController::class, 'getQuestions']);
+            Route::post('submit', [\App\Http\Controllers\Api\TeacherOnboardingController::class, 'submitTest']);
+        });
+
+        // Policies
+        Route::group(['prefix' => 'policies'], function () {
+            Route::get('/', [\App\Http\Controllers\Api\SchoolPolicyController::class, 'getPolicies']);
+            Route::post('acknowledge', [\App\Http\Controllers\Api\SchoolPolicyController::class, 'acknowledgePolicy']);
+        });
     });
 });
 
@@ -293,8 +315,12 @@ Route::get('/schools', [StaffApiController::class, 'getAllSchools']);
         Route::get('student-fees-receipt', [StaffApiController::class, 'feesReceipt']);
         Route::get('allowances-deductions', [StaffApiController::class, 'allowancesDeductions']);
 
-        
-        
+        Route::post('attendance', [StaffApiController::class, 'markAttendance']);
+        Route::get('attendance-history', [StaffApiController::class, 'attendanceHistory']);
+
+        // Student Pickup Verification
+        Route::post('verify-student-pickup-otp', [StudentPickupController::class, 'verifyPickupOTP']);
+        Route::get('student-pickup-requests', [StudentPickupController::class, 'getAllPickupRequests']);
     });
 });
 

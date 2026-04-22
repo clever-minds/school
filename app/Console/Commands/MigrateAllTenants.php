@@ -155,15 +155,25 @@ class MigrateAllTenants extends Command
                       '--path' => 'database/migrations/schools/2026_04_10_101311_create_teacher_onboarding_tables.php',
                       '--force' => true,
                   ]);
+                  Artisan::call('migrate', [
+                      '--database' => 'tenant',
+                      '--path' => 'database/migrations/schools/2026_04_16_105510_create_staff_attendances_table.php',
+                      '--force' => true,
+                  ]);
+                  Artisan::call('migrate', [
+                      '--database' => 'tenant',
+                      '--path' => 'database/migrations/schools/2026_04_17_161053_create_school_policies_table.php',
+                      '--force' => true,
+                  ]);
+                  Artisan::call('migrate', [
+                      '--database' => 'tenant',
+                      '--path' => 'database/migrations/schools/2026_04_19_080000_add_latitude_and_longitude_to_schools_table_tenant.php',
+                      '--force' => true,
+                  ]);
                 $this->info("✅ Migration done for {$tenant->name}");
             } catch (\Exception $e) {
                 $this->error("❌ Migration failed for {$tenant->name}: {$e->getMessage()}");
             }
-        }
-
-        $this->info('🎉 All tenant migrations completed successfully!');
-    }
-}           }
         }
 
         $this->info('🎉 All tenant migrations completed successfully!');

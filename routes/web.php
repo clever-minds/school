@@ -47,6 +47,7 @@ use App\Http\Controllers\PromoteStudentController;
 use App\Http\Controllers\RoleController;
 use App\Http\Controllers\SchoolController;
 use App\Http\Controllers\SchoolSettingsController;
+use App\Http\Controllers\SchoolPolicyController;
 use App\Http\Controllers\SectionController;
 use App\Http\Controllers\SemesterController;
 use App\Http\Controllers\SessionYearController;
@@ -58,12 +59,14 @@ use App\Http\Controllers\StudentController;
 use App\Http\Controllers\SubjectController;
 use App\Http\Controllers\SubscriptionBillPaymentController;
 use App\Http\Controllers\StudentPickupController;
+use App\Http\Controllers\StaffAttendanceController;
 use App\Http\Controllers\SubscriptionController;
 use App\Http\Controllers\SubscriptionWebhookController;
 use App\Http\Controllers\SystemSettingsController;
 use App\Http\Controllers\SystemUpdateController;
 use App\Http\Controllers\TeacherController;
 use App\Http\Controllers\TeacherOnboardingController;
+use App\Http\Controllers\TeacherKycController;
 use App\Http\Controllers\TimetableController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\WebhookController;
@@ -90,6 +93,9 @@ use Illuminate\Support\Facades\Session;
 use App\Http\Controllers\ExpenseTransController;
 use App\Http\Controllers\ActivityLogController;
 use App\Http\Controllers\Auth\ImpersonationController;
+use App\Http\Controllers\EventController;
+use App\Http\Controllers\ReminderController;
+use App\Http\Controllers\ScheduleController;
 
 
 
@@ -316,6 +322,7 @@ Route::post('/admin/impersonation-exit',
             Route::get('student-terms-condition', [SystemSettingsController::class, 'termsConditions'])->name('system-settings.student-terms-condition');
             Route::get('contact-us', [SystemSettingsController::class, 'contactUs'])->name('system-settings.contact-us');
             Route::get('about-us', [SystemSettingsController::class, 'aboutUs'])->name('system-settings.about-us');
+
             Route::put('notification-settings', [SystemSettingsController::class, 'notificationSettingUpdate'])->name('notification-setting.update');
 
             /*** Email Settings ***/
@@ -351,7 +358,19 @@ Route::post('/admin/impersonation-exit',
 
         });
 
-        Route::resource('system-settings', SystemSettingsController::class);
+        Route::resource('system-settings', SystemSettingsController::class)->only(['index', 'store', 'update']);
+        Route::resource('events', EventController::class);
+        Route::get('events-list', [EventController::class, 'show'])->name('events.list');
+
+        Route::resource('reminders', ReminderController::class);
+        Route::get('reminders-list', [ReminderController::class, 'show'])->name('reminders.list');
+
+        Route::resource('schedules', ScheduleController::class);
+        Route::get('schedules-list', [ScheduleController::class, 'show'])->name('schedules.list');
+
+        // Teacher KYC for current user
+        Route::get('kyc-documents', [TeacherKycController::class, 'teacherKyc'])->name('teacher.kyc.index');
+        Route::post('kyc-documents/upload', [TeacherKycController::class, 'teacherUpload'])->name('teacher.kyc.upload');
 
         Route::get('/activity-logs', [ActivityLogController::class, 'index'])->name('activity.logs');
         Route::get('activity-logs/fetch', [ActivityLogController::class, 'fetchLogs'])->name('activity.logs.fetch');
@@ -408,6 +427,21 @@ Route::post('/admin/impersonation-exit',
         Route::put("staff/{id}/change-status", [StaffController::class, 'restore'])->name('staff.restore');
         Route::delete("staff/{id}/deleted", [StaffController::class, 'trash'])->name('staff.trash');
         Route::post("staff/change-status-bulk", [StaffController::class, 'changeStatusBulk']);
+
+        Route::group(['prefix' => 'staff-attendance'], static function () {
+            Route::get('/', [StaffAttendanceController::class, 'index'])->name('staff-attendance.index');
+            Route::get('/list', [StaffAttendanceController::class, 'show'])->name('staff-attendance.list');
+            Route::post('/check', [StaffAttendanceController::class, 'check'])->name('staff-attendance.check');
+            Route::get('/my', [StaffAttendanceController::class, 'myAttendance'])->name('staff-attendance.my');
+        });
+
+        // Teacher KYC
+        Route::group(['prefix' => 'staff-kyc'], static function () {
+            Route::get('/', [TeacherKycController::class, 'index'])->name('staff.kyc.index');
+            Route::get('/show', [TeacherKycController::class, 'show'])->name('staff.kyc.show');
+            Route::get('/details/{id}', [TeacherKycController::class, 'details'])->name('staff.kyc.details');
+            Route::post('/update-status', [TeacherKycController::class, 'updateStatus'])->name('staff.kyc.update-status');
+        });
        
 
         /*** Medium ***/
@@ -540,6 +574,12 @@ Route::post('/admin/impersonation-exit',
             Route::get('/questions/list', [TeacherOnboardingController::class, 'questionList'])->name('teacher-onboarding.questions.list');
             Route::delete('/questions/{id}', [TeacherOnboardingController::class, 'questionDelete'])->name('teacher-onboarding.questions.delete');
         });
+
+        /*** School Policies ***/
+        Route::group(['prefix' => 'school-policy'], static function () {
+            Route::get('/list', [SchoolPolicyController::class, 'show'])->name('school-policy.list');
+        });
+        Route::resource('school-policy', SchoolPolicyController::class);
 
         Route::get('id-card-settings', [SchoolSettingsController::class, 'id_card_index'])->name('id-card-settings');
         Route::post('id-card-settings', [SchoolSettingsController::class, 'id_card_store']);
@@ -779,7 +819,7 @@ Route::post('/admin/impersonation-exit',
             Route::get('third-party-apis', [SchoolSettingsController::class, 'thirdPartyApiIndex'])->name('school-settings.third-party');
             Route::post('third-party-apis', [SchoolSettingsController::class, 'thirdPartyApiUpdate'])->name('school-settings.third-party.update');
         });
-        Route::resource('school-settings', SchoolSettingsController::class);
+        Route::resource('school-settings', SchoolSettingsController::class)->only(['index', 'store', 'update']);
 
         // Database backup
         Route::group(['prefix' => 'database-backup'], static function () {

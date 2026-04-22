@@ -40,6 +40,8 @@ use Illuminate\Support\Str;
 use PDF;
 use PHPUnit\Framework\Constraint\Count;
 use App\Models\Notification;
+use App\Models\StaffAttendance;
+use App\Repositories\StaffAttendance\StaffAttendanceInterface;
 
 class StaffApiController extends Controller
 {
@@ -68,8 +70,9 @@ class StaffApiController extends Controller
     private SystemSettingInterface $systemSetting;
     private SchoolSettingInterface $schoolSettings;
     private StaffSalaryInterface $staffSalary;
+    private StaffAttendanceInterface $staffAttendance;
 
-    public function __construct(ExpenseInterface $expense, SchoolSettingInterface $schoolSetting, CachingService $cache, LeaveInterface $leave, UserInterface $user, StudentInterface $student, TimetableInterface $timetable, ClassSectionInterface $classSection, AnnouncementInterface $announcement, AnnouncementClassInterface $announcementClass, FilesInterface $files, AttendanceInterface $attendance, NotificationInterface $notification, FeesInterface $fees, LeaveMasterInterface $leaveMaster, ExamResultInterface $examResult, FeaturesService $featureService, SessionYearInterface $sessionYearInterface, StaffInterface $staff, FeesPaidInterface $feesPaid, SystemSettingInterface $systemSetting, SchoolSettingInterface $schoolSettings, StaffSalaryInterface $staffSalary)
+    public function __construct(ExpenseInterface $expense, SchoolSettingInterface $schoolSetting, CachingService $cache, LeaveInterface $leave, UserInterface $user, StudentInterface $student, TimetableInterface $timetable, ClassSectionInterface $classSection, AnnouncementInterface $announcement, AnnouncementClassInterface $announcementClass, FilesInterface $files, AttendanceInterface $attendance, NotificationInterface $notification, FeesInterface $fees, LeaveMasterInterface $leaveMaster, ExamResultInterface $examResult, FeaturesService $featureService, SessionYearInterface $sessionYearInterface, StaffInterface $staff, FeesPaidInterface $feesPaid, SystemSettingInterface $systemSetting, SchoolSettingInterface $schoolSettings, StaffSalaryInterface $staffSalary, StaffAttendanceInterface $staffAttendance)
     {
         $this->expense = $expense;
         $this->schoolSetting = $schoolSetting;
@@ -94,6 +97,7 @@ class StaffApiController extends Controller
         $this->systemSetting = $systemSetting;
         $this->schoolSettings = $schoolSettings;
         $this->staffSalary = $staffSalary;
+        $this->staffAttendance = $staffAttendance;
     }
 
     public function myPayroll(Request $request)
@@ -1313,4 +1317,77 @@ class StaffApiController extends Controller
     }
 }
 
+    public function markAttendance(Request $request) {
+        $validator = Validator::make($request->all(), [
+            'latitude' => 'required',
+            'longitude' => 'required',
+        ]);
+        if ($validator->fails()) {
+            return ResponseService::validationError($validator->errors()->first());
+        }
+        try {
+            $user = Auth::user();
+            $today = Carbon::now()->toDateString();
+            $currentTime = Carbon::now()->toDateTimeString();
+            $attendance = $this->staffAttendance->builder()->where('user_id', $user->id)->where('date', $today)->first();
+
+            if (!$attendance) {
+                // Perform Check-In
+                $data = [
+                    'user_id' => $user->id,
+                    'school_id' => $user->school_id,
+                    'date' => $today,
+                    'check_in' => $currentTime,
+                    'latitude' => $request->latitude,
+                    'longitude' => $request->longitude,
+                    'check_in_location' => $request->address ?? null,
+                    'check_in_ip' => $request->ip(),
+                    'status' => 1 // Present
+                ];
+                $this->staffAttendance->create($data);
+                return ResponseService::successResponse('Checked in successfully', ['type' => 'check_in']);
+            }
+
+            if ($attendance->check_out) {
+                return ResponseService::errorResponse('Already checked out for today');
+            }
+
+            // Perform Check-Out
+            $data = [
+                'check_out' => $currentTime,
+                'check_out_latitude' => $request->latitude,
+                'check_out_longitude' => $request->longitude,
+                'check_out_location' => $request->address ?? null,
+                'check_out_ip' => $request->ip(),
+            ];
+            $this->staffAttendance->update($attendance->id, $data);
+            return ResponseService::successResponse('Checked out successfully', ['type' => 'check_out']);
+
+        } catch (\Throwable $th) {
+            ResponseService::logErrorResponse($th);
+            return ResponseService::errorResponse();
+        }
+    }
+
+
+
+    public function attendanceHistory(Request $request) {
+        try {
+            $user = Auth::user();
+            $attendance = $this->staffAttendance->builder()->where('user_id', $user->id)
+                ->when($request->month, function($q) use($request){
+                    $q->whereMonth('date', $request->month);
+                })
+                ->when($request->year, function($q) use($request){
+                    $q->whereYear('date', $request->year);
+                })
+                ->orderBy('date', 'desc')
+                ->paginate($request->limit ?? 30);
+            return ResponseService::successResponse('Data fetched successfully', $attendance);
+        } catch (\Throwable $th) {
+            ResponseService::logErrorResponse($th);
+            return ResponseService::errorResponse();
+        }
+    }
 }
+

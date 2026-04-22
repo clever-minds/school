@@ -150,7 +150,9 @@ class SchoolController extends Controller {
                 'code'          => $school_code,
                 'type'          => "custom",
                 'domain_type'   => $request->domain_type,
-                'installed'     => 0
+                'installed'     => 0,
+                'latitude'      => $request->latitude,
+                'longitude'     => $request->longitude
             );
             // Call store function of Schools Repository
             $schoolData = $this->schoolsRepository->create($school_data);
@@ -438,7 +440,9 @@ class SchoolController extends Controller {
                 'support_phone' => $request->edit_school_support_phone,
                 'tagline'       => $request->edit_school_tagline,
                 'domain_type'   => $request->edit_domain_type,
-                'domain'        => $request->edit_domain
+                'domain'        => $request->edit_domain,
+                'latitude'      => $request->edit_latitude,
+                'longitude'     => $request->edit_longitude
             );
 
             if ($request->hasFile('edit_school_image')) {

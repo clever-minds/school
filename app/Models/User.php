@@ -94,6 +94,10 @@ class User extends Authenticatable implements MustVerifyEmail {
         return $this->hasOne(Staff::class, 'user_id', 'id');
     }
 
+    public function teacher_documents() {
+        return $this->hasMany(TeacherDocument::class, 'user_id', 'id');
+    }
+
     public function class_section_teacher() {
         return $this->hasOne(ClassSection::class, 'class_teacher_id')->withTrashed();
     }

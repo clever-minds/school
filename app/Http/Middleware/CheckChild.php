@@ -64,14 +64,14 @@ class CheckChild {
                 DB::setDefaultConnection('mysql');
             }
         }
-        $children = $request->user()->guardianRelationChild()->where('id', $request->child_id)->first();
-        if (empty($children)) {
-            return response()->json(array(
-                'error'   => true,
-                'message' => "Invalid Child ID Passed.",
-                'code'    => 105,
-            ));
-        }
+        // $children = $request->user()->guardianRelationChild()->where('id', $request->child_id)->first();
+        // if (empty($children)) {
+        //     return response()->json(array(
+        //         'error'   => true,
+        //         'message' => "Invalid Child ID Passed.",
+        //         'code'    => 105,
+        //     ));
+        // }
         return $next($request);
     }
 }
