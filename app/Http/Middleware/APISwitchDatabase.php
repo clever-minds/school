@@ -20,7 +20,7 @@ class APISwitchDatabase
      */
     public function handle(Request $request, Closure $next): Response
     {
-        $schoolCode = $request->header('school-code');
+        $schoolCode = $request->header('school-code') ?? $request->school_code;
         if ($schoolCode) {
             $school = School::on('mysql')->where('code',$schoolCode)->first();
 
@@ -30,7 +30,7 @@ class APISwitchDatabase
                 DB::purge('school');
                 DB::connection('school')->reconnect();
                 DB::setDefaultConnection('school');
-                $token = $request->bearerToken();
+                $token = $request->bearerToken() ?? $request->token;
                 $user = PersonalAccessToken::findToken($token);
                 
                 if ($user) {

@@ -67,8 +67,16 @@
 
     <!-- Header -->
     <div class="text-center">
-        @if ($school['horizontal_logo'] ?? '')
-            <img src="{{ public_path('storage/') . $school['horizontal_logo'] }}" style="height:60px; max-width:100%;">
+        @php
+            $logoPath = public_path('storage/') . ($school['horizontal_logo'] ?? '');
+            $logoBase64 = '';
+            if (!empty($school['horizontal_logo']) && file_exists($logoPath) && is_file($logoPath)) {
+                $logoData = base64_encode(file_get_contents($logoPath));
+                $logoBase64 = 'data:image/' . pathinfo($logoPath, PATHINFO_EXTENSION) . ';base64,' . $logoData;
+            }
+        @endphp
+        @if ($logoBase64)
+            <img src="{{ $logoBase64 }}" style="height:60px; max-width:100%;">
         @endif
 
       {{--  <div style="font-size:16px; font-weight:bold;">
@@ -127,8 +135,8 @@
                             <strong>Txn ID:</strong> {{ $compulsoryFee->transaction_id ?? '-' }}<br>
                         @endif
 
-                        @if($compulsoryFee->mode === "chaque")
-                            <strong>Cheque No:</strong> {{ $compulsoryFee->chaque_no ?? '-' }}<br>
+                        @if($compulsoryFee->mode === "Cheque")
+                            <strong>Cheque No:</strong> {{ $compulsoryFee->cheque_no ?? '-' }}<br>
                         @endif
                     </td>
 
