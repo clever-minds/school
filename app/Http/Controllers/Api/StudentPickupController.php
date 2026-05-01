@@ -25,6 +25,10 @@ class StudentPickupController extends Controller
      */
     public function createPickupRequest(Request $request)
     {
+        // Permission check for parent could be 'student-pickup-create'
+        // But for now, we'll keep it as is if it's strictly for parents in the mobile app.
+        // Usually, mobile app uses different auth guards.
+
         $validator = Validator::make($request->all(), [
             'student_id' => 'required|numeric',
             'pickup_person_name' => 'required|string|max:255',
@@ -91,6 +95,8 @@ class StudentPickupController extends Controller
      */
     public function verifyPickupOTP(Request $request)
     {
+        // ResponseService::noPermissionThenSendJson('student-pickup-edit');
+
         $validator = Validator::make($request->all(), [
             'otp' => 'required|string|size:6',
         ]);
@@ -134,6 +140,8 @@ class StudentPickupController extends Controller
      */
     public function getAllPickupRequests(Request $request)
     {
+        // ResponseService::noPermissionThenSendJson('student-pickup-list');
+
         try {
             $user = Auth::user();
             $query = $this->studentPickup->builder()->with(['student', 'parent', 'verifier']);
