@@ -1829,8 +1829,10 @@ class ParentApiController extends Controller
     public function feesPaidReceiptPDF(Request $request)
     {
         $validator = Validator::make($request->all(), [
-            'child_id' => 'required|integer',
-            'fees_id' => 'required|integer'
+            'child_id'          => 'required_without_all:fees_paid_id,compulsory_fee_id|integer',
+            'fees_id'           => 'required_without_all:fees_paid_id,compulsory_fee_id|integer',
+            'fees_paid_id'      => 'required_without_all:child_id,compulsory_fee_id|numeric',
+            'compulsory_fee_id' => 'required_without_all:child_id,fees_paid_id|numeric',
         ]);
 
         if ($validator->fails()) {
@@ -1838,18 +1840,24 @@ class ParentApiController extends Controller
         }
 
         try {
-            $student = Auth::user()->guardianRelationChild()->where('id', $request->child_id)->whereHas('user', function ($q) {
-                $q->whereNull('deleted_at');
-            })->with('user:id,first_name,last_name', 'class_section.class.stream', 'class_section.section', 'class_section.medium')->first();
-
-            if (empty($student)) {
-                ResponseService::errorResponse("Child's Account is not Active.Contact School Support", NULL, config('constants.RESPONSE_CODE.INACTIVE_CHILD'));
-            }
-            $feesPaid = $this->feesPaid->builder()->where(['fees_id' => $request->fees_id, 'student_id' => $student->user_id])
-                ->with([
-                    'fees' => function ($q) {
-                        $q->with('class:id,medium_id,name', 'class.medium', 'fees_class_type.fees_type');
-                    },
+            if ($request->compulsory_fee_id) {
+                // By Compulsory Fee ID
+                $feesPaid = $this->feesPaid->builder()
+                    ->whereHas('compulsory_fee', function ($q) use ($request) {
+                        $q->where('id', $request->compulsory_fee_id);
+                    })
+                    ->with([
+                        'fees.fees_class_type.fees_type',
+                        'compulsory_fee' => function ($q) use ($request) {
+                            $q->where('id', $request->compulsory_fee_id)->with('installment_fee:id,name');
+                        },
+                        'optional_fee.fees_class_type.fees_type:id,name'
+                    ])
+                    ->firstOrFail();
+            } elseif ($request->fees_paid_id) {
+                // By Fees Paid ID
+                $feesPaid = $this->feesPaid->builder()->where('id', $request->fees_paid_id)->with([
+                    'fees.fees_class_type.fees_type',
                     'compulsory_fee.installment_fee:id,name',
                     'optional_fee' => function ($q) {
                         $q->with([
@@ -1857,22 +1865,56 @@ class ParentApiController extends Controller
                                 $q->select('id', 'fees_type_id')->with('fees_type:id,name');
                             }
                         ]);
-                    },
-                ])->first();
+                    }
+                ])->firstOrFail();
+            } else {
+                // Fallback to existing child_id and fees_id logic
+                $student_data = Auth::user()->guardianRelationChild()->where('id', $request->child_id)->first();
+                $feesPaid = $this->feesPaid->builder()->where(['fees_id' => $request->fees_id, 'student_id' => $student_data->user_id])
+                    ->with([
+                        'fees.fees_class_type.fees_type',
+                        'compulsory_fee.installment_fee:id,name',
+                        'optional_fee' => function ($q) {
+                            $q->with([
+                                'fees_class_type' => function ($q) {
+                                    $q->select('id', 'fees_type_id')->with('fees_type:id,name');
+                                }
+                            ]);
+                        }
+                    ])->firstOrFail();
+            }
+
+            $student = $this->student->builder()->with('user:id,first_name,last_name,email', 'class_section.class.stream', 'class_section.section', 'class_section.medium')->whereHas('user', function ($q) use ($feesPaid) {
+                $q->where('id', $feesPaid->student_id);
+            })->firstOrFail();
+
+            $school = $this->cache->getSchoolSettings();
+
+            $data = explode("storage/", $school['horizontal_logo'] ?? '');
+            $school['horizontal_logo'] = end($data);
+
+            if (empty($school['horizontal_logo'])) {
+                $systemSettings = $this->cache->getSystemSettings();
+                $data = explode("storage/", $systemSettings['horizontal_logo'] ?? '');
+                $school['horizontal_logo'] = end($data);
+            }
+
             $systemVerticalLogo = $this->systemSetting->builder()->where('name', 'vertical_logo')->first();
             $schoolVerticalLogo = $this->schoolSetting->builder()->where('name', 'vertical_logo')->first();
-            $school = $this->cache->getSchoolSettings();
-            //            return view('fees.fees_receipt', compact('systemVerticalLogo', 'school', 'feesPaid', 'student', 'schoolVerticalLogo'));
             $output = Pdf::loadView('fees.fees_receipt', compact('systemVerticalLogo', 'school', 'feesPaid', 'student', 'schoolVerticalLogo'))->output();
-            $response = array(
-                'error' => false,
-                'pdf' => base64_encode($output),
-            );
+
+            $data = [
+                'fees_paid' => $feesPaid,
+                'student'   => $student,
+                'school'    => $school,
+                'pdf'       => base64_encode($output)
+            ];
+
+            ResponseService::successResponse("Fees Receipt Fetched Successfully", $data);
         } catch (Throwable $e) {
             ResponseService::logErrorResponse($e);
             ResponseService::errorResponse();
         }
-        return response()->json($response);
     }
 
     public function getSchoolSettings(Request $request)
@@ -1967,28 +2009,28 @@ class ParentApiController extends Controller
 //    }
 
     //get the fees paid list
-//    public function feesPaidList(Request $request) {
-//        $validator = Validator::make($request->all(), [
-//            'child_id'        => 'required',
-//            'session_year_id' => 'nullable'
-//        ]);
-//
-//        if ($validator->fails()) {
-//            ResponseService::validationError($validator->errors()->first());
-//        }
-//        try {
-//            $child = $this->student->findById($request->child_id);
-//            $currentSessionYear = $this->cache->getDefaultSessionYear($child->user->school_id);
-//            $sessionYearId = $request->session_year_id ?? $currentSessionYear->id;
-//            $fees_paid = $this->feesPaid->builder()->where(['student_id' => $child->user_id, 'session_year_id' => $sessionYearId])->with('session_year:id,name', 'class.medium')->get();
-//
-//            ResponseService::successResponse("", $fees_paid);
-//        } catch (Throwable $e) {
-//            DB::rollBack();
-//            ResponseService::logErrorResponse($e);
-//            ResponseService::errorResponse();
-//        }
-//    }
+    public function feesPaidList(Request $request) {
+        $validator = Validator::make($request->all(), [
+            'child_id'        => 'required',
+            'session_year_id' => 'nullable'
+        ]);
+
+        if ($validator->fails()) {
+            ResponseService::validationError($validator->errors()->first());
+        }
+        try {
+            $child = $this->student->findById($request->child_id);
+            $currentSessionYear = $this->cache->getDefaultSessionYear($child->user->school_id);
+            $sessionYearId = $request->session_year_id ?? $currentSessionYear->id;
+            $fees_paid = $this->feesPaid->builder()->where(['student_id' => $child->user_id, 'session_year_id' => $sessionYearId])->with('session_year:id,name', 'class.medium')->get();
+
+            ResponseService::successResponse("Fees Paid List Fetched Successfully", $fees_paid);
+        } catch (Throwable $e) {
+            ResponseService::logErrorResponse($e);
+            ResponseService::errorResponse();
+        }
+    }
+
 
 
     // // Make Transaction Fail API

@@ -26,7 +26,7 @@ class CheckChild {
         $url = $request->getRequestUri();
         // For api routes
         if (strpos($url, 'api') !== false) {
-            $schoolCode = $request->header('school-code');
+            $schoolCode = $request->header('school-code') ?? $request->school_code;
             if ($schoolCode) {
                 $school = School::on('mysql')->where('code',$schoolCode)->first();
 
@@ -36,7 +36,7 @@ class CheckChild {
                     DB::purge('school');
                     DB::connection('school')->reconnect();
                     DB::setDefaultConnection('school');
-                    $token = $request->bearerToken();
+                    $token = $request->bearerToken() ?? $request->token;
                     $user = PersonalAccessToken::findToken($token);
                     
                     if ($user) {
