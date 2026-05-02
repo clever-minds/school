@@ -18,12 +18,13 @@ class StudentPickupController extends Controller
 
     public function index()
     {
-        // For web admin view
+        ResponseService::noPermissionThenRedirect('student-pickup-list');
         return view('student_pickup.index');
     }
 
     public function show(Request $request)
     {
+        ResponseService::noPermissionThenSendJson('student-pickup-list');
         try {
             $offset = $request->input('offset', 0);
             $limit = $request->input('limit', 10);
@@ -31,13 +32,13 @@ class StudentPickupController extends Controller
             $order = $request->input('order', 'DESC');
             $search = $request->input('search');
 
-            $query = $this->studentPickup->builder()->with(['student', 'parent', 'verifier', 'school']);
+            $query = $this->studentPickup->builder()->with(['student.user', 'parent', 'verifier', 'school']);
 
             if ($search) {
                 $query->where(function ($q) use ($search) {
                     $q->where('pickup_person_name', 'LIKE', "%$search%")
                       ->orWhere('otp', 'LIKE', "%$search%")
-                      ->orWhereHas('student', function($q) use ($search) {
+                      ->orWhereHas('student.user', function($q) use ($search) {
                           $q->where('first_name', 'LIKE', "%$search%")->orWhere('last_name', 'LIKE', "%$search%");
                       });
                 });
