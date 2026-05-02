@@ -122,7 +122,7 @@ class StudentPickupController extends Controller
                 'verified_at' => Carbon::now(),
             ]);
 
-            $pickupRequest->load('student.student.class_section.class', 'student.student.class_section.section', 'student.student.guardian', 'student.student.session_year', 'student.student.shift');
+            $pickupRequest->load('student.user', 'student.class_section.class', 'student.class_section.section', 'student.guardian', 'student.session_year', 'student.shift');
 
             ResponseService::successResponse('OTP verified successfully. You can allow the pickup.', [
                 'student_id' => $pickupRequest->student_id,
@@ -145,7 +145,7 @@ class StudentPickupController extends Controller
 
         try {
             $user = Auth::user();
-            $query = $this->studentPickup->builder()->with(['student', 'parent', 'verifier']);
+            $query = $this->studentPickup->builder()->with(['student.user', 'student.class_section.class', 'student.class_section.section', 'parent', 'verifier']);
             
             if (!$user->hasRole('Super Admin')) {
                 $query->where('school_id', $user->school_id);

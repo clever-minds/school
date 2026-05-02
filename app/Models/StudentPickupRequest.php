@@ -22,7 +22,7 @@ class StudentPickupRequest extends Model
 
     public function student()
     {
-        return $this->belongsTo(User::class, 'student_id')->withTrashed();
+        return $this->belongsTo(Students::class, 'student_id')->withTrashed();
     }
 
     public function parent()
