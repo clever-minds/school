@@ -68,7 +68,9 @@
                                         <th scope="col" data-field="user.email" data-visible="true">{{ __('GR NO.') }}</th>
                                         <th scope="col" data-field="user.dob" >{{ __('dob') }}</th>
                                         <th scope="col" data-field="class_section.full_name" data-formatter="classSectionFormatter">{{ __('class_section') }}</th>
-                                        <th scope="col" data-field="campus">{{ __('Campus') }}</th>
+                                        @if(getSchoolSettings('school_name') == 'LCIS Tandalja')
+                                            <th scope="col" data-field="campus">{{ __('Campus') }}</th>
+                                        @endif
                                         <th scope="col" data-field="roll_number">{{ __('roll_no') }}</th>
                                         <th scope="col" data-field="user.gender">{{ __('gender') }}</th>
                                         <th scope="col" data-field="admission_date" >{{ __('admission_date') }}</th>
@@ -242,10 +244,12 @@
                                             ]
                                         ) !!}
                                     </div>
-                                    <div class="form-group col-sm-12 col-md-12 col-lg-6 col-xl-4">
-                                        <label>{{ __('Campus') }}</label>
-                                        {!! Form::text('campus', null, ['class' => 'form-control', 'id' => 'edit_campus','readonly'=>true]) !!}
-                                    </div>
+                                    @if(getSchoolSettings('school_name') == 'LCIS Tandalja')
+                                        <div class="form-group col-sm-12 col-md-12 col-lg-6 col-xl-4">
+                                            <label>{{ __('Campus') }}</label>
+                                            {!! Form::text('campus', null, ['class' => 'form-control', 'id' => 'edit_campus','readonly'=>true]) !!}
+                                        </div>
+                                    @endif
                             </div>
                             
                             <hr>

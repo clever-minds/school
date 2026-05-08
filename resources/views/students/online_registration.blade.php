@@ -60,7 +60,9 @@
                                         <th scope="col" data-field="user.full_name">{{ __('name') }}</th>
                                         <th scope="col" data-field="user.dob" >{{ __('dob') }}</th>
                                         <th scope="col" data-field="user.image" data-formatter="imageFormatter">{{ __('image') }}</th>
-                                        <th scope="col" data-field="campus">{{ __('Campus') }}</th>
+                                        @if(getSchoolSettings('school_name') == 'LCIS Tandalja')
+                                            <th scope="col" data-field="campus">{{ __('Campus') }}</th>
+                                        @endif
                                          <th scope="col" data-field="class.full_name">{{ __('class_name') }}</th>
                                         <th scope="col" data-field="user.gender">{{ __('gender') }}</th>
                                         <th scope="col" data-field="admission_date" >{{ __('admission_date') }}</th>
@@ -150,10 +152,12 @@
                                                             <option value="">{{ __('select_class_section') }}</option>
                                                         </select>
                                                     </div>
-                                                    <div class="form-group col-sm-12 col-md-12 col-lg-6 col-xl-4">
-                                                        <label>{{ __('Campus') }}</label>
-                                                        {!! Form::text('campus', null, ['class' => 'form-control', 'id' => 'edit_campus','readonly'=>true]) !!}
-                                                    </div>
+                                                    @if(getSchoolSettings('school_name') == 'LCIS Tandalja')
+                                                        <div class="form-group col-sm-12 col-md-12 col-lg-6 col-xl-4">
+                                                            <label>{{ __('Campus') }}</label>
+                                                            {!! Form::text('campus', null, ['class' => 'form-control', 'id' => 'edit_campus','readonly'=>true]) !!}
+                                                        </div>
+                                                    @endif
                                                 </div>
                                                 <hr>
                                                 <div class="row mt-5">

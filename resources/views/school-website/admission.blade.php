@@ -85,7 +85,7 @@
                                                     </div>
                                                 </div>
 
-                                                @if($school->id == 10 || str_contains($school->name, 'Tandalja'))
+                                                @if($school->name == 'LCIS Tandalja')
                                                 <div class="col-lg-6 inputWrapper">
                                                     <label for="campus">{{ __('Campus') }} <span>*</span></label>
                                                     <div>
