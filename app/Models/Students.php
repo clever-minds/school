@@ -41,6 +41,7 @@ class Students extends Model {
         'last_cleared_class',
         'education_board',
         'remarks',
+        'campus',
 
 
     ];
