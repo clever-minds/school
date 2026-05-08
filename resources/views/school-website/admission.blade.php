@@ -84,6 +84,19 @@
                                                         </select>
                                                     </div>
                                                 </div>
+
+                                                @if($school->id == 10 || str_contains($school->name, 'Tandalja'))
+                                                <div class="col-lg-6 inputWrapper">
+                                                    <label for="campus">{{ __('Campus') }} <span>*</span></label>
+                                                    <div>
+                                                        <select name="campus" id="campus" required>
+                                                            <option value="">Select Campus</option>
+                                                            <option value="GM">GM</option>
+                                                            <option value="Tandalja">Tandalja</option>
+                                                        </select>
+                                                    </div>
+                                                </div>
+                                                @endif
                                         
                                                 <div class="col-lg-6 inputWrapper">
                                                     <label for="gender">{{ __('gender') }}<span>*</span></label>

@@ -60,7 +60,8 @@
                                         <th scope="col" data-field="user.full_name">{{ __('name') }}</th>
                                         <th scope="col" data-field="user.dob" >{{ __('dob') }}</th>
                                         <th scope="col" data-field="user.image" data-formatter="imageFormatter">{{ __('image') }}</th>
-                                        <th scope="col" data-field="class.full_name">{{ __('class_name') }}</th>
+                                        <th scope="col" data-field="campus">{{ __('Campus') }}</th>
+                                         <th scope="col" data-field="class.full_name">{{ __('class_name') }}</th>
                                         <th scope="col" data-field="user.gender">{{ __('gender') }}</th>
                                         <th scope="col" data-field="admission_date" >{{ __('admission_date') }}</th>
                                         <th scope="col" data-field="application_status" data-formatter="applicationStatusFormatter">{{ __('admission_status') }}</th>
@@ -148,6 +149,10 @@
                                                         <select name="class_section_id" class="form-control" id="edit_student_class_section_id" disabled>>
                                                             <option value="">{{ __('select_class_section') }}</option>
                                                         </select>
+                                                    </div>
+                                                    <div class="form-group col-sm-12 col-md-12 col-lg-6 col-xl-4">
+                                                        <label>{{ __('Campus') }}</label>
+                                                        {!! Form::text('campus', null, ['class' => 'form-control', 'id' => 'edit_campus','readonly'=>true]) !!}
                                                     </div>
                                                 </div>
                                                 <hr>

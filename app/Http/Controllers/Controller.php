@@ -627,7 +627,7 @@ class Controller extends BaseController {
         } else {
             $extraFields = $this->formFields->defaultModel()->orderBy('rank')->get();
         }
-        return view('school-website.admission', compact('classes', 'extraFields'));
+        return view('school-website.admission', compact('classes', 'extraFields', 'school'));
     }
     
     public function registerStudent(Request $request)
@@ -648,6 +648,7 @@ class Controller extends BaseController {
             'guardian_gender'     => 'required|in:male,female',
             'guardian_image'      => 'nullable|mimes:jpg,jpeg,png|max:4096',
             'status'              => 'nullable|in:0,1',
+            'campus'              => 'nullable|string',
         ]);
 
         try {
@@ -759,6 +760,7 @@ class Controller extends BaseController {
                 'application_type' => "online",
                 'application_status' => 0,
                 'school_id'         => $school->id,
+                'remarks'           => $request->campus ? 'Campus: '.$request->campus : null,
             ]);
 
             $extraDetails = array();

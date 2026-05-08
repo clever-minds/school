@@ -313,6 +313,7 @@ window.studentEvents = {
         $('#edit_pen_no').val(row.pen_no);
         $('#edit_birth_place').val(row.birth_place);
         $('#edit_remarks').val(row.remarks);
+        $('#edit_campus').val(row.campus);
         $('#edit_student_class_id').val(row.class_id).trigger('change');
         $('#edit_student_class_id').val(row.class_id).trigger('change');
         $('#edit_cast').val(row.cast).trigger('change');
