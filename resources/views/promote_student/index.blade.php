@@ -23,18 +23,44 @@
                             <form action="{{ route('transfer-student.store') }}" data-success-function="formSuccessFunction" class="create-form mt-6 pt-3" id="formdata">
                                 @csrf
                                 <div class="row" id="toolbar1">
-                                    <div class="form-group col-sm-12 col-md-4">
+                                    <div class="form-group col-sm-12 col-md-3">
+                                        <label>{{ __('Source School') }}</label>
+                                        <select name="source_school_id" id="transfer_source_school_id" class="form-control select2" style="width:100%;" tabindex="-1" aria-hidden="true">
+                                            @if(Auth::user()->school_id)
+                                                @foreach ($schools as $school)
+                                                    @if($school->id == Auth::user()->school_id)
+                                                        <option value="{{ $school->id }}" selected>{{ $school->name }}</option>
+                                                    @endif
+                                                @endforeach
+                                            @else
+                                                <option value="">{{ __('Select School') }}</option>
+                                                @foreach ($schools as $school)
+                                                    <option value="{{ $school->id }}">{{ $school->name }}</option>
+                                                @endforeach
+                                            @endif
+                                        </select>
+                                    </div>
+                                    <div class="form-group col-sm-12 col-md-3">
                                         <label>{{ __('Current Class Section') }} <span class="text-danger">*</span></label>
                                         <select required name="current_class_section_id" id="transfer_class_section" class="form-control select2" style="width:100%;" tabindex="-1" aria-hidden="true">
                                             <option value="">{{ __('Select Class') }}</option>
                                             @foreach ($classSections as $classSection)
-                                                <option value="{{ $classSection->id }}" data-class="{{ $classSection->class_id }}" data-section="{{ $classSection->section_id }}">
+                                                <option value="{{ $classSection->id }}" data-class="{{ $classSection->class_id }}" data-section="{{ $classSection->section_id }}" data-school="{{ $classSection->school_id }}">
                                                     {{ $classSection->full_name }}
                                                 </option>
                                             @endforeach
                                         </select>
                                     </div>
-                                    <div class="form-group col-sm-12 col-md-4">
+                                    <div class="form-group col-sm-12 col-md-3">
+                                        <label>{{ __('School') }}</label>
+                                        <select name="new_school_id" id="transfer_school_id" class="form-control select2" style="width:100%;" tabindex="-1" aria-hidden="true">
+                                            <option value="">{{ __('Select School') }}</option>
+                                            @foreach ($schools as $school)
+                                                <option value="{{ $school->id }}">{{ $school->name }}</option>
+                                            @endforeach
+                                        </select>
+                                    </div>
+                                    <div class="form-group col-sm-12 col-md-3">
                                         <label>{{ __('Transfer Class Section') }} <span class="text-danger">*</span></label>
                                         <select required name="new_class_section_id" id="new_transfer_class_section" class="form-control select2" style="width:100%;" tabindex="-1" aria-hidden="true">
                                             <option value="">{{ __('Select Class') }}</option>
@@ -90,18 +116,35 @@
                             <form action="{{ route('promote-student.store') }}" data-success-function="formSuccessFunction" class="create-form mt-6 pt-3" id="formdata">
                                 @csrf
                                 <div class="row" id="toolbar2">
-                                    <div class="form-group col-sm-12 col-md-4">
+                                    <div class="form-group col-sm-12 col-md-3">
+                                        <label>{{ __('Source School') }}</label>
+                                        <select name="source_school_id" id="promote_source_school_id" class="form-control select2" style="width:100%;" tabindex="-1" aria-hidden="true">
+                                            @if(Auth::user()->school_id)
+                                                @foreach ($schools as $school)
+                                                    @if($school->id == Auth::user()->school_id)
+                                                        <option value="{{ $school->id }}" selected>{{ $school->name }}</option>
+                                                    @endif
+                                                @endforeach
+                                            @else
+                                                <option value="">{{ __('Select School') }}</option>
+                                                @foreach ($schools as $school)
+                                                    <option value="{{ $school->id }}">{{ $school->name }}</option>
+                                                @endforeach
+                                            @endif
+                                        </select>
+                                    </div>
+                                    <div class="form-group col-sm-12 col-md-3">
                                         <label>{{ __('Class Section') }} <span class="text-danger">*</span></label>
                                         <select required name="class_section_id" id="student_class_section" class="form-control select2" style="width:100%;" tabindex="-1" aria-hidden="true">
                                             <option value="">{{ __('Select Class') }}</option>
                                             @foreach ($classSections as $section)
-                                                <option value="{{ $section->id }}" data-class="{{ $section->class->id }}">
+                                                <option value="{{ $section->id }}" data-class="{{ $section->class->id }}" data-school="{{ $section->school_id }}">
                                                     {{ $section->full_name }}
                                                 </option>
                                             @endforeach
                                         </select>
                                     </div>
-                                    <div class="form-group col-sm-12 col-md-4">
+                                    <div class="form-group col-sm-12 col-md-2">
                                         <label>{{ __('Promote In') }} <span class="text-danger">*</span></label>
                                         <select required name="session_year_id" id="session_year_id" class="form-control select2" style="width:100%;" tabindex="-1" aria-hidden="true">
                                             <option value="">{{ __('Select Session Years') }}</option>
@@ -112,7 +155,16 @@
                                             @endforeach
                                         </select>
                                     </div>
-                                    <div class="form-group col-sm-12 col-md-4">
+                                    <div class="form-group col-sm-12 col-md-2">
+                                        <label>{{ __('Target School') }}</label>
+                                        <select name="new_school_id" id="promote_school_id" class="form-control select2" style="width:100%;" tabindex="-1" aria-hidden="true">
+                                            <option value="">{{ __('Select School') }}</option>
+                                            @foreach ($schools as $school)
+                                                <option value="{{ $school->id }}">{{ $school->name }}</option>
+                                            @endforeach
+                                        </select>
+                                    </div>
+                                    <div class="form-group col-sm-12 col-md-2">
                                         <label>{{ __('Promote Class') }} <span class="text-danger">*</span></label>
                                         <select required name="new_class_section_id" id="new_student_class_section" class="form-control select2" style="width:100%;" tabindex="-1" aria-hidden="true">
                                             <option value="">{{ __('Select Class') }}</option>
@@ -284,5 +336,50 @@
                     $('textarea#student_ids').val(student_id);
                 })
         })
+
+        $('#promote_school_id, #transfer_school_id, #promote_source_school_id, #transfer_source_school_id').on('change', function () {
+            let school_id = $(this).val();
+            let target_select = '';
+            if ($(this).attr('id') === 'promote_school_id') {
+                target_select = '#new_student_class_section';
+            } else if ($(this).attr('id') === 'transfer_school_id') {
+                target_select = '#new_transfer_class_section';
+            } else if ($(this).attr('id') === 'promote_source_school_id') {
+                target_select = '#student_class_section';
+            } else if ($(this).attr('id') === 'transfer_source_school_id') {
+                target_select = '#transfer_class_section';
+            }
+            
+            if (school_id) {
+                let url = "{{ url('get-class-section-by-school') }}" + "/" + school_id;
+                $.ajax({
+                    url: url,
+                    type: "GET",
+                    success: function (response) {
+                        let html = '<option value="">Select Class</option>';
+                        if (response.data.length > 0) {
+                            $.each(response.data, function (key, value) {
+                                html += '<option value="' + value.id + '">' + value.full_name + '</option>';
+                            });
+                        } else {
+                            html += '<option value="data-not-found">-- No Data Found --</option>';
+                        }
+                        $(target_select).html(html);
+                    }
+                });
+            } else {
+                $(target_select).html('<option value="">Select Class</option><option value="data-not-found">-- No Data Found --</option>');
+            }
+        });
+
+        // Trigger change on page load for source schools if they have a value
+        $(document).ready(function() {
+            if ($('#promote_source_school_id').val()) {
+                $('#promote_source_school_id').trigger('change');
+            }
+            if ($('#transfer_source_school_id').val()) {
+                $('#transfer_source_school_id').trigger('change');
+            }
+        });
     </script>
 @endsection

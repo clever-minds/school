@@ -706,6 +706,7 @@ Route::post('/admin/impersonation-exit',
         // TODO make two groups promote student and transfer student and classify the routes related to their group
         Route::resource('promote-student', PromoteStudentController::class);
         Route::get('getPromoteData', [PromoteStudentController::class, 'getPromoteData']);
+        Route::get('get-class-section-by-school/{school_id}', [PromoteStudentController::class, 'getClassSectionBySchool']);
         Route::post('transfer-student-store', [PromoteStudentController::class, 'storeTransferStudent'])->name('transfer-student.store');
         Route::get('transfer-student-list', [PromoteStudentController::class, 'showTransferStudent'])->name('transfer-student.show');
 
