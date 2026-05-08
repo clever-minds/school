@@ -345,12 +345,7 @@ class StudentController extends Controller {
             $tempRow['eng_guardian_gender'] = $guardian_gender;
             $tempRow['uid_no'] = $row->uni_no;
             $tempRow['pen_no'] = $row->pen_no;
-            
-            $campus = '';
-            if (str_contains($row->remarks, 'Campus: ')) {
-                $campus = str_replace('Campus: ', '', $row->remarks);
-            }
-            $tempRow['campus'] = $campus;
+            $tempRow['campus'] = $row->campus;
             // $tempRow['user.dob'] = format_date($row->user->dob);
             // $tempRow['admission_date'] = format_date($row->admission_date);
             
@@ -1006,11 +1001,7 @@ public function resetPasswordUpdate(Request $request) {
             $tempRow['rte_status'] = $row->rte_status;
             $tempRow['cast'] = $row->cast;
 
-            $campus = '';
-            if (str_contains($row->remarks, 'Campus: ')) {
-                $campus = str_replace('Campus: ', '', $row->remarks);
-            }
-            $tempRow['campus'] = $campus;
+            $tempRow['campus'] = $row->campus;
 
             foreach ($row->user->extra_student_details as $key => $field) {
                 $data = '';

@@ -760,7 +760,7 @@ class Controller extends BaseController {
                 'application_type' => "online",
                 'application_status' => 0,
                 'school_id'         => $school->id,
-                'remarks'           => $request->campus ? 'Campus: '.$request->campus : null,
+                'campus'            => $request->campus,
             ]);
 
             $extraDetails = array();
