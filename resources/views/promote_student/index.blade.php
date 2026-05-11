@@ -23,7 +23,7 @@
                             <form action="{{ route('transfer-student.store') }}" data-success-function="formSuccessFunction" class="create-form mt-6 pt-3" id="formdata">
                                 @csrf
                                 <div class="row" id="toolbar1">
-                                    <div class="form-group col-sm-12 col-md-3">
+                                    <div class="form-group col-sm-12 col-md-3" @if(Auth::user()->school_id) style="display:none;" @endif>
                                         <label>{{ __('Source School') }}</label>
                                         <select name="source_school_id" id="transfer_source_school_id" class="form-control select2" style="width:100%;" tabindex="-1" aria-hidden="true">
                                             @if(Auth::user()->school_id)
@@ -56,7 +56,7 @@
                                         <select name="new_school_id" id="transfer_school_id" class="form-control select2" style="width:100%;" tabindex="-1" aria-hidden="true">
                                             <option value="">{{ __('Select School') }}</option>
                                             @foreach ($schools as $school)
-                                                <option value="{{ $school->id }}">{{ $school->name }}</option>
+                                                <option value="{{ $school->id }}" {{ Auth::user()->school_id == $school->id ? 'selected' : '' }}>{{ $school->name }}</option>
                                             @endforeach
                                         </select>
                                     </div>
@@ -116,7 +116,7 @@
                             <form action="{{ route('promote-student.store') }}" data-success-function="formSuccessFunction" class="create-form mt-6 pt-3" id="formdata">
                                 @csrf
                                 <div class="row" id="toolbar2">
-                                    <div class="form-group col-sm-12 col-md-3">
+                                    <div class="form-group col-sm-12 col-md-3" @if(Auth::user()->school_id) style="display:none;" @endif>
                                         <label>{{ __('Source School') }}</label>
                                         <select name="source_school_id" id="promote_source_school_id" class="form-control select2" style="width:100%;" tabindex="-1" aria-hidden="true">
                                             @if(Auth::user()->school_id)
@@ -160,7 +160,7 @@
                                         <select name="new_school_id" id="promote_school_id" class="form-control select2" style="width:100%;" tabindex="-1" aria-hidden="true">
                                             <option value="">{{ __('Select School') }}</option>
                                             @foreach ($schools as $school)
-                                                <option value="{{ $school->id }}">{{ $school->name }}</option>
+                                                <option value="{{ $school->id }}" {{ Auth::user()->school_id == $school->id ? 'selected' : '' }}>{{ $school->name }}</option>
                                             @endforeach
                                         </select>
                                     </div>
@@ -388,6 +388,12 @@
             }
             if ($('#transfer_source_school_id').val()) {
                 $('#transfer_source_school_id').trigger('change');
+            }
+            if ($('#promote_school_id').val()) {
+                $('#promote_school_id').trigger('change');
+            }
+            if ($('#transfer_school_id').val()) {
+                $('#transfer_school_id').trigger('change');
             }
         });
     </script>
