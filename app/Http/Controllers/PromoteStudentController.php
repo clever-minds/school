@@ -100,8 +100,9 @@ class PromoteStudentController extends Controller {
                 $orderBy = !empty($this->cache->getSchoolSettings('roll_number_sort_order')) ? $this->cache->getSchoolSettings('roll_number_sort_order') : 'asc';
 
                 // Get The Data of Users who is passed with Student Relation and make Array to Update Student Details
-                $studentUsers = $this->user->builder()->role('Student')->whereIn('id',$passStudentsIds)->with('student')->orderBy('users.'.$sortBy, $orderBy)->get();
-                $studentsData = array();
+                $studentUsers = $this->user->builder()->role('Student')->whereIn('id',$passStudentsIds)->with('student', 'student.guardian')->orderBy('users.'.$sortBy, $orderBy)->get();
+                $guardianMap = []; // Map source_guardian_id -> target_guardian_id
+
                 foreach ($studentUsers as $key => $user) {
                     if ($request->new_school_id && $request->new_school_id != Auth::user()->school_id) {
                         // Cross-database promotion
@@ -110,65 +111,160 @@ class PromoteStudentController extends Controller {
                             $sourceDb = Config::get('database.connections.school.database');
                             $targetDb = $targetSchool->database_name;
 
-                            // 1. Prepare data
-                            $userData = $user->toArray();
-                            unset($userData['id']);
-                            $userData['school_id'] = $request->new_school_id;
+                            // 1. Prepare student user data (explicitly)
+                            $userData = [
+                                'first_name' => $user->first_name,
+                                'middle_name' => $user->middle_name,
+                                'last_name' => $user->last_name,
+                                'mother_name' => $user->mother_name,
+                                'mobile' => $user->mobile,
+                                'email' => $user->email,
+                                'password' => $user->password,
+                                'gender' => $user->gender,
+                                'dob' => $user->getRawOriginal('dob'),
+                                'current_address' => $user->current_address,
+                                'permanent_address' => $user->permanent_address,
+                                'school_id' => $request->new_school_id,
+                                'status' => 1,
+                            ];
 
                             $sourceStudent = $user->student;
-                            $studentData = $sourceStudent->toArray();
-                            unset($studentData['id']);
-                            $studentData['school_id'] = $request->new_school_id;
-                            $studentData['class_section_id'] = $request->new_class_section_id;
-                            $studentData['session_year_id'] = $request->session_year_id;
-                            $studentData['roll_number'] = (int)$key + 1;
+                            $studentData = [
+                                'admission_no' => $sourceStudent->admission_no,
+                                'roll_number' => (int)$key + 1,
+                                'class_section_id' => $request->new_class_section_id,
+                                'school_id' => $request->new_school_id,
+                                'admission_date' => $sourceStudent->getRawOriginal('admission_date'),
+                                'uni_no' => $sourceStudent->uni_no ?? '',
+                                'pen_no' => $sourceStudent->pen_no ?? '',
+                                'cast' => $sourceStudent->cast ?? 'GENERAL',
+                                'blood_group' => $sourceStudent->blood_group,
+                                'nationality' => $sourceStudent->nationality,
+                                'birth_place' => $sourceStudent->birth_place,
+                                'last_school' => $sourceStudent->last_school,
+                                'last_cleared_class' => $sourceStudent->last_cleared_class,
+                                'education_board' => $sourceStudent->education_board,
+                                'remarks' => $sourceStudent->remarks,
+                            ];
 
-                            // Handle potential null constraints in target database
-                            $studentData['uni_no'] = $studentData['uni_no'] ?? '';
-                            $studentData['cast'] = $studentData['cast'] ?? 'GENERAL';
+                            // Get session year names from source
+                            $sourceSessionYear = \App\Models\SessionYear::on('school')->find($request->session_year_id);
+                            $sessionYearName = $sourceSessionYear ? $sourceSessionYear->name : null;
+                            
+                            $sourceJoinSessionYear = \App\Models\SessionYear::on('school')->find($sourceStudent->join_session_year_id);
+                            $joinSessionYearName = $sourceJoinSessionYear ? $sourceJoinSessionYear->name : null;
 
                             // 2. Switch connection
                             Config::set('database.connections.school.database', $targetDb);
                             DB::purge('school');
                             DB::connection('school')->reconnect();
 
-                            // 3. Insert
-                            $existingUser = \App\Models\User::on('school')->where('email', $userData['email'])->first();
+                            // Map session years by name in target database
+                            if ($sessionYearName) {
+                                $targetSessionYear = \App\Models\SessionYear::on('school')->where('name', $sessionYearName)->first();
+                                if ($targetSessionYear) {
+                                    $studentData['session_year_id'] = $targetSessionYear->id;
+                                } else {
+                                    $studentData['session_year_id'] = \App\Models\SessionYear::on('school')->where('default', 1)->first()->id ?? 1;
+                                }
+                            }
+
+                            if ($joinSessionYearName) {
+                                $targetJoinSessionYear = \App\Models\SessionYear::on('school')->where('name', $joinSessionYearName)->first();
+                                if ($targetJoinSessionYear) {
+                                    $studentData['join_session_year_id'] = $targetJoinSessionYear->id;
+                                } else {
+                                    $studentData['join_session_year_id'] = $studentData['session_year_id'];
+                                }
+                            }
+
+                            // 3. Handle User
+                            $existingUser = null;
+                            if (!empty($userData['email'])) {
+                                $existingUser = \App\Models\User::on('school')->role('Student')->where('email', $userData['email'])->first();
+                            } elseif (!empty($userData['mobile'])) {
+                                $existingUser = \App\Models\User::on('school')->role('Student')->where('mobile', $userData['mobile'])->first();
+                            }
+
                             if (!$existingUser) {
                                 $newUser = \App\Models\User::on('school')->create($userData);
                                 $newUser->assignRole('student');
                             } else {
                                 $newUser = $existingUser;
+                                $newUser->update($userData); // Sync existing user details
                             }
 
-                            // Handling Guardian (Need to fetch from source student)
+                            // 4. Handling Guardian
                             $sourceGuardian = $sourceStudent->guardian;
-                            if ($sourceGuardian) {
-                                $guardianData = $sourceGuardian->toArray();
-                                unset($guardianData['id']);
-                                $guardianData['school_id'] = $request->new_school_id;
+                            $targetGuardianId = 0;
 
-                                $existingGuardian = \App\Models\User::on('school')->where('email', $guardianData['email'])->first();
-                                if (!$existingGuardian) {
-                                    $newGuardian = \App\Models\User::on('school')->create($guardianData);
-                                    $newGuardian->assignRole('guardian');
+                            if ($sourceGuardian) {
+                                // Check if we already processed this guardian in this request
+                                if (isset($guardianMap[$sourceStudent->guardian_id])) {
+                                    $targetGuardianId = $guardianMap[$sourceStudent->guardian_id];
                                 } else {
-                                    $newGuardian = $existingGuardian;
+                                    $guardianData = [
+                                        'first_name' => $sourceGuardian->first_name,
+                                        'middle_name' => $sourceGuardian->middle_name,
+                                        'last_name' => $sourceGuardian->last_name,
+                                        'mobile' => $sourceGuardian->mobile,
+                                        'email' => $sourceGuardian->email,
+                                        'password' => $sourceGuardian->password,
+                                        'gender' => $sourceGuardian->gender,
+                                        'dob' => $sourceGuardian->getRawOriginal('dob'),
+                                        'current_address' => $sourceGuardian->current_address,
+                                        'permanent_address' => $sourceGuardian->permanent_address,
+                                        'school_id' => $request->new_school_id,
+                                        'status' => 1,
+                                    ];
+
+                                    $existingGuardian = null;
+                                    if (!empty($guardianData['email'])) {
+                                        $existingGuardian = \App\Models\User::on('school')->role('Guardian')->where('email', $guardianData['email'])->first();
+                                    } elseif (!empty($guardianData['mobile'])) {
+                                        $existingGuardian = \App\Models\User::on('school')->role('Guardian')->where('mobile', $guardianData['mobile'])->first();
+                                    }
+
+                                    if (!$existingGuardian) {
+                                        $newGuardian = \App\Models\User::on('school')->create($guardianData);
+                                        $newGuardian->assignRole('guardian');
+                                        $targetGuardianId = $newGuardian->id;
+                                    } else {
+                                        $targetGuardianId = $existingGuardian->id;
+                                        $existingGuardian->update($guardianData); // Sync existing guardian details
+                                    }
+                                    // Save to map for next student
+                                    $guardianMap[$sourceStudent->guardian_id] = $targetGuardianId;
                                 }
-                                $studentData['guardian_id'] = $newGuardian->id;
-                            } else {
-                                $studentData['guardian_id'] = $studentData['guardian_id'] ?? 0;
+                            }
+                            
+                            $studentData['guardian_id'] = $targetGuardianId;
+                            $studentData['user_id'] = $newUser->id;
+                            $targetStudent = \App\Models\Students::on('school')->create($studentData);
+
+                            // 5. Transfer Extra User Data (Custom Fields)
+                            $sourceExtraData = \App\Models\ExtraStudentData::where('user_id', $user->id)->get();
+                            if ($sourceExtraData->count() > 0) {
+                                foreach ($sourceExtraData as $extra) {
+                                    $sourceField = \App\Models\FormField::find($extra->form_field_id);
+                                    if ($sourceField) {
+                                        $targetField = \App\Models\FormField::on('school')->where('name', $sourceField->name)->first();
+                                        if ($targetField) {
+                                            \App\Models\ExtraStudentData::on('school')->updateOrCreate(
+                                                ['user_id' => $newUser->id, 'form_field_id' => $targetField->id],
+                                                ['data' => $extra->data, 'school_id' => $request->new_school_id]
+                                            );
+                                        }
+                                    }
+                                }
                             }
 
-                            $studentData['user_id'] = $newUser->id;
-                            \App\Models\Students::on('school')->create($studentData);
-
-                            // 4. Switch back
+                            // 6. Switch back
                             Config::set('database.connections.school.database', $sourceDb);
                             DB::purge('school');
                             DB::connection('school')->reconnect();
 
-                            // 5. Deactivate in source
+                            // 6. Deactivate in source
                             $user->update(['status' => 0]);
                         }
                     } else {
@@ -183,7 +279,9 @@ class PromoteStudentController extends Controller {
                 }
 
                 // Upsert Student Data
-                $this->student->upsert($studentsData,['id'],['roll_number','class_section_id','session_year_id', 'school_id']);
+                if (!empty($studentsData)) {
+                    $this->student->upsert($studentsData,['id'],['roll_number','class_section_id','session_year_id', 'school_id']);
+                }
             }
 
             if (!empty($failStudentsIds)) {
@@ -341,6 +439,8 @@ class PromoteStudentController extends Controller {
             $roll_number_db = $roll_number_db['max(roll_number)'];
 
             $updateStudent = array();
+            $guardianMap = []; // Map source_guardian_id -> target_guardian_id
+
             foreach ($studentIds as $id) {
                 $sourceStudent = $this->student->builder()->where('id', $id)->with('user', 'guardian')->first();
                 
@@ -351,68 +451,159 @@ class PromoteStudentController extends Controller {
                         $sourceDb = Config::get('database.connections.school.database');
                         $targetDb = $targetSchool->database_name;
 
-                        // 1. Prepare data from source
-                        $userData = $sourceStudent->user->toArray();
-                        unset($userData['id']);
-                        $userData['school_id'] = $request->new_school_id;
+                        // 1. Prepare student user data (explicitly)
+                        $userData = [
+                            'first_name' => $sourceStudent->user->first_name,
+                            'middle_name' => $sourceStudent->user->middle_name,
+                            'last_name' => $sourceStudent->user->last_name,
+                            'mother_name' => $sourceStudent->user->mother_name,
+                            'mobile' => $sourceStudent->user->mobile,
+                            'email' => $sourceStudent->user->email,
+                            'password' => $sourceStudent->user->password,
+                            'gender' => $sourceStudent->user->gender,
+                            'dob' => $sourceStudent->user->getRawOriginal('dob'),
+                            'current_address' => $sourceStudent->user->current_address,
+                            'permanent_address' => $sourceStudent->user->permanent_address,
+                            'school_id' => $request->new_school_id,
+                            'status' => 1,
+                        ];
 
-                        $guardianData = null;
-                        if ($sourceStudent->guardian) {
-                            $guardianData = $sourceStudent->guardian->toArray();
-                            unset($guardianData['id']);
-                            $guardianData['school_id'] = $request->new_school_id;
-                        }
-
-                        $studentData = $sourceStudent->toArray();
-                        unset($studentData['id']);
-                        $studentData['school_id'] = $request->new_school_id;
-                        $studentData['class_section_id'] = $request->new_class_section_id;
-                        $studentData['roll_number'] = (int)$roll_number_db + 1;
+                        $studentData = [
+                            'admission_no' => $sourceStudent->admission_no,
+                            'roll_number' => (int)$roll_number_db + 1,
+                            'class_section_id' => $request->new_class_section_id,
+                            'school_id' => $request->new_school_id,
+                            'admission_date' => $sourceStudent->getRawOriginal('admission_date'),
+                            'uni_no' => $sourceStudent->uni_no ?? '',
+                            'pen_no' => $sourceStudent->pen_no ?? '',
+                            'cast' => $sourceStudent->cast ?? 'GENERAL',
+                            'blood_group' => $sourceStudent->blood_group,
+                            'nationality' => $sourceStudent->nationality,
+                            'birth_place' => $sourceStudent->birth_place,
+                            'last_school' => $sourceStudent->last_school,
+                            'last_cleared_class' => $sourceStudent->last_cleared_class,
+                            'education_board' => $sourceStudent->education_board,
+                            'remarks' => $sourceStudent->remarks,
+                        ];
                         $roll_number_db++;
 
-                        // Handle potential null constraints in target database
-                        $studentData['uni_no'] = $studentData['uni_no'] ?? '';
-                        $studentData['cast'] = $studentData['cast'] ?? 'GENERAL';
+                        // Get session year names from source
+                        $sourceSessionYear = \App\Models\SessionYear::on('school')->find($sourceStudent->session_year_id);
+                        $sessionYearName = $sourceSessionYear ? $sourceSessionYear->name : null;
+                        
+                        $sourceJoinSessionYear = \App\Models\SessionYear::on('school')->find($sourceStudent->join_session_year_id);
+                        $joinSessionYearName = $sourceJoinSessionYear ? $sourceJoinSessionYear->name : null;
 
                         // 2. Switch to target database
                         Config::set('database.connections.school.database', $targetDb);
                         DB::purge('school');
                         DB::connection('school')->reconnect();
 
-                        // 3. Insert into target database
-                        // Check if user already exists by email/mobile
-                        $existingUser = \App\Models\User::on('school')->where('email', $userData['email'])->first();
+                        // Map session years by name in target database
+                        if ($sessionYearName) {
+                            $targetSessionYear = \App\Models\SessionYear::on('school')->where('name', $sessionYearName)->first();
+                            if ($targetSessionYear) {
+                                $studentData['session_year_id'] = $targetSessionYear->id;
+                            } else {
+                                $studentData['session_year_id'] = \App\Models\SessionYear::on('school')->where('default', 1)->first()->id ?? 1;
+                            }
+                        }
+
+                        if ($joinSessionYearName) {
+                            $targetJoinSessionYear = \App\Models\SessionYear::on('school')->where('name', $joinSessionYearName)->first();
+                            if ($targetJoinSessionYear) {
+                                $studentData['join_session_year_id'] = $targetJoinSessionYear->id;
+                            } else {
+                                $studentData['join_session_year_id'] = $studentData['session_year_id'];
+                            }
+                        }
+
+                        // 3. Handle User
+                        $existingUser = null;
+                        if (!empty($userData['email'])) {
+                            $existingUser = \App\Models\User::on('school')->role('Student')->where('email', $userData['email'])->first();
+                        } elseif (!empty($userData['mobile'])) {
+                            $existingUser = \App\Models\User::on('school')->role('Student')->where('mobile', $userData['mobile'])->first();
+                        }
+
                         if (!$existingUser) {
                             $newUser = \App\Models\User::on('school')->create($userData);
-                            // Assign role
                             $newUser->assignRole('student');
                         } else {
                             $newUser = $existingUser;
+                            $newUser->update($userData); // Sync existing user
                         }
 
-                        if ($guardianData) {
-                            $existingGuardian = \App\Models\User::on('school')->where('email', $guardianData['email'])->first();
-                            if (!$existingGuardian) {
-                                $newGuardian = \App\Models\User::on('school')->create($guardianData);
-                                $newGuardian->assignRole('guardian');
+                        // 4. Handling Guardian
+                        $sourceGuardian = $sourceStudent->guardian;
+                        $targetGuardianId = 0;
+
+                        if ($sourceGuardian) {
+                            // Check map for siblings
+                            if (isset($guardianMap[$sourceStudent->guardian_id])) {
+                                $targetGuardianId = $guardianMap[$sourceStudent->guardian_id];
                             } else {
-                                $newGuardian = $existingGuardian;
-                            }
-                            $studentData['guardian_id'] = $newGuardian->id;
-                        } else {
-                            // If guardian is required but missing
-                            $studentData['guardian_id'] = $studentData['guardian_id'] ?? 0;
-                        }
+                                $guardianData = [
+                                    'first_name' => $sourceGuardian->first_name,
+                                    'middle_name' => $sourceGuardian->middle_name,
+                                    'last_name' => $sourceGuardian->last_name,
+                                    'mobile' => $sourceGuardian->mobile,
+                                    'email' => $sourceGuardian->email,
+                                    'password' => $sourceGuardian->password,
+                                    'gender' => $sourceGuardian->gender,
+                                    'dob' => $sourceGuardian->getRawOriginal('dob'),
+                                    'current_address' => $sourceGuardian->current_address,
+                                    'permanent_address' => $sourceGuardian->permanent_address,
+                                    'school_id' => $request->new_school_id,
+                                    'status' => 1,
+                                ];
 
+                                $existingGuardian = null;
+                                if (!empty($guardianData['email'])) {
+                                    $existingGuardian = \App\Models\User::on('school')->role('Guardian')->where('email', $guardianData['email'])->first();
+                                } elseif (!empty($guardianData['mobile'])) {
+                                    $existingGuardian = \App\Models\User::on('school')->role('Guardian')->where('mobile', $guardianData['mobile'])->first();
+                                }
+
+                                if (!$existingGuardian) {
+                                    $newGuardian = \App\Models\User::on('school')->create($guardianData);
+                                    $newGuardian->assignRole('guardian');
+                                    $targetGuardianId = $newGuardian->id;
+                                } else {
+                                    $targetGuardianId = $existingGuardian->id;
+                                    $existingGuardian->update($guardianData); // Sync existing guardian
+                                }
+                                $guardianMap[$sourceStudent->guardian_id] = $targetGuardianId;
+                            }
+                        }
+                        
+                        $studentData['guardian_id'] = $targetGuardianId;
                         $studentData['user_id'] = $newUser->id;
-                        \App\Models\Students::on('school')->create($studentData);
+                        $targetStudent = \App\Models\Students::on('school')->create($studentData);
+
+                        // 5. Transfer Extra User Data (Custom Fields)
+                        $sourceExtraData = \App\Models\ExtraStudentData::where('user_id', $sourceStudent->user_id)->get();
+                        if ($sourceExtraData->count() > 0) {
+                            foreach ($sourceExtraData as $extra) {
+                                $sourceField = \App\Models\FormField::find($extra->form_field_id);
+                                if ($sourceField) {
+                                    $targetField = \App\Models\FormField::on('school')->where('name', $sourceField->name)->first();
+                                    if ($targetField) {
+                                        \App\Models\ExtraStudentData::on('school')->updateOrCreate(
+                                            ['user_id' => $newUser->id, 'form_field_id' => $targetField->id],
+                                            ['data' => $extra->data, 'school_id' => $request->new_school_id]
+                                        );
+                                    }
+                                }
+                            }
+                        }
 
                         // 4. Switch back to source database
                         Config::set('database.connections.school.database', $sourceDb);
                         DB::purge('school');
                         DB::connection('school')->reconnect();
 
-                        // 5. Deactivate in source (Optional, but good for data integrity)
+                        // 5. Deactivate in source
                         $sourceStudent->user->update(['status' => 0]);
                     }
                 } else {

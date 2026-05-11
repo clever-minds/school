@@ -1178,12 +1178,18 @@ Route::group(['prefix' => 'expense-trans'], static function () {
 
 });
 Route::get('/js/lang', static function () {
-    //    https://medium.com/@serhii.matrunchyk/using-laravel-localization-with-javascript-and-vuejs-23064d0c210e
     header('Content-Type: text/javascript');
     $labels = \Illuminate\Support\Facades\Cache::remember('lang.js', 3600, static function () {
         $lang = app()->getLocale();
-        $files = resource_path('lang/' . $lang . '.json');
-        return File::get($files);
+        $file = base_path('lang/' . $lang . '.json');
+        if (!\Illuminate\Support\Facades\File::exists($file)) {
+            $file = resource_path('lang/' . $lang . '.json');
+        }
+        
+        if (\Illuminate\Support\Facades\File::exists($file)) {
+            return \Illuminate\Support\Facades\File::get($file);
+        }
+        return '{}';
     });
     echo('window.trans = ' . $labels);
     exit();

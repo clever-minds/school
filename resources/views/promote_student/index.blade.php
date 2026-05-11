@@ -281,10 +281,19 @@
         });
 
         function formSuccessFunction(response) {
+            // Clear selections
+            selections = [];
+            $('textarea#student_ids').val('');
+            
             $('#promote_student_table_list').bootstrapTable('refresh');
             $('#transfer-student-table-list').bootstrapTable('refresh');
             $('.btn_promote').hide();
             $('.btn-transfer').hide();
+
+            // Full page refresh after a short delay
+            setTimeout(function() {
+                window.location.reload();
+            }, 500);
         }
 
         // Check Events on Transfer Student List Table

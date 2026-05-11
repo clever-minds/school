@@ -697,10 +697,9 @@ function subjectTeacherListFormatter(value, row) {
 }
 
 function promoteStudentResultFormatter(value, row) {
-    if (value) {
-        return "<input type='hidden' name='promote_data[" + row.no + "][student_id]' value='" + row.user_id + "'><div class='d-flex'><div class='form-check mr-2'><label class='form-check-label'> <input required type='radio' class='result form-check-input'  name='promote_data[" + row.no + "][result]' value='1' " + value == 1 ? "selected" : '' + ">" + window.trans["pass"] + "<i class='input-helper'></i></label></div><div class='form-check-inline'><label class='form-check-label'> <input type='radio' class='result form-check-input'  name='promote_data[" + row.no + "][result]' value='0' " + value == 0 ? "selected" : '' + ">" + window.trans["fail"] + " <i class='input-helper'></i></label></div></div>";
+    if (value != null && value !== '') {
+        return "<input type='hidden' name='promote_data[" + row.no + "][student_id]' value='" + row.user_id + "'><div class='d-flex'><div class='form-check mr-2'><label class='form-check-label'> <input required type='radio' class='result form-check-input'  name='promote_data[" + row.no + "][result]' value='1' " + (value == 1 ? "checked" : "") + ">" + window.trans["pass"] + "<i class='input-helper'></i></label></div><div class='form-check-inline'><label class='form-check-label'> <input type='radio' class='result form-check-input'  name='promote_data[" + row.no + "][result]' value='0' " + (value == 0 ? "checked" : "") + ">" + window.trans["fail"] + " <i class='input-helper'></i></label></div></div>";
     } else {
-
         return "<input type='hidden' name='promote_data[" + row.no + "][student_id]' value='" + row.user_id + "'>" +
             "<div class='d-flex'>" +
             "<div class='form-check mr-2'>" +
@@ -720,8 +719,8 @@ function promoteStudentResultFormatter(value, row) {
 }
 
 function promoteStudentStatusFormatter(value, row) {
-    if (value) {
-        return "<div class='d-flex'><div class='form-check form-check-info mr-2'><label class='form-check-label'> <input required type='radio' class='status form-check-input'  name='promote_data[" + row.no + "][status]' value='1' " + value == 1 ? "selected" : '' + ">" + window.trans["continue"] + "<i class='input-helper'></i></label></div><div class='form-check form-check-info'><label class='form-check-label'> <input type='radio' class='status form-check-input'  name='promote_data[" + row.no + "][status]' value='0' " + value == 0 ? "selected" : '' + ">" + window.trans["leave"] + " <i class='input-helper'></i></label></div></div>";
+    if (value != null && value !== '') {
+        return "<div class='d-flex'><div class='form-check form-check-info mr-2'><label class='form-check-label'> <input required type='radio' class='status form-check-input'  name='promote_data[" + row.no + "][status]' value='1' " + (value == 1 ? "checked" : "") + ">" + window.trans["continue"] + "<i class='input-helper'></i></label></div><div class='form-check form-check-info'><label class='form-check-label'> <input type='radio' class='status form-check-input'  name='promote_data[" + row.no + "][status]' value='0' " + (value == 0 ? "checked" : "") + ">" + window.trans["leave"] + " <i class='input-helper'></i></label></div></div>";
     } else {
         return "<div class='d-flex'><div class='form-check form-check-info mr-2'><label class='form-check-label'> <input required type='radio' class='status form-check-input'  name='promote_data[" + row.no + "][status]' value='1' checked>" + window.trans["continue"] + "<i class='input-helper'></i></label></div><div class='form-check form-check-info'><label class='form-check-label'> <input type='radio' class='status form-check-input'  name='promote_data[" + row.no + "][status]' value='0'>" + window.trans["leave"] + " <i class='input-helper'></i></label></div></div>";
     }

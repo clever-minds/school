@@ -16,6 +16,7 @@ class ExtraStudentData extends Model {
     protected $table = 'extra_user_datas';
 
     protected $fillable = [
+        'user_id',
         'student_id',
         'form_field_id',
         'data',
