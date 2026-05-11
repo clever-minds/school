@@ -91,7 +91,7 @@
                                                     <div>
                                                         <select name="campus" id="campus" required>
                                                             <option value="">Select Campus</option>
-                                                            <option value="GM">GM</option>
+                                                            <option value="JIAM">JIAM</option>
                                                             <option value="Tandalja">Tandalja</option>
                                                         </select>
                                                     </div>
