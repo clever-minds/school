@@ -15,8 +15,8 @@ class AssignStaffAttendancePermission extends Command
 
     public function handle()
     {
-        $permissionName = 'staff-attendance-list';
-        $this->info("🚀 Starting to assign '{$permissionName}' to ALL roles in ALL tenants...");
+        $permissionNames = ['staff-attendance-list', 'staff-attendance-create', 'staff-attendance-edit', 'staff-attendance-delete'];
+        $this->info("🚀 Starting to assign staff attendance permissions to ALL roles in ALL tenants...");
 
         // Get all tenants from main DB
         $tenants = DB::connection('mysql')->table('schools')->get();
@@ -45,23 +45,23 @@ class AssignStaffAttendancePermission extends Command
                 // Clear old permission cache
                 app()[PermissionRegistrar::class]->forgetCachedPermissions();
 
-                // Ensure permission exists in tenant DB
-                $permission = Permission::on('school')->firstOrCreate([
-                    'name' => $permissionName,
-                    'guard_name' => 'web',
-                ]);
+                foreach ($permissionNames as $permissionName) {
+                    // Ensure permission exists in tenant DB
+                    $permission = Permission::on('school')->firstOrCreate([
+                        'name' => $permissionName,
+                        'guard_name' => 'web',
+                    ]);
 
-                // Get ALL roles in this tenant
-                $roles = Role::on('school')->get();
+                    // Get ALL roles in this tenant
+                    $roles = Role::on('school')->get();
 
-                foreach ($roles as $role) {
-                    // Skip Student and Guardian roles if you want, but user said "sabhi role"
-                    // However, it's safer to give it to everyone as requested.
-                    try {
-                        $role->givePermissionTo($permission);
-                        $this->info("✅ Assigned to role: '{$role->name}'");
-                    } catch (\Exception $e) {
-                        $this->error("⚠️ Failed assigning to '{$role->name}': " . $e->getMessage());
+                    foreach ($roles as $role) {
+                        try {
+                            $role->givePermissionTo($permission);
+                            $this->info("✅ Assigned '{$permissionName}' to role: '{$role->name}'");
+                        } catch (\Exception $e) {
+                            $this->error("⚠️ Failed assigning '{$permissionName}' to '{$role->name}': " . $e->getMessage());
+                        }
                     }
                 }
 
