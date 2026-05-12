@@ -25,7 +25,7 @@ class SystemUpdateController extends Controller
 
     public function index()
     {
-        if (!Auth::user()->hasRole('Super Admin')) {
+        if (!Auth::user()->hasRole('Super Admin') && !Auth::user()->hasRole('School Admin')) {
             $response = array(
                 'message' => trans('no_permission_message')
             );
@@ -245,12 +245,17 @@ class SystemUpdateController extends Controller
     }
     public function fixStaffAttendancePermission()
     {
-        if (!Auth::user()->hasRole('Super Admin')) {
+        $user = Auth::user();
+        if (!$user->hasRole('Super Admin') && !$user->hasRole('School Admin')) {
             ResponseService::errorResponse('no_permission_message');
         }
 
         try {
-            Artisan::call('tenants:assign-attendance-permission');
+            if ($user->hasRole('Super Admin')) {
+                Artisan::call('tenants:assign-attendance-permission');
+            } else {
+                Artisan::call('tenants:assign-attendance-permission', ['school_id' => $user->school_id]);
+            }
             ResponseService::successResponse('Permissions Updated Successfully');
         } catch (Throwable $e) {
             ResponseService::logErrorResponse($e);

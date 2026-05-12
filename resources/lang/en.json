@@ -292,5 +292,6 @@
     "student_information": "Student Information",
     "parents_information": "Parents Information",
     "class_and_medium": "Class & Medium",
-    "mobile_number": "Mobile Number"
+    "mobile_number": "Mobile Number",
+    "no_permission_message": "You do not have permission to perform this action"
 }

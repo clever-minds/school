@@ -10,16 +10,21 @@ use Spatie\Permission\PermissionRegistrar;
 
 class AssignStaffAttendancePermission extends Command
 {
-    protected $signature = 'tenants:assign-attendance-permission';
-    protected $description = 'Assign staff-attendance-list permission to ALL roles in ALL tenant databases';
+    protected $signature = 'tenants:assign-attendance-permission {school_id?}';
+    protected $description = 'Assign staff-attendance permissions to ALL roles in ALL tenant databases (or a specific school)';
 
     public function handle()
     {
         $permissionNames = ['staff-attendance-list', 'staff-attendance-create', 'staff-attendance-edit', 'staff-attendance-delete'];
-        $this->info("🚀 Starting to assign staff attendance permissions to ALL roles in ALL tenants...");
+        $schoolId = $this->argument('school_id');
 
-        // Get all tenants from main DB
-        $tenants = DB::connection('mysql')->table('schools')->get();
+        if ($schoolId) {
+            $tenants = DB::connection('mysql')->table('schools')->where('id', $schoolId)->get();
+            $this->info("🚀 Starting to assign staff attendance permissions to ALL roles in School ID: {$schoolId}...");
+        } else {
+            $tenants = DB::connection('mysql')->table('schools')->get();
+            $this->info("🚀 Starting to assign staff attendance permissions to ALL roles in ALL tenants...");
+        }
 
         if ($tenants->isEmpty()) {
             $this->error('❌ No tenants found in schools table.');
