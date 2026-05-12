@@ -385,7 +385,7 @@ class SchoolDataService {
             ...self::permission('student-diary'),
             ['name' => 'staff-kyc-manage'],
             ['name' => 'staff-kyc-upload'],
-            ['name' => 'staff-attendance-list'],
+            ...self::permission('staff-attendance'),
 
 
         ];

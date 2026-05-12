@@ -21,13 +21,18 @@ class StaffAttendanceController extends Controller
 
     public function index()
     {
-        ResponseService::noAnyPermissionThenSendJson(['staff-attendance-list']);
+        ResponseService::noAnyPermissionThenRedirect(['staff-attendance-list']);
         return view('staff_attendance.index');
     }
 
     public function show(Request $request)
     {
-        ResponseService::noAnyPermissionThenSendJson(['staff-attendance-list']);
+        $user = Auth::user();
+        // If user doesn't have permission to view all, and they are not viewing their own, then deny
+        if (!$user->can('staff-attendance-list') && $request->staff_id != $user->id) {
+            ResponseService::noAnyPermissionThenSendJson(['staff-attendance-list']);
+        }
+
         $offset = $request->input('offset', 0);
         $limit = $request->input('limit', 10);
         $sort = $request->input('sort', 'date');
@@ -40,6 +45,11 @@ class StaffAttendanceController extends Controller
             ->when($request->staff_id, function ($q) use ($request) {
                 $q->where('user_id', $request->staff_id);
             });
+
+        // Force self ID if no permission to see all
+        if (!$user->can('staff-attendance-list')) {
+            $sql->where('user_id', $user->id);
+        }
 
         $total = $sql->count();
 
