@@ -144,22 +144,22 @@
                                     </select>
                                 </div>
                                 <div class="form-group col-sm-12 col-md-12 col-lg-6 col-xl-4">
-                                    <label>RTE Status <span class="text-danger">*</span></label>
+                                    <label>{{ __('RTE Status') }} <span class="text-danger">*</span></label>
                                     <select name="rte_status" id="edit_rte_status" class="form-control">
-                                        <option value="">Select RTE Status</option>
-                                        <option value="RTE">RTE</option>
-                                        <option value="NON_RTE">NON RTE</option>
+                                        <option value="">{{ __('Select RTE Status') }}</option>
+                                        <option value="RTE">{{ __('RTE') }}</option>
+                                        <option value="NON_RTE">{{ __('NON_RTE') }}</option>
                                     </select>
                                 </div>
                                 <div class="form-group col-sm-12 col-md-12 col-lg-6 col-xl-4">
-                                    <label>CAST <span class="text-danger">*</span></label>
+                                    <label>{{ __('CAST') }} <span class="text-danger">*</span></label>
                                     <select name="cast" id="edit_cast" class="form-control">
-                                        <option value="">Select CAST</option>
-                                        <option value="GENERAL">GENERAL</option>
-                                        <option value="OBC">OBC</option>
-                                        <option value="SC">SC</option>
-                                        <option value="ST">ST</option>
-                                        <option value="EWS">EWS</option>
+                                        <option value="">{{ __('Select CAST') }}</option>
+                                        <option value="GENERAL">{{ __('GENERAL') }}</option>
+                                        <option value="OBC">{{ __('OBC') }}</option>
+                                        <option value="SC">{{ __('SC') }}</option>
+                                        <option value="ST">{{ __('ST') }}</option>
+                                        <option value="EWS">{{ __('EWS') }}</option>
                                     </select>
                                 </div>
                                   <div class="form-group col-sm-12 col-md-12 col-lg-6 col-xl-4">

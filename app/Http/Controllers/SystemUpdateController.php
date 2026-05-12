@@ -243,4 +243,18 @@ class SystemUpdateController extends Controller
         }
        
     }
+    public function fixStaffAttendancePermission()
+    {
+        if (!Auth::user()->hasRole('Super Admin')) {
+            ResponseService::errorResponse('no_permission_message');
+        }
+
+        try {
+            Artisan::call('tenants:assign-attendance-permission');
+            ResponseService::successResponse('Permissions Updated Successfully');
+        } catch (Throwable $e) {
+            ResponseService::logErrorResponse($e);
+            ResponseService::errorResponse();
+        }
+    }
 }

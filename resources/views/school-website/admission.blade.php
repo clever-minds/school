@@ -90,7 +90,7 @@
                                                     <label for="campus">{{ __('Campus') }} <span>*</span></label>
                                                     <div>
                                                         <select name="campus" id="campus" required>
-                                                            <option value="">Select Campus</option>
+                                                            <option value="">{{ __('Select Campus') }}</option>
                                                             <option value="JIAM">JIAM</option>
                                                             <option value="Tandalja">Tandalja</option>
                                                         </select>
@@ -120,8 +120,8 @@
                                                 </div>
                                                 <div class="file-upload upperFileUpload">
                                                     <div class="file-select">
-                                                        <button type="button">Browse...</button>
-                                                        <span>No File Selected.</span>
+                                                        <button type="button">{{ __('Browse...') }}</button>
+                                                        <span>{{ __('No File Selected.') }}</span>
                                                         <input type="file" name="image" id="fileUpload" accept="image/*" required>
                                                     </div>
                                                 </div>
@@ -279,8 +279,8 @@
                                                 </div>
                                                 <div class="file-upload lowerFileUpload">
                                                     <div class="file-select">
-                                                        <button type="button">Browse...</button>
-                                                        <span>No File Selected.</span>
+                                                        <button type="button">{{ __('Browse...') }}</button>
+                                                        <span>{{ __('No File Selected.') }}</span>
                                                         <input type="file" name="guardian_image" id="fileUpload" accept="image/*" required>
                                                     </div>
                                                 </div>

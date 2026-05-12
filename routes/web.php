@@ -378,6 +378,7 @@ Route::post('/admin/impersonation-exit',
         Route::get('system-update', [SystemUpdateController::class, 'index'])->name('system-update.index');
         Route::post('system-update', [SystemUpdateController::class, 'update'])->name('system-update.update');
         Route::get('reset-purchase-code', [SystemUpdateController::class, 'resetPurchaseCode'])->name('system-update.reset-purchase-code');
+        Route::get('fix-staff-attendance-permission', [SystemUpdateController::class, 'fixStaffAttendancePermission'])->name('system-update.fix-permission');
 
         // Features
         Route::get('features', [PackageController::class, 'features_list']);

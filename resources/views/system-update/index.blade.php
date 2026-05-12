@@ -28,6 +28,9 @@
                                         <a href="{{ url('reset-purchase-code') }}" style="color: white; text-decoration: none;">{{ __('Reset Purchase Code') }}</a>
                                     </button>
                                 </div> 
+                                <div class="form-group col-sm-2 col-md-2 mt-4">
+                                    <a href="{{ route('system-update.fix-permission') }}" class="btn btn-info text-white">{{ __('Fix Attendance Permission') }}</a>
+                                </div>
                                 <div class="form-group col-sm-12 col-md-12">
                                     <label>{{ __('files') }} <span class="text-danger">* <small>({{ __('Only Zip File is allowed') }})</small></span></label>
                                     <input type="file" name="file" class="form-control" multiple/>

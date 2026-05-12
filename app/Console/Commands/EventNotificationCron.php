@@ -14,7 +14,7 @@ use Illuminate\Support\Facades\Log;
 class EventNotificationCron extends Command
 {
     protected $signature = 'event:send-notifications';
-    protected $description = 'Send event reminder notifications (school wise)';
+    protected $description = 'Send Event Reminder notifications (school wise)';
 
     public function handle()
     {

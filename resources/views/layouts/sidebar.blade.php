@@ -455,13 +455,13 @@
                                 {{ __('My Attendance') }}
                             </a>
                         </li>
-                        @if(Auth::user()->hasRole('School Admin'))
+                        @can('staff-attendance-list')
                             <li class="nav-item">
                                 <a href="{{ route('staff-attendance.index') }}" class="nav-link">
                                     {{ __('All Staff Attendance') }}
                                 </a>
                             </li>
-                        @endif
+                        @endcan
                     </ul>
                 </div>
             </li>
