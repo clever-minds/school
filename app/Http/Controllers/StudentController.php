@@ -122,6 +122,7 @@ class StudentController extends Controller {
             'birth_place'     => 'required',
             'blood_group'     => 'required',
             'pen_no'          => 'required|digits:11',
+            'campus'          => 'nullable',
         ]);
 
         try {
@@ -165,7 +166,7 @@ class StudentController extends Controller {
             $sessionYear = $this->sessionYear->findById($request->session_year_id);
             $guardian = $userService->createOrUpdateParent($request->guardian_first_name, $request->guardian_last_name,$request->student_mother_name, $request->guardian_email, $request->guardian_mobile, $request->guardian_gender, $request->guardian_image);
             $is_send_notification = false;
-            $userService->createStudentUser($request->first_name,$request->middle_name, $request->last_name, $request->admission_no, $request->mobile, $request->dob, $request->gender, $request->image, $request->class_section_id, $request->admission_date, $request->current_address, $request->permanent_address, $sessionYear->id, $guardian->id, $request->extra_fields ?? [], $request->status ?? 0, $is_send_notification,$request->rte_status,$request->cast,$request->nationality,$request->birth_place,$request->blood_group,$request->last_school,$request->last_cleared_class,$request->education_board,$request->remarks,$request->pen_no);
+            $userService->createStudentUser($request->first_name,$request->middle_name, $request->last_name, $request->admission_no, $request->mobile, $request->dob, $request->gender, $request->image, $request->class_section_id, $request->admission_date, $request->current_address, $request->permanent_address, $sessionYear->id, $guardian->id, $request->extra_fields ?? [], $request->status ?? 0, $is_send_notification,$request->rte_status,$request->cast,$request->nationality,$request->birth_place,$request->blood_group,$request->last_school,$request->last_cleared_class,$request->education_board,$request->remarks,$request->pen_no, $request->campus);
 
             DB::commit();
             ResponseService::successResponse('Data Stored Successfully');
@@ -209,6 +210,7 @@ class StudentController extends Controller {
             'birth_place'     => 'required',
             'blood_group'     => 'required',
             'pen_no'          => 'required|digits:11',
+            'campus'          => 'nullable',
 
 
 
@@ -225,7 +227,7 @@ class StudentController extends Controller {
             $userService = app(UserService::class);
             $sessionYear = $this->sessionYear->findById($request->session_year_id);
             $guardian = $userService->createOrUpdateParent($request->guardian_first_name, $request->guardian_last_name,$request->student_mother_name, $request->guardian_email, $request->guardian_mobile, $request->guardian_gender, $request->guardian_image, $request->parent_reset_password);
-            $userService->updateStudentUser($id, $request->first_name,$request->middle_name, $request->last_name, $request->mobile, $request->dob, $request->gender, $request->image, $sessionYear->id, $request->extra_fields ?? [], $guardian->id, $request->current_address, $request->permanent_address, $request->reset_password, $request->class_section_id,$request->admission_no,$request->rte_status,$request->cast,$request->nationality,$request->birth_place,$request->blood_group,$request->last_school,$request->last_cleared_class,$request->education_board,$request->remarks,$request->pen_no);
+            $userService->updateStudentUser($id, $request->first_name,$request->middle_name, $request->last_name, $request->mobile, $request->dob, $request->gender, $request->image, $sessionYear->id, $request->extra_fields ?? [], $guardian->id, $request->current_address, $request->permanent_address, $request->reset_password, $request->class_section_id,$request->admission_no,$request->rte_status,$request->cast,$request->nationality,$request->birth_place,$request->blood_group,$request->last_school,$request->last_cleared_class,$request->education_board,$request->remarks,$request->pen_no, $request->campus);
             DB::commit();
             ResponseService::successResponse('Data Updated Successfully');
         } catch (Throwable $e) {
@@ -908,7 +910,9 @@ public function resetPasswordUpdate(Request $request) {
         $sessionYears = $this->sessionYear->all();
         $features = FeaturesService::getFeatures();
 
-        return view('students.online_registration', compact('class_sections', 'extraFields', 'sessionYears', 'features', 'classes'));
+        $campuses = $this->student->builder()->where('application_type', 'online')->whereNotNull('campus')->distinct()->pluck('campus');
+
+        return view('students.online_registration', compact('class_sections', 'extraFields', 'sessionYears', 'features', 'classes', 'campuses'));
     }
 
     public function onlineRegistrationList(Request $request)
@@ -954,6 +958,10 @@ public function resetPasswordUpdate(Request $request) {
                 $query->where(function ($query) use ($classId) {
                     $query->where('class_id', $classId);
                 });
+            })
+            ->when(request('campus') != null, function ($query) {
+                $campus = request('campus');
+                $query->where('campus', $campus);
             });
 
         if ($request->exam_id && $request->exam_id != 'data-not-found') {
@@ -1088,7 +1096,8 @@ public function resetPasswordUpdate(Request $request) {
             'dob' => 'required',
             'gender' => 'required',
             'admission_no' => 'required',
-            'class_section_id'  => 'required_if:application_status,1'
+            'class_section_id'  => 'required_if:application_status,1',
+            'campus'          => 'nullable',
         ], [
             'class_section_id.required_if' => 'The class section field is required when application status is accepted.'
         ]);
@@ -1143,7 +1152,8 @@ public function resetPasswordUpdate(Request $request) {
                 $student->last_cleared_class,
                 $student->education_board,
                 $student->remarks,
-                $student->pen_no
+                $student->pen_no,
+                $request->campus
             );
 
             // Re-fetch models after update to ensure we have latest data (e.g. for email)

@@ -80,6 +80,13 @@
                                             ['class' => 'form-control', 'placeholder' => 'Select CAST']
                                         ) !!}
                                     </div>
+
+                                    @if(getSchoolSettings('school_name') == 'LCIS Tandalja')
+                                        <div class="form-group col-sm-12 col-md-12 col-lg-6 col-xl-3">
+                                            <label>{{ __('Campus') }} <span class="text-danger">*</span></label>
+                                            {!! Form::select('campus', ['JIAM' => 'JIAM', 'Tandalja' => 'Tandalja'], null, ['class' => 'form-control', 'placeholder' => __('Select Campus'), 'required' => true]) !!}
+                                        </div>
+                                    @endif
                                     <div class="form-group col-sm-12 col-md-12 col-lg-6 col-xl-3">
                                         <label>{{ __('Nationality') }} <span class="text-danger">*</span></label>
 

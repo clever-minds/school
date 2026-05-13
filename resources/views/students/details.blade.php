@@ -246,8 +246,8 @@
                                     </div>
                                     @if(getSchoolSettings('school_name') == 'LCIS Tandalja')
                                         <div class="form-group col-sm-12 col-md-12 col-lg-6 col-xl-4">
-                                            <label>{{ __('Campus') }}</label>
-                                            {!! Form::text('campus', null, ['class' => 'form-control', 'id' => 'edit_campus','readonly'=>true]) !!}
+                                            <label>{{ __('Campus') }} <span class="text-danger">*</span></label>
+                                            {!! Form::select('campus', ['JIAM' => 'JIAM', 'Tandalja' => 'Tandalja'], null, ['class' => 'form-control', 'id' => 'edit_campus', 'placeholder' => __('Select Campus'), 'required' => true]) !!}
                                         </div>
                                     @endif
                             </div>
