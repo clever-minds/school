@@ -40,15 +40,17 @@
                                     <option value="">{{ __('select_class_section') }}</option>
                                 </select>
                             </div>
-                            <div class="form-group col-sm-12 col-md-4">
-                                <label class="filter-menu">{{ __('Campus') }}</label>
-                                <select name="filter_campus" id="filter_campus" class="form-control">
-                                    <option value="">{{ __('All') }}</option>
-                                    @foreach ($campuses as $campus)
-                                        <option value="{{ $campus }}">{{ $campus }}</option>
-                                    @endforeach
-                                </select>
-                            </div>
+                            @if(getSchoolSettings('school_name') == 'LCIS Tandalja')
+                                <div class="form-group col-sm-12 col-md-4">
+                                    <label class="filter-menu">{{ __('Campus') }}</label>
+                                    <select name="filter_campus" id="filter_campus" class="form-control">
+                                        <option value="">{{ __('All') }}</option>
+                                        @foreach ($campuses ?? [] as $campus)
+                                            <option value="{{ $campus }}">{{ $campus }}</option>
+                                        @endforeach
+                                    </select>
+                                </div>
+                            @endif
                         </div>
                         <div class="row">
                             <div class="col-12">
