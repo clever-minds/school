@@ -40,6 +40,15 @@
                                     <option value="">{{ __('select_class_section') }}</option>
                                 </select>
                             </div>
+                            <div class="form-group col-sm-12 col-md-4">
+                                <label class="filter-menu">{{ __('Campus') }}</label>
+                                <select name="filter_campus" id="filter_campus" class="form-control">
+                                    <option value="">{{ __('All') }}</option>
+                                    @foreach ($campuses as $campus)
+                                        <option value="{{ $campus }}">{{ $campus }}</option>
+                                    @endforeach
+                                </select>
+                            </div>
                         </div>
                         <div class="row">
                             <div class="col-12">
@@ -155,7 +164,7 @@
                                                     @if(getSchoolSettings('school_name') == 'LCIS Tandalja')
                                                         <div class="form-group col-sm-12 col-md-12 col-lg-6 col-xl-4">
                                                             <label>{{ __('Campus') }}</label>
-                                                            {!! Form::text('campus', null, ['class' => 'form-control', 'id' => 'edit_campus']) !!}
+                                                            {!! Form::select('campus', ['JIAM' => 'JIAM', 'Tandalja' => 'Tandalja'], null, ['class' => 'form-control', 'id' => 'edit_campus', 'placeholder' => __('Select Campus')]) !!}
                                                         </div>
                                                     @endif
                                                 </div>
@@ -483,5 +492,20 @@
                 }
             })
         })
+        function studentsQueryParams(p) {
+            return {
+                limit: p.limit,
+                sort: p.sort,
+                order: p.order,
+                offset: p.offset,
+                search: p.search,
+                class_id: $('#filter_class_id').val(),
+                campus: $('#filter_campus').val(),
+            };
+        }
+
+        $('#filter_class_id, #filter_campus').on('change', function () {
+            $('#table_list').bootstrapTable('refresh');
+        });
     </script>
 @endsection
