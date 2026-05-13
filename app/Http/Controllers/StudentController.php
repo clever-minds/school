@@ -1081,48 +1081,102 @@ public function resetPasswordUpdate(Request $request) {
         ResponseService::noPermissionThenRedirect('student-create');
 
         $request->validate([
+            'edit_user_id' => 'required',
+            'application_status' => 'required',
+            'first_name' => 'required',
+            'last_name' => 'required',
+            'dob' => 'required',
+            'gender' => 'required',
+            'admission_no' => 'required',
             'class_section_id'  => 'required_if:application_status,1'
-        ],[
+        ], [
             'class_section_id.required_if' => 'The class section field is required when application status is accepted.'
         ]);
 
         try {
-          
             $userService = app(UserService::class);
             DB::beginTransaction();
-            
+
             $user = $this->user->findTrashedById($request->edit_user_id);
             $student = $this->student->builder()->where('user_id', $request->edit_user_id)->first();
-            if ($user->status == 0) {
+
+            // Update Guardian if details are provided
+            $guardianID = $request->guardian_id;
+            if ($request->guardian_first_name || $request->guardian_mobile) {
+                $guardian = $userService->createOrUpdateParent(
+                    $request->guardian_first_name,
+                    $request->guardian_last_name,
+                    $request->student_mother_name ?? ($student->guardian->mother_name ?? null),
+                    $request->guardian_email,
+                    $request->guardian_mobile,
+                    $request->guardian_gender,
+                    $request->file('guardian_image'),
+                    $request->parent_reset_password
+                );
+                $guardianID = $guardian->id;
+            }
+
+            // Update Student and User Details
+            $userService->updateStudentUser(
+                $request->edit_user_id,
+                $request->first_name,
+                $request->middle_name ?? $user->middle_name,
+                $request->last_name,
+                $request->mobile,
+                $request->dob,
+                $request->gender,
+                $request->file('image'),
+                $request->session_year_id,
+                $request->extra_fields ?? [],
+                $guardianID,
+                $request->current_address,
+                $request->permanent_address,
+                $request->reset_password,
+                $request->class_section_id,
+                $request->admission_no,
+                $student->rte_status,
+                $student->cast,
+                $student->nationality,
+                $student->birth_place,
+                $student->blood_group,
+                $student->last_school,
+                $student->last_cleared_class,
+                $student->education_board,
+                $student->remarks,
+                $student->pen_no
+            );
+
+            // Re-fetch models after update to ensure we have latest data (e.g. for email)
+            $user->refresh();
+            $student->refresh();
+
+            if ($user->status == 0 && $request->application_status == 1) {
                 $subscription = $this->subscriptionService->active_subscription(Auth::user()->school_id);
-                // If prepaid plan check student limit
                 if ($subscription && $subscription->package_type == 0) {
-                    $status = $this->subscriptionService->check_user_limit($subscription,"Students");
-                    
+                    $status = $this->subscriptionService->check_user_limit($subscription, "Students");
                     if (!$status) {
                         ResponseService::errorResponse('You reach out limits');
+                        return;
                     }
                 }
             }
-            if($request->application_status == 1)
-            {
+
+            if ($request->application_status == 1) {
                 $this->student->builder()->where('user_id', $request->edit_user_id)->withTrashed()->update(['application_status' => 1, 'class_section_id' => $request->class_section_id]);
                 $password = str_replace('-', '', date('d-m-Y', strtotime($user->dob)));
                 $guardian = $this->user->guardian()->where('id', $student->guardian_id)->firstOrFail();
                 $userService->sendRegistrationEmail($guardian, $user, $student->admission_no, $password);
-            }
-            else{
-                $this->student->builder()->where('user_id', $request->edit_user_id)->withTrashed()->update(['application_status' => 0]);
+            } else {
+                $this->student->builder()->where('user_id', $request->edit_user_id)->withTrashed()->update(['application_status' => 2]);
                 $guardian = $this->user->guardian()->where('id', $student->guardian_id)->firstOrFail();
                 $userService->sendApplicationRejectEmail($user, $student, $guardian);
-                
+                $user->delete();
             }
-             
-                
-            
+
             DB::commit();
-            ResponseService::successResponse("Status Updated Successfully");
+            ResponseService::successResponse("Application Updated and Status Changed Successfully");
         } catch (Throwable $e) {
+            DB::rollBack();
             ResponseService::logErrorResponse($e);
             ResponseService::errorResponse();
         }

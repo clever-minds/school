@@ -124,13 +124,13 @@
                                                 <div class="row">
                                                     <div class="form-group col-sm-12 col-md-12 col-lg-6 col-xl-4">
                                                         <label>{{ __('admission_no') }} <span class="text-danger">*</span></label>
-                                                        {!! Form::text('admission_no', null, ['placeholder' => __('admission_no'), 'class' => 'form-control', 'id' => 'edit_admission_no' ,'readonly'=>true]) !!}
+                                                        {!! Form::text('admission_no', null, ['placeholder' => __('admission_no'), 'class' => 'form-control', 'id' => 'edit_admission_no' ,'readonly'=>false]) !!}
                     
                                                     </div>
                     
                                                     <div class="form-group col-sm-12 col-md-12 col-lg-6 col-xl-4">
                                                         <label>{{ __('Session Year') }} <span class="text-danger">*</span></label>
-                                                        <select required name="session_year_id" class="form-control" id="session_year_id" disabled>>
+                                                        <select required name="session_year_id" class="form-control" id="session_year_id">
                                                             @foreach ($sessionYears as $sessionYear)
                                                                 <option value="{{ $sessionYear->id }}">{{$sessionYear->name}}</option>
                                                             @endforeach
@@ -139,7 +139,7 @@
                     
                                                     <div class="form-group col-sm-12 col-md-12 col-lg-6 col-xl-4">
                                                         <label>{{ __('Class') }} <span class="text-danger">*</span></label>
-                                                        <select required name="class_id" class="form-control" id="edit_student_class_id" disabled>>
+                                                        <select required name="class_id" class="form-control" id="edit_student_class_id">
                                                             <option value="">{{ __('select_class') }}</option>
                                                             @foreach ($classes as $class)
                                                                 <option value={{ $class->id }}>{{$class->full_name}}</option>
@@ -148,14 +148,14 @@
                                                     </div>
                                                     <div class="form-group col-sm-12 col-md-12 col-lg-6 col-xl-4">
                                                         <label>{{ __('Class Section') }} <span class="text-danger">*</span></label>
-                                                        <select name="class_section_id" class="form-control" id="edit_student_class_section_id" disabled>>
+                                                        <select name="class_section_id" class="form-control" id="edit_student_class_section_id">
                                                             <option value="">{{ __('select_class_section') }}</option>
                                                         </select>
                                                     </div>
                                                     @if(getSchoolSettings('school_name') == 'LCIS Tandalja')
                                                         <div class="form-group col-sm-12 col-md-12 col-lg-6 col-xl-4">
                                                             <label>{{ __('Campus') }}</label>
-                                                            {!! Form::text('campus', null, ['class' => 'form-control', 'id' => 'edit_campus','readonly'=>true]) !!}
+                                                            {!! Form::text('campus', null, ['class' => 'form-control', 'id' => 'edit_campus']) !!}
                                                         </div>
                                                     @endif
                                                 </div>
@@ -163,17 +163,17 @@
                                                 <div class="row mt-5">
                                                     <div class="form-group col-sm-12 col-md-12 col-lg-6 col-xl-4">
                                                         <label>{{ __('first_name') }} <span class="text-danger">*</span></label>
-                                                        {!! Form::text('first_name', null, ['placeholder' => __('first_name'), 'class' => 'form-control', 'id' => 'edit_first_name','readonly'=>true]) !!}
+                                                        {!! Form::text('first_name', null, ['placeholder' => __('first_name'), 'class' => 'form-control', 'id' => 'edit_first_name']) !!}
                                                     </div>
                     
                                                     <div class="form-group col-sm-12 col-md-12 col-lg-6 col-xl-4">
                                                         <label>{{ __('last_name') }} <span class="text-danger">*</span></label>
-                                                        {!! Form::text('last_name', null, ['placeholder' => __('last_name'), 'class' => 'form-control', 'id' => 'edit_last_name','readonly'=>true]) !!}
+                                                        {!! Form::text('last_name', null, ['placeholder' => __('last_name'), 'class' => 'form-control', 'id' => 'edit_last_name']) !!}
                                                     </div>
                     
                                                     <div class="form-group col-sm-12 col-md-12 col-lg-6 col-xl-4">
                                                         <label>{{ __('dob') }} <span class="text-danger">*</span></label>
-                                                        {!! Form::text('dob', null, ['placeholder' => __('dob'), 'class' => 'datepicker-popup-no-future form-control', 'id' => 'edit_dob','readonly'=>true]) !!}
+                                                        {!! Form::text('dob', null, ['placeholder' => __('dob'), 'class' => 'datepicker-popup-no-future form-control', 'id' => 'edit_dob']) !!}
                                                         <span class="input-group-addon input-group-append">
                                                         </span>
                                                     </div>
@@ -183,13 +183,13 @@
                                                         <div class="d-flex">
                                                             <div class="form-check form-check-inline">
                                                                 <label class="form-check-label">
-                                                                    {!! Form::radio('gender', 'male', false ,['id' => 'male' ,'disabled' => 'disabled']) !!}
+                                                                    {!! Form::radio('gender', 'male', false ,['id' => 'male']) !!}
                                                                     {{ __('male') }}
                                                                 </label>
                                                             </div>
                                                             <div class="form-check form-check-inline">
                                                                 <label class="form-check-label">
-                                                                    {!! Form::radio('gender', 'female', false , ['id' => 'female' ,'disabled' => 'disabled']) !!}
+                                                                    {!! Form::radio('gender', 'female', false , ['id' => 'female']) !!}
                                                                     {{ __('female') }}
                                                                 </label>
                                                             </div>
@@ -204,15 +204,15 @@
                                                     </div>
                                                     <div class="form-group col-sm-12 col-md-12 col-lg-6 col-xl-4">
                                                         <label>{{ __('mobile') }}</label>
-                                                        {!! Form::number('mobile', null, ['placeholder' => __('mobile'), 'min' => 1 , 'class' => 'form-control remove-number-increment', 'id' => 'edit_mobile','readonly'=>true]) !!}
+                                                        {!! Form::number('mobile', null, ['placeholder' => __('mobile'), 'min' => 1 , 'class' => 'form-control remove-number-increment', 'id' => 'edit_mobile']) !!}
                                                     </div>
                                                     <div class="form-group col-sm-12 col-md-6">
                                                         <label>{{ __('current_address') }} <span class="text-danger">*</span></label>
-                                                        {!! Form::textarea('current_address', null, ['required', 'placeholder' => __('current_address'), 'class' => 'form-control', 'rows' => 3,'id'=>'edit-current-address','readonly'=>true]) !!}
+                                                        {!! Form::textarea('current_address', null, ['required', 'placeholder' => __('current_address'), 'class' => 'form-control', 'rows' => 3,'id'=>'edit-current-address']) !!}
                                                     </div>
                                                     <div class="form-group col-sm-12 col-md-6">
                                                         <label>{{ __('permanent_address') }} <span class="text-danger">*</span></label>
-                                                        {!! Form::textarea('permanent_address', null, ['required', 'placeholder' => __('permanent_address'), 'class' => 'form-control', 'rows' => 3,'id'=>'edit-permanent-address','readonly'=>true]) !!}
+                                                        {!! Form::textarea('permanent_address', null, ['required', 'placeholder' => __('permanent_address'), 'class' => 'form-control', 'rows' => 3,'id'=>'edit-permanent-address']) !!}
                                                     </div>
                                                 </div>
                     
@@ -323,18 +323,18 @@
                                                 <div class="row mt-5">
                                                     <div class="form-group col-sm-12 col-md-12">
                                                         <label>{{ __('guardian') . ' ' . __('Mobile') }} <span class="text-danger">*</span></label>
-                                                        <select class="edit-guardian-search form-control" name="guardian_id" disabled></select>
+                                                        <select class="edit-guardian-search form-control" name="guardian_id"></select>
                                                         <input type="hidden" id="edit_guardian_mobile" name="guardian_mobile">
                                                     </div>
                     
                                                     <div class="form-group col-sm-12 col-md-12 col-lg-6 col-xl-4">
                                                         <label>{{ __('Father') . ' ' . __('first_name') }} <span class="text-danger">*</span></label>
-                                                        {!! Form::text('guardian_first_name', null, ['placeholder' => __('guardian') . ' ' . __('first_name'), 'class' => 'form-control', 'id' => 'edit_guardian_first_name','readonly'=>true]) !!}
+                                                        {!! Form::text('guardian_first_name', null, ['placeholder' => __('guardian') . ' ' . __('first_name'), 'class' => 'form-control', 'id' => 'edit_guardian_first_name']) !!}
                                                     </div>
                     
                                                     <div class="form-group col-sm-12 col-md-12 col-lg-6 col-xl-4">
                                                         <label>{{ __('Father') . ' ' . __('last_name') }} <span class="text-danger">*</span></label>
-                                                        {!! Form::text('guardian_last_name', null, ['placeholder' => __('guardian') . ' ' . __('last_name'), 'class' => 'form-control', 'id' => 'edit_guardian_last_name','readonly'=>true]) !!}
+                                                        {!! Form::text('guardian_last_name', null, ['placeholder' => __('guardian') . ' ' . __('last_name'), 'class' => 'form-control', 'id' => 'edit_guardian_last_name']) !!}
                                                     </div>
                                                     <div class="form-group col-sm-12 col-md-12 col-lg-6 col-xl-4">
                                                         <label>{{ __('Father') . ' ' . __('email') }} <span class="text-danger">*</span></label>
