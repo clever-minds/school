@@ -1174,11 +1174,11 @@ public function resetPasswordUpdate(Request $request) {
             if ($request->application_status == 1) {
                 $this->student->builder()->where('user_id', $request->edit_user_id)->withTrashed()->update(['application_status' => 1, 'class_section_id' => $request->class_section_id]);
                 $password = str_replace('-', '', date('d-m-Y', strtotime($user->dob)));
-                $guardian = $this->user->guardian()->where('id', $student->guardian_id)->firstOrFail();
+                $guardian = $this->user->guardian()->withTrashed()->where('id', $student->guardian_id)->firstOrFail();
                 $userService->sendRegistrationEmail($guardian, $user, $student->admission_no, $password);
             } else {
                 $this->student->builder()->where('user_id', $request->edit_user_id)->withTrashed()->update(['application_status' => 2]);
-                $guardian = $this->user->guardian()->where('id', $student->guardian_id)->firstOrFail();
+                $guardian = $this->user->guardian()->withTrashed()->where('id', $student->guardian_id)->firstOrFail();
                 $userService->sendApplicationRejectEmail($user, $student, $guardian);
                 $user->delete();
             }

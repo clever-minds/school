@@ -129,7 +129,7 @@ class BaseRepository implements BaseInterface {
      * @return Model|null
      */
     public function update(int $modelId, array $payload): ?Model {
-        $model = $this->findById($modelId);
+        $model = $this->findTrashedById($modelId);
 
         foreach ($payload as $column => $value) {
             if ($value instanceof UploadedFile) {

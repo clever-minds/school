@@ -182,7 +182,7 @@ class UserService {
             $this->extraFormFields->createBulk($extraDetails);
         }
 
-        $guardian = $this->user->guardian()->where('id', $guardianID)->firstOrFail();
+        $guardian = $this->user->guardian()->withTrashed()->where('id', $guardianID)->firstOrFail();
         if (is_object($guardian)) {
             $guardian = (object) $guardian->toArray();
         }
