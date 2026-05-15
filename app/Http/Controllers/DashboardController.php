@@ -224,6 +224,9 @@ class DashboardController extends Controller
             'deactive_school' => 0,
         ];
         if (Auth::user()->hasRole('Super Admin') || !Auth::user()->school_id) {
+            $original_connection = DB::getDefaultConnection();
+            DB::setDefaultConnection('mysql');
+
             $school = $this->school->builder()->get();
             $total_school = $school->count();
             $active_school = $school->where('status', 1)->count();
@@ -276,6 +279,7 @@ class DashboardController extends Controller
                 $package_data
             ];
 
+            DB::setDefaultConnection($original_connection);
         }
 
         // Timetable

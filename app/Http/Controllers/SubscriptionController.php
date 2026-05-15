@@ -1388,7 +1388,7 @@ class SubscriptionController extends Controller
     public function transaction($year)
     {   
         try {
-            $paymentTransaction = $this->paymentTransaction->builder()->has('subscription_bill')
+            $paymentTransaction = $this->paymentTransaction->model()->setConnection('mysql')->has('subscription_bill')
             ->where('payment_status',"succeed")
             ->select(
                 DB::raw('MONTH(created_at) as month'),
