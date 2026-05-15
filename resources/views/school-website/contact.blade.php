@@ -85,12 +85,29 @@
                 <div class="col-lg-6">
                     <div class="col-12 infoContainer">
                         <div class="col-12">
-                            <div class="mapWrapper commonMT">
-                                <div>
-                                    {!! $schoolSettings['google_map_link'] ?? '' !!}
-                                    {{-- <iframe src="{{ $schoolSettings['google_map_link'] ?? '' }}" width="100%" height="100%" style="border:0;" allowfullscreen="true" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe> --}}
+                                <div class="mapWrapper commonMT">
+                                    <div class="col-12">
+                                        @php
+                                            $mapLink = $schoolSettings['google_map_link'] ?? '';
+                                            $isIframe = str_contains($mapLink, '<iframe');
+                                            $isUrl = filter_var($mapLink, FILTER_VALIDATE_URL) || str_contains($mapLink, 'maps.app.goo.gl') || str_contains($mapLink, 'google.com/maps');
+                                        @endphp
+
+                                        @if ($isIframe)
+                                            {!! $mapLink !!}
+                                        @elseif ($isUrl)
+                                            <div class="text-center p-4 border rounded bg-light d-flex flex-column align-items-center justify-content-center" style="min-height: 200px;">
+                                                <i class="fa fa-map-marker-alt fa-3x text-danger mb-3"></i>
+                                                <h5>{{ __('view_on_google_maps') }}</h5>
+                                                <a href="{{ $mapLink }}" target="_blank" class="commonBtn mt-3" style="text-decoration: none; display: inline-block;">
+                                                    {{ __('open_maps') }}
+                                                </a>
+                                            </div>
+                                        @else
+                                            {!! $mapLink !!}
+                                        @endif
+                                    </div>
                                 </div>
-                            </div>
                         </div>
                     </div>
                 </div>

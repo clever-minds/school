@@ -114,7 +114,7 @@ class UserService {
      * @throws Throwable
      */
 
-    public function createStudentUser(string $first_name,string $middle_name, string $last_name, string $admission_no, string|null $mobile, string $dob, string $gender, \Symfony\Component\HttpFoundation\File\UploadedFile|null $image, int $classSectionID, string $admissionDate, $current_address = null, $permanent_address = null, int $sessionYearID, int $guardianID, array $extraFields = [], int $status, $is_send_notification = null ,string $rte_status = 'NON_RTE',$cast,$nationality,$birth_place,$blood_group,$last_school,$last_cleared_class,$education_board,$remarks,$pen_no, $campus = null) {
+    public function createStudentUser(string $first_name,string $middle_name, string $last_name, string $admission_no, string|null $mobile, string $dob, string $gender, \Symfony\Component\HttpFoundation\File\UploadedFile|null $image, int $classSectionID, string $admissionDate, $current_address = null, $permanent_address = null, int $sessionYearID, int $guardianID, array $extraFields = [], int $status, $is_send_notification = null ,string|null $rte_status = 'NON_RTE',$cast = null,$nationality = null,$birth_place = null,$blood_group = null,$last_school = null,$last_cleared_class = null,$education_board = null,$remarks = null,$pen_no = null, $campus = null) {
         $password = $this->makeStudentPassword($dob);
         //Create Student User First
         $user = $this->user->create([
@@ -210,7 +210,7 @@ class UserService {
      * @return Model|null
      * @throws JsonException
      */
-    public function updateStudentUser($userID, $first_name, $middle_name, $last_name, $mobile, $dob, $gender, $image, $sessionYearID, array $extraFields = [], $guardianID = null, $current_address = null, $permanent_address = null, $reset_password = null, $classSectionID,$admission_no,$rte_status,$cast,$nationality,$birth_place,$blood_group,$last_school,$last_cleared_class,$education_board,$remarks,$pen_no, $campus = null) {
+    public function updateStudentUser($userID, $first_name, $middle_name, $last_name, $mobile, $dob, $gender, $image, $sessionYearID, array $extraFields = [], $guardianID = null, $current_address = null, $permanent_address = null, $reset_password = null, $classSectionID,$admission_no,string|null $rte_status = 'NON_RTE',$cast = null,$nationality = null,$birth_place = null,$blood_group = null,$last_school = null,$last_cleared_class = null,$education_board = null,$remarks = null,$pen_no = null, $campus = null) {
        
        
        

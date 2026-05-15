@@ -32,21 +32,20 @@ class SchoolDataService {
         DB::connection('school')->reconnect();
         DB::setDefaultConnection('school');
 
-        $school = New School();
-        $school->id = $schoolData->id;
-        $school->name = $schoolData->name;
-        $school->address = $schoolData->address;
-        $school->support_phone = $schoolData->support_phone;
-        $school->support_email = $schoolData->support_email;
-        $school->tagline = $schoolData->tagline;
-        $school->logo = $schoolData->logo;
-        $school->status = $schoolData->type == "demo" ? 1 : $schoolData->status;
-        $school->domain = $schoolData->domain;
-        $school->database_name = $schoolData->database_name;
-        $school->code = $schoolData->code;
-        $school->created_at = $schoolData->created_at;
-        $school->updated_at = $schoolData->updated_at;
-        $school->save();
+        School::updateOrCreate(['id' => $schoolData->id], [
+            'name' => $schoolData->name,
+            'address' => $schoolData->address,
+            'support_phone' => $schoolData->support_phone,
+            'support_email' => $schoolData->support_email,
+            'tagline' => $schoolData->tagline,
+            'logo' => $schoolData->logo,
+            'status' => $schoolData->type == "demo" ? 1 : $schoolData->status,
+            'domain' => $schoolData->domain,
+            'database_name' => $schoolData->database_name,
+            'code' => $schoolData->code,
+            'created_at' => $schoolData->created_at,
+            'updated_at' => $schoolData->updated_at,
+        ]);
 
         $mainUser = DB::connection('mysql')->table('users')->where('id',$schoolData->admin_id)->first();        
 
@@ -63,7 +62,8 @@ class SchoolDataService {
             'updated_at' => $mainUser->updated_at,
         ];
 
-        DB::connection('school')->table('users')->insert($userRow);
+        DB::connection('school')->table('users')->updateOrInsert(['id' => $mainUser->id], $userRow[0]);
+        Log::info("Admin user setup completed for school: " . $schoolData->name);
 
         $school = School::find($schoolData->id);
         $school->admin_id = $schoolData->admin_id;

@@ -166,7 +166,7 @@
                                 <th scope="col" data-field="full_name" data-sortable="false">{{ __('name') }}</th>
                                 <th scope="col" data-field="shift.name">{{ __('Shift') }}</th>
                                 <th scope="col" data-field="include_semesters" data-formatter="yesAndNoStatusFormatter">{{ __('Semester') }}</th>
-                                <th scope="col" data-field="section_names">{{ __('section') }}</th>
+
                                 <th scope="col" data-field="created_at"  data-sortable="false" data-visible="false">{{ __('created_at') }}</th>
                                 <th scope="col" data-field="updated_at"  data-sortable="false" data-visible="false">{{ __('updated_at') }}</th>
                                 <th scope="col" data-field="operate" data-escape="false">{{ __('action') }}</th>

@@ -125,9 +125,11 @@ final class SetupSchoolDatabase implements ShouldQueue
                 'email_body'  => $email_body
             ];
 
+            Log::info("Attempting to send welcome email for school ID: {$this->schoolId} to {$data['email']}");
             Mail::send('schools.email', $data, static function ($message) use ($data) {
                 $message->to($data['email'])->subject($data['subject']);
             });
+            Log::info("Welcome email sent (or queued) successfully for school ID: {$this->schoolId}");
 
             // Send email verification if not already verified
             if (!$school->user->hasVerifiedEmail()) {

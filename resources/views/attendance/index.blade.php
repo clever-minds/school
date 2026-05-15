@@ -23,7 +23,7 @@
                             <div class="row" id="toolbar">
                                 <div class="form-group col-sm-12 col-md-4">
                                     <select required name="class_section_id" id="timetable_class_section" class="form-control select2" style="width:100%;" tabindex="-1" aria-hidden="true">
-                                        <option value="">{{ __('select') . ' ' . __('Class') }}</option>
+                                        <option value="">{{ __('select') . ' ' . __('class_section') }}</option>
                                         @foreach ($classSections as $section)
                                             <option value="{{ $section->id }}" data-class="{{ $section->class->id }}">
                                                 {{ $section->full_name }}

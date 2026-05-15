@@ -52,7 +52,7 @@
                                 <th scope="col" data-field="shift.name">{{ __('Shift') }}</th>
                                 <th scope="col" data-field="include_semesters" data-formatter="yesAndNoStatusFormatter">{{ __('Semester') }}</th>
                                 <th scope="col" data-field="medium.name">{{ __('medium') }}</th>
-                                <th scope="col" data-field="section_names">{{ __('section') }}</th>
+
                                 <th scope="col" data-field="core_subjects" data-formatter="coreSubjectFormatter">{{ __('Core Subjects') }}</th>
                                 <th scope="col" data-field="elective_subject_groups" data-formatter="electiveSubjectFormatter">{{ __('elective_subject') }}</th>
                                 <th scope="col" data-field="created_at"  data-visible="false">{{ __('created_at') }}</th>

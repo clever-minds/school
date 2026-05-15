@@ -48,7 +48,7 @@ class BaseRepository implements BaseInterface {
      * @return Collection
      */
     public function allTrashed(): Collection {
-        if (in_array('Illuminate\Database\Eloquent\SoftDeletes', class_uses_recursive($this->model))) {
+        if (method_exists($this->model, 'onlyTrashed')) {
             return $this->defaultModel()->onlyTrashed()->get();
         }
         return new Collection();
@@ -74,7 +74,7 @@ class BaseRepository implements BaseInterface {
      * @return Model|null
      */
     public function findTrashedById(int $modelId): ?Model {
-        if (in_array('Illuminate\Database\Eloquent\SoftDeletes', class_uses_recursive($this->model))) {
+        if (method_exists($this->model, 'withTrashed')) {
             return $this->defaultModel()->withTrashed()->findOrFail($modelId);
         }
         return $this->defaultModel()->findOrFail($modelId);
@@ -87,7 +87,7 @@ class BaseRepository implements BaseInterface {
      * @return Model|null
      */
     public function findOnlyTrashedById(int $modelId): ?Model {
-        if (in_array('Illuminate\Database\Eloquent\SoftDeletes', class_uses_recursive($this->model))) {
+        if (method_exists($this->model, 'onlyTrashed')) {
             return $this->defaultModel()->onlyTrashed()->findOrFail($modelId);
         }
         return $this->defaultModel()->findOrFail($modelId);
@@ -205,7 +205,7 @@ class BaseRepository implements BaseInterface {
      * @return void
      */
     public function restoreById(int $modelId): void {
-        if (in_array('Illuminate\Database\Eloquent\SoftDeletes', class_uses_recursive($this->model))) {
+        if (method_exists($this->model, 'onlyTrashed')) {
             $this->findOnlyTrashedById($modelId)->restore();
         }
     }
@@ -217,7 +217,7 @@ class BaseRepository implements BaseInterface {
      * @return bool
      */
     public function permanentlyDeleteById(int $modelId): bool {
-        if (in_array('Illuminate\Database\Eloquent\SoftDeletes', class_uses_recursive($this->model))) {
+        if (method_exists($this->model, 'withTrashed')) {
             return $this->findTrashedById($modelId)->forceDelete();
         }
         return $this->findTrashedById($modelId)->delete();

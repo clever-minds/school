@@ -11,42 +11,50 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('teacher_onboarding_jds', function (Blueprint $table) {
-            $table->id();
-            $table->string('title');
-            $table->text('description');
-            $table->bigInteger('school_id')->unsigned();
-            $table->timestamps();
-            $table->softDeletes();
-        });
-
-        Schema::create('teacher_onboarding_questions', function (Blueprint $table) {
-            $table->id();
-            $table->text('question');
-            $table->text('option_a');
-            $table->text('option_b');
-            $table->text('option_c');
-            $table->text('option_d');
-            $table->string('answer'); // 'a', 'b', 'c', or 'd'
-            $table->bigInteger('school_id')->unsigned();
-            $table->timestamps();
-            $table->softDeletes();
-        });
-
-        Schema::create('teacher_onboarding_results', function (Blueprint $table) {
-            $table->id();
-            $table->bigInteger('user_id')->unsigned();
-            $table->integer('score');
-            $table->integer('total_questions');
-            $table->boolean('status')->default(0); // 0: Fail/Ongoing, 1: Pass
-            $table->bigInteger('school_id')->unsigned();
-            $table->timestamps();
-        });
-
-        if (!Schema::hasColumn('staff', 'onboarding_completed')) {
-            Schema::table('staff', function (Blueprint $table) {
-                $table->boolean('onboarding_completed')->default(0)->after('user_id');
+        if (!Schema::hasTable('teacher_onboarding_jds')) {
+            Schema::create('teacher_onboarding_jds', function (Blueprint $table) {
+                $table->id();
+                $table->string('title');
+                $table->text('description');
+                $table->bigInteger('school_id')->unsigned();
+                $table->timestamps();
+                $table->softDeletes();
             });
+        }
+
+        if (!Schema::hasTable('teacher_onboarding_questions')) {
+            Schema::create('teacher_onboarding_questions', function (Blueprint $table) {
+                $table->id();
+                $table->text('question');
+                $table->text('option_a');
+                $table->text('option_b');
+                $table->text('option_c');
+                $table->text('option_d');
+                $table->string('answer'); // 'a', 'b', 'c', or 'd'
+                $table->bigInteger('school_id')->unsigned();
+                $table->timestamps();
+                $table->softDeletes();
+            });
+        }
+
+        if (!Schema::hasTable('teacher_onboarding_results')) {
+            Schema::create('teacher_onboarding_results', function (Blueprint $table) {
+                $table->id();
+                $table->bigInteger('user_id')->unsigned();
+                $table->integer('score');
+                $table->integer('total_questions');
+                $table->boolean('status')->default(0); // 0: Fail/Ongoing, 1: Pass
+                $table->bigInteger('school_id')->unsigned();
+                $table->timestamps();
+            });
+        }
+
+        if (Schema::hasTable('staffs')) {
+            if (!Schema::hasColumn('staffs', 'onboarding_completed')) {
+                Schema::table('staffs', function (Blueprint $table) {
+                    $table->boolean('onboarding_completed')->default(0)->after('user_id');
+                });
+            }
         }
     }
 
@@ -59,10 +67,12 @@ return new class extends Migration
         Schema::dropIfExists('teacher_onboarding_questions');
         Schema::dropIfExists('teacher_onboarding_results');
         
-        if (Schema::hasColumn('staff', 'onboarding_completed')) {
-            Schema::table('staff', function (Blueprint $table) {
-                $table->dropColumn('onboarding_completed');
-            });
+        if (Schema::hasTable('staffs')) {
+            if (Schema::hasColumn('staffs', 'onboarding_completed')) {
+                Schema::table('staffs', function (Blueprint $table) {
+                    $table->dropColumn('onboarding_completed');
+                });
+            }
         }
     }
 };

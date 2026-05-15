@@ -52,7 +52,7 @@
                             <tr>
                                 <th scope="col" data-field="id" data-sortable="true" data-visible="false">{{ __('id') }}</th>
                                 <th scope="col" data-field="no">{{ __('no.') }}</th>
-                                <th scope="col" data-field="full_name">{{ __('Class') }}</th>
+                                <th scope="col" data-field="full_name">{{ __('class_section') }}</th>
                                 <th scope="col" data-field="class_teachers_list" data-formatter="classTeacherListFormatter">{{ __('Class Teacher') }}</th>
                                 <th scope="col" data-field="subject_teachers_list" data-formatter="subjectTeacherListFormatter">{{ __('Subject Teacher') }}</th>
                                 <th scope="col" data-field="created_at"  data-sortable="true" data-visible="false">{{ __('created_at') }}</th>
