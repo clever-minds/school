@@ -32,7 +32,7 @@ class SchoolDataService {
         DB::connection('school')->reconnect();
         DB::setDefaultConnection('school');
 
-        School::updateOrCreate(['id' => $schoolData->id], [
+        School::on('school')->updateOrCreate(['id' => $schoolData->id], [
             'name' => $schoolData->name,
             'address' => $schoolData->address,
             'support_phone' => $schoolData->support_phone,
@@ -65,14 +65,16 @@ class SchoolDataService {
         DB::connection('school')->table('users')->updateOrInsert(['id' => $mainUser->id], $userRow[0]);
         Log::info("Admin user setup completed for school: " . $schoolData->name);
 
-        $school = School::find($schoolData->id);
-        $school->admin_id = $schoolData->admin_id;
-        $school->save();
+        $school = School::on('school')->find($schoolData->id);
+        if ($school) {
+            $school->admin_id = $schoolData->admin_id;
+            $school->save();
+        }
 
 
 
         $this->createPreSetupRole($schoolData);
-        $sessionYear = SessionYear::updateOrCreate([
+        $sessionYear = SessionYear::on('school')->updateOrCreate([
             'name'      => Carbon::now()->format('Y'),
             'school_id' => $schoolData->id
         ],
@@ -206,7 +208,7 @@ class SchoolDataService {
 
 
         );
-        SchoolSetting::upsert($schoolSettingData, ["name", "school_id"], ["data", "type"]);
+        SchoolSetting::on('school')->upsert($schoolSettingData, ["name", "school_id"], ["data", "type"]);
         $this->assignLastActivePlanToNewSchool($schoolData);
 
     }
@@ -235,8 +237,8 @@ class SchoolDataService {
 
     public function defaultRoles($school)
     {
-        Role::updateOrCreate(['name' => 'Guardian', 'school_id' => $school->id, 'custom_role' => 0, 'editable' => 0]);
-        Role::updateOrCreate(['name' => 'Student', 'school_id' => $school->id, 'custom_role' => 0, 'editable' => 0]);
+        Role::on('school')->updateOrCreate(['name' => 'Guardian', 'school_id' => $school->id, 'custom_role' => 0, 'editable' => 0]);
+        Role::on('school')->updateOrCreate(['name' => 'Student', 'school_id' => $school->id, 'custom_role' => 0, 'editable' => 0]);
     }
 
     public function createDatabaseMigration($schoolData)
@@ -412,7 +414,7 @@ class SchoolDataService {
             $data['guard_name'] = 'web';
             return $data;
         }, $permissions);
-        Permission::upsert($permissions, ['name'], ['name']);
+        Permission::on('school')->upsert($permissions, ['name'], ['name']);
         \Artisan::call('permission:cache-reset');
     }
 
@@ -431,7 +433,7 @@ class SchoolDataService {
     }
 
     public function createSchoolAdminRole($school) {
-        $role = Role::withoutGlobalScope('school')->updateOrCreate(['name' => 'School Admin', 'custom_role' => 0, 'editable' => 0, 'school_id' => $school->id]);
+        $role = Role::on('school')->withoutGlobalScope('school')->updateOrCreate(['name' => 'School Admin', 'custom_role' => 0, 'editable' => 0, 'school_id' => $school->id]);
         $SchoolAdminHasAccessTo = [
             'medium-list',
             'medium-create',
@@ -673,7 +675,7 @@ class SchoolDataService {
     public function createTeacherRole($school)
     {
         //Add Teacher Role
-        $teacher_role = Role::updateOrCreate(['name' => 'Teacher', 'school_id' => $school->id, 'custom_role' => 0, 'editable' => 1]);
+        $teacher_role = Role::on('school')->updateOrCreate(['name' => 'Teacher', 'school_id' => $school->id, 'custom_role' => 0, 'editable' => 1]);
         $TeacherHasAccessTo = [
             'student-list',
             'timetable-list',
