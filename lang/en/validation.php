@@ -168,6 +168,21 @@ return [
     |
     */
 
-    'attributes' => [],
+    'attributes' => [
+        'first_name' => 'First Name',
+        'last_name' => 'Last Name',
+        'mobile' => 'Mobile',
+        'dob' => 'Date of Birth',
+        'qualification' => 'Qualification',
+        'current_address' => 'Current Address',
+        'permanent_address' => 'Permanent Address',
+        'salary' => 'Salary',
+        'joining_date' => 'Joining Date',
+        'email' => 'Email',
+        'password' => 'Password',
+        'gender' => 'Gender',
+        'status' => 'Status',
+        'image' => 'Image',
+    ],
 
 ];

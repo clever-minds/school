@@ -48,7 +48,10 @@ class BaseRepository implements BaseInterface {
      * @return Collection
      */
     public function allTrashed(): Collection {
-        return $this->defaultModel()->onlyTrashed()->get();
+        if (in_array('Illuminate\Database\Eloquent\SoftDeletes', class_uses_recursive($this->model))) {
+            return $this->defaultModel()->onlyTrashed()->get();
+        }
+        return new Collection();
     }
 
     /**
@@ -71,7 +74,10 @@ class BaseRepository implements BaseInterface {
      * @return Model|null
      */
     public function findTrashedById(int $modelId): ?Model {
-        return $this->defaultModel()->withTrashed()->findOrFail($modelId);
+        if (in_array('Illuminate\Database\Eloquent\SoftDeletes', class_uses_recursive($this->model))) {
+            return $this->defaultModel()->withTrashed()->findOrFail($modelId);
+        }
+        return $this->defaultModel()->findOrFail($modelId);
     }
 
     /**
@@ -81,7 +87,10 @@ class BaseRepository implements BaseInterface {
      * @return Model|null
      */
     public function findOnlyTrashedById(int $modelId): ?Model {
-        return $this->defaultModel()->onlyTrashed()->findOrFail($modelId);
+        if (in_array('Illuminate\Database\Eloquent\SoftDeletes', class_uses_recursive($this->model))) {
+            return $this->defaultModel()->onlyTrashed()->findOrFail($modelId);
+        }
+        return $this->defaultModel()->findOrFail($modelId);
     }
 
     /**
@@ -196,7 +205,9 @@ class BaseRepository implements BaseInterface {
      * @return void
      */
     public function restoreById(int $modelId): void {
-        $this->findOnlyTrashedById($modelId)->restore();
+        if (in_array('Illuminate\Database\Eloquent\SoftDeletes', class_uses_recursive($this->model))) {
+            $this->findOnlyTrashedById($modelId)->restore();
+        }
     }
 
     /**
@@ -206,7 +217,10 @@ class BaseRepository implements BaseInterface {
      * @return bool
      */
     public function permanentlyDeleteById(int $modelId): bool {
-        return $this->findTrashedById($modelId)->forceDelete();
+        if (in_array('Illuminate\Database\Eloquent\SoftDeletes', class_uses_recursive($this->model))) {
+            return $this->findTrashedById($modelId)->forceDelete();
+        }
+        return $this->findTrashedById($modelId)->delete();
     }
 
 
