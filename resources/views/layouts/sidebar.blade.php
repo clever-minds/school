@@ -1232,9 +1232,9 @@
                         @endcan
 
                         @can('database-backup')
-                            <!-- <li class="nav-item">
+                            <li class="nav-item">
                                 <a class="nav-link" href="{{ url('database-backup') }}">{{ __('database_backup') }}</a>
-                            </li> -->
+                            </li>
                         @endcan 
 
                         
