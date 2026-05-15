@@ -11,8 +11,10 @@ return new class extends Migration
      */
     public function up(): void
     {
-        if (!Schema::hasTable('teacher_documents')) {
-            Schema::create('teacher_documents', function (Blueprint $table) {
+        $connection = 'school';
+
+        if (!Schema::connection($connection)->hasTable('teacher_documents')) {
+            Schema::connection($connection)->create('teacher_documents', function (Blueprint $table) {
                 $table->id();
                 $table->foreignId('user_id')->references('id')->on('users')->onDelete('cascade');
                 $table->string('type'); // id_proof, address_proof, marksheet, degree, experience_letter
@@ -25,10 +27,14 @@ return new class extends Migration
             });
         }
 
-        if (!Schema::hasColumn('staffs', 'kyc_completed')) {
-            Schema::table('staffs', function (Blueprint $table) {
-                $table->boolean('kyc_completed')->default(0)->after('onboarding_completed');
-            });
+        foreach (['staffs', 'staff'] as $tableName) {
+            if (Schema::connection($connection)->hasTable($tableName)) {
+                if (!Schema::connection($connection)->hasColumn($tableName, 'kyc_completed')) {
+                    Schema::connection($connection)->table($tableName, function (Blueprint $table) {
+                        $table->boolean('kyc_completed')->default(0)->after('onboarding_completed');
+                    });
+                }
+            }
         }
     }
 
@@ -37,11 +43,15 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('teacher_documents');
-        if (Schema::hasColumn('staffs', 'kyc_completed')) {
-            Schema::table('staffs', function (Blueprint $table) {
-                $table->dropColumn('kyc_completed');
-            });
+        $connection = 'school';
+        Schema::connection($connection)->dropIfExists('teacher_documents');
+        
+        foreach (['staffs', 'staff'] as $tableName) {
+            if (Schema::connection($connection)->hasColumn($tableName, 'kyc_completed')) {
+                Schema::connection($connection)->table($tableName, function (Blueprint $table) {
+                    $table->dropColumn('kyc_completed');
+                });
+            }
         }
     }
 };

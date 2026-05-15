@@ -242,28 +242,47 @@ class SchoolDataService {
     public function createDatabaseMigration($schoolData)
     {
         $database_name = $schoolData->database_name;
+        Log::info("Starting createDatabaseMigration for School ID: {$schoolData->id} into database: {$database_name}");
 
         $query = "SELECT SCHEMA_NAME FROM INFORMATION_SCHEMA.SCHEMATA WHERE SCHEMA_NAME =  ?";
-
         $db = DB::select($query, [$database_name]);
         
         if (empty($db)) {
+            Log::info("Database {$database_name} does not exist. Creating it.");
             DB::statement("CREATE DATABASE {$database_name}");
+        } else {
+            Log::info("Database {$database_name} already exists.");
         }
         
-        // Artisan::call('migrate:school');
-        Config::set('database.connections.school.database', $schoolData->database_name);
+        // Configure the 'school' connection for this tenant
+        Config::set('database.connections.school.database', $database_name);
         DB::purge('school');
         DB::connection('school')->reconnect();
-        DB::setDefaultConnection('school');
-        app(\Spatie\Permission\PermissionRegistrar::class)->forgetCachedPermissions();
-
-        Artisan::call('migrate', [
-            '--database' => 'school',
-            '--path' => 'database/migrations/schools',
-            '--force' => true,
-        ]);
         
+        // Temporarily set as default for the duration of migrations
+        $originalConnection = DB::getDefaultConnection();
+        DB::setDefaultConnection('school');
+        
+        Log::info("Default connection set to 'school'. Running Artisan migrate...");
+        
+        try {
+            app(\Spatie\Permission\PermissionRegistrar::class)->forgetCachedPermissions();
+
+            Artisan::call('migrate', [
+                '--database' => 'school',
+                '--path' => 'database/migrations/schools',
+                '--force' => true,
+            ]);
+            
+            Log::info("Artisan migrate completed successfully for school ID: {$schoolData->id}");
+        } catch (\Exception $e) {
+            Log::error("Artisan migrate failed for school ID: {$schoolData->id}: " . $e->getMessage());
+            throw $e;
+        } finally {
+            // Restore original connection
+            DB::setDefaultConnection($originalConnection);
+            Log::info("Restored original default connection: {$originalConnection}");
+        }
     }
 
     public function createPermissions() {

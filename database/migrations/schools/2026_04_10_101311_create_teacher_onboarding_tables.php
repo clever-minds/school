@@ -3,6 +3,7 @@
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
+use Illuminate\Support\Facades\Log;
 
 return new class extends Migration
 {
@@ -11,8 +12,11 @@ return new class extends Migration
      */
     public function up(): void
     {
-        if (!Schema::hasTable('teacher_onboarding_jds')) {
-            Schema::create('teacher_onboarding_jds', function (Blueprint $table) {
+        $connection = 'school';
+
+        // 1. teacher_onboarding_jds
+        if (!Schema::connection($connection)->hasTable('teacher_onboarding_jds')) {
+            Schema::connection($connection)->create('teacher_onboarding_jds', function (Blueprint $table) {
                 $table->id();
                 $table->string('title');
                 $table->text('description');
@@ -22,8 +26,9 @@ return new class extends Migration
             });
         }
 
-        if (!Schema::hasTable('teacher_onboarding_questions')) {
-            Schema::create('teacher_onboarding_questions', function (Blueprint $table) {
+        // 2. teacher_onboarding_questions
+        if (!Schema::connection($connection)->hasTable('teacher_onboarding_questions')) {
+            Schema::connection($connection)->create('teacher_onboarding_questions', function (Blueprint $table) {
                 $table->id();
                 $table->text('question');
                 $table->text('option_a');
@@ -37,8 +42,9 @@ return new class extends Migration
             });
         }
 
-        if (!Schema::hasTable('teacher_onboarding_results')) {
-            Schema::create('teacher_onboarding_results', function (Blueprint $table) {
+        // 3. teacher_onboarding_results
+        if (!Schema::connection($connection)->hasTable('teacher_onboarding_results')) {
+            Schema::connection($connection)->create('teacher_onboarding_results', function (Blueprint $table) {
                 $table->id();
                 $table->bigInteger('user_id')->unsigned();
                 $table->integer('score');
@@ -49,11 +55,19 @@ return new class extends Migration
             });
         }
 
-        if (Schema::hasTable('staffs')) {
-            if (!Schema::hasColumn('staffs', 'onboarding_completed')) {
-                Schema::table('staffs', function (Blueprint $table) {
-                    $table->boolean('onboarding_completed')->default(0)->after('user_id');
-                });
+        // 4. Add onboarding_completed column to staffs (or staff) table
+        foreach (['staffs', 'staff'] as $tableName) {
+            if (Schema::connection($connection)->hasTable($tableName)) {
+                if (!Schema::connection($connection)->hasColumn($tableName, 'onboarding_completed')) {
+                    try {
+                        Schema::connection($connection)->table($tableName, function (Blueprint $table) {
+                            $table->boolean('onboarding_completed')->default(0)->after('user_id');
+                        });
+                        Log::info("Added onboarding_completed column to {$tableName} table on connection {$connection}.");
+                    } catch (\Exception $e) {
+                        Log::warning("Could not add onboarding_completed to {$tableName}: " . $e->getMessage());
+                    }
+                }
             }
         }
     }
@@ -63,13 +77,14 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('teacher_onboarding_jds');
-        Schema::dropIfExists('teacher_onboarding_questions');
-        Schema::dropIfExists('teacher_onboarding_results');
+        $connection = 'school';
+        Schema::connection($connection)->dropIfExists('teacher_onboarding_jds');
+        Schema::connection($connection)->dropIfExists('teacher_onboarding_questions');
+        Schema::connection($connection)->dropIfExists('teacher_onboarding_results');
         
-        if (Schema::hasTable('staffs')) {
-            if (Schema::hasColumn('staffs', 'onboarding_completed')) {
-                Schema::table('staffs', function (Blueprint $table) {
+        foreach (['staffs', 'staff'] as $tableName) {
+            if (Schema::connection($connection)->hasColumn($tableName, 'onboarding_completed')) {
+                Schema::connection($connection)->table($tableName, function (Blueprint $table) {
                     $table->dropColumn('onboarding_completed');
                 });
             }
