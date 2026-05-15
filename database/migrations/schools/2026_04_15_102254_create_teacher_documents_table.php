@@ -28,12 +28,20 @@ return new class extends Migration
         }
 
         foreach (['staffs', 'staff'] as $tableName) {
-            if (Schema::connection($connection)->hasTable($tableName)) {
-                if (!Schema::connection($connection)->hasColumn($tableName, 'kyc_completed')) {
-                    Schema::connection($connection)->table($tableName, function (Blueprint $table) {
-                        $table->boolean('kyc_completed')->default(0)->after('onboarding_completed');
-                    });
+            try {
+                if (Schema::connection($connection)->hasTable($tableName)) {
+                    if (!Schema::connection($connection)->hasColumn($tableName, 'kyc_completed')) {
+                        Schema::connection($connection)->table($tableName, function (Blueprint $table) use ($connection, $tableName) {
+                            if (Schema::connection($connection)->hasColumn($tableName, 'onboarding_completed')) {
+                                $table->boolean('kyc_completed')->default(0)->after('onboarding_completed');
+                            } else {
+                                $table->boolean('kyc_completed')->default(0);
+                            }
+                        });
+                    }
                 }
+            } catch (\Throwable $e) {
+                Log::warning("Could not process kyc_completed for {$tableName}: " . $e->getMessage());
             }
         }
     }

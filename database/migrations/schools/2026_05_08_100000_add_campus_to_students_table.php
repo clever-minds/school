@@ -13,9 +13,13 @@ return new class extends Migration
      */
     public function up()
     {
-        Schema::table('students', function (Blueprint $table) {
-            $table->string('campus')->nullable()->after('admission_no');
-        });
+        if (Schema::hasTable('students')) {
+            if (!Schema::hasColumn('students', 'campus')) {
+                Schema::table('students', function (Blueprint $table) {
+                    $table->string('campus')->nullable()->after('admission_no');
+                });
+            }
+        }
     }
 
     /**

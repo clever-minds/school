@@ -57,17 +57,22 @@ return new class extends Migration
 
         // 4. Add onboarding_completed column to staffs (or staff) table
         foreach (['staffs', 'staff'] as $tableName) {
-            if (Schema::connection($connection)->hasTable($tableName)) {
-                if (!Schema::connection($connection)->hasColumn($tableName, 'onboarding_completed')) {
-                    try {
-                        Schema::connection($connection)->table($tableName, function (Blueprint $table) {
-                            $table->boolean('onboarding_completed')->default(0)->after('user_id');
+            try {
+                if (Schema::connection($connection)->hasTable($tableName)) {
+                    if (!Schema::connection($connection)->hasColumn($tableName, 'onboarding_completed')) {
+                        Schema::connection($connection)->table($tableName, function (Blueprint $table) use ($connection, $tableName) {
+                            // Only use 'after' if user_id column exists
+                            if (Schema::connection($connection)->hasColumn($tableName, 'user_id')) {
+                                $table->boolean('onboarding_completed')->default(0)->after('user_id');
+                            } else {
+                                $table->boolean('onboarding_completed')->default(0);
+                            }
                         });
                         Log::info("Added onboarding_completed column to {$tableName} table on connection {$connection}.");
-                    } catch (\Exception $e) {
-                        Log::warning("Could not add onboarding_completed to {$tableName}: " . $e->getMessage());
                     }
                 }
+            } catch (\Throwable $e) {
+                Log::warning("Could not process onboarding_completed for {$tableName}: " . $e->getMessage());
             }
         }
     }
