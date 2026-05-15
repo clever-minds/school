@@ -204,7 +204,7 @@
                                                                     </span>
                                                                     <div class="classWrapper announcement-desc">
                                                                         <span
-                                                                            class="eventDesc eventClasses">{{ implode(', ', $item->announcement_class->pluck('class_section.full_name')->toArray()) }}</span>
+                                                                            class="eventDesc eventClasses">{{ implode(', ', $item->announcement_class->pluck('class_section.class.name')->unique()->toArray()) }}</span>
                                                                     </div>
                                                                 </div>
                                                             </div>
