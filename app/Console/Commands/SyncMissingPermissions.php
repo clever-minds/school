@@ -39,7 +39,26 @@ class SyncMissingPermissions extends Command
             'staff-attendance-create',
             'staff-attendance-delete',
             'staff-attendance-edit',
-            'staff-attendance-list'
+            'staff-attendance-list',
+            'event-list',
+            'event-create',
+            'event-edit',
+            'event-delete',
+            'manage-expense-list',
+            'manage-expense-show',
+            'reminder-list',
+            'reminder-create',
+            'reminder-edit',
+            'reminder-delete',
+            'school-policy-list',
+            'school-policy-create',
+            'school-policy-edit',
+            'school-policy-delete',
+            'student-pickup-list',
+            'student-pickup-create',
+            'student-pickup-edit',
+            'student-pickup-delete',
+            'staff-kyc-upload'
         ];
 
         $schoolId = $this->argument('school_id');
@@ -83,6 +102,9 @@ class SyncMissingPermissions extends Command
                     $role->givePermissionTo($permissions);
                 }
 
+                // Create and sync other staff roles (Principal, Accountant, etc.)
+                app(\App\Services\SchoolDataService::class)->createStaffRoles($school);
+
                 // Forget cached permissions
                 app(\Spatie\Permission\PermissionRegistrar::class)->forgetCachedPermissions();
 
@@ -94,6 +116,6 @@ class SyncMissingPermissions extends Command
         // Revert to mysql default
         DB::setDefaultConnection('mysql');
         
-        $this->info("All done! Missing permissions have been synced.");
+        $this->info("All done! Missing permissions and roles have been synced.");
     }
 }

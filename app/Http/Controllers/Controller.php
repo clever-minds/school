@@ -805,6 +805,14 @@ class Controller extends BaseController {
         try {
             $user = Auth::user();
 
+            // Check if user is already verified in MySQL database
+            $mysqlUser = DB::connection('mysql')->table('users')->where('id', $user->id)->first();
+            if ($mysqlUser && $mysqlUser->email_verified_at) {
+                // If verified in MySQL, update current (school) database
+                $user->update(['email_verified_at' => $mysqlUser->email_verified_at]);
+                return redirect()->route('home');
+            }
+
             if (!$user->hasVerifiedEmail()) {
                 $now = Carbon::now();
                 if ($now->diffInHours($user->updated_at) >= 2) {
@@ -829,7 +837,6 @@ class Controller extends BaseController {
             Auth::logout();
             return redirect()->route('login')->with('error',trans('An error occurred Please try again later'));
         }
-        
     }
 
     public function cacheFlush()

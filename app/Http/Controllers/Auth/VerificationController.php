@@ -68,6 +68,22 @@ class VerificationController extends Controller
 
         if ($user->markEmailAsVerified()) {
             event(new \Illuminate\Auth\Events\Verified($user));
+
+            // Sync to School Database if school_id is present
+            if ($user->school_id) {
+                try {
+                    $school = \App\Models\School::find($user->school_id);
+                    if ($school) {
+                        \Illuminate\Support\Facades\Config::set('database.connections.school.database', $school->database_name);
+                        \Illuminate\Support\Facades\DB::purge('school');
+                        \Illuminate\Support\Facades\DB::connection('school')->table('users')->where('id', $user->id)->update([
+                            'email_verified_at' => $user->email_verified_at
+                        ]);
+                    }
+                } catch (\Exception $e) {
+                    \Illuminate\Support\Facades\Log::error("Failed to sync email verification to school database: " . $e->getMessage());
+                }
+            }
         }
 
         return redirect($this->redirectPath())->with('verified', true)->with('success', 'Email verified successfully.');

@@ -72,7 +72,19 @@ class InstallationSeeder extends Seeder {
             ['name' => 'database-backup'],
             ...self::permission('school-custom-field'),
             
-            ['name' => 'contact-inquiry-list']
+            ['name' => 'contact-inquiry-list'],
+            ['name' => 'assign-roll-no'],
+            ['name' => 'generate-staff-id-card'],
+            ['name' => 'generate-student-id-card'],
+            ['name' => 'login-as-staff'],
+            ...self::permission('staff-attendance'),
+            ...self::permission('event'),
+            ['name' => 'manage-expense-list'],
+            ['name' => 'manage-expense-show'],
+            ...self::permission('reminder'),
+            ...self::permission('school-policy'),
+            ...self::permission('student-pickup'),
+            ['name' => 'staff-kyc-upload']
 
             
 
@@ -158,7 +170,34 @@ class InstallationSeeder extends Seeder {
             'school-custom-field-edit',
             'school-custom-field-delete',
 
-            'contact-inquiry-list'
+            'contact-inquiry-list',
+            'assign-roll-no',
+            'generate-staff-id-card',
+            'generate-student-id-card',
+            'login-as-staff',
+            'staff-attendance-list',
+            'staff-attendance-create',
+            'staff-attendance-edit',
+            'staff-attendance-list',
+            'event-list',
+            'event-create',
+            'event-edit',
+            'event-delete',
+            'manage-expense-list',
+            'manage-expense-show',
+            'reminder-list',
+            'reminder-create',
+            'reminder-edit',
+            'reminder-delete',
+            'school-policy-list',
+            'school-policy-create',
+            'school-policy-edit',
+            'school-policy-delete',
+            'student-pickup-list',
+            'student-pickup-create',
+            'student-pickup-edit',
+            'student-pickup-delete',
+            'staff-kyc-upload'
 
         ];
         $role->syncPermissions($superAdminHasAccessTo);

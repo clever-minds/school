@@ -60,7 +60,7 @@ class SchoolDataService {
             'email' => $mainUser->email,
             'password' => $mainUser->password,
             'school_id' => $mainUser->school_id,
-            'email_verified_at' => $schoolData->type == "demo" ? Carbon::now() : null,
+            'email_verified_at' => $schoolData->type == "demo" ? Carbon::now() : $mainUser->email_verified_at,
             'created_at' => $mainUser->created_at,
             'updated_at' => $mainUser->updated_at,
         ];
@@ -234,6 +234,9 @@ class SchoolDataService {
 
         // Create teacher role
         $this->createTeacherRole($school);
+
+        // Create other staff roles (Principal, Accountant, etc.)
+        $this->createStaffRoles($school);
     }
 
     public function defaultRoles($school)
@@ -411,7 +414,14 @@ class SchoolDataService {
             ['name' => 'assign-roll-no'],
             ['name' => 'generate-staff-id-card'],
             ['name' => 'generate-student-id-card'],
-            ['name' => 'login-as-staff']
+            ['name' => 'login-as-staff'],
+            ['name' => 'contact-us'],
+            ...self::permission('event'),
+            ['name' => 'manage-expense-list'],
+            ['name' => 'manage-expense-show'],
+            ...self::permission('reminder'),
+            ...self::permission('school-policy'),
+            ...self::permission('student-pickup')
 
         ];
         $permissions = array_map(static function ($data) {
@@ -676,7 +686,27 @@ class SchoolDataService {
             'assign-roll-no',
             'generate-staff-id-card',
             'generate-student-id-card',
-            'login-as-staff'
+            'login-as-staff',
+            'contact-us',
+            'event-list',
+            'event-create',
+            'event-edit',
+            'event-delete',
+            'manage-expense-list',
+            'manage-expense-show',
+            'reminder-list',
+            'reminder-create',
+            'reminder-edit',
+            'reminder-delete',
+            'school-policy-list',
+            'school-policy-create',
+            'school-policy-edit',
+            'school-policy-delete',
+            'student-pickup-list',
+            'student-pickup-create',
+            'student-pickup-edit',
+            'student-pickup-delete',
+            'staff-kyc-upload'
 
         ];
         
@@ -734,6 +764,80 @@ class SchoolDataService {
             'staff-attendance-list'
         ];
         $teacher_role->syncPermissions($TeacherHasAccessTo);
+    }
+
+    public function createStaffRoles($school)
+    {
+        // 1. Principal Role (All permissions except delete)
+        $principal_role = Role::updateOrCreate(['name' => 'Principal', 'school_id' => $school->id, 'custom_role' => 1, 'editable' => 1]);
+        $allPermissions = Permission::where('guard_name', 'web')->pluck('name')->toArray();
+        $principalPermissions = array_filter($allPermissions, function ($p) {
+            return !str_ends_with($p, '-delete');
+        });
+        $principal_role->syncPermissions($principalPermissions);
+
+        // 2. Admin Clerk Role
+        $admin_clerk_role = Role::updateOrCreate(['name' => 'Admin Clerk', 'school_id' => $school->id, 'custom_role' => 1, 'editable' => 1]);
+        $admin_clerk_permissions = [
+            'announcement-create', 'announcement-edit', 'announcement-list',
+            'assign-elective-subject-create', 'assign-elective-subject-edit', 'assign-elective-subject-list',
+            'assign-roll-no', 'attendance-list',
+            'certificate-create', 'certificate-edit', 'certificate-list',
+            'class-create', 'class-edit', 'class-group-create', 'class-group-edit', 'class-group-list', 'class-list',
+            'class-section-create', 'class-section-edit', 'class-section-list',
+            'contact-inquiry-list',
+            'fees-class-create', 'fees-class-edit', 'fees-class-list', 'fees-config', 'fees-create', 'fees-edit', 'fees-list', 'fees-paid',
+            'fees-type-create', 'fees-type-edit', 'fees-type-list',
+            'generate-student-id-card', 'grade-create', 'grade-edit', 'grade-list',
+            'guardian-create', 'guardian-edit', 'guardian-list', 'id-card-settings',
+            'reports-exam', 'reports-student', 'reset-password-list',
+            'section-create', 'section-edit', 'section-list',
+            'semester-create', 'semester-edit', 'semester-list',
+            'staff-attendance-create', 'staff-attendance-delete', 'staff-attendance-edit', 'staff-attendance-list',
+            'student-change-password', 'student-create', 'student-diary-create', 'student-diary-edit', 'student-diary-list', 'student-edit', 'student-list', 'student-reset-password',
+            'subject-create', 'subject-edit', 'subject-list',
+            'teacher-create', 'teacher-edit', 'teacher-list',
+            'timetable-create', 'timetable-delete', 'timetable-edit', 'timetable-list',
+            'update-student-uni'
+        ];
+        $admin_clerk_role->syncPermissions($admin_clerk_permissions);
+
+        // 3. Finance Head Role
+        $finance_head_role = Role::updateOrCreate(['name' => 'Finance Head', 'school_id' => $school->id, 'custom_role' => 1, 'editable' => 1]);
+        $finance_head_permissions = [
+            'announcement-create', 'announcement-edit', 'announcement-list',
+            'approve-leave', 'attendance-list',
+            'expense-category-create', 'expense-category-delete', 'expense-category-edit', 'expense-category-list',
+            'expense-create', 'expense-delete', 'expense-edit', 'expense-list',
+            'fees-class-create', 'fees-class-delete', 'fees-class-edit', 'fees-class-list', 'fees-config', 'fees-create', 'fees-delete', 'fees-edit', 'fees-list', 'fees-paid',
+            'fees-type-create', 'fees-type-delete', 'fees-type-edit', 'fees-type-list',
+            'guardian-list', 'holiday-list', 'manage-expense-add', 'manage-expense-list', 'manage-expense-show',
+            'notification-create', 'notification-list',
+            'payroll-create', 'payroll-delete', 'payroll-edit', 'payroll-list',
+            'payroll-settings-create', 'payroll-settings-delete', 'payroll-settings-edit', 'payroll-settings-list',
+            'reports-exam', 'reports-student',
+            'session-year-create', 'session-year-edit', 'session-year-list',
+            'staff-attendance-create', 'staff-attendance-delete', 'staff-attendance-edit', 'staff-attendance-list',
+            'student-list', 'teacher-list', 'timetable-list'
+        ];
+        $finance_head_role->syncPermissions($finance_head_permissions);
+
+        // 4. Accountant Role
+        $accountant_role = Role::updateOrCreate(['name' => 'Accountant', 'school_id' => $school->id, 'custom_role' => 1, 'editable' => 1]);
+        $accountant_permissions = [
+            'announcement-create', 'announcement-edit', 'announcement-list',
+            'expense-category-create', 'expense-category-delete', 'expense-category-edit', 'expense-category-list',
+            'expense-create', 'expense-edit', 'expense-list',
+            'fees-class-create', 'fees-class-edit', 'fees-class-list', 'fees-config', 'fees-create', 'fees-edit', 'fees-list', 'fees-paid',
+            'fees-type-create', 'fees-type-delete', 'fees-type-edit', 'fees-type-list',
+            'manage-expense-add', 'manage-expense-list', 'manage-expense-show',
+            'notification-create', 'notification-list',
+            'payroll-create', 'payroll-edit', 'payroll-list',
+            'payroll-settings-create', 'payroll-settings-edit', 'payroll-settings-list',
+            'session-year-create', 'session-year-edit', 'session-year-list',
+            'staff-attendance-create', 'staff-attendance-delete', 'staff-attendance-edit', 'staff-attendance-list'
+        ];
+        $accountant_role->syncPermissions($accountant_permissions);
     }
        public function assignLastActivePlanToNewSchool($schoolData)
         {
