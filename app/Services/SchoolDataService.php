@@ -32,20 +32,23 @@ class SchoolDataService {
         DB::connection('school')->reconnect();
         DB::setDefaultConnection('school');
 
-        School::updateOrCreate(['id' => $schoolData->id], [
-            'name' => $schoolData->name,
-            'address' => $schoolData->address,
-            'support_phone' => $schoolData->support_phone,
-            'support_email' => $schoolData->support_email,
-            'tagline' => $schoolData->tagline,
-            'logo' => $schoolData->logo,
-            'status' => $schoolData->type == "demo" ? 1 : $schoolData->status,
-            'domain' => $schoolData->domain,
-            'database_name' => $schoolData->database_name,
-            'code' => $schoolData->code,
-            'created_at' => $schoolData->created_at,
-            'updated_at' => $schoolData->updated_at,
-        ]);
+        DB::connection('school')->table('schools')->updateOrInsert(
+            ['id' => $schoolData->id],
+            [
+                'name' => $schoolData->name,
+                'address' => $schoolData->address,
+                'support_phone' => $schoolData->support_phone,
+                'support_email' => $schoolData->support_email,
+                'tagline' => $schoolData->tagline,
+                'logo' => $schoolData->logo,
+                'status' => $schoolData->type == "demo" ? 1 : $schoolData->status,
+                'domain' => $schoolData->domain,
+                'database_name' => $schoolData->database_name,
+                'code' => $schoolData->code,
+                'created_at' => $schoolData->created_at,
+                'updated_at' => $schoolData->updated_at,
+            ]
+        );
 
         $mainUser = DB::connection('mysql')->table('users')->where('id',$schoolData->admin_id)->first();        
 
