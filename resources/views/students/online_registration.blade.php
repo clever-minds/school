@@ -40,7 +40,7 @@
                                     <option value="">{{ __('select_class_section') }}</option>
                                 </select>
                             </div>
-                            @if(getSchoolSettings('school_name') == 'LCIS Tandalja')
+                            @if(in_array(getSchoolSettings('school_name'), ['LCIS Tandalja', 'GKIS Tandalja']))
                                 <div class="form-group col-sm-12 col-md-4">
                                     <label class="filter-menu">{{ __('Campus') }}</label>
                                     <select name="filter_campus" id="filter_campus" class="form-control">
@@ -71,7 +71,7 @@
                                         <th scope="col" data-field="user.full_name">{{ __('name') }}</th>
                                         <th scope="col" data-field="user.dob" >{{ __('dob') }}</th>
                                         <th scope="col" data-field="user.image" data-formatter="imageFormatter">{{ __('image') }}</th>
-                                        @if(getSchoolSettings('school_name') == 'LCIS Tandalja')
+                                        @if(in_array(getSchoolSettings('school_name'), ['LCIS Tandalja', 'GKIS Tandalja']))
                                             <th scope="col" data-field="campus">{{ __('Campus') }}</th>
                                         @endif
                                          <th scope="col" data-field="class.full_name">{{ __('class_name') }}</th>
@@ -163,7 +163,7 @@
                                                             <option value="">{{ __('select_class_section') }}</option>
                                                         </select>
                                                     </div>
-                                                    @if(getSchoolSettings('school_name') == 'LCIS Tandalja')
+                                                    @if(in_array(getSchoolSettings('school_name'), ['LCIS Tandalja', 'GKIS Tandalja']))
                                                         <div class="form-group col-sm-12 col-md-12 col-lg-6 col-xl-4">
                                                             <label>{{ __('Campus') }}</label>
                                                             {!! Form::select('campus', ['JIAM' => 'JIAM', 'Tandalja' => 'Tandalja'], null, ['class' => 'form-control', 'id' => 'edit_campus', 'placeholder' => __('Select Campus')]) !!}
