@@ -103,7 +103,9 @@ class RoleController extends Controller {
     public function create() {
         ResponseService::noFeatureThenRedirect('Staff Management');
         ResponseService::noPermissionThenRedirect('role-create');
-        $permission = Permission::whereHas('roles', static function ($q) {
+        $permission = Permission::whereDoesntHave('roles', function ($q) {
+            $q->where('name', 'Teacher');
+        })->orWhereHas('roles', function ($q) {
             $q->where('name', '!=', 'Teacher');
         })->orderBy('name')->get();
         return view('roles.create', compact('permission'));
@@ -156,7 +158,9 @@ class RoleController extends Controller {
         if ($role->name == "Teacher") {
             $permission = Permission::orderBy('name')->get();
         } else {            
-            $permission = Permission::whereHas('roles', static function ($q) {
+            $permission = Permission::whereDoesntHave('roles', function ($q) {
+                $q->where('name', 'Teacher');
+            })->orWhereHas('roles', function ($q) {
                 $q->where('name', '!=', 'Teacher');
             })->orderBy('name')->get();
         }

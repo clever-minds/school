@@ -408,7 +408,10 @@ class SchoolDataService {
             ['name' => 'staff-kyc-manage'],
             ['name' => 'staff-kyc-upload'],
             ...self::permission('staff-attendance'),
-
+            ['name' => 'assign-roll-no'],
+            ['name' => 'generate-staff-id-card'],
+            ['name' => 'generate-student-id-card'],
+            ['name' => 'login-as-staff']
 
         ];
         $permissions = array_map(static function ($data) {
@@ -666,7 +669,14 @@ class SchoolDataService {
 
             'manage-expense-add',
             'staff-kyc-manage',
-            'staff-attendance-list'
+            'staff-attendance-list',
+            'staff-attendance-create',
+            'staff-attendance-delete',
+            'staff-attendance-edit',
+            'assign-roll-no',
+            'generate-staff-id-card',
+            'generate-student-id-card',
+            'login-as-staff'
 
         ];
         
