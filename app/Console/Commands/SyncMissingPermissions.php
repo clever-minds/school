@@ -96,11 +96,11 @@ class SyncMissingPermissions extends Command
                 $mapped = array_map(function($p) { return ['name' => $p, 'guard_name' => 'web']; }, $permissions);
                 Permission::upsert($mapped, ['name'], ['name']);
                 
-                // Assign missing permissions to School Admin if the role exists
-                $role = Role::where('name', 'School Admin')->first();
-                if ($role) {
-                    $role->givePermissionTo($permissions);
-                }
+                // Sync School Admin Role
+                app(\App\Services\SchoolDataService::class)->createSchoolAdminRole($school);
+
+                // Sync Teacher Role
+                app(\App\Services\SchoolDataService::class)->createTeacherRole($school);
 
                 // Create and sync other staff roles (Principal, Accountant, etc.)
                 app(\App\Services\SchoolDataService::class)->createStaffRoles($school);
