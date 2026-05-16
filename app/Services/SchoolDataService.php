@@ -730,9 +730,6 @@ class SchoolDataService {
             try {
                 // Switch to main DB to get the last active plan
                 DB::setDefaultConnection('mysql');
-                Config::set('database.connections.mysql.database', env('DB_DATABASE'));
-                DB::purge('mysql');
-                DB::connection('mysql')->reconnect();
 
                 $lastActivePlan = DB::table('packages')
                     ->where('status', 1)
