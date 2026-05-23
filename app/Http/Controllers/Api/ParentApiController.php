@@ -108,7 +108,11 @@ class ParentApiController extends Controller
 
     #[NoReturn] public function login(Request $request)
     {
-
+       Log::info('Login Credentials', [
+                'mobile' => $request->email,
+                'password' => $request->password,
+                'school_code' => $request->school_code,
+            ]);
         $validator = Validator::make($request->all(), [
             'email' => 'required',
             'password' => 'required',
@@ -123,14 +127,15 @@ class ParentApiController extends Controller
         }
 
         $school = School::on('mysql')->where('code', $request->school_code)->first();
-
         if ($school) {
             DB::setDefaultConnection('school');
             Config::set('database.connections.school.database', $school->database_name);
             DB::purge('school');
             DB::connection('school')->reconnect();
             DB::setDefaultConnection('school');
+
         } else {
+
             ResponseService::errorResponse('Invalid Login Credentials', null, config('constants.RESPONSE_CODE.INVALID_LOGIN'));
         }
 
@@ -140,6 +145,7 @@ class ParentApiController extends Controller
                 'password' => $request->password
             ])
         ) {
+
             // $auth = Auth::user()->load('child.user', 'child.class_section.class', 'child.class_section.section', 'child.class_section.medium', 'child.user.school');
 
             // Only active child
@@ -164,12 +170,20 @@ class ParentApiController extends Controller
             $token = $auth->createToken($auth->first_name)->plainTextToken;
             // $token = $auth->createToken('API Token', ['school_code' => $request->school_code])->plainTextToken;
             $user = $auth;
+          
             if($user->status === 0){
                 ResponseService::errorResponse('Your account is inactive, please contact admin.', null, config('constants.RESPONSE_CODE.INVALID_LOGIN'));
             }
             $request->headers->set('school_code', $request->school_code);
             ResponseService::successResponse('User logged-in!', new UserDataResource($user), ['token' => $token], config('constants.RESPONSE_CODE.LOGIN_SUCCESS'));
         } else {
+              Log::info('Current Default Connection', [
+                    'connection' => DB::getDefaultConnection()
+                ]);
+
+                Log::info('Current Database Name', [
+                    'database' => DB::connection()->getDatabaseName()
+                ]);
             ResponseService::errorResponse('Invalid Login Credentials', null, config('constants.RESPONSE_CODE.INVALID_LOGIN'));
         }
     }

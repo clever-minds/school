@@ -2,7 +2,6 @@
 
 namespace App\Repositories\Base;
 
-use App\Repositories\User\UserInterface;
 use App\Services\UploadService;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
@@ -11,6 +10,7 @@ use Illuminate\Http\UploadedFile;
 use Storage;
 
 class BaseRepository implements BaseInterface {
+
     /**
      * @var Model
      */
@@ -33,233 +33,318 @@ class BaseRepository implements BaseInterface {
     }
 
     /**
-     * @param array $columns
-     * @param array $relations
-     * @param array $where
-     * @return Collection
+     * Get all models.
      */
-    public function all(array $columns = ['*'], array $relations = [], array $where = []): Collection {
-        return $this->defaultModel()->with($relations)->where($where)->get($columns);
+    public function all(
+        array $columns = ['*'],
+        array $relations = [],
+        array $where = []
+    ): Collection {
+
+        return $this->defaultModel()
+            ->with($relations)
+            ->where($where)
+            ->get($columns);
     }
 
     /**
      * Get all trashed models.
-     *
-     * @return Collection
      */
     public function allTrashed(): Collection {
+
         if (method_exists($this->model, 'onlyTrashed')) {
-            return $this->defaultModel()->onlyTrashed()->get();
+            return $this->defaultModel()
+                ->withoutGlobalScopes()
+                ->onlyTrashed()
+                ->get();
         }
+
         return new Collection();
     }
 
     /**
      * Find model by id.
-     *
-     * @param int $modelId
-     * @param array $columns
-     * @param array $relations
-     * @param array $appends
-     * @return Model|null
      */
-    public function findById(int $modelId, array $columns = ['*'], array $relations = [], array $appends = []): ?Model {
-        return $this->defaultModel()->select($columns)->with($relations)->findOrFail($modelId)->append($appends);
+    public function findById(
+        int $modelId,
+        array $columns = ['*'],
+        array $relations = [],
+        array $appends = []
+    ): ?Model {
+
+        return $this->defaultModel()
+            ->withoutGlobalScopes()
+            ->select($columns)
+            ->with($relations)
+            ->findOrFail($modelId)
+            ->append($appends);
     }
 
     /**
      * Find trashed model by id.
-     *
-     * @param int $modelId
-     * @return Model|null
      */
     public function findTrashedById(int $modelId): ?Model {
+
         if (method_exists($this->model, 'withTrashed')) {
-            return $this->defaultModel()->withTrashed()->findOrFail($modelId);
+
+            return $this->defaultModel()
+                ->withoutGlobalScopes()
+                ->withTrashed()
+                ->findOrFail($modelId);
         }
-        return $this->defaultModel()->findOrFail($modelId);
+
+        return $this->defaultModel()
+            ->withoutGlobalScopes()
+            ->findOrFail($modelId);
     }
 
     /**
      * Find only trashed model by id.
-     *
-     * @param int $modelId
-     * @return Model|null
      */
     public function findOnlyTrashedById(int $modelId): ?Model {
+
         if (method_exists($this->model, 'onlyTrashed')) {
-            return $this->defaultModel()->onlyTrashed()->findOrFail($modelId);
+
+            return $this->defaultModel()
+                ->withoutGlobalScopes()
+                ->onlyTrashed()
+                ->findOrFail($modelId);
         }
-        return $this->defaultModel()->findOrFail($modelId);
+
+        return $this->defaultModel()
+            ->withoutGlobalScopes()
+            ->findOrFail($modelId);
     }
 
     /**
      * Create a model.
-     *
-     * @param array $payload
-     * @return Model|null
      */
     public function create(array $payload): ?Model {
 
         foreach ($payload as $column => $value) {
+
             if ($value instanceof UploadedFile) {
-                $payload[$column] = UploadService::upload($value, $this->uploadFolder);
+                $payload[$column] = UploadService::upload(
+                    $value,
+                    $this->uploadFolder
+                );
             }
         }
+
         return $this->defaultModel()->create($payload);
-        //        ->fresh()
     }
 
-
     /**
-     * Create a model.
-     *
-     * @param array $payload
-     * @return bool
+     * Bulk insert.
      */
     public function createBulk(array $payload): bool {
+
         foreach ($payload as $key => $arr) {
+
             foreach ($arr as $column => $value) {
+
                 if ($value instanceof UploadedFile) {
-                    $payload[$key][$column] = UploadService::upload($value, $this->uploadFolder);
+                    $payload[$key][$column] = UploadService::upload(
+                        $value,
+                        $this->uploadFolder
+                    );
                 }
             }
+
             $payload[$key]['created_at'] = now();
             $payload[$key]['updated_at'] = now();
         }
+
         return $this->defaultModel()->insert($payload);
     }
 
     /**
-     * Update existing model.
-     *
-     * @param int $modelId
-     * @param array $payload
-     * @return Model|null
+     * Update model.
      */
     public function update(int $modelId, array $payload): ?Model {
+
         $model = $this->findTrashedById($modelId);
 
         foreach ($payload as $column => $value) {
+
             if ($value instanceof UploadedFile) {
-                if ($model->getAttributes()[$column]) {
-                    UploadService::delete($model->getAttributes()[$column]);
+
+                if (
+                    isset($model->getAttributes()[$column]) &&
+                    $model->getAttributes()[$column]
+                ) {
+                    UploadService::delete(
+                        $model->getAttributes()[$column]
+                    );
                 }
-                $payload[$column] = UploadService::upload($value, $this->uploadFolder);
+
+                $payload[$column] = UploadService::upload(
+                    $value,
+                    $this->uploadFolder
+                );
             }
         }
+
         $model->update($payload);
+
         return $model;
     }
 
     /**
-     * Update existing model.
-     *
-     * @param array $uniqueColumns
-     * @param array $updatingColumn Names of the columns which will be updated
-     * @return Model
+     * Update or create.
      */
-    public function updateOrCreate(array $uniqueColumns, array $updatingColumn): Model {
+    public function updateOrCreate(
+        array $uniqueColumns,
+        array $updatingColumn
+    ): Model {
+
         foreach ($updatingColumn as $column => $value) {
+
             if ($value instanceof UploadedFile) {
-                $updatingColumn[$column] = UploadService::upload($value, $this->uploadFolder);
+
+                $updatingColumn[$column] = UploadService::upload(
+                    $value,
+                    $this->uploadFolder
+                );
             }
         }
-        return $this->defaultModel()->updateOrCreate($uniqueColumns, $updatingColumn);
+
+        return $this->defaultModel()->updateOrCreate(
+            $uniqueColumns,
+            $updatingColumn
+        );
     }
 
     /**
-     * Update existing model.
-     *
-     * @param array $payloads
-     * @param array $uniqueColumns
-     * @param array $updatingColumn Names of the columns which will be updated
-     * @return bool
+     * Upsert.
      */
-    public function upsert(array $payloads, array $uniqueColumns, array $updatingColumn): bool {
+    public function upsert(
+        array $payloads,
+        array $uniqueColumns,
+        array $updatingColumn
+    ): bool {
+
         foreach ($payloads as $key => $payload) {
+
             foreach ($payload as $column => $value) {
+
                 if ($value instanceof UploadedFile) {
-                    $payloads[$key][$column] = UploadService::upload($value, $this->uploadFolder);
+
+                    $payloads[$key][$column] = UploadService::upload(
+                        $value,
+                        $this->uploadFolder
+                    );
                 }
             }
         }
 
-        return $this->defaultModel()->upsert($payloads, $uniqueColumns, $updatingColumn);
+        return $this->defaultModel()->upsert(
+            $payloads,
+            $uniqueColumns,
+            $updatingColumn
+        );
     }
 
     /**
-     * Delete model by id.
-     *
-     * @param int $modelId
-     * @return bool
+     * Delete by id.
      */
     public function deleteById(int $modelId): bool {
+
         return $this->findById($modelId)->delete();
     }
 
     /**
-     * Restore model by id.
-     *
-     * @param int $modelId
-     * @return void
+     * Restore model.
      */
     public function restoreById(int $modelId): void {
+
         if (method_exists($this->model, 'onlyTrashed')) {
+
             $this->findOnlyTrashedById($modelId)->restore();
         }
     }
 
     /**
-     * Permanently delete model by id.
-     *
-     * @param int $modelId
-     * @return bool
+     * Permanently delete.
      */
     public function permanentlyDeleteById(int $modelId): bool {
+
         if (method_exists($this->model, 'withTrashed')) {
+
             return $this->findTrashedById($modelId)->forceDelete();
         }
+
         return $this->findTrashedById($modelId)->delete();
     }
 
-
     /**
-     * Returns the builder so that you can use your own conditions and functions.
-     *
-     * @return Model|Builder
+     * Builder.
      */
     public function builder(): Model|Builder {
+
         return $this->defaultModel();
     }
 
     /**
-     * Returns the new model instance so that you can use your own conditions and functions.
-     *
-     * @return Model
+     * New model instance.
      */
     public function model(): Model {
+
         return new $this->model();
     }
 
-    public function upsertProfile(array $payloads, array $uniqueColumns, array $updatingColumn): bool
-    {
-        $existingRecords = $this->defaultModel()->whereIn($uniqueColumns[0], array_column($payloads, $uniqueColumns[0]))->get();
+    /**
+     * Upsert profile.
+     */
+    public function upsertProfile(
+        array $payloads,
+        array $uniqueColumns,
+        array $updatingColumn
+    ): bool {
 
-        foreach ($existingRecords as $key => $row) {
-            if ($row->image && $row->getRawOriginal('image')) {
-                if (Storage::disk('public')->exists($row->getRawOriginal('image'))) {
-                    Storage::disk('public')->delete($row->getRawOriginal('image'));
+        $existingRecords = $this->defaultModel()
+            ->whereIn(
+                $uniqueColumns[0],
+                array_column($payloads, $uniqueColumns[0])
+            )
+            ->get();
+
+        foreach ($existingRecords as $row) {
+
+            if (
+                $row->image &&
+                $row->getRawOriginal('image')
+            ) {
+
+                if (
+                    Storage::disk('public')
+                        ->exists($row->getRawOriginal('image'))
+                ) {
+
+                    Storage::disk('public')
+                        ->delete($row->getRawOriginal('image'));
                 }
             }
         }
+
         foreach ($payloads as $key => $payload) {
+
             foreach ($payload as $column => $value) {
+
                 if ($value instanceof UploadedFile) {
-                    $payloads[$key][$column] = UploadService::upload($value, $this->uploadFolder);
+
+                    $payloads[$key][$column] = UploadService::upload(
+                        $value,
+                        $this->uploadFolder
+                    );
                 }
             }
         }
-        return $this->defaultModel()->upsert($payloads, $uniqueColumns, $updatingColumn);
+
+        return $this->defaultModel()->upsert(
+            $payloads,
+            $uniqueColumns,
+            $updatingColumn
+        );
     }
 }

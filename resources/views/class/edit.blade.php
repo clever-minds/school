@@ -26,9 +26,10 @@
                                     <input name="name" id="edit_name" type="text" placeholder="{{ __('name') }}" class="form-control" value="{{$class->name}}"/>
                                 </div> -->
 
-                                @php
-                                    $classes = ['Nursery','LKG','UKG','Balvatika','1st','2nd','3rd','4th','5th','6th','7th','8th','9th','10th','11th','12th'];
+                                 @php
+                                    $classes = ['Nursery', 'Jr.KG','Sr.KG','Balvatika', '1st', '2nd', '3rd', '4th', '5th', '6th', '7th', '8th', '9th', '10th', '11th', '12th'];
                                 @endphp
+
 
                                     <div class="form-group">
                                         <label for="class">{{ __('class') }} <span class="text-danger">*</span></label>

@@ -33,8 +33,9 @@ function getSchoolSettings($name = '') {
             $settingList[$row->name] = $row->data;
         }
         return $settingList;
-    }
+        dd( $settingList);
 
+    }
     $settings = $schoolSettingsRepository->getSpecificData($name);
     return $settings ?? null;
 }

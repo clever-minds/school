@@ -1104,11 +1104,11 @@ public function resetPasswordUpdate(Request $request) {
 
         try {
             $userService = app(UserService::class);
+
             DB::beginTransaction();
 
             $user = $this->user->findTrashedById($request->edit_user_id);
             $student = $this->student->builder()->where('user_id', $request->edit_user_id)->first();
-
             // Update Guardian if details are provided
             $guardianID = $request->guardian_id;
             if ($request->guardian_first_name || $request->guardian_mobile) {
@@ -1186,6 +1186,7 @@ public function resetPasswordUpdate(Request $request) {
             DB::commit();
             ResponseService::successResponse("Application Updated and Status Changed Successfully");
         } catch (Throwable $e) {
+            dd($e);
             DB::rollBack();
             ResponseService::logErrorResponse($e);
             ResponseService::errorResponse();
