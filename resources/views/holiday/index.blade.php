@@ -47,7 +47,7 @@
 
                                 {!! Form::text('date', null, [
                                 'placeholder' => __('date'),
-                                'class' => 'datepicker-popup form-control',
+                                'class' => 'form-control',
                                 'autocomplete' => 'off',
                                 'id' => 'date-field'
                                 ]) !!}
@@ -385,16 +385,43 @@ $(document).ready(function () {
     });
 
 
-    // DATEPICKER
-    const sessionStart = "{{ $current_sessionYear->start_date }}";
-    const sessionEnd = "{{ $current_sessionYear->end_date }}";
+    // DATE RANGE PICKER
+    const sessionStart = moment("{{ $current_sessionYear->start_date }}");
+    const sessionEnd = moment("{{ $current_sessionYear->end_date }}");
 
-    $('.datepicker-popup').datepicker({
-        format: 'yyyy-mm-dd',
-        startDate: sessionStart,
-        endDate: sessionEnd,
-        autoclose: true,
-        todayHighlight: true
+    $('#date-field').daterangepicker({
+        locale: {
+            format: 'YYYY-MM-DD'
+        },
+        minDate: sessionStart,
+        maxDate: sessionEnd,
+        autoUpdateInput: false
+    });
+
+    $('#date-field').on('apply.daterangepicker', function(ev, picker) {
+        $(this).val(picker.startDate.format('YYYY-MM-DD') + ' - ' + picker.endDate.format('YYYY-MM-DD'));
+    });
+
+    $('#date-field').on('cancel.daterangepicker', function(ev, picker) {
+        $(this).val('');
+    });
+
+    // EDIT DATEPICKER (Date Range)
+    $('#edit-date').daterangepicker({
+        locale: {
+            format: 'YYYY-MM-DD'
+        },
+        minDate: sessionStart,
+        maxDate: sessionEnd,
+        autoUpdateInput: false
+    });
+
+    $('#edit-date').on('apply.daterangepicker', function(ev, picker) {
+        $(this).val(picker.startDate.format('YYYY-MM-DD') + ' - ' + picker.endDate.format('YYYY-MM-DD'));
+    });
+
+    $('#edit-date').on('cancel.daterangepicker', function(ev, picker) {
+        $(this).val('');
     });
 
 

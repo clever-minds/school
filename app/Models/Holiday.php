@@ -15,6 +15,7 @@ class Holiday extends Model {
         'type',
         'class_ids',
         'date',
+        'end_date',
         'title',
         'description',
         'school_id'

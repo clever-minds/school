@@ -51,7 +51,7 @@ class HolidayController extends Controller
     if ($request->type == 'holiday') {
 
         $validator = Validator::make($request->all(), [
-            'date'  => 'required|date',
+            'date'  => 'required',
             'title' => 'required'
         ]);
 
@@ -81,31 +81,46 @@ class HolidayController extends Controller
 
         // date validation only for normal holiday
         if ($request->type == 'holiday') {
+            
+            $dates = explode(' - ', $request->date);
+            $startDate = Carbon::parse($dates[0]);
+            $endDate = isset($dates[1]) ? Carbon::parse($dates[1]) : Carbon::parse($dates[0]);
 
-            $holidayDate = Carbon::parse($request->date);
-            $start = Carbon::parse($sessionYear->start_date);
-            $end   = Carbon::parse($sessionYear->end_date);
+            $sessionStart = Carbon::parse($sessionYear->start_date);
+            $sessionEnd   = Carbon::parse($sessionYear->end_date);
 
-            if ($holidayDate->lt($start) || $holidayDate->gt($end)) {
-                ResponseService::errorResponse('The selected date must fall within the current session year.');
+            if ($startDate->lt($sessionStart) || $endDate->gt($sessionEnd)) {
+                ResponseService::errorResponse('The selected date range must fall within the current session year.');
             }
+
+            $data['date'] = $startDate->format('Y-m-d');
+            $data['end_date'] = $endDate->format('Y-m-d');
+            
+            $holiday = $this->holiday->create($data);
+
+            $this->sessionYearsTrackingsService->storeSessionYearsTracking(
+                'App\Models\Holiday',
+                $holiday->id,
+                Auth::user()->id,
+                $sessionYear->id,
+                Auth::user()->school_id,
+                null
+            );
 
         } else {
             // saturday holiday → no specific date
             $data['date'] = null;
+            $holiday = $this->holiday->create($data);
+
+            $this->sessionYearsTrackingsService->storeSessionYearsTracking(
+                'App\Models\Holiday',
+                $holiday->id,
+                Auth::user()->id,
+                $sessionYear->id,
+                Auth::user()->school_id,
+                null
+            );
         }
-
-        // store holiday
-        $holiday = $this->holiday->create($data);
-
-        $this->sessionYearsTrackingsService->storeSessionYearsTracking(
-            'App\Models\Holiday',
-            $holiday->id,
-            Auth::user()->id,
-            $sessionYear->id,
-            Auth::user()->school_id,
-            null
-        );
 
         ResponseService::successResponse('Data Stored Successfully');
 
@@ -124,7 +139,7 @@ class HolidayController extends Controller
     // Validation
     if ($request->type == 'holiday') {
         $validator = Validator::make($request->all(), [
-            'date'  => 'required|date',
+            'date'  => 'required',
             'title' => 'required'
         ]);
     } else {
@@ -150,13 +165,19 @@ class HolidayController extends Controller
 
         // Date validation only for normal holiday
         if ($request->type == 'holiday') {
-            $holidayDate = Carbon::parse($request->date);
+            $dates = explode(' - ', $request->date);
+            $startDate = Carbon::parse($dates[0]);
+            $endDate = isset($dates[1]) ? Carbon::parse($dates[1]) : Carbon::parse($dates[0]);
+            
             $start = Carbon::parse($sessionYear->start_date);
             $end   = Carbon::parse($sessionYear->end_date);
 
-            if ($holidayDate->lt($start) || $holidayDate->gt($end)) {
-                ResponseService::errorResponse('The selected date must fall within the current session year.');
+            if ($startDate->lt($start) || $endDate->gt($end)) {
+                ResponseService::errorResponse('The selected date range must fall within the current session year.');
             }
+            
+            $data['date'] = $startDate->format('Y-m-d');
+            $data['end_date'] = $endDate->format('Y-m-d');
         } else {
             // Saturday holiday → no specific date
             $data['date'] = null;
@@ -233,7 +254,10 @@ class HolidayController extends Controller
         })
 
         ->when($month, function ($query) use ($month) {
-            $query->whereMonth('date', $month);
+            $query->where(function($q) use ($month) {
+                $q->whereMonth('date', $month)
+                  ->orWhereMonth('end_date', $month);
+            });
         });
 
     $total = $sql->count();
@@ -265,7 +289,15 @@ class HolidayController extends Controller
 
         // Holiday Type
         if ($row->type == 'holiday') {
-            $tempRow['date'] = $row->date;
+            if (!empty($row->end_date) && $row->date != $row->end_date) {
+                $tempRow['date'] = date('d-m-Y', strtotime($row->date)) . ' to ' . date('d-m-Y', strtotime($row->end_date));
+            } else {
+                $tempRow['date'] = date('d-m-Y', strtotime($row->date));
+            }
+            
+            $tempRow['start_date'] = date('d-m-Y', strtotime($row->date));
+            $tempRow['end_date'] = !empty($row->end_date) ? date('d-m-Y', strtotime($row->end_date)) : date('d-m-Y', strtotime($row->date));
+            
             $tempRow['holiday_type'] = 'Normal Holiday';
         } elseif ($row->type == 'saturday_all') {
              $tempRow['date'] = "";
