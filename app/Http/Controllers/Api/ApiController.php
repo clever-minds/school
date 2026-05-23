@@ -279,6 +279,24 @@ class ApiController extends Controller
         }
     }
 
+    public function getUpiDetails(Request $request)
+    {
+        try {
+            $response = $this->paymentConfiguration->builder()
+                ->select('payment_method', 'upi_id', 'qr_code_image')
+                ->where('status', 1)
+                ->where(function($q) {
+                    $q->whereNotNull('upi_id')->orWhereNotNull('qr_code_image');
+                })
+                ->get();
+                
+            ResponseService::successResponse("UPI Details Fetched", $response);
+        } catch (Throwable $e) {
+            ResponseService::logErrorResponse($e);
+            ResponseService::errorResponse();
+        }
+    }
+
     public function getPaymentConfirmation(Request $request)
     {
         $validator = Validator::make($request->all(), [
