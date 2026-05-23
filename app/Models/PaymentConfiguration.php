@@ -23,6 +23,8 @@ class PaymentConfiguration extends Model
         'bank_name',
         'account_name',
         'account_no',
+        'upi_id',
+        'qr_code_image',
     ];
 
     public function getConnectionName()

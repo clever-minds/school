@@ -175,6 +175,11 @@ class MigrateAllTenants extends Command
                       '--path' => 'database/migrations/schools/2026_05_08_100000_add_campus_to_students_table.php',
                       '--force' => true,
                   ]);
+                  Artisan::call('migrate', [
+                      '--database' => 'tenant',
+                      '--path' => 'database/migrations/schools/2026_05_23_132956_add_upi_fields_to_payment_configurations_table.php',
+                      '--force' => true,
+                  ]);
                 $this->info("✅ Migration done for {$tenant->name}");
             } catch (\Exception $e) {
                 $this->error("❌ Migration failed for {$tenant->name}: {$e->getMessage()}");

@@ -392,6 +392,10 @@ class SystemSettingsController extends Controller {
             'gateway.Flutterwave.api_key' => 'required_if:gateway.Flutterwave.status,1',
             'gateway.Flutterwave.secret_key' => 'required_if:gateway.Flutterwave.status,1',
             'gateway.Flutterwave.webhook_secret_key' => 'required_if:gateway.Flutterwave.status,1',
+
+            'gateway.UPI.status' => 'required|boolean',
+            'gateway.UPI.upi_id' => 'required_if:gateway.UPI.status,1',
+            'gateway.UPI.qr_code_image' => 'nullable|image',
         ], [
             'gateway.Stripe.api_key.required_if' => trans('The Stripe Publishable Key is required when Stripe is enabled'),
             'gateway.Stripe.secret_key.required_if' => trans('The Stripe Secret Key is required when Stripe is enabled'),
@@ -409,6 +413,9 @@ class SystemSettingsController extends Controller {
             'gateway.Flutterwave.api_key.required_if' => trans('The Flutterwave API Key is required when Flutterwave is enabled'),
             'gateway.Flutterwave.secret_key.required_if' => trans('The Flutterwave Secret Key is required when Flutterwave is enabled'),
             'gateway.Flutterwave.webhook_secret_key.required_if' => trans('The Flutterwave Webhook Secret is required when Flutterwave is enabled'),
+
+            'gateway.UPI.upi_id.required_if' => trans('The UPI ID is required when UPI is enabled'),
+            'gateway.UPI.qr_code_image.image' => trans('The QR Code must be an image'),
         ]);
         // $request->validate([
         //     'gateway'        => 'required|array',
@@ -418,7 +425,7 @@ class SystemSettingsController extends Controller {
         try {
             DB::beginTransaction();
             foreach ($request->gateway as $key => $gateway) {
-                $this->paymentConfiguration->updateOrCreate(['payment_method' => $key], [
+                $configData = [
                     'api_key'            => $gateway["api_key"] ?? '',
                     'secret_key'         => $gateway["secret_key"] ?? '',
                     'webhook_secret_key' => $gateway["webhook_secret_key"] ?? '',
@@ -428,7 +435,19 @@ class SystemSettingsController extends Controller {
                     'bank_name'          => $gateway["bank_name"] ?? '',
                     'account_name'       => $gateway["account_name"] ?? '',
                     'account_no'         => $gateway["account_no"] ?? '',
-                ]);
+
+                    'upi_id'             => $gateway["upi_id"] ?? '',
+                ];
+
+                if (isset($gateway["qr_code_image"]) && $gateway["qr_code_image"] instanceof \Illuminate\Http\UploadedFile) {
+                    $fileName = time() . '-' . $gateway["qr_code_image"]->getClientOriginalName();
+                    $gateway["qr_code_image"]->move(public_path('storage/payment_qr'), $fileName);
+                    $configData['qr_code_image'] = 'storage/payment_qr/' . $fileName;
+                } else if (isset($gateway["qr_code_image_old"])) {
+                    $configData['qr_code_image'] = $gateway["qr_code_image_old"];
+                }
+
+                $this->paymentConfiguration->updateOrCreate(['payment_method' => $key], $configData);
             }
             if (Auth::user()->hasRole('Super Admin')) {
                 $this->systemSettings->upsert([

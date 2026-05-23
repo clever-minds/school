@@ -454,3 +454,35 @@
     </div>
     
 </div> --}}
+
+{{-- UPI --}}
+<div class="border border-secondary rounded-lg mb-3">
+    <h3 class="col-12 page-title mt-3 ">
+        {{ __('UPI') }}
+    </h3>
+    <div class="row my-4 mx-1">
+        <div class="form-group col-sm-12 col-md-6">
+            <label for="upi_status">{{ __('status') }} <span class="text-danger">*</span></label>
+            <select name="gateway[UPI][status]" id="upi_status" class="form-control">
+                <option value="0" {{ isset($paymentGateway['UPI']['status']) && $paymentGateway['UPI']['status'] == 0 ? 'selected' : '' }}>{{ __('Disable') }}</option>
+                <option value="1" {{ isset($paymentGateway['UPI']['status']) && $paymentGateway['UPI']['status'] == 1 ? 'selected' : '' }}>{{ __('Enable') }}</option>
+            </select>
+        </div>
+
+        <div class="form-group col-sm-12 col-md-6">
+            <label for="upi_id">{{ __('UPI ID') }} <span class="text-danger">*</span></label>
+            <input type="text" name="gateway[UPI][upi_id]" id="upi_id" class="form-control" placeholder="{{ __('UPI ID') }}" value="{{ $paymentGateway['UPI']['upi_id'] ?? '' }}">
+        </div>
+
+        <div class="form-group col-sm-12 col-md-6">
+            <label for="qr_code_image">{{ __('QR Code Image') }}</label>
+            <input type="file" name="gateway[UPI][qr_code_image]" id="qr_code_image" class="form-control" accept="image/*">
+            @if(isset($paymentGateway['UPI']['qr_code_image']) && $paymentGateway['UPI']['qr_code_image'])
+                <input type="hidden" name="gateway[UPI][qr_code_image_old]" value="{{ $paymentGateway['UPI']['qr_code_image'] }}">
+                <div class="mt-2">
+                    <img src="{{ asset($paymentGateway['UPI']['qr_code_image']) }}" alt="QR Code" style="max-height: 150px;">
+                </div>
+            @endif
+        </div>
+    </div>
+</div>
