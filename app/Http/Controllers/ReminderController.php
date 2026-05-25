@@ -24,7 +24,8 @@ class ReminderController extends Controller
     {
         ResponseService::noAnyPermissionThenRedirect(['reminder-create', 'reminder-list']);
         $current_sessionYear = $this->cache->getDefaultSessionYear();
-        return view('reminders.index', compact('current_sessionYear'));
+        $class_sections = app(\App\Repositories\ClassSection\ClassSectionInterface::class)->builder()->with('class', 'class.stream', 'section', 'medium')->get();
+        return view('reminders.index', compact('current_sessionYear', 'class_sections'));
     }
 
     public function store(Request $request)
@@ -33,6 +34,7 @@ class ReminderController extends Controller
         $validator = Validator::make($request->all(), [
             'date'  => 'required|date',
             'title' => 'required',
+            'class_section_id' => 'nullable|exists:class_sections,id',
         ]);
 
         if ($validator->fails()) {
@@ -59,7 +61,7 @@ class ReminderController extends Controller
         $order = request('order', 'DESC');
         $search = request('search');
 
-        $sql = Reminder::owner()
+        $sql = Reminder::owner()->with('class_section.class', 'class_section.section', 'class_section.medium')
             ->where(function ($query) use ($search) {
                 if ($search) {
                     $query->where('title', 'LIKE', "%$search%")
@@ -84,6 +86,7 @@ class ReminderController extends Controller
             $tempRow = $row->toArray();
             $tempRow['no'] = $no++;
             $tempRow['operate'] = $operate;
+            $tempRow['class_section_name'] = $row->class_section ? $row->class_section->full_name : __('All Classes');
             $rows[] = $tempRow;
         }
 
@@ -97,6 +100,7 @@ class ReminderController extends Controller
         $validator = Validator::make($request->all(), [
             'date'  => 'required|date',
             'title' => 'required',
+            'class_section_id' => 'nullable|exists:class_sections,id',
         ]);
 
         if ($validator->fails()) {

@@ -400,6 +400,7 @@ class SchoolDataService {
             ['name' => 'email-template' ],
             ['name' => 'database-backup' ],
             ['name' => 'view-exam-marks'],
+            ['name' => 'manual-upi-transaction-list'],
 
             ['name' => 'contact-inquiry-list'],
             
@@ -663,6 +664,7 @@ class SchoolDataService {
             'email-template',
             'database-backup',
             'view-exam-marks',
+            'manual-upi-transaction-list',
             'assign-elective-subject-list',
             'assign-elective-subject-create',
             'assign-elective-subject-edit',

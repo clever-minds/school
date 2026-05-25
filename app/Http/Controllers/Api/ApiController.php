@@ -1796,4 +1796,31 @@ public function getMessage(Request $request)
             ResponseService::errorResponse();
         }
     }
+
+    public function storeManualUpiTransaction(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'student_id' => 'required|exists:students,id',
+            'amount' => 'required|numeric',
+            'transaction_id' => 'required|string',
+        ]);
+
+        if ($validator->fails()) {
+            return ResponseService::validationError($validator->errors()->first());
+        }
+
+        try {
+            $transaction = new \App\Models\ManualUpiTransaction();
+            $transaction->student_id = $request->student_id;
+            $transaction->amount = $request->amount;
+            $transaction->transaction_id = $request->transaction_id;
+            $transaction->status = 'pending';
+            $transaction->save();
+
+            return ResponseService::successResponse("Manual UPI Transaction recorded successfully.", $transaction);
+        } catch (Throwable $e) {
+            ResponseService::logErrorResponse($e);
+            return ResponseService::errorResponse();
+        }
+    }
 }

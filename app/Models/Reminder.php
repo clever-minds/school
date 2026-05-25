@@ -8,7 +8,12 @@ use Illuminate\Database\Eloquent\Model;
 class Reminder extends Model
 {
     use HasFactory;
-    protected $fillable = ['title', 'description', 'date', 'school_id'];
+    protected $fillable = ['title', 'description', 'date', 'school_id', 'class_section_id'];
+    
+    public function class_section()
+    {
+        return $this->belongsTo(ClassSection::class, 'class_section_id');
+    }
 
     public function scopeOwner($query)
     {

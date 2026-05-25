@@ -342,6 +342,7 @@ Route::group(['middleware' => ['APISwitchDatabase',]], static function () {
     Route::get('payment-confirmation', [ApiController::class, 'getPaymentConfirmation'])->name('payment-confirmation');
     Route::get('payment-transactions', [ApiController::class, 'getPaymentTransactions'])->name('payment-transactions');
     Route::get('payment-upi-details', [ApiController::class, 'getUpiDetails'])->name('payment-upi-details');
+    Route::post('payment-manual-upi', [ApiController::class, 'storeManualUpiTransaction'])->name('payment-manual-upi');
     Route::get('gallery', [ApiController::class, 'getGallery']);
     Route::get('session-years', [ApiController::class, 'getSessionYear']);
 //    Route::get('features', [ApiController::class, 'getFeatures']);

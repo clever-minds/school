@@ -37,6 +37,15 @@
                                         <label>{{ __('description') }}</label>
                                         {!! Form::textarea('description', null, ['rows' => '2', 'placeholder' => __('description'), 'class' => 'form-control']) !!}
                                     </div>
+                                    <div class="form-group col-md-6">
+                                        <label>{{ __('class_section') }} <span class="text-info">({{ __('Optional') }})</span></label>
+                                        <select name="class_section_id" class="form-control" id="class_section_id">
+                                            <option value="">{{ __('All Classes') }}</option>
+                                            @foreach($class_sections as $class_section)
+                                                <option value="{{ $class_section->id }}">{{ $class_section->full_name }}</option>
+                                            @endforeach
+                                        </select>
+                                    </div>
                                 </div>
                                 <button class="btn btn-theme float-right ml-3" type="submit">{{ __('submit') }}</button>
                                 <button class="btn btn-secondary float-right" type="reset">{{ __('reset') }}</button>
@@ -63,6 +72,7 @@
                                         <th data-field="date">{{ __('date') }}</th>
                                         <th data-field="title">{{ __('title') }}</th>
                                         <th data-field="description">{{ __('description') }}</th>
+                                        <th data-field="class_section_name">{{ __('class_section') }}</th>
                                         @if (Auth::user()->can('reminder-edit') || Auth::user()->can('reminder-delete'))
                                             <th data-field="operate">{{ __('action') }}</th>
                                         @endif
@@ -102,6 +112,15 @@
                             <label>{{ __('description') }}</label>
                             {!! Form::textarea('description', null, ['rows' => '2', 'placeholder' => __('description'), 'class' => 'form-control', 'id' => 'edit-description']) !!}
                         </div>
+                        <div class="form-group">
+                            <label>{{ __('class_section') }} <span class="text-info">({{ __('Optional') }})</span></label>
+                            <select name="class_section_id" class="form-control" id="edit-class_section_id">
+                                <option value="">{{ __('All Classes') }}</option>
+                                @foreach($class_sections as $class_section)
+                                    <option value="{{ $class_section->id }}">{{ $class_section->full_name }}</option>
+                                @endforeach
+                            </select>
+                        </div>
                     </div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-secondary" data-dismiss="modal">{{ __('cancel') }}</button>
@@ -121,6 +140,7 @@
                 $('#edit-date').val(row.date);
                 $('#edit-title').val(row.title);
                 $('#edit-description').val(row.description);
+                $('#edit-class_section_id').val(row.class_section_id);
             }
         };
 

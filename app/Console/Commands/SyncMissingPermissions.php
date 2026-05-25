@@ -58,7 +58,8 @@ class SyncMissingPermissions extends Command
             'student-pickup-create',
             'student-pickup-edit',
             'student-pickup-delete',
-            'staff-kyc-upload'
+            'staff-kyc-upload',
+            'manual-upi-transaction-list'
         ];
 
         $schoolId = $this->argument('school_id');

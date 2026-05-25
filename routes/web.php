@@ -763,6 +763,8 @@ Route::post('/admin/impersonation-exit',
             // Transaction list
             Route::get('/transaction-logs', [FeesController::class, 'feesTransactionsLogsIndex'])->name('fees.transactions.log.index');
             Route::get('/transaction-logs/list', [FeesController::class, 'feesTransactionsLogsList'])->name('fees.transactions.log.list');
+            
+            Route::get('/manual-upi-transactions', [\App\Http\Controllers\ManualUpiTransactionController::class, 'index'])->name('manual_upi_transactions.index');
 
             // Receipt
             Route::get('/paid/receipt-pdf/{id}', [FeesController::class, 'feesPaidReceiptPDF'])->name('fees.paid.receipt.pdf');

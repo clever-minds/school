@@ -26,7 +26,8 @@ class EventController extends Controller
     {
         ResponseService::noAnyPermissionThenRedirect(['event-create', 'event-list']);
         $current_sessionYear = $this->cache->getDefaultSessionYear();
-        return view('events.index', compact('current_sessionYear'));
+        $class_sections = app(\App\Repositories\ClassSection\ClassSectionInterface::class)->builder()->with('class', 'class.stream', 'section', 'medium')->get();
+        return view('events.index', compact('current_sessionYear', 'class_sections'));
     }
 
     public function store(Request $request)
@@ -35,6 +36,7 @@ class EventController extends Controller
         $validator = Validator::make($request->all(), [
             'date'  => 'required|date',
             'title' => 'required',
+            'class_section_id' => 'nullable|exists:class_sections,id',
         ]);
 
         if ($validator->fails()) {
@@ -61,7 +63,7 @@ class EventController extends Controller
         $order = request('order', 'DESC');
         $search = request('search');
 
-        $sql = Event::owner()
+        $sql = Event::owner()->with('class_section.class', 'class_section.section', 'class_section.medium')
             ->where(function ($query) use ($search) {
                 if ($search) {
                     $query->where('title', 'LIKE', "%$search%")
@@ -86,6 +88,7 @@ class EventController extends Controller
             $tempRow = $row->toArray();
             $tempRow['no'] = $no++;
             $tempRow['operate'] = $operate;
+            $tempRow['class_section_name'] = $row->class_section ? $row->class_section->full_name : __('All Classes');
             $rows[] = $tempRow;
         }
 
@@ -99,6 +102,7 @@ class EventController extends Controller
         $validator = Validator::make($request->all(), [
             'date'  => 'required|date',
             'title' => 'required',
+            'class_section_id' => 'nullable|exists:class_sections,id',
         ]);
 
         if ($validator->fails()) {
