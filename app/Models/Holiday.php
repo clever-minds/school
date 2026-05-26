@@ -66,7 +66,14 @@ class Holiday extends Model {
     }
 
     public function getDateAttribute() {
-        return $this->formatDateOnly($this->getRawOriginal('date'));
+        $date = $this->formatDateOnly($this->getRawOriginal('date'));
+        $end_date = $this->getRawOriginal('end_date') ? $this->formatDateOnly($this->getRawOriginal('end_date')) : null;
+        
+        if ($end_date && $date !== $end_date) {
+            return $date . ' to ' . $end_date;
+        }
+        
+        return $date;
     }
    
 }

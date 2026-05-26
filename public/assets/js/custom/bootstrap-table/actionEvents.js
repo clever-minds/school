@@ -1180,7 +1180,11 @@ window.holidayEvents = {
             $('.edit-date-box').show();
             let startDate = moment(row.start_date, 'DD-MM-YYYY').format('YYYY-MM-DD');
             let endDate = moment(row.end_date, 'DD-MM-YYYY').format('YYYY-MM-DD');
-            $('#edit-date').val(startDate + ' - ' + endDate);
+            if (startDate === endDate) {
+                $('#edit-date').val(startDate);
+            } else {
+                $('#edit-date').val(startDate + ' - ' + endDate);
+            }
             $('#edit-date').data('daterangepicker').setStartDate(startDate);
             $('#edit-date').data('daterangepicker').setEndDate(endDate);
         } else {

@@ -399,7 +399,11 @@ $(document).ready(function () {
     });
 
     $('#date-field').on('apply.daterangepicker', function(ev, picker) {
-        $(this).val(picker.startDate.format('YYYY-MM-DD') + ' - ' + picker.endDate.format('YYYY-MM-DD'));
+        if (picker.startDate.format('YYYY-MM-DD') === picker.endDate.format('YYYY-MM-DD')) {
+            $(this).val(picker.startDate.format('YYYY-MM-DD'));
+        } else {
+            $(this).val(picker.startDate.format('YYYY-MM-DD') + ' - ' + picker.endDate.format('YYYY-MM-DD'));
+        }
     });
 
     $('#date-field').on('cancel.daterangepicker', function(ev, picker) {
@@ -417,7 +421,11 @@ $(document).ready(function () {
     });
 
     $('#edit-date').on('apply.daterangepicker', function(ev, picker) {
-        $(this).val(picker.startDate.format('YYYY-MM-DD') + ' - ' + picker.endDate.format('YYYY-MM-DD'));
+        if (picker.startDate.format('YYYY-MM-DD') === picker.endDate.format('YYYY-MM-DD')) {
+            $(this).val(picker.startDate.format('YYYY-MM-DD'));
+        } else {
+            $(this).val(picker.startDate.format('YYYY-MM-DD') + ' - ' + picker.endDate.format('YYYY-MM-DD'));
+        }
     });
 
     $('#edit-date').on('cancel.daterangepicker', function(ev, picker) {

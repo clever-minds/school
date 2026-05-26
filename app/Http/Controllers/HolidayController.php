@@ -289,14 +289,16 @@ class HolidayController extends Controller
 
         // Holiday Type
         if ($row->type == 'holiday') {
-            if (!empty($row->end_date) && $row->date != $row->end_date) {
-                $tempRow['date'] = date('d-m-Y', strtotime($row->date)) . ' to ' . date('d-m-Y', strtotime($row->end_date));
+            $raw_date = $row->getRawOriginal('date');
+            $raw_end_date = $row->getRawOriginal('end_date');
+            if (!empty($raw_end_date) && $raw_date != $raw_end_date) {
+                $tempRow['date'] = date('d-m-Y', strtotime($raw_date)) . ' to ' . date('d-m-Y', strtotime($raw_end_date));
             } else {
-                $tempRow['date'] = date('d-m-Y', strtotime($row->date));
+                $tempRow['date'] = date('d-m-Y', strtotime($raw_date));
             }
             
-            $tempRow['start_date'] = date('d-m-Y', strtotime($row->date));
-            $tempRow['end_date'] = !empty($row->end_date) ? date('d-m-Y', strtotime($row->end_date)) : date('d-m-Y', strtotime($row->date));
+            $tempRow['start_date'] = date('d-m-Y', strtotime($raw_date));
+            $tempRow['end_date'] = !empty($raw_end_date) ? date('d-m-Y', strtotime($raw_end_date)) : date('d-m-Y', strtotime($raw_date));
             
             $tempRow['holiday_type'] = 'Normal Holiday';
         } elseif ($row->type == 'saturday_all') {
