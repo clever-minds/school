@@ -15,6 +15,8 @@ class ManualUpiTransactionController extends Controller
 
         $transactions = ManualUpiTransaction::with('student.user')->latest()->paginate(15);
         return view('manual_upi_transactions.index', compact('transactions'));
+    }
+
     public function accept($id)
     {
         if (!auth()->user()->can('manual-upi-transaction-list')) {
