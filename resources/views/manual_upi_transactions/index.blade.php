@@ -27,6 +27,7 @@
                                     <th>{{ __('Transaction ID') }}</th>
                                     <th>{{ __('Status') }}</th>
                                     <th>{{ __('Date') }}</th>
+                                    <th>{{ __('Action') }}</th>
                                 </tr>
                                 </thead>
                                 <tbody>
@@ -48,10 +49,24 @@
                                             @endif
                                         </td>
                                         <td>{{ $transaction->created_at->format('Y-m-d H:i:s') }}</td>
+                                        <td>
+                                            @if($transaction->status == 'pending')
+                                                <form action="{{ route('manual_upi_transactions.accept', $transaction->id) }}" method="POST" style="display:inline-block;">
+                                                    @csrf
+                                                    <button type="submit" class="btn btn-sm btn-success">{{ __('Accept') }}</button>
+                                                </form>
+                                                <form action="{{ route('manual_upi_transactions.reject', $transaction->id) }}" method="POST" style="display:inline-block;">
+                                                    @csrf
+                                                    <button type="submit" class="btn btn-sm btn-danger">{{ __('Reject') }}</button>
+                                                </form>
+                                            @else
+                                                -
+                                            @endif
+                                        </td>
                                     </tr>
                                 @empty
                                     <tr>
-                                        <td colspan="6" class="text-center">{{ __('No transactions found.') }}</td>
+                                        <td colspan="7" class="text-center">{{ __('No transactions found.') }}</td>
                                     </tr>
                                 @endforelse
                                 </tbody>
