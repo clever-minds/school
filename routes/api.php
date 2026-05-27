@@ -101,7 +101,8 @@ Route::group(['prefix' => 'parent'], static function () {
         // Route::group(['middleware' => ['']], static function () {
         //     Route::get('test', [ParentApiController::class, 'test']);
         // });
-            Route::post('forgot-password', [ParentApiController::class, 'forgotPassword']);
+        Route::post('forgot-password', [ParentApiController::class, 'forgotPassword']);
+        Route::post('reset-password', [ParentApiController::class, 'resetPassword']);
 
         Route::group(['middleware' => ['APISwitchDatabase']], static function () {
             Route::get('test', [ParentApiController::class, 'test']);

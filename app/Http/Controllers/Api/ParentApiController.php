@@ -40,6 +40,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
 use JetBrains\PhpStorm\NoReturn;
 use Throwable;
@@ -2134,29 +2135,25 @@ class ParentApiController extends Controller
             ResponseService::errorResponse();
         }
     }
- public function forgotPassword(Request $request)
-{
-    $validator = Validator::make($request->all(), [
-        'school_code' => 'required|string',
-        'mobile'      => 'required|digits:10',
-    ], [
-        'school_code.required' => 'Please enter the school code.',
-        'mobile.required'      => 'Please enter the mobile number.',
-        'mobile.digits'        => 'Mobile number must be 10 digits.',
-    ]);
+    public function forgotPassword(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'school_code' => 'required|string',
+            'mobile'      => 'required|digits:10',
+        ], [
+            'school_code.required' => 'Please enter the school code.',
+            'mobile.required'      => 'Please enter the mobile number.',
+            'mobile.digits'        => 'Mobile number must be 10 digits.',
+        ]);
 
+        if ($validator->fails()) {
+            return ResponseService::validationError($validator->errors()->first());
+        }
 
-    if ($validator->fails()) {
-        return ResponseService::validationError($validator->errors()->first());
-    }
+        try {
+            $schoolCode = $request->school_code;
+            $mobile = $request->mobile;
 
-    try {
-        $schoolCode = $request->school_code;
-        $mobile = $request->mobile;
-        $user = null;
-
-        // ✅ Case 1: Search by school_code (school DB)
-        if ($schoolCode) {
             $school = School::on('mysql')->where('code', $schoolCode)->first();
 
             if ($school) {
@@ -2166,39 +2163,85 @@ class ParentApiController extends Controller
                 DB::connection('school')->reconnect();
                 DB::setDefaultConnection('school');
 
-                // 🔍 Find user who has "parent" role
-                $user = $this->user->builder()
+                $user = clone $this->user->builder()
+                    ->where('mobile', $mobile)
                     ->role('Guardian')
                     ->first();
+
+                if (!empty($user)) {
+                    $this->user->update($user->id, [
+                        'reset_request' => 1,
+                        'school_id'     => $user->school_id ?? null,
+                    ]);
+                    return ResponseService::successResponse("User verified successfully");
+                } else {
+                    return ResponseService::errorResponse("Invalid user details", null, config('constants.RESPONSE_CODE.INVALID_USER_DETAILS'));
+                }
             } else {
                 return response()->json(['error' => true, 'message' => 'Invalid school code'], 200);
             }
+        } catch (Throwable $e) {
+            ResponseService::logErrorResponse($e);
+            return ResponseService::errorResponse();
         }
-
-        // ✅ Case 2: Search by mobile (main DB)
-        if ($mobile) {
-            $user = User::on('mysql')
-                ->where('mobile', $mobile)
-                ->role('Guardian') // Spatie role filter
-                ->first();
-        }
-
-        // ✅ Common response
-        if (!empty($user)) {
-            $this->user->update($user->id, [
-                'reset_request' => 1,
-                'school_id'     => $user->school_id ?? null,
-            ]);
-            return ResponseService::successResponse("Request sent successfully");
-        } else {
-            return ResponseService::errorResponse("Invalid user details", null, config('constants.RESPONSE_CODE.INVALID_USER_DETAILS'));
-        }
-
-    } catch (Throwable $e) {
-        ResponseService::logErrorResponse($e);
-        return ResponseService::errorResponse();
     }
-}
+
+    public function resetPassword(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'school_code' => 'required|string',
+            'mobile'   => 'required|digits:10',
+            'password' => 'required|min:6|confirmed',
+        ], [
+            'school_code.required' => 'Please enter the school code.',
+            'mobile.required'   => 'Please enter the mobile number.',
+            'mobile.digits'     => 'Mobile number must be 10 digits.',
+            'password.required' => 'Please enter the new password.',
+            'password.min'      => 'Password must be at least 6 characters.',
+            'password.confirmed'=> 'Password confirmation does not match.',
+        ]);
+
+        if ($validator->fails()) {
+            return ResponseService::validationError($validator->errors()->first());
+        }
+
+        try {
+            $schoolCode = $request->school_code;
+            $mobile = $request->mobile;
+
+            $school = School::on('mysql')->where('code', $schoolCode)->first();
+
+            if ($school) {
+                DB::setDefaultConnection('school');
+                Config::set('database.connections.school.database', $school->database_name);
+                DB::purge('school');
+                DB::connection('school')->reconnect();
+                DB::setDefaultConnection('school');
+
+                $user = clone $this->user->builder()
+                    ->where('mobile', $mobile)
+                    ->role('Guardian')
+                    ->first();
+
+                if (!empty($user)) {
+                    $this->user->update($user->id, [
+                        'password' => Hash::make($request->password),
+                        'reset_request' => 0,
+                    ]);
+                    
+                    return ResponseService::successResponse("Password updated successfully");
+                } else {
+                    return ResponseService::errorResponse("Invalid user details", null, config('constants.RESPONSE_CODE.INVALID_USER_DETAILS'));
+                }
+            } else {
+                return response()->json(['error' => true, 'message' => 'Invalid school code'], 200);
+            }
+        } catch (Throwable $e) {
+            ResponseService::logErrorResponse($e);
+            return ResponseService::errorResponse();
+        }
+    }
+
 public function getNotifications()
 {
     try {
