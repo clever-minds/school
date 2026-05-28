@@ -42,6 +42,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Facades\Password;
 use JetBrains\PhpStorm\NoReturn;
 use Throwable;
 use App\Models\User;
@@ -2139,11 +2140,14 @@ class ParentApiController extends Controller
     {
         $validator = Validator::make($request->all(), [
             'school_code' => 'required|string',
-            'mobile'      => 'required|digits:10',
+            'mobile'      => 'required_without:email|nullable|digits:10',
+            'email'       => 'required_without:mobile|nullable|email',
         ], [
             'school_code.required' => 'Please enter the school code.',
-            'mobile.required'      => 'Please enter the mobile number.',
+            'mobile.required_without' => 'Please enter either mobile number or email.',
+            'email.required_without' => 'Please enter either mobile number or email.',
             'mobile.digits'        => 'Mobile number must be 10 digits.',
+            'email.email'          => 'Please enter a valid email address.',
         ]);
 
         if ($validator->fails()) {
@@ -2152,7 +2156,6 @@ class ParentApiController extends Controller
 
         try {
             $schoolCode = $request->school_code;
-            $mobile = $request->mobile;
 
             $school = School::on('mysql')->where('code', $schoolCode)->first();
 
@@ -2163,19 +2166,39 @@ class ParentApiController extends Controller
                 DB::connection('school')->reconnect();
                 DB::setDefaultConnection('school');
 
-                $user = clone $this->user->builder()
-                    ->where('mobile', $mobile)
-                    ->role('Guardian')
-                    ->first();
+                if ($request->has('email') && !empty($request->email)) {
+                    // Check if user exists with this email and role Guardian
+                    $userExists = $this->user->builder()
+                        ->where('email', $request->email)
+                        ->role('Guardian')
+                        ->exists();
 
-                if (!empty($user)) {
-                    $this->user->update($user->id, [
-                        'reset_request' => 1,
-                        'school_id'     => $user->school_id ?? null,
-                    ]);
-                    return ResponseService::successResponse("User verified successfully");
-                } else {
-                    return ResponseService::errorResponse("Invalid user details", null, config('constants.RESPONSE_CODE.INVALID_USER_DETAILS'));
+                    if (!$userExists) {
+                        return ResponseService::errorResponse("Invalid user details", null, config('constants.RESPONSE_CODE.INVALID_USER_DETAILS'));
+                    }
+
+                    $response = Password::sendResetLink(['email' => $request->email]);
+                   
+                    if ($response == Password::RESET_LINK_SENT) {
+                        return ResponseService::successResponse("Forgot Password email sent successfully");
+                    } else {
+                        return ResponseService::errorResponse("Cannot send Reset Password Link. Try again later", null, config('constants.RESPONSE_CODE.RESET_PASSWORD_FAILED'));
+                    }
+                } elseif ($request->has('mobile') && !empty($request->mobile)) {
+                    $user = clone $this->user->builder()
+                        ->where('mobile', $request->mobile)
+                        ->role('Guardian')
+                        ->first();
+
+                    if (!empty($user)) {
+                        $this->user->update($user->id, [
+                            'reset_request' => 1,
+                            'school_id'     => $user->school_id ?? null,
+                        ]);
+                        return ResponseService::successResponse("User verified successfully");
+                    } else {
+                        return ResponseService::errorResponse("Invalid user details", null, config('constants.RESPONSE_CODE.INVALID_USER_DETAILS'));
+                    }
                 }
             } else {
                 return response()->json(['error' => true, 'message' => 'Invalid school code'], 200);
