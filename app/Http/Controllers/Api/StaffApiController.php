@@ -1236,9 +1236,11 @@ class StaffApiController extends Controller
                     ]);
                 }
             ])->firstOrFail();
-            $student = $this->student->builder()->with('user:id,first_name,last_name')->whereHas('user', function ($q) use ($feesPaid) {
-                $q->where('id', $feesPaid->student_id);
-            })->firstOrFail();
+            $student = $this->student->builder()->with('user:id,first_name,last_name')
+                ->where(function ($q) use ($feesPaid) {
+                    $q->where('id', $feesPaid->student_id)
+                      ->orWhere('user_id', $feesPaid->student_id);
+                })->firstOrFail();
 
             $systemVerticalLogo = $this->systemSetting->builder()->where('name', 'vertical_logo')->first();
             $schoolVerticalLogo = $this->schoolSettings->builder()->where('name', 'vertical_logo')->first();

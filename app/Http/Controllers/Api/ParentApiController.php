@@ -1900,9 +1900,11 @@ class ParentApiController extends Controller
                     ])->firstOrFail();
             }
 
-            $student = $this->student->builder()->with('user:id,first_name,last_name,email', 'class_section.class.stream', 'class_section.section', 'class_section.medium')->whereHas('user', function ($q) use ($feesPaid) {
-                $q->where('id', $feesPaid->student_id);
-            })->firstOrFail();
+            $student = $this->student->builder()->with('user:id,first_name,last_name,email', 'class_section.class.stream', 'class_section.section', 'class_section.medium')
+                ->where(function ($q) use ($feesPaid) {
+                    $q->where('id', $feesPaid->student_id)
+                      ->orWhere('user_id', $feesPaid->student_id);
+                })->firstOrFail();
 
             $school = $this->cache->getSchoolSettings();
 
