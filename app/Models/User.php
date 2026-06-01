@@ -210,11 +210,11 @@ class User extends Authenticatable implements MustVerifyEmail {
     }
 
     public function optional_fees() {
-        return $this->hasMany(OptionalFee::class, 'student_id')->withTrashed();
+        return $this->hasMany(OptionalFee::class, 'student_id');
     }
 
     public function compulsory_fees() {
-        return $this->hasMany(CompulsoryFee::class, 'student_id')->withTrashed();
+        return $this->hasMany(CompulsoryFee::class, 'student_id');
     }
 
     public function features() {

@@ -53,12 +53,12 @@ class FeesPaid extends Model
 
     public function optional_fee()
     {
-        return $this->hasMany(OptionalFee::class, 'fees_paid_id')->withTrashed();
+        return $this->hasMany(OptionalFee::class, 'fees_paid_id');
     }
 
     public function compulsory_fee()
     {
-        return $this->hasMany(CompulsoryFee::class, 'fees_paid_id')->withTrashed();
+        return $this->hasMany(CompulsoryFee::class, 'fees_paid_id');
     }
 
     /*It is used in Fees Receipt view file*/
