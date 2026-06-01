@@ -935,7 +935,7 @@ class FeesController extends Controller
         try {
             $feesPaid = null;
             try {
-                $feesPaid = $this->feesPaid->builder()->where('id', $feesPaidId)->with([
+                $feesPaid = \App\Models\FeesPaid::withTrashed()->where('id', $feesPaidId)->with([
                     'fees.fees_class_type.fees_type',
                     'compulsory_fee.installment_fee:id,name',
                     'optional_fee' => function ($q) {
@@ -947,7 +947,7 @@ class FeesController extends Controller
                     }
                 ])->firstOrFail();
             } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
-                $feesPaid = $this->feesPaid->builder()
+                $feesPaid = \App\Models\FeesPaid::withTrashed()
                     ->whereHas('compulsory_fee', function ($q) use ($feesPaidId) {
                         $q->where('id', $feesPaidId);
                     })
@@ -960,6 +960,13 @@ class FeesController extends Controller
                         'optional_fee.fees_class_type.fees_type:id,name'
                     ])
                     ->firstOrFail();
+            }
+
+            if (Auth::user() && !Auth::user()->hasRole('Super Admin')) {
+                if ($feesPaid->school_id && Auth::user()->school_id && $feesPaid->school_id !== Auth::user()->school_id) {
+                    ResponseService::errorRedirectResponse();
+                    return false;
+                }
             }
 
             $student = $this->student->builder()->with('user:id,first_name,last_name,email', 'class_section.class.stream', 'class_section.section', 'class_section.medium')->whereHas('user', function ($q) use ($feesPaid) {
@@ -998,25 +1005,25 @@ class FeesController extends Controller
 //                 'compulsory_fee:id'
 //             ])
 //             ->firstOrFail();
-
+ 
 //         $student = $this->student->builder()
 //             ->with('user:id,first_name,last_name,email', 'class_section.class.stream', 'class_section.section', 'class_section.medium')
 //             ->whereHas('user', function ($q) use ($feesPaid) {
 //                 $q->where('id', $feesPaid->student_id);
 //             })
 //             ->firstOrFail();
-
+ 
 //         $school = $this->cache->getSchoolSettings();
-
+ 
 //         $data = explode("storage/", $school['horizontal_logo'] ?? '');
 //         $school['horizontal_logo'] = end($data);
-
+ 
 //         if ($school['horizontal_logo'] == null) {
 //             $systemSettings = $this->cache->getSystemSettings();
 //             $data = explode("storage/", $systemSettings['horizontal_logo'] ?? '');
 //             $school['horizontal_logo'] = end($data);
 //         }
-
+ 
 //         $pdf = Pdf::loadView('fees.fees_receipt', compact('school', 'feesPaid', 'student'));
 //         return $pdf->stream('fees-receipt.pdf');
 //     } catch (Throwable $e) {
@@ -1032,7 +1039,7 @@ public function feesPaidReceiptPDF1($feesPaidId)
 
         try {
             DB::enableQueryLog();
-           $feesPaid = $this->feesPaid->builder()
+           $feesPaid = \App\Models\FeesPaid::withTrashed()
     ->whereHas('compulsory_fee', function ($q) use ($feesPaidId) {
         $q->where('id', $feesPaidId);   // ✅ compulsory_fees.id
     })
@@ -1048,6 +1055,12 @@ public function feesPaidReceiptPDF1($feesPaidId)
     ])
     ->firstOrFail();
 
+            if (Auth::user() && !Auth::user()->hasRole('Super Admin')) {
+                if ($feesPaid->school_id && Auth::user()->school_id && $feesPaid->school_id !== Auth::user()->school_id) {
+                    ResponseService::errorRedirectResponse();
+                    return false;
+                }
+            }
 
             $student = $this->student->builder()->with('user:id,first_name,last_name,email', 'class_section.class.stream', 'class_section.section', 'class_section.medium')->whereHas('user', function ($q) use ($feesPaid) {
                 $q->where('id', $feesPaid->student_id);
