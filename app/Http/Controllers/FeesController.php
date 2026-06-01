@@ -933,17 +933,35 @@ class FeesController extends Controller
         ResponseService::noFeatureThenRedirect('Fees Management');
         ResponseService::noPermissionThenRedirect('fees-paid');
         try {
-            $feesPaid = $this->feesPaid->builder()->where('id', $feesPaidId)->with([
-                'fees.fees_class_type.fees_type',
-                'compulsory_fee.installment_fee:id,name',
-                'optional_fee' => function ($q) {
-                    $q->with([
-                        'fees_class_type' => function ($q) {
-                            $q->select('id', 'fees_type_id')->with('fees_type:id,name');
-                        }
-                    ]);
-                }
-            ])->firstOrFail();
+            $feesPaid = null;
+            try {
+                $feesPaid = $this->feesPaid->builder()->where('id', $feesPaidId)->with([
+                    'fees.fees_class_type.fees_type',
+                    'compulsory_fee.installment_fee:id,name',
+                    'optional_fee' => function ($q) {
+                        $q->with([
+                            'fees_class_type' => function ($q) {
+                                $q->select('id', 'fees_type_id')->with('fees_type:id,name');
+                            }
+                        ]);
+                    }
+                ])->firstOrFail();
+            } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
+                $feesPaid = $this->feesPaid->builder()
+                    ->whereHas('compulsory_fee', function ($q) use ($feesPaidId) {
+                        $q->where('id', $feesPaidId);
+                    })
+                    ->with([
+                        'fees.fees_class_type.fees_type',
+                        'compulsory_fee' => function ($q) use ($feesPaidId) {
+                            $q->where('id', $feesPaidId)
+                              ->with('installment_fee:id,name');
+                        },
+                        'optional_fee.fees_class_type.fees_type:id,name'
+                    ])
+                    ->firstOrFail();
+            }
+
             $student = $this->student->builder()->with('user:id,first_name,last_name,email', 'class_section.class.stream', 'class_section.section', 'class_section.medium')->whereHas('user', function ($q) use ($feesPaid) {
                 $q->where('id', $feesPaid->student_id);
             })->firstOrFail();
@@ -962,7 +980,7 @@ class FeesController extends Controller
             $pdf = Pdf::loadView('fees.fees_receipt', compact('school', 'feesPaid', 'student'))->setPaper('a5');
             return $pdf->stream('fees-receipt.pdf');
         } catch (Throwable $e) {
-            return $e;
+            ResponseService::logErrorResponse($e);
             ResponseService::errorRedirectResponse();
             return false;
         }
@@ -1049,7 +1067,7 @@ public function feesPaidReceiptPDF1($feesPaidId)
             $pdf = Pdf::loadView('fees.fees_receipt', compact('school', 'feesPaid', 'student'))->setPaper('a5');
             return $pdf->stream('fees-receipt.pdf');
         } catch (Throwable $e) {
-            return $e;
+            ResponseService::logErrorResponse($e);
             ResponseService::errorRedirectResponse();
             return false;
         }

@@ -24,8 +24,11 @@ class SaaSRepository extends BaseRepository
 
     public function create(array $payload): Model
     {
-        if(empty($payload['school_id'])){
-            $payload['school_id'] = Auth::user()->school_id;
+        if (empty($payload['school_id'])) {
+            $user = Auth::user();
+            if ($user) {
+                $payload['school_id'] = $user->school_id;
+            }
         }
         return parent::create($payload)->fresh();
     }
@@ -34,12 +37,11 @@ class SaaSRepository extends BaseRepository
     {
         $payload = array_map(static function ($d) {
             $user = Auth::user();
-            
             if ($user && $user->school_id) {
                 $d['school_id'] = $user->school_id;
             } elseif (!empty($d['school_id'])) {
                 $d['school_id'] = $d['school_id'];
-            } 
+            }
             return $d;
         }, $payload);
         return parent::createBulk($payload);
@@ -47,8 +49,11 @@ class SaaSRepository extends BaseRepository
 
     public function update(int $modelId, array $payload): ?Model
     {
-        if(empty($payload['school_id'])){
-            $payload['school_id'] = Auth::user()->school_id;
+        if (empty($payload['school_id'])) {
+            $user = Auth::user();
+            if ($user) {
+                $payload['school_id'] = $user->school_id;
+            }
         }
         return parent::update($modelId, $payload);
 
@@ -56,8 +61,11 @@ class SaaSRepository extends BaseRepository
 
     public function updateOrCreate(array $uniqueColumns, array $updatingColumn): Model
     {
-        if(empty($uniqueColumns['school_id'])){
-            $uniqueColumns['school_id'] = Auth::user()->school_id;
+        if (empty($uniqueColumns['school_id'])) {
+            $user = Auth::user();
+            if ($user) {
+                $uniqueColumns['school_id'] = $user->school_id;
+            }
         }
         return parent::updateOrCreate($uniqueColumns, $updatingColumn);
     }
@@ -65,7 +73,10 @@ class SaaSRepository extends BaseRepository
     public function upsert(array $payload, array $uniqueColumns, array $updatingColumn): bool
     {
         $payload = array_map(static function ($d) {
-            $d['school_id'] = Auth::user()->school_id;
+            $user = Auth::user();
+            if ($user && empty($d['school_id'])) {
+                $d['school_id'] = $user->school_id;
+            }
             return $d;
         }, $payload);
         $uniqueColumns[] = ['school_id'];
