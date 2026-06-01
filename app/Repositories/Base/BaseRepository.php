@@ -52,7 +52,7 @@ class BaseRepository implements BaseInterface {
      */
     public function allTrashed(): Collection {
 
-        if (method_exists($this->model, 'onlyTrashed')) {
+        if (in_array(\Illuminate\Database\Eloquent\SoftDeletes::class, class_uses_recursive($this->model))) {
             return $this->defaultModel()
                 ->withoutGlobalScopes()
                 ->onlyTrashed()
@@ -85,7 +85,7 @@ class BaseRepository implements BaseInterface {
      */
     public function findTrashedById(int $modelId): ?Model {
 
-        if (method_exists($this->model, 'withTrashed')) {
+        if (in_array(\Illuminate\Database\Eloquent\SoftDeletes::class, class_uses_recursive($this->model))) {
 
             return $this->defaultModel()
                 ->withoutGlobalScopes()
@@ -103,7 +103,7 @@ class BaseRepository implements BaseInterface {
      */
     public function findOnlyTrashedById(int $modelId): ?Model {
 
-        if (method_exists($this->model, 'onlyTrashed')) {
+        if (in_array(\Illuminate\Database\Eloquent\SoftDeletes::class, class_uses_recursive($this->model))) {
 
             return $this->defaultModel()
                 ->withoutGlobalScopes()
@@ -258,7 +258,7 @@ class BaseRepository implements BaseInterface {
      */
     public function restoreById(int $modelId): void {
 
-        if (method_exists($this->model, 'onlyTrashed')) {
+        if (in_array(\Illuminate\Database\Eloquent\SoftDeletes::class, class_uses_recursive($this->model))) {
 
             $this->findOnlyTrashedById($modelId)->restore();
         }
@@ -269,7 +269,7 @@ class BaseRepository implements BaseInterface {
      */
     public function permanentlyDeleteById(int $modelId): bool {
 
-        if (method_exists($this->model, 'withTrashed')) {
+        if (in_array(\Illuminate\Database\Eloquent\SoftDeletes::class, class_uses_recursive($this->model))) {
 
             return $this->findTrashedById($modelId)->forceDelete();
         }

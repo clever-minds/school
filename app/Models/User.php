@@ -202,11 +202,11 @@ class User extends Authenticatable implements MustVerifyEmail {
 
 
     public function fees_paids() {
-        return $this->hasMany(FeesPaid::class, 'student_id')->withTrashed();
+        return $this->hasMany(FeesPaid::class, 'student_id');
     }
 
     public function fees_paid() {
-        return $this->hasOne(FeesPaid::class, 'student_id')->withTrashed();
+        return $this->hasOne(FeesPaid::class, 'student_id');
     }
 
     public function optional_fees() {

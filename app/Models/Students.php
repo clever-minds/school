@@ -187,7 +187,7 @@ class Students extends Model {
 //    }
 
     public function fees_paid() {
-        return $this->hasMany(FeesPaid::class, 'student_id')->withTrashed();
+        return $this->hasMany(FeesPaid::class, 'student_id');
     }
 
 
