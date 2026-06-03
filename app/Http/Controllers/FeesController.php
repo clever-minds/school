@@ -990,8 +990,8 @@ class FeesController extends Controller
                 'optional_fees' => function ($query) {
                     $query->with('fees_class_type');
                 }, 
-                'fees_paids' => function ($q) {
-                    $q->with('compulsory_fee', 'optional_fee');
+                'fees_paids' => function ($q) use ($sessionYearId) {
+                    $q->where('session_year_id', $sessionYearId)->with('compulsory_fee', 'optional_fee');
                 }
             ]);
 
