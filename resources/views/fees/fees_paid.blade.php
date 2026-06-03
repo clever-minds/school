@@ -123,6 +123,7 @@
                                 <div class="form-group col-md-3">
                                     <label class="filter-menu" for="filter_paid_status"> {{ __('status') }} </label>
                                     <select name="filter_paid_status" id="filter_paid_status" class="form-control">
+                                        <option value="">{{ __('all') }}</option>
                                         <option value="0">{{ __('unpaid') }}</option>
                                         <option value="1">{{ __('paid') }}</option>
                                         <option value="2">{{ __('Partial Paid') }}</option>
@@ -218,7 +219,7 @@
             ajaxRequest('GET', baseUrl + '/fees/search', {
                 'session_year_id': $(this).val()
             }, null, function(response) {
-                let feesDropdown = '';
+                let feesDropdown = '<option value=\"\">' + window.trans['all'] + '</option>';
 
                 response.data.forEach(function(value, index) {
                     feesDropdown += "<option value='" + value.id + "' data-class-section-id='" + value.class_id + "'>" + value.name + "</option>";
