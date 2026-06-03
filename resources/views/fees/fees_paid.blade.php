@@ -123,10 +123,10 @@
                                 <div class="form-group col-md-3">
                                     <label class="filter-menu" for="filter_paid_status"> {{ __('status') }} </label>
                                     <select name="filter_paid_status" id="filter_paid_status" class="form-control">
+                                        <option value="">{{ __('all') }}</option>
                                         <option value="0">{{ __('unpaid') }}</option>
                                         <option value="1">{{ __('paid') }}</option>
                                         <option value="2">{{ __('Partial Paid') }}</option>
-                                        
                                     </select>
                                 </div>
                                     <div class="form-group col-md-3">
@@ -142,7 +142,7 @@
                             <div class="row paid-filter" style="display: none">
                                 <div class="form-group col-md-3">
                                     <label class="filter-menu" for="filter_paid_status"> {{ __('month') }} </label>
-                                    {!! Form::select('month', $months, date('n'), ['class' => 'form-control paid-month','placeholder' => __('all')]) !!}
+                                    {!! Form::select('month', $months, null, ['class' => 'form-control paid-month','placeholder' => __('all')]) !!}
                                 </div>
 
                                 {{-- <div class="form-group col-md-3">
