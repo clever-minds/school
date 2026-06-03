@@ -1022,34 +1022,48 @@ class FeesController extends Controller
             $total = $sql->count();
             
             // Compute global statistics for dashboard
-            $matchingStudents = (clone $sql)->select('id')->with('student.class_section')->get();
+            $matchingStudents = (clone $sql)->get();
             $global_compulsory_fees = 0;
             $global_optional_fees = 0;
+            $global_compulsory_fees_collected = 0;
+            $global_optional_fees_collected = 0;
+
             foreach ($matchingStudents as $ms) {
+                // Calculate Total Dues
                 $c_id = $ms->student->class_section->class_id ?? null;
                 $studentFees = $feesList->where('class_id', $c_id);
-                $global_compulsory_fees += $studentFees->sum('total_compulsory_fees');
-                $global_optional_fees += $studentFees->sum('total_optional_fees');
+                foreach($studentFees as $f) {
+                    $global_compulsory_fees += $f->total_compulsory_fees;
+                    $global_optional_fees += $f->total_optional_fees;
+                }
+
+                // Calculate Total Collected
+                $allFeesPaid = $ms->fees_paid;
+                if (!$allFeesPaid && $ms->student && $ms->student->fees_paid->isNotEmpty()) {
+                    $allFeesPaid = $ms->student->fees_paid;
+                }
+
+                if ($allFeesPaid) {
+                    foreach($allFeesPaid as $fp) {
+                        if ($fp->compulsory_fee) {
+                            $global_compulsory_fees_collected += $fp->compulsory_fee->sum('amount');
+                        }
+                        if ($fp->optional_fee) {
+                            $global_optional_fees_collected += $fp->optional_fee->sum('amount');
+                        }
+                    }
+                }
             }
 
             $global_fees_data = [
                 'total_fees' => $global_compulsory_fees + $global_optional_fees,
                 'total_compulsory_fees' => $global_compulsory_fees,
                 'total_optional_fees' => $global_optional_fees,
+                'total_fees_collected' => $global_compulsory_fees_collected + $global_optional_fees_collected,
+                'total_compulsory_fees_collected' => $global_compulsory_fees_collected,
+                'total_optional_fees_collected' => $global_optional_fees_collected,
                 'currency_symbol' => $settings['currency_symbol'] ?? ''
             ];
-
-            $global_compulsory_fees_collected = 0;
-            $global_optional_fees_collected = 0;
-            foreach ($feesList as $f) {
-                if (count($f->fees_paid)) {
-                    $global_compulsory_fees_collected += $f->fees_paid->sum('compulsory_fee_sum_amount');
-                    $global_optional_fees_collected += $f->fees_paid->sum('optional_fee_sum_amount');
-                }
-            }
-            $global_fees_data['total_fees_collected'] = $global_compulsory_fees_collected + $global_optional_fees_collected;
-            $global_fees_data['total_compulsory_fees_collected'] = $global_compulsory_fees_collected;
-            $global_fees_data['total_optional_fees_collected'] = $global_optional_fees_collected;
 
             $sql->orderBy($sort, $order)->skip($offset)->take($limit);
             $res = $sql->get();
