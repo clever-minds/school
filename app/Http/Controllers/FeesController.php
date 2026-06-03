@@ -969,8 +969,6 @@ class FeesController extends Controller
             }
             $bulkData['rows'] = $rows;
             return response()->json($bulkData);
-        }
-
         } else {
             // Logic for 'All' fees
             $feesList = $this->fees->builder()
