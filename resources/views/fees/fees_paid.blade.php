@@ -218,7 +218,7 @@
             ajaxRequest('GET', baseUrl + '/fees/search', {
                 'session_year_id': $(this).val()
             }, null, function(response) {
-                let feesDropdown = '';
+                let feesDropdown = '<option value="">{{ __("all") }}</option>';
 
                 response.data.forEach(function(value, index) {
                     feesDropdown += "<option value='" + value.id + "' data-class-section-id='" + value.class_id + "'>" + value.name + "</option>";
