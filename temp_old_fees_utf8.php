@@ -1,4 +1,4 @@
-<?php
+﻿<?php
 
 namespace App\Http\Controllers;
 
@@ -800,90 +800,88 @@ class FeesController extends Controller
 
 
 
-            if ($request->paid_status == 0) {
-                $sql->where(function ($query) use ($fees) {
-                    $query->where(function ($q) use ($fees) {
-                        $q->whereDoesntHave('fees_paid', function ($q) use ($fees) {
-                            $q->where('fees_id', $fees->id);
-                        })->whereDoesntHave('student.fees_paid', function ($q) use ($fees) {
-                            $q->where('fees_id', $fees->id);
+            if (isset($request->paid_status) && $request->paid_status !== '') {
+                if ($request->paid_status == 0) {
+                    $sql->where(function ($query) use ($fees) {
+                        $query->where(function ($q) use ($fees) {
+                            $q->whereDoesntHave('fees_paid', function ($q) use ($fees) {
+                                $q->where('fees_id', $fees->id);
+                            })->whereDoesntHave('student.fees_paid', function ($q) use ($fees) {
+                                $q->where('fees_id', $fees->id);
+                            });
+                        })->orWhereHas('fees_paid', function ($q) use ($fees) {
+                            $q->where(['fees_id' => $fees->id, 'is_fully_paid' => 0]);
+                        })->orWhereHas('student.fees_paid', function ($q) use ($fees) {
+                            $q->where(['fees_id' => $fees->id, 'is_fully_paid' => 0]);
                         });
-                    })->orWhereHas('fees_paid', function ($q) use ($fees) {
-                        $q->where(['fees_id' => $fees->id, 'is_fully_paid' => 0]);
-                    })->orWhereHas('student.fees_paid', function ($q) use ($fees) {
-                        $q->where(['fees_id' => $fees->id, 'is_fully_paid' => 0]);
+                    });
+                } else if ($request->paid_status == 1) {
+                    $sql->where(function ($query) use ($fees) {
+                        $query->whereHas('fees_paid', function ($q) use ($fees) {
+                            $q->where(['fees_id' => $fees->id, 'is_fully_paid' => 1]);
+                        })->orWhereHas('student.fees_paid', function ($q) use ($fees) {
+                            $q->where(['fees_id' => $fees->id, 'is_fully_paid' => 1]);
+                        });
+                    });
+                } else if ($request->paid_status == 2) {
+                    $sql->where(function ($query) use ($fees) {
+                        $query->whereHas('fees_paid', function ($q) use ($fees) {
+                            $q->where(['fees_id' => $fees->id, 'is_fully_paid' => 0]);
+                        })->orWhereHas('student.fees_paid', function ($q) use ($fees) {
+                            $q->where(['fees_id' => $fees->id, 'is_fully_paid' => 0]);
+                        });
+                    });
+                }
+            }
+
+            if ($request->month) {
+                $sql->where(function ($query) use ($request, $fees) {
+                    $query->whereHas('fees_paid', function ($q) use ($request, $fees) {
+                        $q->whereMonth('date', $request->month)
+                        ->where('fees_id',$fees->id);
+                    })->orWhereHas('student.fees_paid', function ($q) use ($request, $fees) {
+                        $q->whereMonth('date', $request->month)
+                        ->where('fees_id',$fees->id);
                     });
                 });
-            } else {
+            }
 
-                if ($request->paid_status == 1) {
-                    $sql->where(function ($query) use ($fees) {
-                        $query->whereHas('fees_paid', function ($q) use ($fees) {
-                            $q->where(['fees_id' => $fees->id, 'is_fully_paid' => 1]);
-                        })->orWhereHas('student.fees_paid', function ($q) use ($fees) {
-                            $q->where(['fees_id' => $fees->id, 'is_fully_paid' => 1]);
-                        });
+            if ($request->payment_gateway == 'cash_cheque') {
+                $sql->where(function ($query) {
+                    $query->whereHas('fees_paid.compulsory_fee', function ($q) {
+                        $q->whereIn('mode', ['Cash','Cheque']);
+                    })->orWhereHas('student.fees_paid.compulsory_fee', function ($q) {
+                        $q->whereIn('mode', ['Cash','Cheque']);
                     });
-                } else {
-                    $sql->where(function ($query) use ($fees) {
-                        $query->whereHas('fees_paid', function ($q) use ($fees) {
-                            $q->where(['fees_id' => $fees->id, 'is_fully_paid' => 0]);
-                        })->orWhereHas('student.fees_paid', function ($q) use ($fees) {
-                            $q->where(['fees_id' => $fees->id, 'is_fully_paid' => 0]);
-                        });
-                    });
-                }
-                
-                if ($request->month) {
-                    $sql->where(function ($query) use ($request, $fees) {
-                        $query->whereHas('fees_paid', function ($q) use ($request, $fees) {
-                            $q->whereMonth('date', $request->month)
-                            ->where('fees_id',$fees->id);
-                        })->orWhereHas('student.fees_paid', function ($q) use ($request, $fees) {
-                            $q->whereMonth('date', $request->month)
-                            ->where('fees_id',$fees->id);
-                        });
-                    });
-                }
-    
-                if ($request->payment_gateway == 'cash_cheque') {
-                    $sql->where(function ($query) {
-                        $query->whereHas('fees_paid.compulsory_fee', function ($q) {
-                            $q->whereIn('mode', ['Cash','Cheque']);
-                        })->orWhereHas('student.fees_paid.compulsory_fee', function ($q) {
-                            $q->whereIn('mode', ['Cash','Cheque']);
-                        });
-                    });
-                }
-    
-                if ($request->payment_gateway == 'stripe_razorpay') {
-                    $sql->where(function ($query) {
-                        $query->whereHas('fees_paid.compulsory_fee.payment_transaction', function ($q) {
-                            $q->whereIn('payment_gateway', ['Stripe','Razorpay','Flutterwave','Paystack']);
-                        })->orWhereHas('student.fees_paid.compulsory_fee.payment_transaction', function ($q) {
-                            $q->whereIn('payment_gateway', ['Stripe','Razorpay','Flutterwave','Paystack']);
-                        });
-                    });
-                }
+                });
+            }
 
-                if($request->online_offline_payment) {
-                    $sql->where(function ($query) use ($request) {
-                        $query->whereHas('fees_paid.compulsory_fee', function ($q) use ($request) {
-                            if($request->online_offline_payment == 2) {
-                                $q->whereIn('mode', ['Cash','Cheque']);
-                            } else if ($request->online_offline_payment == 1) {
-                                $q->whereIn('mode', ['Stripe','Razorpay','Flutterwave','Paystack']);
-                            }
-                        })->orWhereHas('student.fees_paid.compulsory_fee', function ($q) use ($request) {
-                            if($request->online_offline_payment == 2) {
-                                $q->whereIn('mode', ['Cash','Cheque']);
-                            } else if ($request->online_offline_payment == 1) {
-                                $q->whereIn('mode', ['Stripe','Razorpay','Flutterwave','Paystack']);
-                            }
-                        });
+            if ($request->payment_gateway == 'stripe_razorpay') {
+                $sql->where(function ($query) {
+                    $query->whereHas('fees_paid.compulsory_fee.payment_transaction', function ($q) {
+                        $q->whereIn('payment_gateway', ['Stripe','Razorpay','Flutterwave','Paystack']);
+                    })->orWhereHas('student.fees_paid.compulsory_fee.payment_transaction', function ($q) {
+                        $q->whereIn('payment_gateway', ['Stripe','Razorpay','Flutterwave','Paystack']);
                     });
-                }
-                
+                });
+            }
+
+            if($request->online_offline_payment) {
+                $sql->where(function ($query) use ($request) {
+                    $query->whereHas('fees_paid.compulsory_fee', function ($q) use ($request) {
+                        if($request->online_offline_payment == 2) {
+                            $q->whereIn('mode', ['Cash','Cheque']);
+                        } else if ($request->online_offline_payment == 1) {
+                            $q->whereIn('mode', ['Stripe','Razorpay','Flutterwave','Paystack']);
+                        }
+                    })->orWhereHas('student.fees_paid.compulsory_fee', function ($q) use ($request) {
+                        if($request->online_offline_payment == 2) {
+                            $q->whereIn('mode', ['Cash','Cheque']);
+                        } else if ($request->online_offline_payment == 1) {
+                            $q->whereIn('mode', ['Stripe','Razorpay','Flutterwave','Paystack']);
+                        }
+                    });
+                });
             }
 
             
@@ -971,12 +969,171 @@ class FeesController extends Controller
             }
             $bulkData['rows'] = $rows;
             return response()->json($bulkData);
+        } else {
+            // Logic for 'All' fees
+            $feesList = $this->fees->builder()
+                ->where('session_year_id', $sessionYearId)
+                ->with(['fees_class_type.fees_type:id,name', 'installments:id,name,due_date,due_charges,fees_id', 'fees_paid' => function ($q) {
+                    $q->withSum('compulsory_fee', 'amount')
+                        ->withSum('optional_fee', 'amount');
+                }])->get();
+
+            $sql = $this->user->builder()->role('Student')->select('id', 'first_name', 'last_name')->with([
+                'student' => function ($query) {
+                    $query->select('id', 'class_section_id', 'user_id')->with([
+                        'class_section' => function ($query) {
+                            $query->select('id', 'class_id', 'section_id', 'medium_id')->with('class:id,name', 'section:id,name', 'medium:id,name');
+                        }
+                    ]);
+                }, 
+                'optional_fees' => function ($query) {
+                    $query->with('fees_class_type');
+                }, 
+                'fees_paid' => function ($q) {
+                    $q->with('compulsory_fee');
+                },
+                'compulsory_fees'
+            ]);
+
+            if ($class_id || $class_section_id) {
+                $sql->whereHas('student.class_section', function ($q) use ($class_section_id, $class_id) {
+                    if ($class_id) {
+                        $q->where('class_id', $class_id);
+                    }
+                    if ($class_section_id) {
+                        $q->where('id', $class_section_id);
+                    }
+                });
+            }
+
+            if (!empty($student_id)) {
+                $sql->whereHas('student', function ($q) use ($student_id) {
+                    $q->where('id', $student_id);
+                });
+            }
+
+            if (!empty($_GET['search'])) {
+                $search = $_GET['search'];
+                $sql->where(function ($q) use ($search) {
+                    $q->where('id', 'LIKE', "%$search%")->orWhere('first_name', 'LIKE', "%$search%")->orWhere('last_name', 'LIKE', "%$search%");
+                });
+            }
+
+            $total = $sql->count();
+            
+            // Compute global statistics for dashboard
+            $matchingStudents = (clone $sql)->get();
+            $global_compulsory_fees = 0;
+            $global_optional_fees = 0;
+            $global_compulsory_fees_collected = 0;
+            $global_optional_fees_collected = 0;
+
+            foreach ($matchingStudents as $ms) {
+                // Calculate Total Dues
+                $c_id = $ms->student->class_section->class_id ?? null;
+                $studentFees = $feesList->where('class_id', $c_id);
+                foreach($studentFees as $f) {
+                    $global_compulsory_fees += $f->total_compulsory_fees;
+                    $global_optional_fees += $f->total_optional_fees;
+                }
+
+                // Calculate Total Collected
+                $allFeesPaid = $ms->fees_paid;
+                if (!$allFeesPaid && $ms->student && $ms->student->fees_paid->isNotEmpty()) {
+                    $allFeesPaid = $ms->student->fees_paid;
+                }
+
+                if ($allFeesPaid) {
+                    foreach($allFeesPaid as $fp) {
+                        if ($fp->compulsory_fee) {
+                            $global_compulsory_fees_collected += $fp->compulsory_fee->sum('amount');
+                        }
+                        if ($fp->optional_fee) {
+                            $global_optional_fees_collected += $fp->optional_fee->sum('amount');
+                        }
+                    }
+                }
+            }
+
+            $global_fees_data = [
+                'total_fees' => $global_compulsory_fees + $global_optional_fees,
+                'total_compulsory_fees' => $global_compulsory_fees,
+                'total_optional_fees' => $global_optional_fees,
+                'total_fees_collected' => $global_compulsory_fees_collected + $global_optional_fees_collected,
+                'total_compulsory_fees_collected' => $global_compulsory_fees_collected,
+                'total_optional_fees_collected' => $global_optional_fees_collected,
+                'currency_symbol' => $settings['currency_symbol'] ?? ''
+            ];
+
+            $sql->orderBy($sort, $order)->skip($offset)->take($limit);
+            $res = $sql->get();
+
+            $bulkData = array();
+            $bulkData['total'] = $total;
+            $rows = array();
+            $no = 1;
+
+            foreach ($res as $row) {
+                $tempRow = $row->toArray();
+                
+                $student_class_id = $row->student->class_section->class_id ?? null;
+                $studentFees = $feesList->where('class_id', $student_class_id);
+
+                $std_compulsory_fees = 0;
+                $std_optional_fees = 0;
+                foreach($studentFees as $f) {
+                    $std_compulsory_fees += $f->total_compulsory_fees;
+                    $std_optional_fees += $f->total_optional_fees;
+                }
+
+                $tempRow['no'] = $global_fees_data;
+                $tempRow['no']['no'] = $no++;
+
+                // Set a mock fees array so frontend doesn't break
+                $tempRow['fees'] = [
+                    'total_compulsory_fees' => $std_compulsory_fees,
+                    'total_optional_fees' => $std_optional_fees,
+                    'name' => 'All Fees',
+                    'due_date' => null,
+                ];
+
+                $paid_amount = 0;
+                $payment_method = '-';
+                $is_fully_paid_flags = [];
+
+                $allFeesPaid = $row->fees_paid;
+                if (!$allFeesPaid && $row->student && $row->student->fees_paid->isNotEmpty()) {
+                    $allFeesPaid = $row->student->fees_paid;
+                }
+
+                if ($allFeesPaid) {
+                    foreach($allFeesPaid as $fp) {
+                        $paid_amount += $fp->compulsory_fee->sum('amount');
+                        if (isset($fp->compulsory_fee[0]->mode)) {
+                            $payment_method = $fp->compulsory_fee[0]->mode; 
+                        }
+                        $is_fully_paid_flags[] = $fp->is_fully_paid;
+                    }
+                }
+
+                $tempRow['paid_amount'] = $paid_amount;
+                $tempRow['payment_method'] = $payment_method;
+
+                if (count($studentFees) > 0 && count($is_fully_paid_flags) >= count($studentFees) && !in_array(0, $is_fully_paid_flags)) {
+                    $tempRow['fees_status'] = 1; 
+                } else if ($paid_amount > 0) {
+                    $tempRow['fees_status'] = 2; 
+                } else {
+                    $tempRow['fees_status'] = 0; 
+                }
+
+                $tempRow['operate'] = '-'; 
+                $rows[] = $tempRow;
+            }
+
+            $bulkData['rows'] = $rows;
+            return response()->json($bulkData);
         }
-
-
-        $bulkData['total'] = 0;
-        $bulkData['rows'] = $tempRow = [];
-        return response()->json($bulkData);
     }
 
     public function feesPaidReceiptPDF($feesPaidId)
@@ -1094,13 +1251,13 @@ public function feesPaidReceiptPDF1($feesPaidId)
             DB::enableQueryLog();
            $feesPaid = \App\Models\FeesPaid::withTrashed()
     ->whereHas('compulsory_fee', function ($q) use ($feesPaidId) {
-        $q->where('id', $feesPaidId);   // ✅ compulsory_fees.id
+        $q->where('id', $feesPaidId);   // Γ£à compulsory_fees.id
     })
     ->with([
         'fees.fees_class_type.fees_type',
 
         'compulsory_fee' => function ($q) use ($feesPaidId) {
-            $q->where('id', $feesPaidId)   // ✅ THIS WAS MISSING
+            $q->where('id', $feesPaidId)   // Γ£à THIS WAS MISSING
               ->with('installment_fee:id,name');
         },
 
