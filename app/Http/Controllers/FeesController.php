@@ -1020,6 +1020,37 @@ class FeesController extends Controller
             }
 
             $total = $sql->count();
+            
+            // Compute global statistics for dashboard
+            $matchingStudents = (clone $sql)->select('id')->with('student.class_section')->get();
+            $global_compulsory_fees = 0;
+            $global_optional_fees = 0;
+            foreach ($matchingStudents as $ms) {
+                $c_id = $ms->student->class_section->class_id ?? null;
+                $studentFees = $feesList->where('class_id', $c_id);
+                $global_compulsory_fees += $studentFees->sum('total_compulsory_fees');
+                $global_optional_fees += $studentFees->sum('total_optional_fees');
+            }
+
+            $global_fees_data = [
+                'total_fees' => $global_compulsory_fees + $global_optional_fees,
+                'total_compulsory_fees' => $global_compulsory_fees,
+                'total_optional_fees' => $global_optional_fees,
+                'currency_symbol' => $settings['currency_symbol'] ?? ''
+            ];
+
+            $global_compulsory_fees_collected = 0;
+            $global_optional_fees_collected = 0;
+            foreach ($feesList as $f) {
+                if (count($f->fees_paid)) {
+                    $global_compulsory_fees_collected += $f->fees_paid->sum('compulsory_fee_sum_amount');
+                    $global_optional_fees_collected += $f->fees_paid->sum('optional_fee_sum_amount');
+                }
+            }
+            $global_fees_data['total_fees_collected'] = $global_compulsory_fees_collected + $global_optional_fees_collected;
+            $global_fees_data['total_compulsory_fees_collected'] = $global_compulsory_fees_collected;
+            $global_fees_data['total_optional_fees_collected'] = $global_optional_fees_collected;
+
             $sql->orderBy($sort, $order)->skip($offset)->take($limit);
             $res = $sql->get();
 
@@ -1041,14 +1072,7 @@ class FeesController extends Controller
                     $std_optional_fees += $f->total_optional_fees;
                 }
 
-                $fees_data = [
-                    'total_fees' => $std_compulsory_fees + $std_optional_fees,
-                    'total_compulsory_fees' => $std_compulsory_fees,
-                    'total_optional_fees' => $std_optional_fees,
-                    'currency_symbol' => $settings['currency_symbol'] ?? ''
-                ];
-
-                $tempRow['no'] = $fees_data;
+                $tempRow['no'] = $global_fees_data;
                 $tempRow['no']['no'] = $no++;
 
                 // Set a mock fees array so frontend doesn't break
