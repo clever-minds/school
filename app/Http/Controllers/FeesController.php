@@ -712,12 +712,12 @@ class FeesController extends Controller
         $sort = request('sort', 'id');
         $order = request('order', 'DESC');
         $feesId = (int)request('fees_id');
-        $requestSessionYearId = (int)request('session_year_id');
+        $requestSessionYearId = request('session_year_id');
+        $sessionYearId = $requestSessionYearId ? (int)$requestSessionYearId : $this->cache->getDefaultSessionYear()->id;
         $class_section_id = request('class_section_id');
         $class_id = request('class_id');
         $settings = $this->cache->getSchoolSettings();
         $student_id=(int)request('student_id');
-        $sessionYearId = $requestSessionYearId ?? $this->cache->getDefaultSessionYear()->id;
         $fees = null;
         if ($feesId) {
             $fees = $this->fees->findById($feesId, ['*'], ['fees_class_type.fees_type:id,name', 'installments:id,name,due_date,due_charges,fees_id', 'fees_paid' => function ($q) {
