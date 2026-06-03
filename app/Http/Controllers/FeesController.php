@@ -990,7 +990,7 @@ class FeesController extends Controller
                 'optional_fees' => function ($query) {
                     $query->with('fees_class_type');
                 }, 
-                'fees_paid' => function ($q) {
+                'fees_paids' => function ($q) {
                     $q->with('compulsory_fee', 'optional_fee');
                 }
             ]);
@@ -1038,7 +1038,7 @@ class FeesController extends Controller
                 }
 
                 // Calculate Total Collected
-                $allFeesPaid = $ms->fees_paid;
+                $allFeesPaid = $ms->fees_paids;
                 if (!$allFeesPaid && $ms->student && $ms->student->fees_paid->isNotEmpty()) {
                     $allFeesPaid = $ms->student->fees_paid;
                 }
@@ -1104,7 +1104,7 @@ class FeesController extends Controller
                 $payment_method = '-';
                 $is_fully_paid_flags = [];
 
-                $allFeesPaid = $row->fees_paid;
+                $allFeesPaid = $row->fees_paids;
                 if (!$allFeesPaid && $row->student && $row->student->fees_paid->isNotEmpty()) {
                     $allFeesPaid = $row->student->fees_paid;
                 }
