@@ -970,6 +970,7 @@ class FeesController extends Controller
             $bulkData['rows'] = $rows;
             return response()->json($bulkData);
         } else {
+            \Log::info("All fees branch triggered. Request Data: ", request()->all());
             // Logic for 'All' fees
             $feesList = $this->fees->builder()
                 ->where('session_year_id', $sessionYearId)
@@ -990,9 +991,8 @@ class FeesController extends Controller
                     $query->with('fees_class_type');
                 }, 
                 'fees_paid' => function ($q) {
-                    $q->with('compulsory_fee');
-                },
-                'compulsory_fees'
+                    $q->with('compulsory_fee', 'optional_fee');
+                }
             ]);
 
             if ($class_id || $class_section_id) {
@@ -1030,7 +1030,7 @@ class FeesController extends Controller
 
             foreach ($matchingStudents as $ms) {
                 // Calculate Total Dues
-                $c_id = $ms->student->class_section->class_id ?? null;
+                $c_id = $ms->student ? ($ms->student->class_section->class_id ?? null) : null;
                 $studentFees = $feesList->where('class_id', $c_id);
                 foreach($studentFees as $f) {
                     $global_compulsory_fees += $f->total_compulsory_fees;
@@ -1065,6 +1065,9 @@ class FeesController extends Controller
                 'currency_symbol' => $settings['currency_symbol'] ?? ''
             ];
 
+            \Log::info("Global Stats for All fees:", $global_fees_data);
+            \Log::info("Total matching students (query count): " . $total . " | Collection count: " . $matchingStudents->count());
+
             $sql->orderBy($sort, $order)->skip($offset)->take($limit);
             $res = $sql->get();
 
@@ -1076,7 +1079,7 @@ class FeesController extends Controller
             foreach ($res as $row) {
                 $tempRow = $row->toArray();
                 
-                $student_class_id = $row->student->class_section->class_id ?? null;
+                $student_class_id = $row->student ? ($row->student->class_section->class_id ?? null) : null;
                 $studentFees = $feesList->where('class_id', $student_class_id);
 
                 $std_compulsory_fees = 0;
