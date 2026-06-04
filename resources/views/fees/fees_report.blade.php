@@ -112,7 +112,7 @@
                                 </div>
                                 <div class="form-group col-md-3">
                                     <label class="filter-menu" for="gr_no"> {{ __('GR Number') }} </label>
-                                    <select class="grno-search form-control" id="gr_no"><option>search</option></select>
+                                    <select class="grno-search form-control" id="gr_no"><option value="">search</option></select>
                                     <input type="hidden" id="student_id" class="student_id" name="student_id">
                                 </div>
                             </div>
@@ -170,8 +170,14 @@
             $('#table_list').bootstrapTable('refresh');
         });
 
-        $('#gr_no').on('change', function () {
-            $('#student_id').val($(this).val());
+        $('.grno-search').on('select2:select', function (e) {
+            $('#student_id').val(e.params.data.id);
+            $('#table_list').bootstrapTable('refresh');
+        });
+
+        // Also handle clearing the search if applicable
+        $('.grno-search').on('select2:clear', function (e) {
+            $('#student_id').val('');
             $('#table_list').bootstrapTable('refresh');
         });
 

@@ -1681,7 +1681,7 @@ class FeesController extends Controller
             $optionalQuery->where('fees.session_year_id', $sessionYearId);
         }
 
-        if ($studentId) {
+        if ($studentId && is_numeric($studentId)) {
             $compulsoryQuery->where('compulsory_fees.student_id', $studentId);
             $optionalQuery->where('optional_fees.student_id', $studentId);
         }
