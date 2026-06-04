@@ -617,6 +617,12 @@
                                 </a>
                             </li>
                         @endcan
+                        @can('fees-paid')
+                            <li class="nav-item">
+                                <a href="{{ route('fees.report.index') }}" class="nav-link" data-access="@hasFeatureAccess('Fees Management')"> {{__('Fees Report') }}
+                                </a>
+                            </li>
+                        @endcan
                         @can('manual-upi-transaction-list')
                             <li class="nav-item">
                                 <a href="{{ route('manual_upi_transactions.index') }}" class="nav-link" data-access="@hasFeatureAccess('Fees Management')"> {{__('Manual UPI Transactions') }}

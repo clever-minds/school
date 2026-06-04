@@ -777,6 +777,9 @@ Route::post('/admin/impersonation-exit',
             Route::get('/fees-over-due/{class_section_id}', [FeesController::class, 'feesOverDue']);
             Route::post('/student-account-deactivate', [FeesController::class, 'studentAccountDeactivate'])->name('deactivate-student-account');
 
+            // Fees Report
+            Route::get('/report', [FeesController::class, 'feesReportIndex'])->name('fees.report.index');
+            Route::get('/report/list', [FeesController::class, 'feesReportList'])->name('fees.report.list');
            
         });
         Route::resource('fees', FeesController::class);
