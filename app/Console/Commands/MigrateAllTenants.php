@@ -215,6 +215,11 @@ class MigrateAllTenants extends Command
                       '--path' => 'database/migrations/schools/2026_06_04_140807_drop_email_unique_from_users_table.php',
                       '--force' => true,
                   ]);
+                  Artisan::call('migrate', [
+                      '--database' => 'tenant',
+                      '--path' => 'database/migrations/schools/2026_06_04_143454_make_email_nullable_in_users_table_fix.php',
+                      '--force' => true,
+                  ]);
                 $this->info("✅ Migration done for {$tenant->name}");
             } catch (\Exception $e) {
                 $this->error("❌ Migration failed for {$tenant->name}: {$e->getMessage()}");
