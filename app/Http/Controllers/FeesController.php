@@ -1660,7 +1660,7 @@ class FeesController extends Controller
         $endDate = $request->end_date;
 
         $compulsoryQuery = \App\Models\CompulsoryFee::query()
-            ->with(['student:id,first_name,last_name'])
+            ->with(['student:id,first_name,last_name', 'student.student.class_section.class', 'student.student.class_section.section'])
             ->join('fees_paids', 'fees_paids.id', '=', 'compulsory_fees.fees_paid_id')
             ->join('fees', 'fees.id', '=', 'fees_paids.fees_id')
             ->whereNull('fees_paids.deleted_at')
@@ -1668,7 +1668,7 @@ class FeesController extends Controller
             ->select('compulsory_fees.*', 'fees.session_year_id');
 
         $optionalQuery = \App\Models\OptionalFee::query()
-            ->with(['student:id,first_name,last_name'])
+            ->with(['student:id,first_name,last_name', 'student.student.class_section.class', 'student.student.class_section.section'])
             ->join('fees_paids', 'fees_paids.id', '=', 'optional_fees.fees_paid_id')
             ->join('fees', 'fees.id', '=', 'fees_paids.fees_id')
             ->whereNull('fees_paids.deleted_at')
@@ -1701,8 +1701,19 @@ class FeesController extends Controller
         $no = 1;
         $totalCollected = 0;
         foreach ($allResults as $row) {
+            $classSectionName = 'N/A';
+            $admissionNo = 'N/A';
+            if ($row->student && $row->student->student) {
+                $admissionNo = $row->student->student->admission_no ?? 'N/A';
+                if ($row->student->student->class_section && $row->student->student->class_section->class && $row->student->student->class_section->section) {
+                    $classSectionName = $row->student->student->class_section->class->name . ' - ' . $row->student->student->class_section->section->name;
+                }
+            }
+
             $rows[] = [
                 'no' => $no++,
+                'admission_no' => $admissionNo,
+                'class_section' => $classSectionName,
                 'student_name' => $row->student ? $row->student->first_name . ' ' . $row->student->last_name : 'N/A',
                 'date' => $row->date ? date('d-m-Y', strtotime($row->date)) : 'N/A',
                 'session_year' => isset($sessionYears[$row->session_year_id]) ? $sessionYears[$row->session_year_id]->name : 'N/A',

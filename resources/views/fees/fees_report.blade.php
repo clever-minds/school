@@ -12,6 +12,22 @@
             </h3>
         </div>
         <div class="row">
+            {{-- Total Collected Fees --}}
+            <div class="col-md-4 col-sm-12 grid-margin stretch-card">
+                <div class="card card-statistics">
+                    <div class="custom-card-body">
+                        <div class="row">
+                            <div class="col-sm-12">
+                                <p class="font-weight-bold"> {{ __('Total Fees Collected') }}</p>
+                                <div class="d-flex align-items-center">
+                                    <h4 class="font-weight-semibold" id="total_fees_collected">0.00</h4>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
             <div class="col-md-12 grid-margin stretch-card search-container">
                 <div class="card">
                     <div class="card-body">
@@ -63,6 +79,8 @@
                             <thead>
                                 <tr>
                                     <th scope="col" data-field="no" data-sortable="false">{{ __('no.') }}</th>
+                                    <th scope="col" data-field="admission_no" data-sortable="false">{{ __('GR Number') }}</th>
+                                    <th scope="col" data-field="class_section" data-sortable="false">{{ __('Class Section') }}</th>
                                     <th scope="col" data-field="student_name" data-sortable="false">{{ __('Student Name') }}</th>
                                     <th scope="col" data-field="date" data-sortable="false">{{ __('Date') }}</th>
                                     <th scope="col" data-field="session_year" data-sortable="false">{{ __('Session Year') }}</th>
@@ -96,6 +114,10 @@
 
         $('#session_year_id, #mode, #start_date, #end_date').on('change', function() {
             $('#table_list').bootstrapTable('refresh');
+        });
+
+        $('#table_list').on('load-success.bs.table', function (e, data) {
+            $('#total_fees_collected').text(data.total_collected);
         });
     </script>
 @endsection
