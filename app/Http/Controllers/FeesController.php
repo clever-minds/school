@@ -1661,19 +1661,23 @@ class FeesController extends Controller
 
         $compulsoryQuery = \App\Models\CompulsoryFee::query()
             ->join('fees_paids', 'fees_paids.id', '=', 'compulsory_fees.fees_paid_id')
+            ->join('fees', 'fees.id', '=', 'fees_paids.fees_id')
             ->whereNull('fees_paids.deleted_at')
-            ->select('fees_paids.session_year_id', 'compulsory_fees.mode', \Illuminate\Support\Facades\DB::raw('SUM(compulsory_fees.amount) as total_amount'))
-            ->groupBy('fees_paids.session_year_id', 'compulsory_fees.mode');
+            ->whereNull('fees.deleted_at')
+            ->select('fees.session_year_id', 'compulsory_fees.mode', \Illuminate\Support\Facades\DB::raw('SUM(compulsory_fees.amount) as total_amount'))
+            ->groupBy('fees.session_year_id', 'compulsory_fees.mode');
 
         $optionalQuery = \App\Models\OptionalFee::query()
             ->join('fees_paids', 'fees_paids.id', '=', 'optional_fees.fees_paid_id')
+            ->join('fees', 'fees.id', '=', 'fees_paids.fees_id')
             ->whereNull('fees_paids.deleted_at')
-            ->select('fees_paids.session_year_id', 'optional_fees.mode', \Illuminate\Support\Facades\DB::raw('SUM(optional_fees.amount) as total_amount'))
-            ->groupBy('fees_paids.session_year_id', 'optional_fees.mode');
+            ->whereNull('fees.deleted_at')
+            ->select('fees.session_year_id', 'optional_fees.mode', \Illuminate\Support\Facades\DB::raw('SUM(optional_fees.amount) as total_amount'))
+            ->groupBy('fees.session_year_id', 'optional_fees.mode');
 
         if ($sessionYearId) {
-            $compulsoryQuery->where('fees_paids.session_year_id', $sessionYearId);
-            $optionalQuery->where('fees_paids.session_year_id', $sessionYearId);
+            $compulsoryQuery->where('fees.session_year_id', $sessionYearId);
+            $optionalQuery->where('fees.session_year_id', $sessionYearId);
         }
 
         if ($mode !== null && $mode !== '') {
