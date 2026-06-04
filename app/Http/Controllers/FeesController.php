@@ -1658,7 +1658,7 @@ class FeesController extends Controller
         $mode = $request->mode; // "1" for cash, "2" for cheque, "0" for online
         $startDate = $request->start_date;
         $endDate = $request->end_date;
-        $studentId = $request->student_id;
+        // $studentId = $request->student_id;
 
         $compulsoryQuery = \App\Models\CompulsoryFee::query()
             ->with(['student:id,first_name,last_name', 'student.student.class_section.class', 'student.student.class_section.section'])
@@ -1681,10 +1681,12 @@ class FeesController extends Controller
             $optionalQuery->where('fees.session_year_id', $sessionYearId);
         }
 
+        /*
         if ($studentId && is_numeric($studentId)) {
             $compulsoryQuery->where('compulsory_fees.student_id', $studentId);
             $optionalQuery->where('optional_fees.student_id', $studentId);
         }
+        */
 
         if ($mode !== null && $mode !== '') {
             $compulsoryQuery->where('compulsory_fees.mode', $mode);
