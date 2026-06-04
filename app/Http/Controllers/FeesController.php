@@ -1660,20 +1660,20 @@ class FeesController extends Controller
         $endDate = $request->end_date;
 
         $compulsoryQuery = \App\Models\CompulsoryFee::query()
+            ->with(['student:id,first_name,last_name'])
             ->join('fees_paids', 'fees_paids.id', '=', 'compulsory_fees.fees_paid_id')
             ->join('fees', 'fees.id', '=', 'fees_paids.fees_id')
             ->whereNull('fees_paids.deleted_at')
             ->whereNull('fees.deleted_at')
-            ->select('fees.session_year_id', 'compulsory_fees.mode', \Illuminate\Support\Facades\DB::raw('SUM(compulsory_fees.amount) as total_amount'))
-            ->groupBy('fees.session_year_id', 'compulsory_fees.mode');
+            ->select('compulsory_fees.*', 'fees.session_year_id');
 
         $optionalQuery = \App\Models\OptionalFee::query()
+            ->with(['student:id,first_name,last_name'])
             ->join('fees_paids', 'fees_paids.id', '=', 'optional_fees.fees_paid_id')
             ->join('fees', 'fees.id', '=', 'fees_paids.fees_id')
             ->whereNull('fees_paids.deleted_at')
             ->whereNull('fees.deleted_at')
-            ->select('fees.session_year_id', 'optional_fees.mode', \Illuminate\Support\Facades\DB::raw('SUM(optional_fees.amount) as total_amount'))
-            ->groupBy('fees.session_year_id', 'optional_fees.mode');
+            ->select('optional_fees.*', 'fees.session_year_id');
 
         if ($sessionYearId) {
             $compulsoryQuery->where('fees.session_year_id', $sessionYearId);
@@ -1695,33 +1695,21 @@ class FeesController extends Controller
 
         $sessionYears = \App\Models\SessionYear::all()->keyBy('id');
 
-        $aggregated = [];
-
-        foreach ([$compulsoryResults, $optionalResults] as $results) {
-            foreach ($results as $row) {
-                $key = $row->session_year_id . '_' . $row->mode;
-                if (!isset($aggregated[$key])) {
-                    $aggregated[$key] = [
-                        'session_year' => isset($sessionYears[$row->session_year_id]) ? $sessionYears[$row->session_year_id]->name : 'N/A',
-                        'mode' => $row->mode_name,
-                        'total_amount' => 0
-                    ];
-                }
-                $aggregated[$key]['total_amount'] += $row->total_amount;
-            }
-        }
+        $allResults = $compulsoryResults->merge($optionalResults)->sortByDesc('date');
 
         $rows = [];
         $no = 1;
         $totalCollected = 0;
-        foreach ($aggregated as $item) {
+        foreach ($allResults as $row) {
             $rows[] = [
                 'no' => $no++,
-                'session_year' => $item['session_year'],
-                'mode' => $item['mode'],
-                'total_amount' => number_format($item['total_amount'], 2, '.', '')
+                'student_name' => $row->student ? $row->student->first_name . ' ' . $row->student->last_name : 'N/A',
+                'date' => $row->date ? date('d-m-Y', strtotime($row->date)) : 'N/A',
+                'session_year' => isset($sessionYears[$row->session_year_id]) ? $sessionYears[$row->session_year_id]->name : 'N/A',
+                'mode' => $row->mode_name,
+                'total_amount' => number_format($row->amount, 2, '.', '')
             ];
-            $totalCollected += $item['total_amount'];
+            $totalCollected += $row->amount;
         }
 
         $bulkData['total'] = count($rows);

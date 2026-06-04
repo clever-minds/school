@@ -63,9 +63,11 @@
                             <thead>
                                 <tr>
                                     <th scope="col" data-field="no" data-sortable="false">{{ __('no.') }}</th>
+                                    <th scope="col" data-field="student_name" data-sortable="false">{{ __('Student Name') }}</th>
+                                    <th scope="col" data-field="date" data-sortable="false">{{ __('Date') }}</th>
                                     <th scope="col" data-field="session_year" data-sortable="false">{{ __('Session Year') }}</th>
                                     <th scope="col" data-field="mode" data-sortable="false">{{ __('Payment Mode') }}</th>
-                                    <th scope="col" data-field="total_amount" data-sortable="false">{{ __('Total Amount') }}</th>
+                                    <th scope="col" data-field="total_amount" data-sortable="false">{{ __('Amount Paid') }}</th>
                                 </tr>
                             </thead>
                         </table>
