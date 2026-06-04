@@ -105,6 +105,7 @@ class LoginController extends Controller
                 Auth::guard('web')->attempt([
                     $loginField => $request->email,
                     'password' => $request->password,
+                    fn ($query) => $query->whereDoesntHave('roles', fn($q) => $q->whereIn('name', ['Student', 'Guardian']))
                 ])
             ) {
                 \Log::info('User authenticated successfully.', [
@@ -173,6 +174,7 @@ class LoginController extends Controller
                 Auth::guard('web')->attempt([
                     $loginField => $request->email,
                     'password' => $request->password,
+                    fn ($query) => $query->whereDoesntHave('roles', fn($q) => $q->whereIn('name', ['Student', 'Guardian']))
                 ])
             ) {
 

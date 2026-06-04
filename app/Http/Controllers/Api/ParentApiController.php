@@ -144,7 +144,8 @@ class ParentApiController extends Controller
         if (
             Auth::attempt([
                 'mobile' => $request->email,
-                'password' => $request->password
+                'password' => $request->password,
+                fn ($query) => $query->whereHas('roles', fn ($q) => $q->where('name', 'Guardian'))
             ])
         ) {
 

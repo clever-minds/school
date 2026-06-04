@@ -54,7 +54,7 @@ class UserService {
      * @param null $image
      * @return Model|null
      */
-    public function createOrUpdateParent($first_name, $last_name,$mother_name, $email, $mobile, $gender, $image = null, $reset_password = null) {
+    public function createOrUpdateParent($first_name, $last_name,$mother_name, $email, $mobile, $gender, $image = null, $reset_password = null, $guardian_id = null) {
         $password = $this->makeParentPassword($mobile);
 
         $parent = array(
@@ -67,7 +67,11 @@ class UserService {
         );
 
         //NOTE : This line will return the old values if the user is already exists
-        $user = $this->user->guardian()->where('mobile', $mobile)->first();
+        if (!empty($guardian_id)) {
+            $user = $this->user->guardian()->where('id', $guardian_id)->first();
+        } else {
+            $user = $this->user->guardian()->where('mobile', $mobile)->first();
+        }
         if (!empty($image)) {
             $parent['image'] = UploadService::upload($image, 'guardian');
         }
