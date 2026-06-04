@@ -170,14 +170,8 @@
             $('#table_list').bootstrapTable('refresh');
         });
 
-        $('.grno-search').on('select2:select', function (e) {
-            $('#student_id').val(e.params.data.id);
-            $('#table_list').bootstrapTable('refresh');
-        });
-
-        // Also handle clearing the search if applicable
-        $('.grno-search').on('select2:clear', function (e) {
-            $('#student_id').val('');
+        $('#gr_no').on('change', function () {
+            $('#student_id').val($(this).val());
             $('#table_list').bootstrapTable('refresh');
         });
 
