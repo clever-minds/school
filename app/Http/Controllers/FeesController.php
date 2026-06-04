@@ -1660,26 +1660,30 @@ class FeesController extends Controller
         $endDate = $request->end_date;
 
         $compulsoryQuery = \App\Models\CompulsoryFee::query()
-            ->select('session_year_id', 'mode', \Illuminate\Support\Facades\DB::raw('SUM(amount) as total_amount'))
-            ->groupBy('session_year_id', 'mode');
+            ->join('fees_paids', 'fees_paids.id', '=', 'compulsory_fees.fees_paid_id')
+            ->whereNull('fees_paids.deleted_at')
+            ->select('fees_paids.session_year_id', 'compulsory_fees.mode', \Illuminate\Support\Facades\DB::raw('SUM(compulsory_fees.amount) as total_amount'))
+            ->groupBy('fees_paids.session_year_id', 'compulsory_fees.mode');
 
         $optionalQuery = \App\Models\OptionalFee::query()
-            ->select('session_year_id', 'mode', \Illuminate\Support\Facades\DB::raw('SUM(amount) as total_amount'))
-            ->groupBy('session_year_id', 'mode');
+            ->join('fees_paids', 'fees_paids.id', '=', 'optional_fees.fees_paid_id')
+            ->whereNull('fees_paids.deleted_at')
+            ->select('fees_paids.session_year_id', 'optional_fees.mode', \Illuminate\Support\Facades\DB::raw('SUM(optional_fees.amount) as total_amount'))
+            ->groupBy('fees_paids.session_year_id', 'optional_fees.mode');
 
         if ($sessionYearId) {
-            $compulsoryQuery->where('session_year_id', $sessionYearId);
-            $optionalQuery->where('session_year_id', $sessionYearId);
+            $compulsoryQuery->where('fees_paids.session_year_id', $sessionYearId);
+            $optionalQuery->where('fees_paids.session_year_id', $sessionYearId);
         }
 
         if ($mode !== null && $mode !== '') {
-            $compulsoryQuery->where('mode', $mode);
-            $optionalQuery->where('mode', $mode);
+            $compulsoryQuery->where('compulsory_fees.mode', $mode);
+            $optionalQuery->where('optional_fees.mode', $mode);
         }
 
         if ($startDate && $endDate) {
-            $compulsoryQuery->whereBetween('date', [$startDate, $endDate]);
-            $optionalQuery->whereBetween('date', [$startDate, $endDate]);
+            $compulsoryQuery->whereBetween('compulsory_fees.date', [$startDate, $endDate]);
+            $optionalQuery->whereBetween('optional_fees.date', [$startDate, $endDate]);
         }
 
         $compulsoryResults = $compulsoryQuery->get();
