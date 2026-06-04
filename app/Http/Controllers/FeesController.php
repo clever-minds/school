@@ -1658,6 +1658,7 @@ class FeesController extends Controller
         $mode = $request->mode; // "1" for cash, "2" for cheque, "0" for online
         $startDate = $request->start_date;
         $endDate = $request->end_date;
+        $studentId = $request->student_id;
 
         $compulsoryQuery = \App\Models\CompulsoryFee::query()
             ->with(['student:id,first_name,last_name', 'student.student.class_section.class', 'student.student.class_section.section'])
@@ -1680,6 +1681,11 @@ class FeesController extends Controller
             $optionalQuery->where('fees.session_year_id', $sessionYearId);
         }
 
+        if ($studentId) {
+            $compulsoryQuery->where('compulsory_fees.student_id', $studentId);
+            $optionalQuery->where('optional_fees.student_id', $studentId);
+        }
+
         if ($mode !== null && $mode !== '') {
             $compulsoryQuery->where('compulsory_fees.mode', $mode);
             $optionalQuery->where('optional_fees.mode', $mode);
@@ -1699,7 +1705,16 @@ class FeesController extends Controller
 
         $rows = [];
         $no = 1;
-        $totalCollected = 0;
+        $totalCompulsoryCollected = 0;
+        $totalOptionalCollected = 0;
+
+        foreach ($compulsoryResults as $r) {
+            $totalCompulsoryCollected += $r->amount;
+        }
+        foreach ($optionalResults as $r) {
+            $totalOptionalCollected += $r->amount;
+        }
+
         foreach ($allResults as $row) {
             $classSectionName = 'N/A';
             $admissionNo = 'N/A';
@@ -1720,12 +1735,39 @@ class FeesController extends Controller
                 'mode' => $row->mode_name,
                 'total_amount' => number_format($row->amount, 2, '.', '')
             ];
-            $totalCollected += $row->amount;
         }
+
+        // Calculate Total Expected Fees for the Session Year
+        $totalExpectedCompulsory = 0;
+        $totalExpectedOptional = 0;
+
+        if ($sessionYearId) {
+            $feesStructures = \App\Models\Fee::where('session_year_id', $sessionYearId)->with('fees_class_type')->get();
+            $classStudentCounts = \App\Models\Students::where('session_year_id', $sessionYearId)
+                ->select('class_id', \Illuminate\Support\Facades\DB::raw('count(*) as count'))
+                ->groupBy('class_id')
+                ->pluck('count', 'class_id');
+
+            foreach ($feesStructures as $fee) {
+                $count = $classStudentCounts[$fee->class_id] ?? 0;
+                if ($count > 0) {
+                    $totalExpectedCompulsory += ($fee->total_compulsory_fees * $count);
+                    $totalExpectedOptional += ($fee->total_optional_fees * $count);
+                }
+            }
+        }
+
+        $totalCompulsoryPending = max(0, $totalExpectedCompulsory - $totalCompulsoryCollected);
+        $totalOptionalPending = max(0, $totalExpectedOptional - $totalOptionalCollected);
 
         $bulkData['total'] = count($rows);
         $bulkData['rows'] = $rows;
-        $bulkData['total_collected'] = number_format($totalCollected, 2, '.', '');
+        $bulkData['total_compulsory_fees'] = $totalExpectedCompulsory;
+        $bulkData['total_optional_fees'] = $totalExpectedOptional;
+        $bulkData['total_compulsory_fees_collected'] = $totalCompulsoryCollected;
+        $bulkData['total_optional_fees_collected'] = $totalOptionalCollected;
+        $bulkData['total_compulsory_fees_pending'] = $totalCompulsoryPending;
+        $bulkData['total_optional_fees_pending'] = $totalOptionalPending;
         
         return response()->json($bulkData);
     }

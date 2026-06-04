@@ -12,16 +12,64 @@
             </h3>
         </div>
         <div class="row">
+            {{-- Total Fees --}}
+            <div class="col-md-4 col-sm-12 grid-margin stretch-card">
+                <div class="card card-statistics">
+                    <div class="custom-card-body">
+                        <div class="row">
+                            <div class="col-sm-12 col-md-6">
+                                <p class="font-weight-bold">{{ __('total_fees') }}</p>
+                                <div class="d-flex align-items-center">
+                                    <h4 class="font-weight-semibold total_fees_statistics">0</h4>
+                                </div>
+                            </div>
+                            <div class="col-sm-12 col-md-6 border-left text-right">
+                                <p class="text-muted mt-2">{{ __('compulsory_fees') }} : <span
+                                        class="total_compulsory_fees">0</span></p>
+                                <p class="text-muted mb-0">{{ __('optional_fees') }} : <span
+                                        class="total_optional_fees">0</span></p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
             {{-- Total Collected Fees --}}
             <div class="col-md-4 col-sm-12 grid-margin stretch-card">
                 <div class="card card-statistics">
                     <div class="custom-card-body">
                         <div class="row">
-                            <div class="col-sm-12">
-                                <p class="font-weight-bold"> {{ __('Total Fees Collected') }}</p>
+                            <div class="col-sm-12 col-md-6">
+                                <p class="font-weight-bold"> {{ __('collected') }} {{ __('Fees') }}</p>
                                 <div class="d-flex align-items-center">
-                                    <h4 class="font-weight-semibold" id="total_fees_collected">0.00</h4>
+                                    <h4 class="font-weight-semibold total_fees_collected">0</h4>
                                 </div>
+                            </div>
+                            <div class="col-sm-12 col-md-6 border-left text-right">
+                                <p class="text-muted mt-2">{{ __('compulsory_fees') }} : <span
+                                        class="total_compulsory_fees_collected">0</span></p>
+                                <p class="text-muted mb-0">{{ __('optional_fees') }} : <span
+                                        class="total_optional_fees_collected">0</span></p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {{-- Total Pending Fees --}}
+            <div class="col-md-4 col-sm-12 grid-margin stretch-card">
+                <div class="card card-statistics">
+                    <div class="custom-card-body">
+                        <div class="row">
+                            <div class="col-sm-12 col-md-6">
+                                <p class="font-weight-bold"> {{ __('pending') }} {{ __('Fees') }}</p>
+                                <div class="d-flex align-items-center">
+                                    <h4 class="font-weight-semibold total_fees_pending">0</h4>
+                                </div>
+                            </div>
+                            <div class="col-sm-12 col-md-6 border-left text-right">
+                                <p class="text-muted mt-2">{{ __('compulsory_fees') }} : <span
+                                        class="total_compulsory_fees_pending">0</span></p>
+                                <p class="text-muted mb-0">{{ __('optional_fees') }} : <span
+                                        class="total_optional_fees_pending">0</span></p>
                             </div>
                         </div>
                     </div>
@@ -59,8 +107,13 @@
                                     <input type="date" name="start_date" id="start_date" class="form-control">
                                 </div>
                                 <div class="form-group col-md-3">
-                                    <label class="filter-menu" for="end_date">{{ __('End Date') }}</label>
+                                    <label class="filter-menu" for="end_date"> {{ __('To Date') }} </label>
                                     <input type="date" name="end_date" id="end_date" class="form-control">
+                                </div>
+                                <div class="form-group col-md-3">
+                                    <label class="filter-menu" for="gr_no"> {{ __('GR Number') }} </label>
+                                    <select class="grno-search form-control" id="gr_no"><option>search</option></select>
+                                    <input type="hidden" id="student_id" class="student_id" name="student_id">
                                 </div>
                             </div>
                         </div>
@@ -109,6 +162,7 @@
                 mode: $('#mode').val(),
                 start_date: $('#start_date').val(),
                 end_date: $('#end_date').val(),
+                student_id: $('#student_id').val()
             };
         }
 
@@ -116,8 +170,27 @@
             $('#table_list').bootstrapTable('refresh');
         });
 
+        $('#gr_no').on('change', function () {
+            $('#student_id').val($(this).val());
+            $('#table_list').bootstrapTable('refresh');
+        });
+
         $('#table_list').on('load-success.bs.table', function (e, data) {
-            $('#total_fees_collected').text(data.total_collected);
+            let total = (data.total_compulsory_fees + data.total_optional_fees);
+            let collected = (data.total_compulsory_fees_collected + data.total_optional_fees_collected);
+            let pending = (data.total_compulsory_fees_pending + data.total_optional_fees_pending);
+
+            $('.total_fees_statistics').text(total.toFixed(2));
+            $('.total_compulsory_fees').text(data.total_compulsory_fees.toFixed(2));
+            $('.total_optional_fees').text(data.total_optional_fees.toFixed(2));
+
+            $('.total_fees_collected').text(collected.toFixed(2));
+            $('.total_compulsory_fees_collected').text(data.total_compulsory_fees_collected.toFixed(2));
+            $('.total_optional_fees_collected').text(data.total_optional_fees_collected.toFixed(2));
+
+            $('.total_fees_pending').text(pending.toFixed(2));
+            $('.total_compulsory_fees_pending').text(data.total_compulsory_fees_pending.toFixed(2));
+            $('.total_optional_fees_pending').text(data.total_optional_fees_pending.toFixed(2));
         });
     </script>
 @endsection
