@@ -9,13 +9,25 @@ use Google\Client;
 
 function send_notification($userIds, $title, $body, $type, $customData = [])
 {
-    $cache = app(CachingService::class);
-    $sessionYear = $cache->getDefaultSessionYear();
+    $schoolId = $customData['school_id'] ?? (auth()->check() ? auth()->user()->school_id : null);
+    
+    if (!$schoolId) {
+        $userIdsArray = (array)$userIds;
+        if (!empty($userIdsArray)) {
+            $firstUserId = reset($userIdsArray);
+            $userForSchool = User::find($firstUserId);
+            if ($userForSchool) {
+                $schoolId = $userForSchool->school_id;
+            }
+        }
+    }
 
-    $schoolId = $customData['school_id'] ?? (auth()->user()->school_id ?? null);
     if (!$schoolId) {
         throw new Exception('School ID missing');
     }
+
+    $cache = app(CachingService::class);
+    $sessionYear = $cache->getDefaultSessionYear($schoolId);
 
     /* =====================================
      | 1️⃣ CREATE SINGLE MASTER NOTIFICATION
