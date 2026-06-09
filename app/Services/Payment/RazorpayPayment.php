@@ -63,7 +63,11 @@ class RazorpayPayment implements PaymentInterface {
      */
     public function retrievePaymentIntent($paymentId): array {
         try {
-            $payment = $this->api->payment->fetch($paymentId);
+            if (str_starts_with($paymentId, 'order_')) {
+                $payment = $this->api->order->fetch($paymentId);
+            } else {
+                $payment = $this->api->payment->fetch($paymentId);
+            }
             return $payment->toArray();
         } catch (\Exception $e) {
             Log::error('Failed to retrieve Razorpay payment: ' . $e->getMessage());

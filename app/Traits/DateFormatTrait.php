@@ -30,7 +30,8 @@ trait DateFormatTrait
 
             $cache = app(CachingService::class);
 
-            $schoolSettings = $cache->getSchoolSettings();
+            $schoolId = $this->school_id ?? (Auth::check() ? Auth::user()->school_id : null);
+            $schoolSettings = $cache->getSchoolSettings('*', $schoolId);
             $systemSettings = $cache->getSystemSettings();
 
             // Get the date and time format from school settings, fallback to system settings, then to default
@@ -56,7 +57,8 @@ trait DateFormatTrait
             }
 
             $cache = app(CachingService::class);
-            $schoolSettings = $cache->getSchoolSettings();
+            $schoolId = $this->school_id ?? (Auth::check() ? Auth::user()->school_id : null);
+            $schoolSettings = $cache->getSchoolSettings('*', $schoolId);
             $systemSettings = $cache->getSystemSettings();
 
             $time_format = $schoolSettings['time_format'] ?? $systemSettings['time_format'] ?? 'H:i:s';
@@ -78,7 +80,8 @@ trait DateFormatTrait
 
         $cache = app(CachingService::class);
 
-        $schoolSettings = $cache->getSchoolSettings();
+        $schoolId = $this->school_id ?? (Auth::check() ? Auth::user()->school_id : null);
+        $schoolSettings = $cache->getSchoolSettings('*', $schoolId);
 
         $systemSettings = $cache->getSystemSettings();
 

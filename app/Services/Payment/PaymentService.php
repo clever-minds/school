@@ -59,6 +59,19 @@ class PaymentService {
                 },
                 'actual_status'   => $paymentIntentData['status']
             ],
+            'razorpay' => [
+                'id'              => $paymentIntentData['id'] ?? null,
+                'amount'          => $paymentIntentData['amount'] ?? 0,
+                'currency'        => $paymentIntentData['currency'] ?? '',
+                'metadata'        => $paymentIntentData['notes'] ?? [],
+                'status'          => match ($paymentIntentData['status'] ?? '') {
+                    "failed" => "failed",
+                    "paid", "captured", "authorized" => "succeed",
+                    "created", "attempted" => "pending",
+                    default => "pending",
+                },
+                'actual_status'   => $paymentIntentData['status'] ?? ''
+            ],
             // any other payment processor implementations
             default => $paymentIntentData,
         };
