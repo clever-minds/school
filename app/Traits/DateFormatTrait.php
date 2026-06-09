@@ -29,8 +29,8 @@ trait DateFormatTrait
             }
 
             $cache = app(CachingService::class);
+            $schoolId = $this->school_id ?? null;
 
-            $schoolId = $this->school_id ?? (Auth::check() ? Auth::user()->school_id : null);
             $schoolSettings = $cache->getSchoolSettings('*', $schoolId);
             $systemSettings = $cache->getSystemSettings();
 
@@ -57,7 +57,7 @@ trait DateFormatTrait
             }
 
             $cache = app(CachingService::class);
-            $schoolId = $this->school_id ?? (Auth::check() ? Auth::user()->school_id : null);
+            $schoolId = $this->school_id ?? null;
             $schoolSettings = $cache->getSchoolSettings('*', $schoolId);
             $systemSettings = $cache->getSystemSettings();
 
@@ -79,8 +79,8 @@ trait DateFormatTrait
         $value = Carbon::parse($value, 'UTC'); // Treat DB time as UTC
 
         $cache = app(CachingService::class);
+        $schoolId = $this->school_id ?? null;
 
-        $schoolId = $this->school_id ?? (Auth::check() ? Auth::user()->school_id : null);
         $schoolSettings = $cache->getSchoolSettings('*', $schoolId);
 
         $systemSettings = $cache->getSystemSettings();

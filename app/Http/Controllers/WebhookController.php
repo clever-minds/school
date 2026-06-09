@@ -31,6 +31,7 @@ class WebhookController extends Controller
     {
         $payload = @file_get_contents('php://input');
         Log::info(PHP_EOL . "----------------------------------------------------------------------------------------------------------------------");
+        Log::info("Stripe Webhook Payload: " . $payload);
         try {
             // Verify webhook signature and extract the event.
             // See https://stripe.com/docs/webhooks/signatures for more information.
@@ -269,6 +270,7 @@ class WebhookController extends Controller
     {
         $webhookBody = file_get_contents('php://input');
         Log::info(PHP_EOL . "----------------------------------------------------------------------------------------------------------------------");
+        Log::info("Razorpay Webhook Payload: " . $webhookBody);
         try {
             // Parse webhook data
             $data = json_decode($webhookBody);
@@ -364,6 +366,7 @@ class WebhookController extends Controller
     {
         $webhookBody = file_get_contents('php://input');
         Log::info(PHP_EOL . "----------------------------------------------------------------------------------------------------------------------");
+        Log::info("Paystack Webhook Payload: " . $webhookBody);
         try {
             $data = json_decode($webhookBody, false, 512, JSON_THROW_ON_ERROR);
             Log::info("Paystack Webhook : ", [$data]);
@@ -620,6 +623,7 @@ class WebhookController extends Controller
     {
         $webhookBody = file_get_contents('php://input');
         Log::info(PHP_EOL . "----------------------------------------------------------------------------------------------------------------------");
+        Log::info("Flutterwave Webhook Payload: " . $webhookBody);
 
         try {
 

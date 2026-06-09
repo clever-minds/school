@@ -74,12 +74,12 @@ class CachingService {
      * @return mixed
      */
     public function schoolLevelCaching($key, callable $callback, $schoolId = null, int $time = 900) {
+        $schoolId = $schoolId ?? (Auth::check() ? Auth::user()->school_id : null);
+        
         if($schoolId){
             $key .= "_" . $schoolId;
-        } elseif (Auth::check() && Auth::user()) {
-            $key .= "_" . Auth::user()->school_id;
-        } else {
-            $key .= "_default";
+        }else{
+            $key .= "_0";
         }
 
         return Cache::remember($key, $time, $callback);

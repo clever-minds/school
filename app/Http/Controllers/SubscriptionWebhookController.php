@@ -57,6 +57,7 @@ class SubscriptionWebhookController extends Controller
         
         $payload = @file_get_contents('php://input');
         $sig_header = $_SERVER['HTTP_STRIPE_SIGNATURE'];
+        Log::info("Stripe Subscription Webhook Payload: " . $payload);
 
         try {
             $event = \Stripe\Webhook::constructEvent(
@@ -148,6 +149,7 @@ class SubscriptionWebhookController extends Controller
 
         Log::info('Called');
         $webhookBody = file_get_contents('php://input');
+        Log::info("Razorpay Subscription Webhook Payload: " . $webhookBody);
         try {
             $data = json_decode($webhookBody, false, 512, JSON_THROW_ON_ERROR);
             Log::info("Razorpay Webhook Data : ", [$data]);
@@ -427,6 +429,7 @@ class SubscriptionWebhookController extends Controller
     {
         Log::info('Flutterwave Webhook Called');
         $webhookBody = file_get_contents('php://input');
+        Log::info("Flutterwave Subscription Webhook Payload: " . $webhookBody);
         try {
             $data = json_decode($webhookBody, true);
             Log::info("Flutterwave Webhook Data:", [$data]);
@@ -622,6 +625,7 @@ class SubscriptionWebhookController extends Controller
         Log::info('Paystack Webhook Called');
         
         $webhookBody = file_get_contents('php://input');
+        Log::info("Paystack Subscription Webhook Payload: " . $webhookBody);
         try {
             $data = json_decode($webhookBody, true);
             Log::info("Paystack Webhook Data:", [$data]);
