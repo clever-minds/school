@@ -15,4 +15,11 @@ class FeesRepository extends SaaSRepository implements FeesInterface {
             ->whereIn('id', $ids)
             ->get();
     }
+    public function getFeesIdsBySessionYear($sessionYearId)
+{
+    return $this->defaultModel()
+        ->where('session_year_id', $sessionYearId)
+        ->pluck('id')
+        ->toArray();
+}
 }

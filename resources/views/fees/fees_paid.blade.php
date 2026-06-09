@@ -95,7 +95,6 @@
                                 <div class="form-group col-md-4">
                                     <label class="filter-menu" for="filter_fees_id">{{ __('Fees') }}</label>
                                     <select name="filter_fees_id" id="filter_fees_id" class="form-control">
-                                                <option value="">{{ __('all') }}</option>
                                         @foreach ($fees as $key => $fee)
                                             <option value="{{ $fee->id }}" data-class-section-id="{{ $fee->class_id }}" {{ $key == 0 ? 'selected' : '' }}>
                                                 {{ $fee->name }}</option> 
@@ -219,7 +218,7 @@
             ajaxRequest('GET', baseUrl + '/fees/search', {
                 'session_year_id': $(this).val()
             }, null, function(response) {
-                let feesDropdown = '<option value=\"\">' + window.trans['all'] + '</option>';
+                let feesDropdown = "";
 
                 response.data.forEach(function(value, index) {
                     feesDropdown += "<option value='" + value.id + "' data-class-section-id='" + value.class_id + "'>" + value.name + "</option>";

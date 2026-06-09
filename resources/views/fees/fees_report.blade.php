@@ -97,9 +97,9 @@
                                     <label class="filter-menu" for="mode">{{ __('Payment Mode') }}</label>
                                     <select name="mode" id="mode" class="form-control">
                                         <option value="">{{ __('all') }}</option>
-                                        <option value="0">{{ __('Online') }}</option>
-                                        <option value="1">{{ __('Cash (Offline)') }}</option>
-                                        <option value="2">{{ __('Cheque (Offline)') }}</option>
+                                        <option value="Online">{{ __('Online') }}</option>
+                                        <option value="Cash">{{ __('Cash (Offline)') }}</option>
+                                        <option value="Cheque">{{ __('Cheque (Offline)') }}</option>
                                     </select>
                                 </div>
                                 <div class="form-group col-md-3">
@@ -135,6 +135,7 @@
                                     <th scope="col" data-field="admission_no" data-sortable="false">{{ __('GR Number') }}</th>
                                     <th scope="col" data-field="class_section" data-sortable="false">{{ __('Class Section') }}</th>
                                     <th scope="col" data-field="student_name" data-sortable="false">{{ __('Student Name') }}</th>
+                                     <th scope="col" data-field="fees_name" data-sortable="false">{{ __('Fees Name') }}</th>
                                     <th scope="col" data-field="date" data-sortable="false">{{ __('Date') }}</th>
                                     <th scope="col" data-field="session_year" data-sortable="false">{{ __('Session Year') }}</th>
                                     <th scope="col" data-field="mode" data-sortable="false">{{ __('Payment Mode') }}</th>

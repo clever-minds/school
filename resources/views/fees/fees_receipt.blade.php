@@ -145,7 +145,7 @@
                     </td>
 
                     <td class="text-left">
-                        {{ $compulsoryFee->remark }}
+                        {{ $compulsoryFee->remark }} {{$feesPaid->fees->name}}
                     </td>
                 </tr>
 
