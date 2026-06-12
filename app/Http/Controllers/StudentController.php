@@ -253,9 +253,11 @@ class StudentController extends Controller {
             ]);
         }
 
-        $sql = $this->student->builder()->where('application_type', 'offline')->where('application_type', 'online')
-        ->orwhere(function ($query) {
-            $query->where('application_status', 1); // Only online applications with status 1
+        $sql = $this->student->builder()->where(function ($q) {
+            $q->where('application_type', 'offline')
+              ->orWhere(function ($query) {
+                  $query->where('application_status', 1)->where('application_type', 'online');
+              });
         })
         ->with('user.extra_student_details.form_field', 'guardian', 'class_section.class.stream', 'class_section.section', 'class_section.medium')
             ->where(function ($query) use ($search) {

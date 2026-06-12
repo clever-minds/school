@@ -47,7 +47,7 @@
 <script src="{{ asset('/assets/js/custom/custom.js') }}"></script>
 <script src="{{ asset('/assets/js/custom/bootstrap-table/actionEvents.js') }}"></script>
 <script src="{{ asset('/assets/js/custom/bootstrap-table/formatter.js') }}"></script>
-<script src="{{ asset('/assets/js/custom/bootstrap-table/queryParams.js') }}"></script>
+<script src="{{ asset('/assets/js/custom/bootstrap-table/queryParams.js') }}?v={{ time() }}"></script>
 
 <script src="{{ asset('/assets/ckeditor-4/ckeditor.js') }}"></script>
 <script src="{{ asset('/assets/ckeditor-4/adapters/jquery.js') }}" async></script>
