@@ -37,6 +37,12 @@
                                     @endforeach
                                 </select>
                             </div>
+                            @if(in_array(getSchoolSettings('school_name'), ['LCIS Tandalja', 'GKIS Tandalja']))
+                                <div class="form-group col-sm-12 col-md-4">
+                                    <label class="filter-menu">{{ __('Campus') }}</label>
+                                    {!! Form::select('filter_campus', ['JIAM' => 'JIAM', 'Tandalja' => 'Tandalja'], null, ['class' => 'form-control', 'id' => 'filter_campus', 'placeholder' => __('Select Campus')]) !!}
+                                </div>
+                            @endif
                                 <div class="form-group col-12">
                                     <button id="update-status" class="btn btn-secondary" disabled><span class="update-status-btn-name">{{ __('Inactive') }}</span></button>
                                 </div>

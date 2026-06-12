@@ -292,6 +292,11 @@ class StudentController extends Controller {
                 $query->where(function ($query) use ($sessionYearID) {
                     $query->where('session_year_id', $sessionYearID);
                 });
+            })->when(request('campus') != null, function ($query) {
+                $campus = request('campus');
+                $query->where(function ($query) use ($campus) {
+                    $query->where('campus', $campus);
+                });
             });
 
         if ($request->show_deactive) {

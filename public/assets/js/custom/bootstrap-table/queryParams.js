@@ -474,6 +474,7 @@ function studentDetailsQueryParams(p) {
         class_id: $('#filter_class_section_id').val(),
         session_year_id: $('#filter_session_year_id').val(),
         exam_id: $('#exam_id').val(),
+        campus: $('#filter_campus').val(),
         show_deactive: tableListType,
     };
 
@@ -656,7 +657,7 @@ function announcementQueryParams(p) {
     };
 }
 
-$("#filter_class_id,#filter_class_section_id,#filter_teacher_id,#filter_subject_id,#filter_medium_id,#filter_subject_id").on('change', function () {
+$("#filter_class_id,#filter_class_section_id,#filter_teacher_id,#filter_subject_id,#filter_medium_id,#filter_subject_id,#filter_campus").on('change', function () {
     $('#table_list').bootstrapTable('refresh');
 })
 
