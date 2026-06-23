@@ -164,7 +164,7 @@ class StudentController extends Controller {
             }
             $userService = app(UserService::class);
             $sessionYear = $this->sessionYear->findById($request->session_year_id);
-            $guardian = $userService->createOrUpdateParent($request->guardian_first_name, $request->guardian_last_name,$request->student_mother_name, $request->guardian_email, $request->guardian_mobile, $request->guardian_gender, $request->guardian_image);
+            $guardian = $userService->createOrUpdateParent($request->guardian_first_name, $request->guardian_last_name,$request->student_mother_name, $request->guardian_email, $request->guardian_mobile, $request->guardian_gender, $request->guardian_image, null, $request->guardian_id);
             $is_send_notification = false;
             $userService->createStudentUser($request->first_name,$request->middle_name, $request->last_name, $request->admission_no, $request->mobile, $request->dob, $request->gender, $request->image, $request->class_section_id, $request->admission_date, $request->current_address, $request->permanent_address, $sessionYear->id, $guardian->id, $request->extra_fields ?? [], $request->status ?? 0, $is_send_notification,$request->rte_status,$request->cast,$request->nationality,$request->birth_place,$request->blood_group,$request->last_school,$request->last_cleared_class,$request->education_board,$request->remarks,$request->pen_no, $request->campus);
 

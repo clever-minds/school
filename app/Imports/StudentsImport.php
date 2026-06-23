@@ -147,7 +147,8 @@ class FirstSheetImport implements ToCollection, WithHeadingRow
             // $sessionYear = $sessionYear->findById($this->sessionYearID);
 
 
-            $guardian = $userService->createOrUpdateParent($row['guardian_first_name'], $row['guardian_last_name'], $row['guardian_email'], $row['guardian_mobile'], $row['guardian_gender']);
+            $mother_name = $row['student_mother_name'] ?? null;
+            $guardian = $userService->createOrUpdateParent($row['guardian_first_name'], $row['guardian_last_name'], $mother_name, $row['guardian_email'] ?? null, $row['guardian_mobile'], $row['guardian_gender'] ?? 'male');
             $get_student = $student->builder()->where('session_year_id', $sessionYear->id)->select('id')->latest('id')->pluck('id')->first();
             $admission_no = $row['admission_no'];
             $extraDetails = array();
