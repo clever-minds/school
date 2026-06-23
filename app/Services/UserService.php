@@ -66,10 +66,12 @@ class UserService {
             'school_id'  => Auth::user()->school_id
         );
 
-        //NOTE : This line will return the old values if the user is already exists
+        $user = null;
         if (!empty($guardian_id)) {
             $user = $this->user->guardian()->where('id', $guardian_id)->first();
-        } else {
+        } 
+        
+        if (empty($user)) {
             $user = $this->user->guardian()->where('mobile', $mobile)->first();
         }
         if (!empty($image)) {
