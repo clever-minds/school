@@ -34,14 +34,14 @@
                 </div>
             @endcan
         @endif
-         @if(auth()->user()->impersonated_by &&
+         @if((auth()->user()->impersonated_by || session('is_super_admin_impersonating')) &&
             session('impersonation_admin') === true
         )
             <div class="align-items-stretch d-none d-md-flex d-sm-flex cache-clear">
                 <div class="alert  py-2 px-3 mb-0 d-flex align-items-center">
                     <i class="fa fa-user-secret mr-2"></i>
                     <span>
-                    Logged in as <strong>Staff</strong>
+                    Logged in as <strong>{{ session('is_super_admin_impersonating') ? 'School Admin' : 'Staff' }}</strong>
                     </span>
 
                     <form class="ml-3" method="POST"
