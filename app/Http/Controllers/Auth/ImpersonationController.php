@@ -99,9 +99,6 @@ class ImpersonationController extends Controller
         // logout staff
         Auth::logout();
 
-        // login back admin
-        Auth::loginUsingId($adminId);
-
         // check if this was a super admin impersonating a school admin
         if (session('is_super_admin_impersonating')) {
             session()->forget('school_database_name');
@@ -112,6 +109,9 @@ class ImpersonationController extends Controller
             DB::connection('mysql')->reconnect();
             DB::setDefaultConnection('mysql');
         }
+
+        // login back admin (this must happen AFTER switching back to central DB)
+        Auth::loginUsingId($adminId);
 
         // clear impersonation session
         session()->forget([
