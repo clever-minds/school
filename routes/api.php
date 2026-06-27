@@ -30,6 +30,9 @@ Route::post('subscription/webhook/razorpay', [SubscriptionWebhookController::cla
 //     Route::post('logout', [ApiController::class, 'logout']);
 // });
 
+Route::get('schools', [ApiController::class, 'getAllSchools']);
+
+
 Route::group(['middleware' => 'APISwitchDatabase'], static function () {
     Route::post('logout', [ApiController::class, 'logout']);
    

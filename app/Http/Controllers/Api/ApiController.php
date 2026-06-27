@@ -1823,4 +1823,24 @@ public function getMessage(Request $request)
             return ResponseService::errorResponse();
         }
     }
+    public function getAllSchools(Request $request)
+    {
+        try {
+            DB::setDefaultConnection('mysql');
+            $schools = School::where('status', 1)->get(['id', 'name', 'code', 'domain', 'logo']);
+            $data = $schools->map(function ($school) {
+                return [
+                    'id' => $school->id,
+                    'name' => $school->name,
+                    'code' => $school->code,
+                    'domain' => $school->domain,
+                    'logo' => $school->logo
+                ];
+            });
+            return ResponseService::successResponse("Schools Fetched Successfully", $data);
+        } catch (\Throwable $e) {
+            ResponseService::logErrorResponse($e);
+            return ResponseService::errorResponse();
+        }
+    }
 }
