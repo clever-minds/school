@@ -1722,6 +1722,7 @@ class FeesController extends Controller
         $mode = $request->mode; // "1" for cash, "2" for cheque, "0" for online
         $startDate = $request->start_date;
         $endDate = $request->end_date;
+        $receiptNo = $request->receipt_no;
         // $studentId = $request->student_id;
 
         $compulsoryQuery = \App\Models\CompulsoryFee::query()
@@ -1730,7 +1731,7 @@ class FeesController extends Controller
             ->join('fees', 'fees.id', '=', 'fees_paids.fees_id')
             ->whereNull('fees_paids.deleted_at')
             ->whereNull('fees.deleted_at')
-            ->select('compulsory_fees.*', 'fees.session_year_id','fees.name as fees_name' ,);
+            ->select(\Illuminate\Support\Facades\DB::raw("'C' as fee_type"), 'compulsory_fees.*', 'fees.session_year_id','fees.name as fees_name' );
 
         $optionalQuery = \App\Models\OptionalFee::query()
             ->with(['student:id,first_name,last_name', 'student.student.class_section.class', 'student.student.class_section.section'])
@@ -1738,11 +1739,25 @@ class FeesController extends Controller
             ->join('fees', 'fees.id', '=', 'fees_paids.fees_id')
             ->whereNull('fees_paids.deleted_at')
             ->whereNull('fees.deleted_at')
-            ->select('optional_fees.*', 'fees.session_year_id','fees.name as fees_name' ,);
+            ->select(\Illuminate\Support\Facades\DB::raw("'O' as fee_type"), 'optional_fees.*', 'fees.session_year_id','fees.name as fees_name' );
 
         if ($sessionYearId) {
             $compulsoryQuery->where('fees.session_year_id', $sessionYearId);
             $optionalQuery->where('fees.session_year_id', $sessionYearId);
+        }
+
+        if ($receiptNo) {
+            $parsedId = preg_replace('/[^0-9]/', '', $receiptNo);
+            if (stripos($receiptNo, 'C') !== false) {
+                $compulsoryQuery->where('compulsory_fees.id', $parsedId);
+                $optionalQuery->where('optional_fees.id', 0); // Ensure no matches for optional
+            } elseif (stripos($receiptNo, 'O') !== false) {
+                $compulsoryQuery->where('compulsory_fees.id', 0); // Ensure no matches for compulsory
+                $optionalQuery->where('optional_fees.id', $parsedId);
+            } else {
+                $compulsoryQuery->where('compulsory_fees.id', $parsedId);
+                $optionalQuery->where('optional_fees.id', $parsedId);
+            }
         }
 
         /*
@@ -1792,6 +1807,7 @@ class FeesController extends Controller
 
             $rows[] = [
                 'no' => $no++,
+                'receipt_no' => $row->fee_type . '-' . $row->id,
                 'admission_no' => $admissionNo,
                 'class_section' => $classSectionName,
                 'student_name' => $row->student ? $row->student->first_name . ' ' . $row->student->last_name : 'N/A',

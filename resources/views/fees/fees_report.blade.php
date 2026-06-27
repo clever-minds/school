@@ -110,6 +110,10 @@
                                     <label class="filter-menu" for="end_date"> {{ __('To Date') }} </label>
                                     <input type="date" name="end_date" id="end_date" class="form-control">
                                 </div>
+                                <div class="form-group col-md-3">
+                                    <label class="filter-menu" for="receipt_no">{{ __('Receipt No') }}</label>
+                                    <input type="text" name="receipt_no" id="receipt_no" class="form-control" placeholder="e.g. C-327">
+                                </div>
                                 {{-- <div class="form-group col-md-3">
                                     <label class="filter-menu" for="gr_no"> {{ __('GR Number') }} </label>
                                     <select class="grno-search form-control" id="gr_no"><option value="">search</option></select>
@@ -132,6 +136,7 @@
                             <thead>
                                 <tr>
                                     <th scope="col" data-field="no" data-sortable="false">{{ __('no.') }}</th>
+                                    <th scope="col" data-field="receipt_no" data-sortable="false">{{ __('Receipt No') }}</th>
                                     <th scope="col" data-field="admission_no" data-sortable="false">{{ __('GR Number') }}</th>
                                     <th scope="col" data-field="class_section" data-sortable="false">{{ __('Class Section') }}</th>
                                     <th scope="col" data-field="student_name" data-sortable="false">{{ __('Student Name') }}</th>
@@ -163,11 +168,12 @@
                 mode: $('#mode').val(),
                 start_date: $('#start_date').val(),
                 end_date: $('#end_date').val(),
+                receipt_no: $('#receipt_no').val(),
                 // student_id: $('#student_id').val()
             };
         }
 
-        $('#session_year_id, #mode, #start_date, #end_date').on('change', function() {
+        $('#session_year_id, #mode, #start_date, #end_date, #receipt_no').on('change', function() {
             $('#table_list').bootstrapTable('refresh');
         });
 
