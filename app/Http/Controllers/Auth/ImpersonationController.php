@@ -76,10 +76,9 @@ class ImpersonationController extends Controller
 
         // Save admin id only for EXIT
         session([
-            'impersonated_by' => $admin->id,
-            'impersonation_return_url' => url()->previous(),
-            'impersonation_admin' => true,
-            'is_super_admin_impersonating' => true
+            'super_admin_impersonated_by' => $admin->id,
+            'is_super_admin_impersonating' => true,
+            'impersonation_admin' => true
         ]);
 
         // Login as school admin (NO PASSWORD, NO 2FA)
@@ -90,42 +89,56 @@ class ImpersonationController extends Controller
 
     public function exit(Request $request)
     {
-        $adminId = session('impersonated_by');
+        // First check if we are exiting a staff impersonation (started by a school admin)
+        if (session()->has('impersonated_by')) {
+            $adminId = session('impersonated_by');
+            $returnUrl = session('impersonation_return_url', '/dashboard');
 
-        abort_if(!$adminId, 403);
+            Auth::logout();
+            Auth::loginUsingId($adminId);
 
-        $returnUrl = session('impersonation_return_url', '/dashboard');
+            session()->forget([
+                'impersonated_by',
+                'impersonation_return_url',
+            ]);
 
-        // logout staff
-        Auth::logout();
+            if (!session('is_super_admin_impersonating')) {
+                session()->forget('impersonation_admin');
+            }
 
-        // check if this was a super admin impersonating a school admin
+            if (!str_starts_with($returnUrl, url('/'))) {
+                $returnUrl = '/dashboard';
+            }
+
+            return redirect($returnUrl);
+        }
+
+        // Otherwise, check if we are exiting a school impersonation
         if (session('is_super_admin_impersonating')) {
+            $superAdminId = session('super_admin_impersonated_by');
+            
+            Auth::logout();
+
             session()->forget('school_database_name');
             Session::put('school_database_name', null);
             
-            // Switch DB back to central
             DB::purge('school');
             DB::connection('mysql')->reconnect();
             DB::setDefaultConnection('mysql');
+
+            if ($superAdminId) {
+                Auth::loginUsingId($superAdminId);
+            }
+
+            session()->forget([
+                'super_admin_impersonated_by',
+                'is_super_admin_impersonating',
+                'impersonation_admin'
+            ]);
+
+            return redirect('/dashboard');
         }
 
-        // login back admin (this must happen AFTER switching back to central DB)
-        Auth::loginUsingId($adminId);
-
-        // clear impersonation session
-        session()->forget([
-            'impersonated_by',
-            'impersonation_return_url',
-            "impersonation_admin",
-            "is_super_admin_impersonating"
-        ]);
-
-        // 🔐 safety fallback
-        if (!str_starts_with($returnUrl, url('/'))) {
-            $returnUrl = '/dashboard';
-        }
-
-        return redirect($returnUrl);
+        abort(403);
     }
 }
