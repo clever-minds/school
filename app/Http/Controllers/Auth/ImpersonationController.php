@@ -70,9 +70,9 @@ class ImpersonationController extends Controller
             abort(403, 'School Admin not found in tenant database');
         }
 
-        $schoolAdmin->update([
-            'impersonated_by' => $admin->id,
-        ]);
+        // Skip updating 'impersonated_by' in the database for super admin
+        // because the super admin's ID doesn't exist in the tenant's users table.
+        // The session variables below are sufficient to track impersonation.
 
         // Save admin id only for EXIT
         session([
