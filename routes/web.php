@@ -174,6 +174,14 @@ Route::middleware([
 )
 ->name('admin.impersonate');
 
+Route::middleware([
+    'auth'
+])
+->get('/admin/login-as-school/{id}',
+    [ImpersonationController::class, 'loginAsSchool']
+)
+->name('admin.impersonate-school');
+
 Route::post('/admin/impersonation-exit',
     [ImpersonationController::class, 'exit']
 )->name('admin.impersonation.exit');

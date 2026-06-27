@@ -362,6 +362,9 @@ class SchoolController extends Controller {
                 } else {
                     $operate .= BootstrapTableService::menuButton('inactive_school',"#",["change-school-status"],['data-id' => $row->id]);
                 }
+                if (auth()->user()->hasRole('Super Admin')) {
+                    $operate .= BootstrapTableService::menuButton('Login As School', route('admin.impersonate-school', ['id' => $row->id]));
+                }
                 $operate .= BootstrapTableService::menuEditButton('edit',route('schools.update', $row->id));
                 $operate .= BootstrapTableService::menuDeleteButton('delete',route('schools.destroy', $row->id));
             }
