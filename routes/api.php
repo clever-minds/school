@@ -146,6 +146,7 @@ Route::group(['prefix' => 'parent'], static function () {
                 // Session Year
                 Route::get('current-session-year', [ParentApiController::class, 'getSessionYear']);
                 Route::get('school-settings', [ParentApiController::class, 'getSchoolSettings']);
+                Route::get('notifications', [ParentApiController::class, 'getNotifications']);
 
                 // profile data
                 Route::get('get-child-profile-data', [ParentApiController::class, 'getChildProfileDetails']); // Get Profile Data
@@ -303,9 +304,9 @@ Route::get('/schools', [StaffApiController::class, 'getAllSchools']);
         Route::get('roles', [StaffApiController::class, 'getRoles']);
         Route::get('users', [StaffApiController::class, 'getUsers']);
         Route::post('notification', [StaffApiController::class, 'storeNotification']);
-        Route::get('notification', [StaffApiController::class, 'getNotification']);
+        Route::get('notifications', [StaffApiController::class, 'getNotification']);
         Route::post('notification-delete', [StaffApiController::class, 'deleteNotification']);
-
+        Route::get('notification', [StaffApiController::class, 'getNotification']);
         Route::get('get-fees', [StaffApiController::class, 'getFees']);
         Route::get('fees-paid-list', [StaffApiController::class, 'getFeesPaidList']);
 
