@@ -441,7 +441,6 @@ Route::post('/admin/impersonation-exit',
             Route::get('/', [StaffAttendanceController::class, 'index'])->name('staff-attendance.index');
             Route::get('/list', [StaffAttendanceController::class, 'show'])->name('staff-attendance.list');
             Route::post('/check', [StaffAttendanceController::class, 'check'])->name('staff-attendance.check');
-            Route::post('/scan', [StaffAttendanceController::class, 'scan'])->name('staff-attendance.scan');
             Route::get('/my', [StaffAttendanceController::class, 'myAttendance'])->name('staff-attendance.my');
         });
 

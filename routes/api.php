@@ -35,7 +35,7 @@ Route::get('schools', [ApiController::class, 'getAllSchools']);
 
 Route::group(['middleware' => 'APISwitchDatabase'], static function () {
     Route::post('logout', [ApiController::class, 'logout']);
-   
+    Route::post('staff-attendance/scan', [\App\Http\Controllers\StaffAttendanceController::class, 'scan']);
 });
 Route::get('fees-due-notification',[ApiController::class, 'sendFeeNotification']);
 /**
