@@ -8,6 +8,7 @@ use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
+use App\Models\User;
 use Throwable;
 
 class StaffAttendanceController extends Controller
@@ -143,5 +144,65 @@ class StaffAttendanceController extends Controller
     public function myAttendance()
     {
         return view('staff_attendance.my_attendance');
+    }
+
+    public function scan(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'user_id' => 'required|exists:users,id',
+            'latitude' => 'required',
+            'longitude' => 'required',
+        ]);
+
+        if ($validator->fails()) {
+            return ResponseService::errorResponse($validator->errors()->first());
+        }
+
+        try {
+            $userId = $request->user_id;
+            $user = User::find($userId);
+            $today = Carbon::now()->toDateString();
+            $currentTime = Carbon::now()->toDateTimeString();
+
+            // Check if already checked in today
+            $attendance = $this->staffAttendance->builder()->where('user_id', $userId)->where('date', $today)->first();
+
+            if (!$attendance) {
+                // Check In
+                $data = [
+                    'user_id' => $userId,
+                    'school_id' => $user->school_id,
+                    'date' => $today,
+                    'check_in' => $currentTime,
+                    'latitude' => $request->latitude,
+                    'longitude' => $request->longitude,
+                    'check_in_location' => $request->address ?? null,
+                    'check_in_ip' => $request->ip(),
+                    'scanned_by' => Auth::id(),
+                    'status' => 1
+                ];
+                $this->staffAttendance->create($data);
+                return ResponseService::successResponse("{$user->full_name} Successfully Checked In", $user);
+            } else {
+                // Check Out
+                if ($attendance->check_out) {
+                    return ResponseService::errorResponse("{$user->full_name} already checked out for today");
+                }
+
+                $data = [
+                    'check_out' => $currentTime,
+                    'check_out_latitude' => $request->latitude,
+                    'check_out_longitude' => $request->longitude,
+                    'check_out_location' => $request->address ?? null,
+                    'check_out_ip' => $request->ip(),
+                    'scanned_by' => Auth::id(),
+                ];
+                $this->staffAttendance->update($attendance->id, $data);
+                return ResponseService::successResponse("{$user->full_name} Successfully Checked Out", $user);
+            }
+        } catch (Throwable $th) {
+            ResponseService::logErrorResponse($th);
+            return ResponseService::errorResponse();
+        }
     }
 }

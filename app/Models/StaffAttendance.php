@@ -25,7 +25,8 @@ class StaffAttendance extends Model
         'check_out_longitude',
         'check_in_ip',
         'check_out_ip',
-        'status'
+        'status',
+        'scanned_by'
     ];
 
     public function user()
