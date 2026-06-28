@@ -225,6 +225,11 @@ class MigrateAllTenants extends Command
                       '--path' => 'database/migrations/schools/2026_06_20_133100_create_schedules_table.php',
                       '--force' => true,
                   ]);
+                  Artisan::call('migrate', [
+                      '--database' => 'tenant',
+                      '--path' => 'database/migrations/schools/2026_06_28_102148_add_scanned_by_to_staff_attendances_table.php',
+                      '--force' => true,
+                  ]);
                 $this->info("✅ Migration done for {$tenant->name}");
             } catch (\Exception $e) {
                 $this->error("❌ Migration failed for {$tenant->name}: {$e->getMessage()}");
