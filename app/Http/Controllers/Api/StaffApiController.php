@@ -872,14 +872,7 @@ class StaffApiController extends Controller
         try {
             DB::beginTransaction();
             $sessionYear = $this->cache->getDefaultSessionYear();
-            $data = [
-                'title' => $request->title,
-                'message' => $request->message,
-                'send_to' => $request->type,
-                'image' => $request->hasFile('file') ? $request->file('file')->store('notification', 'public') : null,
-                'session_year_id' => $sessionYear->id
-            ];
-            $notification = $this->notification->create($data);
+            $imagePath = $request->hasFile('file') ? $request->file('file')->store('notification', 'public') : null;
 
             $notifyUser = [];
 
@@ -982,11 +975,14 @@ class StaffApiController extends Controller
             // ====================================================
 
             $customData = [];
-            if ($notification->image) {
+            if ($imagePath) {
                 $customData = [
-                    'image' => $notification->image
+                    'image' => $imagePath
                 ];
             }
+
+            $notifyUser = array_unique($notifyUser);
+
             $title = $request->title; // Title for Notification
             $body = $request->message;
             $type = 'Notification';
