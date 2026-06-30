@@ -394,6 +394,7 @@ Route::post('/admin/impersonation-exit',
         Route::post('features/enable', [PackageController::class, 'features_enable']);
 
         Route::resource('guidances', GuidanceController::class);
+        Route::resource('audit-questions', \App\Http\Controllers\AuditQuestionController::class);
 
         // End super admin routes
         // =================================================================

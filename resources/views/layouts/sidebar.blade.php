@@ -212,7 +212,11 @@
                                 <span class="menu-title">{{ __('School Policies') }}</span>
                             </a>
                         </li>
-
+                        <li class="nav-item">
+                            <a href="{{ route('audit-questions.index') }}" class="nav-link">
+                                <span class="menu-title">{{ __('Audit Questions') }}</span>
+                            </a>
+                        </li>
                     </ul>
                 </div>
             </li>

@@ -1387,5 +1387,35 @@ class StaffApiController extends Controller
             return ResponseService::errorResponse();
         }
     }
+
+    public function attendanceReport(Request $request) {
+        try {
+            $sql = $this->staffAttendance->builder()->with('user:id,first_name,last_name,image');
+
+            if ($request->staff_id) {
+                $sql->where('user_id', $request->staff_id);
+            }
+
+            if ($request->date) {
+                $sql->whereDate('date', $request->date);
+            }
+
+            if ($request->month && $request->year) {
+                $sql->whereMonth('date', $request->month)->whereYear('date', $request->year);
+            }
+
+            if ($request->start_date && $request->end_date) {
+                $sql->whereBetween('date', [$request->start_date, $request->end_date]);
+            }
+
+            $sql->orderBy('date', 'desc');
+            $data = $sql->paginate($request->limit ?? 30);
+
+            return ResponseService::successResponse('Data fetched successfully', $data);
+        } catch (\Throwable $th) {
+            ResponseService::logErrorResponse($th);
+            return ResponseService::errorResponse();
+        }
+    }
 }
 

@@ -323,6 +323,7 @@ Route::get('/schools', [StaffApiController::class, 'getAllSchools']);
 
         Route::post('attendance', [StaffApiController::class, 'markAttendance']);
         Route::get('attendance-history', [StaffApiController::class, 'attendanceHistory']);
+        Route::get('attendance-report', [StaffApiController::class, 'attendanceReport']);
 
         // Student Pickup Verification
         Route::post('verify-student-pickup-otp', [StudentPickupController::class, 'verifyPickupOTP']);
@@ -382,4 +383,20 @@ Route::group(['middleware' => ['APISwitchDatabase',]], static function () {
     Route::post('class-section/teachers', [ApiController::class, 'classSectionTeachers']);
     
     Route::get('student-details', [ApiController::class, 'getStudentDetails']);
+});
+
+/**
+ * SUPER ADMIN APIs
+ **/
+Route::group(['prefix' => 'super-admin', 'middleware' => ['APISwitchDatabase']], static function () {
+    Route::group(['prefix' => 'audit'], static function () {
+        Route::get('questions', [\App\Http\Controllers\Api\SuperAdminAuditController::class, 'getQuestions']);
+        Route::post('questions', [\App\Http\Controllers\Api\SuperAdminAuditController::class, 'storeQuestion']);
+        Route::put('questions/{id}', [\App\Http\Controllers\Api\SuperAdminAuditController::class, 'updateQuestion']);
+        Route::delete('questions/{id}', [\App\Http\Controllers\Api\SuperAdminAuditController::class, 'deleteQuestion']);
+
+        Route::get('school-audits', [\App\Http\Controllers\Api\SuperAdminAuditController::class, 'getSchoolAudits']);
+        Route::post('school-audits', [\App\Http\Controllers\Api\SuperAdminAuditController::class, 'storeSchoolAudit']);
+        Route::get('school-audits/{id}', [\App\Http\Controllers\Api\SuperAdminAuditController::class, 'getSchoolAuditDetails']);
+    });
 });
