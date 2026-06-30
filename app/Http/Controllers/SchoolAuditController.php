@@ -15,8 +15,9 @@ use Throwable;
 
 class SchoolAuditController extends Controller
 {
-    public function index(Request $request)
+    public function index()
     {
+        $request = request();
         ResponseService::noPermissionThenRedirect('school-audit-list');
 
         if ($request->wantsJson()) {
