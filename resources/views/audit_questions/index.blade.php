@@ -124,7 +124,7 @@
 @section('script')
 <script>
     window.auditQuestionEvents = {
-        'click .editdata': function (e, value, row, index) {
+        'click .edit-data': function (e, value, row, index) {
             $('#id').val(row.id);
             $('#edit-question').val(row.question);
             $('#edit-status').val(row.status);
