@@ -1132,6 +1132,16 @@
             </li>
         @endcanany
 
+        {{-- School Audits --}}
+        @canany(['school-audit-list','school-audit-create','school-audit-edit','school-audit-delete'])
+            <li class="nav-item">
+                <a href="{{ route('school-audits.index') }}" class="nav-link">
+                    <i class="fa fa-check-square menu-icon"></i>
+                    <span class="menu-title">{{ __('School Audits') }}</span>
+                </a>
+            </li>
+        @endcanany
+
         {{-- settings --}}
         @canany(['app-settings', 'language-list', 'school-setting-manage', 'system-setting-manage',
             'fcm-setting-manage', 'email-setting-create', 'privacy-policy', 'contact-us', 'about-us','guidance-create','guidance-list','guidance-edit','guidance-delete', 'email-template'])
