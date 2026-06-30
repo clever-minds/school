@@ -75,8 +75,8 @@ class SchoolAuditController extends Controller
     {
         ResponseService::noPermissionThenRedirect('school-audit-create');
         
-        $schools = School::active()->get();
-        $questions = AuditQuestion::active()->get();
+        $schools = School::where('status', 1)->get();
+        $questions = AuditQuestion::where('status', 1)->get();
 
         return view('school_audits.create', compact('schools', 'questions'));
     }
