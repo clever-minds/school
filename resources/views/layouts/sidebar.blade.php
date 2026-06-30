@@ -1122,6 +1122,16 @@
         
 
 
+        {{-- Audit Questions --}}
+        @canany(['audit-question-list','audit-question-create','audit-question-edit','audit-question-delete'])
+            <li class="nav-item">
+                <a href="{{ route('audit-questions.index') }}" class="nav-link">
+                    <i class="fa fa-question-circle menu-icon"></i>
+                    <span class="menu-title">{{ __('Audit Questions') }}</span>
+                </a>
+            </li>
+        @endcanany
+
         {{-- settings --}}
         @canany(['app-settings', 'language-list', 'school-setting-manage', 'system-setting-manage',
             'fcm-setting-manage', 'email-setting-create', 'privacy-policy', 'contact-us', 'about-us','guidance-create','guidance-list','guidance-edit','guidance-delete', 'email-template'])
@@ -1176,11 +1186,7 @@
                             </li>
                         @endcanany
 
-                        @canany(['audit-question-list','audit-question-create','audit-question-edit','audit-question-delete'])
-                            <li class="nav-item">
-                                <a class="nav-link" href="{{ route('audit-questions.index') }}">{{ __('Audit Questions') }}</a>
-                            </li>
-                        @endcanany
+
 
                         @can('language-list')
                             <li class="nav-item">

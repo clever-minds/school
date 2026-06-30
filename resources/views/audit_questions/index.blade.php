@@ -1,14 +1,14 @@
 @extends('layouts.master')
 
 @section('title')
-    {{ __('audit_questions') }}
+    {{ __('Audit Questions') }}
 @endsection
 
 @section('content')
     <div class="content-wrapper">
         <div class="page-header">
             <h3 class="page-title">
-                {{ __('manage') . ' ' . __('audit_questions') }}
+                {{ __('manage') . ' ' . __('Audit Questions') }}
             </h3>
         </div>
 
@@ -18,7 +18,7 @@
                 <div class="card">
                     <div class="card-body">
                         <h4 class="card-title">
-                            {{ __('create') . ' ' . __('audit_questions') }}
+                            {{ __('create') . ' ' . __('Audit Questions') }}
                         </h4>
                         <form class="create-form pt-3" id="create-form" action="{{route('audit-questions.store')}}" method="POST" novalidate="novalidate">
                             @csrf
@@ -46,7 +46,7 @@
                 <div class="card">
                     <div class="card-body">
                         <h4 class="card-title">
-                            {{ __('list') . ' ' . __('audit_questions') }}
+                            {{ __('list') . ' ' . __('Audit Questions') }}
                         </h4>
                         <div class="row">
                             <div class="col-12">
@@ -85,7 +85,7 @@
         <div class="modal-dialog" role="document">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title" id="exampleModalLabel"> {{ __('edit') . ' ' . __('audit_questions') }}</h5>
+                    <h5 class="modal-title" id="exampleModalLabel"> {{ __('edit') . ' ' . __('Audit Questions') }}</h5>
                     <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                         <span aria-hidden="true"><i class="fa fa-close"></i></span>
                     </button>
