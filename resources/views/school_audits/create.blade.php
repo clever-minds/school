@@ -22,7 +22,7 @@
                             <div class="row form-group">
                                 <div class="col-sm-12 col-md-6">
                                     <label>{{ __('School') }} <span class="text-danger">*</span></label>
-                                    <select name="school_id" id="school_id" class="form-control select2" required>
+                                    <select name="school_id" id="school_id" class="form-control" required>
                                         <option value="">{{ __('Select School') }}</option>
                                         @foreach($schools as $school)
                                             <option value="{{ $school->id }}">{{ $school->name }}</option>
@@ -100,14 +100,4 @@
     </div>
 @endsection
 
-@section('script')
-<script>
-    $(document).ready(function() {
-        if ($('.select2').length) {
-            $('.select2').select2({
-                theme: 'bootstrap'
-            });
-        }
-    });
-</script>
-@endsection
+
