@@ -84,7 +84,11 @@ class InstallationSeeder extends Seeder {
             ...self::permission('reminder'),
             ...self::permission('school-policy'),
             ...self::permission('student-pickup'),
-            ['name' => 'staff-kyc-upload']
+            ['name' => 'student-pickup-delete'],
+            ['name' => 'staff-kyc-upload'],
+
+            ...self::permission('audit-question'),
+            ...self::permission('school-audit')
 
             
 
@@ -197,7 +201,17 @@ class InstallationSeeder extends Seeder {
             'student-pickup-create',
             'student-pickup-edit',
             'student-pickup-delete',
-            'staff-kyc-upload'
+            'staff-kyc-upload',
+
+            'audit-question-list',
+            'audit-question-create',
+            'audit-question-edit',
+            'audit-question-delete',
+
+            'school-audit-list',
+            'school-audit-create',
+            'school-audit-edit',
+            'school-audit-delete',
 
         ];
         $role->syncPermissions($superAdminHasAccessTo);
