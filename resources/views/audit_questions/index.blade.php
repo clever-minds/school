@@ -67,7 +67,7 @@
                                         <th scope="col" data-field="no"> {{ __('no.') }} </th>
                                         <th scope="col" data-field="question">{{ __('question') }} </th>
                                         <th scope="col" data-field="status_text" data-escape="false">{{ __('status') }} </th>
-                                        <th data-events="actionEvents" data-width="150" scope="col" data-field="operate" data-escape="false">{{ __('action') }}</th>
+                                        <th data-events="auditQuestionEvents" data-width="150" scope="col" data-field="operate" data-escape="false">{{ __('action') }}</th>
                                     </tr>
                                     </thead>
                                 </table>
@@ -123,7 +123,7 @@
 
 @section('script')
 <script>
-    window.actionEvents = {
+    window.auditQuestionEvents = {
         'click .editdata': function (e, value, row, index) {
             $('#id').val(row.id);
             $('#edit-question').val(row.question);
