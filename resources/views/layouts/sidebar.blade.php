@@ -212,11 +212,6 @@
                                 <span class="menu-title">{{ __('School Policies') }}</span>
                             </a>
                         </li>
-                        <li class="nav-item">
-                            <a href="{{ route('audit-questions.index') }}" class="nav-link">
-                                <span class="menu-title">{{ __('Audit Questions') }}</span>
-                            </a>
-                        </li>
                     </ul>
                 </div>
             </li>
@@ -1178,6 +1173,12 @@
                         @canany(['guidance-create','guidance-list','guidance-edit','guidance-delete'])
                             <li class="nav-item">
                                 <a class="nav-link" href="{{ route('guidances.index') }}">{{ __('guidance') }}</a>
+                            </li>
+                        @endcanany
+
+                        @canany(['audit-question-list','audit-question-create','audit-question-edit','audit-question-delete'])
+                            <li class="nav-item">
+                                <a class="nav-link" href="{{ route('audit-questions.index') }}">{{ __('Audit Questions') }}</a>
                             </li>
                         @endcanany
 

@@ -16,8 +16,7 @@ class AuditQuestionController extends Controller
      */
     public function index()
     {
-        // For simplicity, we assume super admin has permission
-        // ResponseService::noAnyPermissionThenRedirect(['audit-question-list','audit-question-create']);
+        ResponseService::noAnyPermissionThenRedirect(['audit-question-list','audit-question-create']);
         return view('audit_questions.index');
     }
 
@@ -26,6 +25,7 @@ class AuditQuestionController extends Controller
      */
     public function store(Request $request)
     {
+        ResponseService::noPermissionThenRedirect('audit-question-create');
         $validator = Validator::make($request->all(), [
             'question' => 'required|string',
             'status' => 'nullable|in:0,1'
@@ -52,6 +52,7 @@ class AuditQuestionController extends Controller
      */
     public function show($id)
     {
+        ResponseService::noPermissionThenRedirect('audit-question-list');
         $offset = request('offset', 0);
         $limit = request('limit', 10);
         $sort = request('sort', 'id');
@@ -91,6 +92,7 @@ class AuditQuestionController extends Controller
      */
     public function update(Request $request, $id)
     {
+        ResponseService::noPermissionThenSendJson('audit-question-edit');
         $validator = Validator::make($request->all(), [
             'question' => 'required|string',
             'status' => 'required|in:0,1'
@@ -118,6 +120,7 @@ class AuditQuestionController extends Controller
      */
     public function destroy($id)
     {
+        ResponseService::noPermissionThenSendJson('audit-question-delete');
         try {
             AuditQuestion::findOrFail($id)->delete();
             ResponseService::successResponse('Data Deleted Successfully');
