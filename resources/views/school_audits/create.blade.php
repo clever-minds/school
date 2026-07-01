@@ -17,7 +17,7 @@
             <div class="col-md-12 grid-margin stretch-card">
                 <div class="card">
                     <div class="card-body">
-                        <form class="create-form pt-3" action="{{ route('school-audits.store') }}" method="POST" novalidate="novalidate">
+                        <form class="pt-3" action="{{ route('school-audits.store') }}" method="POST">
                             @csrf
                             <div class="row form-group">
                                 <div class="col-sm-12 col-md-6">

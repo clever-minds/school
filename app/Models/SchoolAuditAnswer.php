@@ -9,7 +9,7 @@ class SchoolAuditAnswer extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['school_audit_id', 'audit_question_id', 'answer'];
+    protected $fillable = ['school_audit_id', 'audit_question_id', 'answer', 'remarks'];
 
     public function audit()
     {
