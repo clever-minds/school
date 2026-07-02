@@ -1146,25 +1146,26 @@
 
         {{-- settings --}}
         @canany(['app-settings', 'language-list', 'school-setting-manage', 'system-setting-manage',
-            'fcm-setting-manage', 'email-setting-create', 'privacy-policy', 'contact-us', 'about-us','guidance-create','guidance-list','guidance-edit','guidance-delete', 'email-template'])
+            'fcm-setting-manage', 'email-setting-create', 'privacy-policy', 'contact-us', 'about-us', 'guidance-create',
+            'guidance-list', 'guidance-edit', 'guidance-delete', 'email-template'])
             <li class="nav-item">
-                <a class="nav-link" data-toggle="collapse" href="#settings-menu" aria-expanded="false" aria-controls="settings-menu">
+                <a class="nav-link" data-toggle="collapse" href="#settings-menu" aria-expanded="false"
+                    aria-controls="settings-menu">
                     <i class="fa fa-cog menu-icon"></i>
                     <span class="menu-title">{{ __('system_settings') }}</span>
                     <i class="menu-arrow"></i>
                 </a>
                 <div class="collapse" id="settings-menu">
                     <ul class="nav flex-column sub-menu">
-                        @role('Super Admin')
                         @can('app-settings')
                             <li class="nav-item">
                                 <a class="nav-link" href="{{ route('system-settings.app') }}">{{ __('app_settings') }}</a>
                             </li>
                         @endcan
-                        @endrole
                         @can('school-setting-manage')
                             <li class="nav-item">
-                                <a class="nav-link" href="{{ route('school-settings.index') }}">{{ __('general_settings') }}</a>
+                                <a class="nav-link"
+                                    href="{{ route('school-settings.index') }}">{{ __('general_settings') }}</a>
                             </li>
 
                             {{-- session-year.index --}}
@@ -1173,54 +1174,49 @@
                             </li>
 
                             <li class="nav-item">
-                                <a class="nav-link" href="{{ route('leave-master.index') }}" data-name="{{ Auth::user()->getRoleNames()[0] }}" data-access="@hasFeatureAccess('Staff Leave Management')">{{ __('leave') }} {{ __('settings') }}</a>
+                                <a class="nav-link" href="{{ route('leave-master.index') }}"
+                                    data-name="{{ Auth::user()->getRoleNames()[0] }}"
+                                    data-access="@hasFeatureAccess('Staff Leave Management')">{{ __('leave') }} {{ __('settings') }}</a>
                             </li>
                         @endcan
 
-                        @role('Super Admin')
                         @can('system-setting-manage')
                             <li class="nav-item">
-                                <a class="nav-link" href="{{ route('system-settings.index') }}">{{ __('general_settings') }}</a>
+                                <a class="nav-link"
+                                    href="{{ route('system-settings.index') }}">{{ __('general_settings') }}</a>
                             </li>
                         @endcan
-                        @endrole
 
-                        @role('Super Admin')
                         @can('subscription-settings')
                             <li class="nav-item">
-                                <a class="nav-link" href="{{ route('system-settings.subscription-settings') }}">{{ __('subscription_settings') }}</a>
+                                <a class="nav-link"
+                                    href="{{ route('system-settings.subscription-settings') }}">{{ __('subscription_settings') }}</a>
                             </li>
                         @endcan
-                        @endrole
 
                         {{-- @can('front-site-setting')
                             <li class="nav-item">
                                 <a class="nav-link" href="{{ route('system-settings.front-site-settings') }}">{{ __('front_site_settings') }}</a>
                             </li>
                         @endcan --}}
-                        @canany(['guidance-create','guidance-list','guidance-edit','guidance-delete'])
+                        @canany(['guidance-create', 'guidance-list', 'guidance-edit', 'guidance-delete'])
                             <li class="nav-item">
                                 <a class="nav-link" href="{{ route('guidances.index') }}">{{ __('guidance') }}</a>
                             </li>
                         @endcanany
 
-
-
-                        @role('Super Admin')
                         @can('language-list')
                             <li class="nav-item">
                                 <a class="nav-link" href="{{ url('language') }}">
                                     {{ __('language_settings') }}</a>
                             </li>
                         @endcan
-                        @endrole
-                        @role('Super Admin')
                         @can('fcm-setting-manage')
                             <li class="nav-item">
-                                <a class="nav-link" href="{{ route('system-settings.fcm') }}"> {{ __('notification_settings') }}</a>
+                                <a class="nav-link" href="{{ route('system-settings.fcm') }}">
+                                    {{ __('notification_settings') }}</a>
                             </li>
                         @endcan
-                        @endrole
 
                         {{-- @can('fees-config')
                             <li class="nav-item">
@@ -1231,71 +1227,70 @@
 
                         @can('school-setting-manage')
                             <li class="nav-item">
-                                <a href="{{ route('school-settings.online-exam.index') }}" class="nav-link text-wrap" data-name="{{ Auth::user()->getRoleNames()[0] }}" data-access="@hasFeatureAccess('Exam Management')">
+                                <a href="{{ route('school-settings.online-exam.index') }}" class="nav-link text-wrap"
+                                    data-name="{{ Auth::user()->getRoleNames()[0] }}" data-access="@hasFeatureAccess('Exam Management')">
                                     {{ __('online_exam_terms_condition') }}
                                 </a>
                             </li>
                         @endcan
 
-                        @role('Super Admin')
                         @can('email-setting-create')
                             <li class="nav-item">
-                                <a class="nav-link" href="{{ route('system-settings.email.index') }}">{{ __('email_configuration') }}</a>
+                                <a class="nav-link"
+                                    href="{{ route('system-settings.email.index') }}">{{ __('email_configuration') }}</a>
                             </li>
                         @endcan
-                        @endrole
 
                         {{-- Super admin panel --}}
-                        @role('Super Admin')
                         @can('email-setting-create')
                             <li class="nav-item">
-                                <a class="nav-link" href="{{ route('system-settings.email.template') }}">{{ __('email_template') }}</a>
+                                <a class="nav-link"
+                                    href="{{ route('system-settings.email.template') }}">{{ __('email_template') }}</a>
                             </li>
                         @endcan
-                        @endrole
 
                         {{-- School admin panel --}}
                         @can('email-template')
                             <li class="nav-item">
-                                <a class="nav-link" href="{{ route('school-settings.email.template') }}">{{ __('email_template') }}</a>
+                                <a class="nav-link"
+                                    href="{{ route('school-settings.email.template') }}">{{ __('email_template') }}</a>
                             </li>
                         @endcan
 
-                        {{--Payment Configuration Menu--}}
-                        @can('payment-settings')
-                        <li class="nav-item">
-                            <a class="nav-link" href="{{ route('system-settings.payment.index') }}">{{ __('Payment Settings') }}</a>
-                        </li>
-                        @endcan
-
-                        @can('school-setting-manage')
-                        <li class="nav-item">
-                            <a class="nav-link" data-access="@hasFeatureAccess('Website Management')" href="{{ route('school-settings.third-party') }}">{{ __('Third-Party APIs') }}</a>
-                        </li>
-                        @endcan
-
-                        @role('Super Admin')
-                        @can('system-setting-manage')
-                        <li class="nav-item">
-                            <a class="nav-link" href="{{ route('system-settings.third-party') }}">{{ __('Third-Party APIs') }}</a>
-                        </li>
-                        @endcan
+                        {{-- Payment Configuration Menu For Superadmin --}}
+                        @hasanyrole(['Super Admin', 'School Admin'])
+                            <li class="nav-item">
+                                <a class="nav-link"
+                                    href="{{ route('system-settings.payment.index') }}">{{ __('Payment Settings') }}</a>
+                            </li>
                         @endrole
 
-                        @role('Super Admin')
-                        @can('database-backup')
+                        @can('school-setting-manage')
+                            <li class="nav-item">
+                                <a class="nav-link" data-access="@hasFeatureAccess('Website Management')"
+                                    href="{{ route('school-settings.third-party') }}">{{ __('Third-Party APIs') }}</a>
+                            </li>
+                        @endcan
+
+                        @can('system-setting-manage')
+                            <li class="nav-item">
+                                <a class="nav-link"
+                                    href="{{ route('system-settings.third-party') }}">{{ __('Third-Party APIs') }}</a>
+                            </li>
+                        @endcan
+
+                        {{-- @can('database-backup')
                             <li class="nav-item">
                                 <a class="nav-link" href="{{ url('database-backup') }}">{{ __('database_backup') }}</a>
                             </li>
-                        @endcan 
-                        @endrole
+                        @endcan --}}
 
-                        
 
-                        @role('Super Admin')
+
                         @can('contact-us')
                             <li class="nav-item">
-                                <a class="nav-link" href="{{ route('system-settings.contact-us') }}"> {{ __('contact_us') }}</a>
+                                <a class="nav-link" href="{{ route('system-settings.contact-us') }}">
+                                    {{ __('contact_us') }}</a>
                             </li>
                         @endcan
                         @can('about-us')
@@ -1304,41 +1299,43 @@
                                 </a>
                             </li>
                         @endcan
+
+                        @hasrole('School Admin')
+
+                            {{-- Privacy Policy --}}
+                            <li class="nav-item">
+                                <a class="nav-link"
+                                    href="{{ route('school-settings.privacy-policy') }}">{{ __('privacy_policy') }}</a>
+                            </li>
+
+                            {{-- Terms & Conditions --}}
+                            <li class="nav-item">
+                                <a class="nav-link"
+                                    href="{{ route('school-settings.terms-condition') }}">{{ __('terms_condition') }}</a>
+                            </li>
+
+                            {{-- Refund Cancellation --}}
+
+                            <li class="nav-item">
+                                <a class="nav-link"
+                                    href="{{ route('school-settings.refund-cancellation') }}">{{ __('refund_cancellation') }}</a>
+                            </li>
+
                         @endrole
 
-                        @can('school-setting-manage')
-                        
-                        {{-- Privacy Policy --}}
-                        <li class="nav-item">
-                            <a class="nav-link" href="{{ route('school-settings.privacy-policy') }}">{{ __('privacy_policy') }}</a>
-                        </li>
-
-                        {{-- Terms & Conditions --}}
-                        <li class="nav-item">
-                            <a class="nav-link" href="{{ route('school-settings.terms-condition') }}">{{ __('terms_condition') }}</a>
-                        </li>
-
-                        {{-- Refund Cancellation --}}
-
-                        <li class="nav-item">
-                            <a class="nav-link" href="{{ route('school-settings.refund-cancellation') }}">{{ __('refund_cancellation') }}</a>
-                        </li>
-
-                        @endcan
-
-                        @role('Super Admin')
                         @can('privacy-policy')
                             <li class="nav-item">
-                                <a class="nav-link" href="{{ route('system-settings.privacy-policy') }}">{{ __('privacy_policy') }}</a>
+                                <a class="nav-link"
+                                    href="{{ route('system-settings.privacy-policy') }}">{{ __('privacy_policy') }}</a>
                             </li>
                         @endcan
 
                         @can('terms-condition')
                             <li class="nav-item">
-                                <a class="nav-link" href="{{ route('system-settings.terms-condition') }}">{{ __('terms_condition') }}</a>
+                                <a class="nav-link"
+                                    href="{{ route('system-settings.terms-condition') }}">{{ __('terms_condition') }}</a>
                             </li>
                         @endcan
-                        @endrole
 
                     </ul>
                 </div>
