@@ -1157,13 +1157,11 @@
                 </a>
                 <div class="collapse" id="settings-menu">
                     <ul class="nav flex-column sub-menu">
-                        @role('Super Admin')
                         @can('app-settings')
                             <li class="nav-item">
                                 <a class="nav-link" href="{{ route('system-settings.app') }}">{{ __('app_settings') }}</a>
                             </li>
                         @endcan
-                        @endrole
                         @can('school-setting-manage')
                             <li class="nav-item">
                                 <a class="nav-link"
@@ -1182,23 +1180,19 @@
                             </li>
                         @endcan
 
-                        @role('Super Admin')
                         @can('system-setting-manage')
                             <li class="nav-item">
                                 <a class="nav-link"
                                     href="{{ route('system-settings.index') }}">{{ __('general_settings') }}</a>
                             </li>
                         @endcan
-                        @endrole
 
-                        @role('Super Admin')
                         @can('subscription-settings')
                             <li class="nav-item">
                                 <a class="nav-link"
                                     href="{{ route('system-settings.subscription-settings') }}">{{ __('subscription_settings') }}</a>
                             </li>
                         @endcan
-                        @endrole
 
                         {{-- @can('front-site-setting')
                             <li class="nav-item">
@@ -1211,22 +1205,18 @@
                             </li>
                         @endcanany
 
-                        @role('Super Admin')
                         @can('language-list')
                             <li class="nav-item">
                                 <a class="nav-link" href="{{ url('language') }}">
                                     {{ __('language_settings') }}</a>
                             </li>
                         @endcan
-                        @endrole
-                        @role('Super Admin')
                         @can('fcm-setting-manage')
                             <li class="nav-item">
                                 <a class="nav-link" href="{{ route('system-settings.fcm') }}">
                                     {{ __('notification_settings') }}</a>
                             </li>
                         @endcan
-                        @endrole
 
                         {{-- @can('fees-config')
                             <li class="nav-item">
@@ -1244,24 +1234,20 @@
                             </li>
                         @endcan
 
-                        @role('Super Admin')
                         @can('email-setting-create')
                             <li class="nav-item">
                                 <a class="nav-link"
                                     href="{{ route('system-settings.email.index') }}">{{ __('email_configuration') }}</a>
                             </li>
                         @endcan
-                        @endrole
 
                         {{-- Super admin panel --}}
-                        @role('Super Admin')
                         @can('email-setting-create')
                             <li class="nav-item">
                                 <a class="nav-link"
                                     href="{{ route('system-settings.email.template') }}">{{ __('email_template') }}</a>
                             </li>
                         @endcan
-                        @endrole
 
                         {{-- School admin panel --}}
                         @can('email-template')
@@ -1271,13 +1257,13 @@
                             </li>
                         @endcan
 
-                        {{-- Payment Configuration Menu --}}
-                        @can('payment-settings')
+                        {{-- Payment Configuration Menu For Superadmin --}}
+                        @hasanyrole(['Super Admin', 'School Admin'])
                             <li class="nav-item">
                                 <a class="nav-link"
                                     href="{{ route('system-settings.payment.index') }}">{{ __('Payment Settings') }}</a>
                             </li>
-                        @endcan
+                        @endrole
 
                         @can('school-setting-manage')
                             <li class="nav-item">
@@ -1286,14 +1272,12 @@
                             </li>
                         @endcan
 
-                        @role('Super Admin')
                         @can('system-setting-manage')
                             <li class="nav-item">
                                 <a class="nav-link"
                                     href="{{ route('system-settings.third-party') }}">{{ __('Third-Party APIs') }}</a>
                             </li>
                         @endcan
-                        @endrole
 
                         {{-- @can('database-backup')
                             <li class="nav-item">
@@ -1303,7 +1287,6 @@
 
 
 
-                        @role('Super Admin')
                         @can('contact-us')
                             <li class="nav-item">
                                 <a class="nav-link" href="{{ route('system-settings.contact-us') }}">
@@ -1316,9 +1299,8 @@
                                 </a>
                             </li>
                         @endcan
-                        @endrole
 
-                        @can('school-setting-manage')
+                        @hasrole('School Admin')
 
                             {{-- Privacy Policy --}}
                             <li class="nav-item">
@@ -1339,9 +1321,8 @@
                                     href="{{ route('school-settings.refund-cancellation') }}">{{ __('refund_cancellation') }}</a>
                             </li>
 
-                        @endcan
+                        @endrole
 
-                        @role('Super Admin')
                         @can('privacy-policy')
                             <li class="nav-item">
                                 <a class="nav-link"
@@ -1355,7 +1336,6 @@
                                     href="{{ route('system-settings.terms-condition') }}">{{ __('terms_condition') }}</a>
                             </li>
                         @endcan
-                        @endrole
 
                     </ul>
                 </div>
