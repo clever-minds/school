@@ -354,7 +354,7 @@ class SystemSettingsController extends Controller {
 
     public function paymentIndex() {
         /* This method is used for both Super Admin & School Admin */
-        ResponseService::noAnyRoleThenRedirect(['Super Admin', 'School Admin']);
+        ResponseService::noPermissionThenRedirect('payment-settings');
         $paymentConfiguration = $this->paymentConfiguration->all();
         $paymentGateway = [];
         foreach ($paymentConfiguration as $row) {
@@ -362,7 +362,7 @@ class SystemSettingsController extends Controller {
         }
         if (Auth::user()->hasRole('Super Admin')) {
             $settings = $this->cache->getSystemSettings();
-        } else if (Auth::user()->hasRole('School Admin')) {
+        } else {
             $settings = $this->cache->getSchoolSettings();
         }
         return view('settings.payment', compact('paymentGateway', 'settings'));
@@ -371,7 +371,7 @@ class SystemSettingsController extends Controller {
     public function paymentUpdate(Request $request) {
         /* This method is used for both Super Admin & School Admin */
       
-        ResponseService::noAnyRoleThenRedirect(['Super Admin', 'School Admin']);
+        ResponseService::noPermissionThenRedirect('payment-settings');
         $request->validate([
             'gateway.Stripe.status' => 'required|boolean',
             'gateway.Stripe.api_key' => 'required_if:gateway.Stripe.status,1',
@@ -502,7 +502,7 @@ class SystemSettingsController extends Controller {
                     );
                 }
             }
-            if (Auth::user()->hasRole('School Admin')) {
+            if (!Auth::user()->hasRole('Super Admin')) {
                 $this->schoolSetting->upsert([
                     ["name" => 'currency_code',
                      "data" => $request->currency_code,
