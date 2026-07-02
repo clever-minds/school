@@ -1066,6 +1066,7 @@
         </li>
         @endcanany
         {{-- Super admin web settings --}}
+        @role('Super Admin')
         @can('web-settings')
         <li class="nav-item">
             <a class="nav-link" data-toggle="collapse" href="#web_settings" aria-expanded="false"
@@ -1093,6 +1094,7 @@
             </div>
         </li>
         @endcan
+        @endrole
 
         {{-- School web page setttings --}}
         @can('school-web-settings')
