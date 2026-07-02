@@ -5,6 +5,7 @@
     <a data-value="{class_section}" class="btn btn-gradient-light btn_tag mt-2">{ {{ __('class_section') }} }</a>
     <a data-value="{student_mobile}" class="btn btn-gradient-light btn_tag mt-2">{ {{ __('student_mobile') }} }</a>
     <a data-value="{dob}" class="btn btn-gradient-light btn_tag mt-2">{ {{ __('dob') }} }</a>
+    <a data-value="{dob_in_words}" class="btn btn-gradient-light btn_tag mt-2">{ {{ __('dob_in_words') }} }</a>
     <a data-value="{roll_no}" class="btn btn-gradient-light btn_tag mt-2">{ {{ __('roll_no') }} }</a>
     <a data-value="{admission_no}" class="btn btn-gradient-light btn_tag mt-2">{ {{ __('admission_no') }} }</a>
     <a data-value="{current_address}" class="btn btn-gradient-light btn_tag mt-2">{ {{ __('current_address') }} }</a>

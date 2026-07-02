@@ -1173,11 +1173,13 @@
                             </li>
                         @endcan
 
+                        @role('Super Admin')
                         @can('system-setting-manage')
                             <li class="nav-item">
                                 <a class="nav-link" href="{{ route('system-settings.index') }}">{{ __('general_settings') }}</a>
                             </li>
                         @endcan
+                        @endrole
 
                         @can('subscription-settings')
                             <li class="nav-item">
@@ -1232,11 +1234,13 @@
                         @endcan
 
                         {{-- Super admin panel --}}
+                        @role('Super Admin')
                         @can('email-setting-create')
                             <li class="nav-item">
                                 <a class="nav-link" href="{{ route('system-settings.email.template') }}">{{ __('email_template') }}</a>
                             </li>
                         @endcan
+                        @endrole
 
                         {{-- School admin panel --}}
                         @can('email-template')
@@ -1245,12 +1249,12 @@
                             </li>
                         @endcan
 
-                        {{--Payment Configuration Menu For Superadmin--}}
-                        @hasanyrole(['Super Admin','School Admin'])
+                        {{--Payment Configuration Menu--}}
+                        @can('payment-settings')
                         <li class="nav-item">
                             <a class="nav-link" href="{{ route('system-settings.payment.index') }}">{{ __('Payment Settings') }}</a>
                         </li>
-                        @endrole
+                        @endcan
 
                         @can('school-setting-manage')
                         <li class="nav-item">
@@ -1258,11 +1262,13 @@
                         </li>
                         @endcan
 
+                        @role('Super Admin')
                         @can('system-setting-manage')
                         <li class="nav-item">
                             <a class="nav-link" href="{{ route('system-settings.third-party') }}">{{ __('Third-Party APIs') }}</a>
                         </li>
                         @endcan
+                        @endrole
 
                         @can('database-backup')
                             <li class="nav-item">

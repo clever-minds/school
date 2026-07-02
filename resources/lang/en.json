@@ -346,6 +346,7 @@
     "email": "Email",
     "mobile": "Mobile",
     "dob": "Date of Birth",
+    "dob_in_words": "DOB in Words",
     "image": "Image",
     "qualification": "Qualification",
     "action": "Action",

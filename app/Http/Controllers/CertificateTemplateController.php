@@ -515,7 +515,7 @@ class CertificateTemplateController extends Controller
             '{class_section}' => $user->student->class_section->full_name,
             '{student_mobile}' => $user->mobile,
             '{dob}' => date($settings['date_format'],strtotime($user->dob)),
-            '{dob_words}' => $dobWords,
+
             '{roll_no}' => $user->student->roll_number,
             '{admission_no}' => $user->student->admission_no,
             '{current_address}' => $user->current_address,
