@@ -198,7 +198,7 @@ class WebhookController extends Controller
 
                         // Send success notification
                         \Log::info("Success Notification in Stripe");
-                        $user = User::where('id', $metadata['parent_id'])->first();
+                        $user = User::where('id', $metadata['student_id'])->first();
                         \Log::info("User ID : ", [$user]);
                         $body = 'Amount :- ' . $paymentTransactionData->amount;
                         $type = 'payment';
@@ -235,7 +235,7 @@ class WebhookController extends Controller
 
                     http_response_code(400);
                     \Log::info("Failed Notification in Stripe");
-                    $user = User::where('id', $metadata['parent_id'])->first();
+                    $user = User::where('id', $metadata['student_id'])->first();
                     \Log::info("User ID : ", [$user]);
                     $body = 'Amount :- ' . $paymentTransactionData->amount;
                     $type = 'payment';
@@ -340,7 +340,7 @@ class WebhookController extends Controller
                 $result = $this->handleRazorpaySuccess($paymentTransaction, $webhookData, $metadata);
 
                 // Send success notification
-                $user = User::find($metadata->parent_id ?? $paymentTransaction->user_id);
+                $user = User::find($metadata->student_id ?? $paymentTransaction->user_id);
                 if ($user) {
                     $body = 'Payment successful. Amount: ' . ($webhookData->amount / 100);
                     send_notification([$user->id], 'Payment Successful', $body, 'payment', ['is_payment_success' => true]);
@@ -401,7 +401,7 @@ class WebhookController extends Controller
 
                 // send notification
                 \Log::info("Failed Notification in Paystack");
-                $user = User::where('id', $metadata->parent_id)->first();
+                $user = User::where('id', $metadata->student_id)->first();
                 \Log::info("User ID : ", [$user]);
                 $body = 'Amount :- ' . $paymentTransactionData->amount;
                 $type = 'payment';
@@ -558,7 +558,7 @@ class WebhookController extends Controller
 
                 // Send notification
                 \Log::info("Send Notification in Paystack");
-                $user = User::where('id', $metadata->parent_id)->first();
+                $user = User::where('id', $metadata->student_id)->first();
                 \Log::info("User ID : ", [$user]);
                 $body = 'Amount :- ' . $paymentTransactionData->amount;
                 $type = 'payment';
@@ -591,7 +591,7 @@ class WebhookController extends Controller
 
                 // Send notification
                 \Log::info("Send Notification in Paystack");
-                $user = User::where('id', $metadata->parent_id)->first();
+                $user = User::where('id', $metadata->student_id)->first();
                 \Log::info("User ID : ", [$user]);
                 DB::commit();
                 if ($user) {
@@ -775,7 +775,7 @@ class WebhookController extends Controller
 
                 Log::info("payment_intent.succeeded called successfully");
                 \Log::info("Send Notification in Flutterwave");
-                $user = User::where('id', $data->meta_data->parent_id)->first();
+                $user = User::where('id', $data->meta_data->student_id)->first();
                 \Log::info("User ID : ", [$user]);
                 $body = 'Amount :- ' . $paymentTransactionData->amount;
                 $type = 'payment';
@@ -805,7 +805,7 @@ class WebhookController extends Controller
 
                 http_response_code(400);
                 \Log::info("Failed Notification in Flutterwave");
-                $user = User::where('id', $data->data->meta_data->parent_id)->first();
+                $user = User::where('id', $data->data->meta_data->student_id)->first();
                 \Log::info("User ID : ", [$user]);
                 $body = 'Amount :- ' . $paymentTransactionData->amount;
                 $type = 'payment';
@@ -893,7 +893,7 @@ class WebhookController extends Controller
             // }
             DB::commit();
             // Send success notification
-            $user = User::find($metadata->parent_id);
+            $user = User::find($metadata->student_id);
             if ($user) {
                 $body = 'Amount: ' . $amount;
                 send_notification([$user->id], 'Fees Payment Successful', $body, 'payment', ['is_payment_success' => 'true']);
@@ -922,7 +922,7 @@ class WebhookController extends Controller
             // }
             DB::commit();
             // Send failure notification
-            $user = User::find($metadata->parent_id);
+            $user = User::find($metadata->student_id);
             if ($user) {
                 $body = 'Amount: ' . ((int) $webhookData->amount / 100);
                 send_notification([$user->id], 'Fees Payment Failed', $body, 'payment', ['is_payment_success' => 'false']);
