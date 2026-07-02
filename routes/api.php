@@ -134,6 +134,7 @@ Route::group(['prefix' => 'parent'], static function () {
                     Route::post('/optional/pay', [ParentApiController::class, 'payOptionalFees']);
                     Route::get('/receipt', [ParentApiController::class, 'feesPaidReceiptPDF']); //Fees Receipt
                     Route::get('/fees-paid-list', [ParentApiController::class, 'feesPaidList']);
+                    Route::get('/fees-failed-list', [ParentApiController::class, 'feesFailedList']);
                 });
 
 

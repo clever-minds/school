@@ -25,7 +25,9 @@ use UnexpectedValueException;
 class WebhookController extends Controller
 {
 
-    public function __construct(UserInterface $user) {}
+    public function __construct(UserInterface $user)
+    {
+    }
 
     public function stripe()
     {
@@ -94,9 +96,9 @@ class WebhookController extends Controller
 
                         // Get or create fees_paid record
                         $feesPaidDB = FeesPaid::where([
-                            'fees_id'    => $metadata['fees_id'],
+                            'fees_id' => $metadata['fees_id'],
                             'student_id' => $metadata['student_id'],
-                            'school_id'  => $metadata['school_id']
+                            'school_id' => $metadata['school_id']
                         ])->first();
 
                         // Calculate total amount including any existing payments
@@ -104,10 +106,10 @@ class WebhookController extends Controller
 
                         // Prepare fees_paid data
                         $feesPaidData = array(
-                            'amount'     => $totalAmount,
-                            'date'       => date('Y-m-d', strtotime($current_date)),
-                            "school_id"  => $metadata['school_id'],
-                            'fees_id'    => $metadata['fees_id'],
+                            'amount' => $totalAmount,
+                            'date' => date('Y-m-d', strtotime($current_date)),
+                            "school_id" => $metadata['school_id'],
+                            'fees_id' => $metadata['fees_id'],
                             'student_id' => $metadata['student_id'],
                             'is_fully_paid' => $totalAmount >= $fees->total_compulsory_fees,
                             'is_used_installment' => !empty($metadata['installment_details'])
@@ -124,35 +126,35 @@ class WebhookController extends Controller
                             if (!empty($installments)) {
                                 foreach ($installments as $installment) {
                                     CompulsoryFee::create([
-                                        'student_id'             => $metadata['student_id'],
+                                        'student_id' => $metadata['student_id'],
                                         'payment_transaction_id' => $paymentTransactionData->id,
-                                        'type'                   => 'Installment Payment',
-                                        'installment_id'         => $installment['id'],
-                                        'mode'                   => 'Online',
-                                        'cheque_no'              => null,
-                                        'amount'                 => $installment['amount'],
-                                        'due_charges'            => $installment['dueChargesAmount'],
-                                        'fees_paid_id'           => $feesPaidResult->id,
-                                        'status'                 => "Success",
-                                        'date'                   => date('Y-m-d'),
-                                        'school_id'              => $metadata['school_id'],
+                                        'type' => 'Installment Payment',
+                                        'installment_id' => $installment['id'],
+                                        'mode' => 'Online',
+                                        'cheque_no' => null,
+                                        'amount' => $installment['amount'],
+                                        'due_charges' => $installment['dueChargesAmount'],
+                                        'fees_paid_id' => $feesPaidResult->id,
+                                        'status' => "Success",
+                                        'date' => date('Y-m-d'),
+                                        'school_id' => $metadata['school_id'],
                                     ]);
                                 }
                             } else {
                                 // Full payment
                                 CompulsoryFee::create([
-                                    'student_id'             => $metadata['student_id'],
+                                    'student_id' => $metadata['student_id'],
                                     'payment_transaction_id' => $paymentTransactionData->id,
-                                    'type'                   => 'Full Payment',
-                                    'installment_id'         => null,
-                                    'mode'                   => 'Online',
-                                    'cheque_no'              => null,
-                                    'amount'                 => $paymentTransactionData->amount,
-                                    'due_charges'            => $metadata['dueChargesAmount'] ?? 0,
-                                    'fees_paid_id'           => $feesPaidResult->id,
-                                    'status'                 => "Success",
-                                    'date'                   => date('Y-m-d'),
-                                    'school_id'              => $metadata['school_id'],
+                                    'type' => 'Full Payment',
+                                    'installment_id' => null,
+                                    'mode' => 'Online',
+                                    'cheque_no' => null,
+                                    'amount' => $paymentTransactionData->amount,
+                                    'due_charges' => $metadata['dueChargesAmount'] ?? 0,
+                                    'fees_paid_id' => $feesPaidResult->id,
+                                    'status' => "Success",
+                                    'date' => date('Y-m-d'),
+                                    'school_id' => $metadata['school_id'],
                                 ]);
                             }
 
@@ -172,9 +174,9 @@ class WebhookController extends Controller
 
                                     FeesAdvance::create([
                                         'compulsory_fee_id' => $updateCompulsoryFees->id,
-                                        'student_id'        => $metadata['student_id'],
-                                        'parent_id'         => $metadata['parent_id'],
-                                        'amount'            => $metadata['advance_amount']
+                                        'student_id' => $metadata['student_id'],
+                                        'parent_id' => $metadata['parent_id'],
+                                        'amount' => $metadata['advance_amount']
                                     ]);
                                 }
                             }
@@ -182,14 +184,14 @@ class WebhookController extends Controller
                             $optionalFees = json_decode($metadata['optional_fees_id'], true);
                             foreach ($optionalFees as $optionalFee) {
                                 OptionalFee::create([
-                                    'student_id'             => $metadata['student_id'],
+                                    'student_id' => $metadata['student_id'],
                                     'payment_transaction_id' => $paymentTransactionData->id,
-                                    'fees_class_id'          => $optionalFee['id'],
-                                    'amount'                 => $optionalFee['amount'],
-                                    'fees_paid_id'           => $feesPaidResult->id,
-                                    'status'                 => "Success",
-                                    'date'                   => date('Y-m-d'),
-                                    'school_id'              => $metadata['school_id'],
+                                    'fees_class_id' => $optionalFee['id'],
+                                    'amount' => $optionalFee['amount'],
+                                    'fees_paid_id' => $feesPaidResult->id,
+                                    'status' => "Success",
+                                    'date' => date('Y-m-d'),
+                                    'school_id' => $metadata['school_id'],
                                 ]);
                             }
                         }
@@ -204,7 +206,7 @@ class WebhookController extends Controller
 
                         send_notification([$user->id], 'Fees Payment Successful', $body, $type, ['is_payment_success' => "true"]);
                         \Log::info("send_notification", [$user->id]);
-                      
+
                         Log::info("Payment processed successfully for transaction ID: " . $metadata['payment_transaction_id']);
                     } catch (\Exception $e) {
                         DB::rollBack();
@@ -598,7 +600,7 @@ class WebhookController extends Controller
                     \Log::info("send_notification", [$user->id]);
                 }
 
-              
+
                 return response()->json(['status' => 'failed'], 400);
             }
 
@@ -674,19 +676,19 @@ class WebhookController extends Controller
                 DB::beginTransaction();
                 PaymentTransaction::where('id', $paymentTransactionData->id)->update(['payment_status' => "succeed"]);
                 $feesPaidDB = FeesPaid::where([
-                    'fees_id'    => $data->meta_data->fees_id,
+                    'fees_id' => $data->meta_data->fees_id,
                     'student_id' => $data->meta_data->student_id,
-                    'school_id'  => $data->meta_data->school_id
+                    'school_id' => $data->meta_data->school_id
                 ])->first();
 
                 // Check if Fees Paid Exists Then Add The optional Fees Amount with Fess Paid Amount
                 $totalAmount = !empty($feesPaidDB) ? $feesPaidDB->amount + $data->data->amount : $data->data->amount;
                 // Fees Paid Array
                 $feesPaidData = array(
-                    'amount'     => $totalAmount,
-                    'date'       => date('Y-m-d', strtotime($current_date)),
-                    "school_id"  => $data->meta_data->school_id,
-                    'fees_id'    => $data->meta_data->fees_id,
+                    'amount' => $totalAmount,
+                    'date' => date('Y-m-d', strtotime($current_date)),
+                    "school_id" => $data->meta_data->school_id,
+                    'fees_id' => $data->meta_data->fees_id,
                     'student_id' => $data->meta_data->student_id,
                 );
 
@@ -700,36 +702,36 @@ class WebhookController extends Controller
                             \Log::info([$data->meta_data]);
 
                             CompulsoryFee::create([
-                                'student_id'             => $data->meta_data->student_id,
+                                'student_id' => $data->meta_data->student_id,
                                 'payment_transaction_id' => $paymentTransactionData->id,
-                                'type'                   => 'Installment Payment',
-                                'installment_id'         => $installment['id'],
-                                'mode'                   => 'Online',
-                                'cheque_no'              => null,
-                                'amount'                 => $installment['amount'],
-                                'due_charges'            => $data->meta_data->dueChargesAmount ?? 0,
-                                'fees_paid_id'           => $feesPaidResult->id,
-                                'status'                 => "Success",
-                                'date'                   => date('Y-m-d'),
-                                'school_id'              => $data->meta_data->school_id,
+                                'type' => 'Installment Payment',
+                                'installment_id' => $installment['id'],
+                                'mode' => 'Online',
+                                'cheque_no' => null,
+                                'amount' => $installment['amount'],
+                                'due_charges' => $data->meta_data->dueChargesAmount ?? 0,
+                                'fees_paid_id' => $feesPaidResult->id,
+                                'status' => "Success",
+                                'date' => date('Y-m-d'),
+                                'school_id' => $data->meta_data->school_id,
                             ]);
                         }
                     } else if ($data->meta_data->advance_amount == 0) {
 
 
                         CompulsoryFee::create([
-                            'student_id'             => $data->meta_data->student_id,
+                            'student_id' => $data->meta_data->student_id,
                             'payment_transaction_id' => $paymentTransactionData->id,
-                            'type'                   => 'Full Payment',
-                            'installment_id'         => null,
-                            'mode'                   => 'Online',
-                            'cheque_no'              => null,
-                            'amount'                 => $paymentTransactionData->amount,
-                            'due_charges'            => $data->meta_data->dueChargesAmount ?? 0,
-                            'fees_paid_id'           => $feesPaidResult->id,
-                            'status'                 => "Success",
-                            'date'                   => date('Y-m-d'),
-                            'school_id'              => $data->meta_data->school_id,
+                            'type' => 'Full Payment',
+                            'installment_id' => null,
+                            'mode' => 'Online',
+                            'cheque_no' => null,
+                            'amount' => $paymentTransactionData->amount,
+                            'due_charges' => $data->meta_data->dueChargesAmount ?? 0,
+                            'fees_paid_id' => $feesPaidResult->id,
+                            'status' => "Success",
+                            'date' => date('Y-m-d'),
+                            'school_id' => $data->meta_data->school_id,
                         ]);
                     }
 
@@ -744,9 +746,9 @@ class WebhookController extends Controller
 
                         FeesAdvance::create([
                             'compulsory_fee_id' => $updateCompulsoryFees->id,
-                            'student_id'        => $data->meta_data->student_id,
-                            'parent_id'         => $data->meta_data->parent_id,
-                            'amount'            => $data->meta_data->advance_amount
+                            'student_id' => $data->meta_data->student_id,
+                            'parent_id' => $data->meta_data->parent_id,
+                            'amount' => $data->meta_data->advance_amount
                         ]);
                     }
                     $feesPaidResult->is_fully_paid = $totalAmount >= $fees->total_compulsory_fees;
@@ -756,17 +758,17 @@ class WebhookController extends Controller
                     $optional_fees = json_decode($data->data->meta_data->optional_fees_id, false, 512, JSON_THROW_ON_ERROR);
                     foreach ($optional_fees as $optional_fee) {
                         OptionalFee::create([
-                            'student_id'             => $data->data->meta_data->student_id,
-                            'class_id'               => $data->data->meta_data->class_id,
+                            'student_id' => $data->data->meta_data->student_id,
+                            'class_id' => $data->data->meta_data->class_id,
                             'payment_transaction_id' => $paymentTransactionData->id,
-                            'fees_class_id'          => $optional_fee->id,
-                            'mode'                   => 'Online',
-                            'cheque_no'              => null,
-                            'amount'                 => $optional_fee->amount,
-                            'fees_paid_id'           => $feesPaidResult->id,
-                            'date'                   => date('Y-m-d'),
-                            'school_id'              => $data->data->meta_data->school_id,
-                            'status'                 => "Success",
+                            'fees_class_id' => $optional_fee->id,
+                            'mode' => 'Online',
+                            'cheque_no' => null,
+                            'amount' => $optional_fee->amount,
+                            'fees_paid_id' => $feesPaidResult->id,
+                            'date' => date('Y-m-d'),
+                            'school_id' => $data->data->meta_data->school_id,
+                            'status' => "Success",
                         ]);
                     }
                 }
@@ -856,23 +858,23 @@ class WebhookController extends Controller
 
             // Update fees paid record
             $feesPaidDB = FeesPaid::where([
-                'fees_id'    => $metadata->fees_id,
+                'fees_id' => $metadata->fees_id,
                 'student_id' => $metadata->student_id,
-                'school_id'  => $metadata->school_id
+                'school_id' => $metadata->school_id
             ])->first();
 
             // Convert amount to integer
-            $amount = (int)$webhookData->amount / 100; // Razorpay amount is in paise
+            $amount = (int) $webhookData->amount / 100; // Razorpay amount is in paise
 
             $totalAmount = !empty($feesPaidDB) ?
                 $feesPaidDB->amount + $amount :
                 $amount;
 
             $feesPaidData = [
-                'amount'     => $totalAmount,
-                'date'       => date('Y-m-d'),
-                'school_id'  => $metadata->school_id,
-                'fees_id'    => $metadata->fees_id,
+                'amount' => $totalAmount,
+                'date' => date('Y-m-d'),
+                'school_id' => $metadata->school_id,
+                'fees_id' => $metadata->fees_id,
                 'student_id' => $metadata->student_id,
                 'is_fully_paid' => $totalAmount >= $fees->total_compulsory_fees,
                 'is_used_installment' => !empty($paymentTransaction->installment_details)
@@ -884,11 +886,11 @@ class WebhookController extends Controller
             );
 
             // Process fees based on type
-            if ($paymentTransaction->fees_type == "compulsory") {
-                $this->processCompulsoryFees($paymentTransaction, $feesPaidResult, $metadata);
-            } else if ($paymentTransaction->fees_type == "optional") {
-                $this->processOptionalFees($paymentTransaction, $feesPaidResult, $metadata);
-            }
+            //  if ($paymentTransaction->fees_type == "compulsory") {
+            $this->processCompulsoryFees($paymentTransaction, $feesPaidResult, $metadata);
+            // } else if ($paymentTransaction->fees_type == "optional") {
+            //     $this->processOptionalFees($paymentTransaction, $feesPaidResult, $metadata);
+            // }
             DB::commit();
             // Send success notification
             $user = User::find($metadata->parent_id);
@@ -911,18 +913,18 @@ class WebhookController extends Controller
             $paymentTransaction->payment_status = "failed";
             $paymentTransaction->save();
 
-            if ($paymentTransaction->fees_type == "compulsory") {
-                CompulsoryFee::where('payment_transaction_id', $paymentTransaction->id)
-                    ->update(['status' => "failed"]);
-            } else if ($paymentTransaction->fees_type == "optional") {
-                OptionalFee::where('payment_transaction_id', $paymentTransaction->id)
-                    ->update(['status' => "failed"]);
-            }
+            // if ($paymentTransaction->fees_type == "compulsory") {
+            CompulsoryFee::where('payment_transaction_id', $paymentTransaction->id)
+                ->update(['status' => "failed"]);
+            // } else if ($paymentTransaction->fees_type == "optional") {
+            //     OptionalFee::where('payment_transaction_id', $paymentTransaction->id)
+            //         ->update(['status' => "failed"]);
+            // }
             DB::commit();
             // Send failure notification
             $user = User::find($metadata->parent_id);
             if ($user) {
-                $body = 'Amount: ' . ((int)$webhookData->amount / 100);
+                $body = 'Amount: ' . ((int) $webhookData->amount / 100);
                 send_notification([$user->id], 'Fees Payment Failed', $body, 'payment', ['is_payment_success' => 'false']);
             }
             return response()->json(['status' => 'failed'], 400);

@@ -2050,6 +2050,27 @@ class ParentApiController extends Controller
         }
     }
 
+    //get the fees failed list
+    public function feesFailedList(Request $request) {
+        $validator = Validator::make($request->all(), [
+            'child_id'        => 'required',
+        ]);
+
+        if ($validator->fails()) {
+            ResponseService::validationError($validator->errors()->first());
+        }
+        try {
+            $child = $this->student->findById($request->child_id);
+            // Fetching transactions with payment_status 0 or 2 (Failed / Pending)
+            $fees_failed = $this->paymentTransaction->builder()->where('user_id', $child->user_id)->whereIn('payment_status', [0, 2])->get();
+
+            ResponseService::successResponse("Fees Failed List Fetched Successfully", $fees_failed);
+        } catch (Throwable $e) {
+            ResponseService::logErrorResponse($e);
+            ResponseService::errorResponse();
+        }
+    }
+
 
 
     // // Make Transaction Fail API
