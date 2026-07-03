@@ -1041,7 +1041,9 @@ class StaffApiController extends Controller
         try {
             $sessionYear = $this->cache->getDefaultSessionYear();
             $user = Auth::user();
-            $sql = $this->notification->builder()->where('session_year_id', $sessionYear->id)->where('user_id', $user->id)->orderBy('id', 'DESC')->paginate(10);
+            $sql = $this->notification->builder()->where('session_year_id', $sessionYear->id)->whereHas('notificationUsers', function ($query) {
+                $query->where('user_id', auth()->id());
+            })->orderBy('id', 'DESC')->paginate(10);
 
             ResponseService::successResponse('Data Fetched Successfully', $sql);
         } catch (\Throwable $th) {
