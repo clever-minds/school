@@ -108,7 +108,7 @@ class StaffApiController extends Controller
             $sql = $this->expense->builder()->select('id', 'staff_id', 'basic_salary', 'paid_leaves', 'month', 'year', 'title', 'amount', 'date', 'session_year_id')->where('staff_id', Auth::user()->staff->id)
                 ->when($request->year, function ($q) use ($request) {
                     $q->whereYear('date', $request->year);
-                })->with('staff', 'staff.staffSalary.payrollSetting',);
+                })->with('staff', 'staff.staffSalary.payrollSetting', );
 
 
             $sql = $this->expense->builder()->select('id', 'staff_id', 'basic_salary', 'paid_leaves', 'month', 'year', 'title', 'amount', 'date', 'session_year_id')->where('staff_id', Auth::user()->staff->id)
@@ -158,11 +158,15 @@ class StaffApiController extends Controller
                 ResponseService::successResponse('no_data_found');
             }
             // Get total leaves
-            $leaves = $this->leave->builder()->where('status', 1)->where('user_id', $salary->staff->user_id)->withCount(['leave_detail as full_leave' => function ($q) use ($salary) {
-                $q->whereMonth('date', $salary->month)->whereYear('date', $salary->year)->where('type', 'Full');
-            }])->withCount(['leave_detail as half_leave' => function ($q) use ($salary) {
-                $q->whereMonth('date', $salary->month)->whereYear('date', $salary->year)->whereNot('type', 'Full');
-            }])->get();
+            $leaves = $this->leave->builder()->where('status', 1)->where('user_id', $salary->staff->user_id)->withCount([
+                'leave_detail as full_leave' => function ($q) use ($salary) {
+                    $q->whereMonth('date', $salary->month)->whereYear('date', $salary->year)->where('type', 'Full');
+                }
+            ])->withCount([
+                        'leave_detail as half_leave' => function ($q) use ($salary) {
+                            $q->whereMonth('date', $salary->month)->whereYear('date', $salary->year)->whereNot('type', 'Full');
+                        }
+                    ])->get();
 
             $total_leaves = $leaves->sum('full_leave') + ($leaves->sum('half_leave') / 2);
             // Total days
@@ -173,11 +177,11 @@ class StaffApiController extends Controller
                 $allow_leaves = $leaves->first()->leave_master->leaves;
             }
 
-            $pdf = PDF::loadView('payroll.slip', compact('schoolSetting', 'salary', 'total_leaves', 'days','allow_leaves'))->output();
+            $pdf = PDF::loadView('payroll.slip', compact('schoolSetting', 'salary', 'total_leaves', 'days', 'allow_leaves'))->output();
 
             return $response = array(
                 'error' => false,
-                'pdf'   => base64_encode($pdf),
+                'pdf' => base64_encode($pdf),
             );
 
 
@@ -224,7 +228,7 @@ class StaffApiController extends Controller
             $title = Carbon::create()->month($request->month)->format('F') . ' - ' . $request->year;
             $data = array();
             foreach ($request->payroll as $key => $payroll) {
-                $payroll = (object)$payroll;
+                $payroll = (object) $payroll;
                 $data[] = [
                     'staff_id' => $payroll->staff_id,
                     'basic_salary' => $payroll->basic_salary,
@@ -253,7 +257,7 @@ class StaffApiController extends Controller
         ResponseService::noFeatureThenSendJson('Expense Management');
         try {
             $sessionYear = $this->sessionYearInterface->builder()->orderBy('start_date', 'ASC')->pluck('name');
-           // dd($sessionYear);
+            // dd($sessionYear);
             // $sessionYear = date('Y', strtotime($sessionYear->start_date));
 
             // $current_year = Carbon::now()->format('Y');
@@ -292,20 +296,32 @@ class StaffApiController extends Controller
                 });
             })->first();
 
-    
-            $sql = $this->staff->builder()->with(['user:id,first_name,last_name,image','staffSalary.payrollSetting', 'expense:id,staff_id,basic_salary,paid_leaves,month,year,title,amount,date', 'leave' => function ($q) use ($month,$year) {
-                $q->where('status', 1)->withCount(['leave_detail as full_leave' => function ($q) use ($month,$year) {
-                    $q->whereMonth('date', $month)->whereYear('date',$year)->where('type', 'Full');
-                }])->withCount(['leave_detail as half_leave' => function ($q) use ($month,$year) {
-                    $q->whereMonth('date', $month)->whereYear('date',$year)->whereNot('type', 'Full');
 
-                }])->with(['leave_detail' => function ($q) use ($month, $year) {
-                        $q->whereMonth('date', $month)->whereYear('date', $year);
-                    }]);
-            }, 'expense' => function ($q) use ($month, $year) {
-                $q->where('month', $month)->where('year', $year)
-                    ->with('staff_payroll.payroll_setting');
-            }])
+            $sql = $this->staff->builder()->with([
+                'user:id,first_name,last_name,image',
+                'staffSalary.payrollSetting',
+                'expense:id,staff_id,basic_salary,paid_leaves,month,year,title,amount,date',
+                'leave' => function ($q) use ($month, $year) {
+                    $q->where('status', 1)->withCount([
+                        'leave_detail as full_leave' => function ($q) use ($month, $year) {
+                            $q->whereMonth('date', $month)->whereYear('date', $year)->where('type', 'Full');
+                        }
+                    ])->withCount([
+                                'leave_detail as half_leave' => function ($q) use ($month, $year) {
+                                    $q->whereMonth('date', $month)->whereYear('date', $year)->whereNot('type', 'Full');
+
+                                }
+                            ])->with([
+                                'leave_detail' => function ($q) use ($month, $year) {
+                                    $q->whereMonth('date', $month)->whereYear('date', $year);
+                                }
+                            ]);
+                },
+                'expense' => function ($q) use ($month, $year) {
+                    $q->where('month', $month)->where('year', $year)
+                        ->with('staff_payroll.payroll_setting');
+                }
+            ])
 
                 ->whereHas('user', function ($q) {
                     $q->Owner();
@@ -478,9 +494,9 @@ class StaffApiController extends Controller
         ResponseService::noPermissionThenSendJson('approve-leave');
         try {
             if ($request->leave_id) {
-                $sql = $this->leave->findById($request->leave_id, ['*'], ['user:id,first_name,last_name,image,email,mobile', 'leave_detail', 'file'])->orderBy('created_at','DESC')->get();
+                $sql = $this->leave->findById($request->leave_id, ['*'], ['user:id,first_name,last_name,image,email,mobile', 'leave_detail', 'file'])->orderBy('created_at', 'DESC')->get();
             } else {
-                $sql = $this->leave->builder()->where('status', 0)->with('user:id,first_name,last_name,image,email,mobile', 'leave_detail', 'file')->orderBy('created_at','DESC')->get();
+                $sql = $this->leave->builder()->where('status', 0)->with('user:id,first_name,last_name,image,email,mobile', 'leave_detail', 'file')->orderBy('created_at', 'DESC')->get();
             }
             ResponseService::successResponse('Data Fetched Successfully', $sql);
         } catch (\Throwable $th) {
@@ -507,7 +523,7 @@ class StaffApiController extends Controller
             $user[] = $leave->user_id;
 
             $type = "Leave";
-            
+
 
             DB::commit();
 
@@ -522,12 +538,15 @@ class StaffApiController extends Controller
                 send_notification($user, $title, $body, $type);
             }
 
-            
+
             ResponseService::successResponse('Data Updated Successfully');
         } catch (\Throwable $e) {
-            if (Str::contains($e->getMessage(), [
-                'does not exist','file_get_contents'
-            ])) {
+            if (
+                Str::contains($e->getMessage(), [
+                    'does not exist',
+                    'file_get_contents'
+                ])
+            ) {
                 DB::commit();
                 ResponseService::warningResponse("Data Stored successfully. But App push notification not send.");
             } else {
@@ -599,8 +618,8 @@ class StaffApiController extends Controller
             DB::beginTransaction();
             $sessionYear = $this->cache->getDefaultSessionYear();
             $announcementData = array(
-                'title'           => $request->title,
-                'description'     => $request->description,
+                'title' => $request->title,
+                'description' => $request->description,
                 'session_year_id' => $sessionYear->id,
             );
 
@@ -612,7 +631,7 @@ class StaffApiController extends Controller
             // Set class sections
             foreach ($request->class_section_id as $class_section) {
                 $announcementClassData[] = [
-                    'announcement_id'  => $announcement->id,
+                    'announcement_id' => $announcement->id,
                     'class_section_id' => $class_section
                 ];
             }
@@ -628,10 +647,10 @@ class StaffApiController extends Controller
                     // Create Temp File Data Array
                     $tempFileData = array(
                         'modal_type' => $announcementModelAssociate->modal_type,
-                        'modal_id'   => $announcementModelAssociate->modal_id,
-                        'file_name'  => $file_upload->getClientOriginalName(),
-                        'type'       => 1,
-                        'file_url'   => $file_upload
+                        'modal_id' => $announcementModelAssociate->modal_id,
+                        'file_name' => $file_upload->getClientOriginalName(),
+                        'type' => 1,
+                        'file_url' => $file_upload
                     );
                     $fileData[] = $tempFileData; // Store Temp File Data in Multi-Dimensional File Data Array
                 }
@@ -644,12 +663,15 @@ class StaffApiController extends Controller
                 send_notification($notifyUser, $title, $body, $type); // Send Notification
             }
 
-          
+
             ResponseService::successResponse('Data Stored Successfully');
         } catch (\Throwable $e) {
-            if (Str::contains($e->getMessage(), [
-                'does not exist','file_get_contents'
-            ])) {
+            if (
+                Str::contains($e->getMessage(), [
+                    'does not exist',
+                    'file_get_contents'
+                ])
+            ) {
                 DB::commit();
                 ResponseService::warningResponse("Data Stored successfully. But App push notification not send.");
             } else {
@@ -676,8 +698,8 @@ class StaffApiController extends Controller
             DB::beginTransaction();
             $sessionYear = $this->cache->getDefaultSessionYear();
             $announcementData = array(
-                'title'           => $request->title,
-                'description'     => $request->description,
+                'title' => $request->title,
+                'description' => $request->description,
                 'session_year_id' => $sessionYear->id,
             );
 
@@ -693,7 +715,7 @@ class StaffApiController extends Controller
             // Set class sections
             foreach ($request->class_section_id as $class_section) {
                 $announcementClassData[] = [
-                    'announcement_id'  => $announcement->id,
+                    'announcement_id' => $announcement->id,
                     'class_section_id' => $class_section
                 ];
                 // Check class section
@@ -719,10 +741,10 @@ class StaffApiController extends Controller
                     // Create Temp File Data Array
                     $tempFileData = array(
                         'modal_type' => $announcementModelAssociate->modal_type,
-                        'modal_id'   => $announcementModelAssociate->modal_id,
-                        'file_name'  => $file_upload->getClientOriginalName(),
-                        'type'       => 1,
-                        'file_url'   => $file_upload
+                        'modal_id' => $announcementModelAssociate->modal_id,
+                        'file_name' => $file_upload->getClientOriginalName(),
+                        'type' => 1,
+                        'file_url' => $file_upload
                     );
                     $fileData[] = $tempFileData; // Store Temp File Data in Multi-Dimensional File Data Array
                 }
@@ -738,9 +760,12 @@ class StaffApiController extends Controller
             DB::commit();
             ResponseService::successResponse('Data Updated Successfully');
         } catch (\Throwable $e) {
-            if (Str::contains($e->getMessage(), [
-                'does not exist','file_get_contents'
-            ])) {
+            if (
+                Str::contains($e->getMessage(), [
+                    'does not exist',
+                    'file_get_contents'
+                ])
+            ) {
                 DB::commit();
                 ResponseService::warningResponse("Data Stored successfully. But App push notification not send.");
             } else {
@@ -939,10 +964,11 @@ class StaffApiController extends Controller
 
                 foreach ($fees as $key => $fee) {
                     $sql = $this->user->builder()->role('Student')->select('id', 'first_name', 'last_name')->with([
-                        'fees_paid'     => function ($q) use ($fee) {
+                        'fees_paid' => function ($q) use ($fee) {
                             $q->where('fees_id', $fee->id);
                         },
-                        'student:id,guardian_id,user_id', 'student.guardian:id'
+                        'student:id,guardian_id,user_id',
+                        'student.guardian:id'
                     ])->whereHas('student.class_section', function ($q) use ($fee) {
                         $q->where('class_id', $fee->class_id);
                     })->whereDoesntHave('fees_paid', function ($q) use ($fee) {
@@ -992,9 +1018,12 @@ class StaffApiController extends Controller
 
             ResponseService::successResponse('Notification Send Successfully');
         } catch (\Throwable $e) {
-            if (Str::contains($e->getMessage(), [
-                'does not exist','file_get_contents'
-            ])) {
+            if (
+                Str::contains($e->getMessage(), [
+                    'does not exist',
+                    'file_get_contents'
+                ])
+            ) {
                 DB::commit();
                 ResponseService::warningResponse("Data Stored successfully. But App push notification not send.");
             } else {
@@ -1011,7 +1040,8 @@ class StaffApiController extends Controller
         ResponseService::noPermissionThenSendJson('announcement-list');
         try {
             $sessionYear = $this->cache->getDefaultSessionYear();
-            $sql = $this->notification->builder()->where('session_year_id', $sessionYear->id)->orderBy('id', 'DESC')->paginate(10);
+            $user = Auth::user();
+            $sql = $this->notification->builder()->where('session_year_id', $sessionYear->id)->where('user_id', $user->id)->orderBy('id', 'DESC')->paginate(10);
 
             ResponseService::successResponse('Data Fetched Successfully', $sql);
         } catch (\Throwable $th) {
@@ -1070,23 +1100,31 @@ class StaffApiController extends Controller
             //     ->withSum('optional_fee','amount');
             // }]);
 
-            $fees = $this->fees->builder()->where('id', $request->fees_id)->where('session_year_id', $request->session_year_id)->with(['fees_class_type.fees_type:id,name', 'installments:id,name,due_date,due_charges,fees_id', 'fees_paid' => function ($q) {
-                $q->withSum('compulsory_fee', 'amount')
-                    ->withSum('optional_fee', 'amount');
-            }])->first();
+            $fees = $this->fees->builder()->where('id', $request->fees_id)->where('session_year_id', $request->session_year_id)->with([
+                'fees_class_type.fees_type:id,name',
+                'installments:id,name,due_date,due_charges,fees_id',
+                'fees_paid' => function ($q) {
+                    $q->withSum('compulsory_fee', 'amount')
+                        ->withSum('optional_fee', 'amount');
+                }
+            ])->first();
 
             if (!$fees) {
                 ResponseService::successResponse('No Data Found');
             }
 
             $sql = $this->user->builder()->role('Student')->select('id', 'first_name', 'last_name')->with([
-                'student'          => function ($query) {
-                    $query->select('id', 'class_section_id', 'user_id')->with(['class_section' => function ($query) {
-                        $query->select('id', 'class_id', 'section_id', 'medium_id')->with('class:id,name', 'section:id,name', 'medium:id,name');
-                    }]);
-                }, 'optional_fees' => function ($query) {
+                'student' => function ($query) {
+                    $query->select('id', 'class_section_id', 'user_id')->with([
+                        'class_section' => function ($query) {
+                            $query->select('id', 'class_id', 'section_id', 'medium_id')->with('class:id,name', 'section:id,name', 'medium:id,name');
+                        }
+                    ]);
+                },
+                'optional_fees' => function ($query) {
                     $query->with('fees_class_type');
-                }, 'fees_paid'     => function ($q) use ($fees) {
+                },
+                'fees_paid' => function ($q) use ($fees) {
                     $q->where('fees_id', $fees->id);
                 },
                 'compulsory_fees'
@@ -1135,11 +1173,14 @@ class StaffApiController extends Controller
         }
         try {
 
-            $sql = $this->examResult->builder()->with(['user:id,first_name,last_name,school_id', 'user.exam_marks' => function ($q) use ($request) {
-                $q->whereHas('timetable', function ($q) use ($request) {
-                    $q->where('exam_id', $request->exam_id);
-                })->with('timetable', 'subject');
-            }])
+            $sql = $this->examResult->builder()->with([
+                'user:id,first_name,last_name,school_id',
+                'user.exam_marks' => function ($q) use ($request) {
+                    $q->whereHas('timetable', function ($q) use ($request) {
+                        $q->where('exam_id', $request->exam_id);
+                    })->with('timetable', 'subject');
+                }
+            ])
                 ->where('exam_id', $request->exam_id)
                 ->where('session_year_id', $request->session_year_id)
                 ->where('class_section_id', $request->class_section_id)->with('exam:id,name,description,start_date,end_date');
@@ -1173,12 +1214,12 @@ class StaffApiController extends Controller
                     'permissions' => $permissions
                 ];
 
-                ResponseService::successResponse('Data Fetched Successfully', $data);    
+                ResponseService::successResponse('Data Fetched Successfully', $data);
             } else {
                 ResponseService::errorResponse(trans('your_account_has_been_deactivated_please_contact_admin'), null, config('constants.RESPONSE_CODE.INACTIVATED_USER'));
             }
-            
-            
+
+
         } catch (\Throwable $th) {
             ResponseService::logErrorResponse($th);
             ResponseService::errorResponse();
@@ -1235,7 +1276,7 @@ class StaffApiController extends Controller
             $student = $this->student->builder()->with('user:id,first_name,last_name')
                 ->where(function ($q) use ($feesPaid) {
                     $q->where('id', $feesPaid->student_id)
-                      ->orWhere('user_id', $feesPaid->student_id);
+                        ->orWhere('user_id', $feesPaid->student_id);
                 })->firstOrFail();
 
             $systemVerticalLogo = $this->systemSetting->builder()->where('name', 'vertical_logo')->first();
@@ -1247,7 +1288,7 @@ class StaffApiController extends Controller
 
             return $response = array(
                 'error' => false,
-                'pdf'   => base64_encode($pdf),
+                'pdf' => base64_encode($pdf),
             );
         } catch (\Throwable $th) {
             ResponseService::logErrorResponse($th);
@@ -1260,20 +1301,20 @@ class StaffApiController extends Controller
 
         try {
             $sql = Auth::user()->load('staff.staffSalary.payrollSetting');
-            
+
             ResponseService::successResponse('Data Fetched Successfully', $sql);
         } catch (\Throwable $th) {
             ResponseService::logErrorResponse($th);
             ResponseService::errorResponse();
         }
     }
-     public function getAllSchools(Request $request)
+    public function getAllSchools(Request $request)
     {
         try {
             // Optional: Add filters if needed (e.g. by city or active status)
             $schools = School::select('id', 'name')
-                            ->orderBy('name', 'ASC')
-                            ->get();
+                ->orderBy('name', 'ASC')
+                ->get();
 
             if ($schools->isEmpty()) {
                 return ResponseService::errorResponse('No schools found');
@@ -1285,37 +1326,38 @@ class StaffApiController extends Controller
             return ResponseService::errorResponse('Failed to fetch schools');
         }
     }
-   public function getNotifications()
-{
-    try {
+    public function getNotifications()
+    {
+        try {
 
-        $userId = auth()->id(); // ✅ logged-in user
+            $userId = auth()->id(); // ✅ logged-in user
 
-        $notifications = Notification::with([
+            $notifications = Notification::with([
                 'notificationUsers' => function ($q) use ($userId) {
                     $q->where('user_id', $userId);
                 }
             ])
-            ->where('send_to', '!=', 'Guardian')
-            ->whereHas('notificationUsers', function ($q) use ($userId) {
-                $q->where('user_id', $userId);
-            })
-            ->orderBy('id', 'DESC')
-            ->get();
+                ->where('send_to', '!=', 'Guardian')
+                ->whereHas('notificationUsers', function ($q) use ($userId) {
+                    $q->where('user_id', $userId);
+                })
+                ->orderBy('id', 'DESC')
+                ->get();
 
-        return ResponseService::successResponse(
-            "Notifications fetched successfully",
-            $notifications
-        );
+            return ResponseService::successResponse(
+                "Notifications fetched successfully",
+                $notifications
+            );
 
-    } catch (Throwable $e) {
+        } catch (Throwable $e) {
 
-        ResponseService::logErrorResponse($e);
-        return ResponseService::errorResponse();
+            ResponseService::logErrorResponse($e);
+            return ResponseService::errorResponse();
+        }
     }
-}
 
-    public function markAttendance(Request $request) {
+    public function markAttendance(Request $request)
+    {
         $validator = Validator::make($request->all(), [
             'latitude' => 'required',
             'longitude' => 'required',
@@ -1369,14 +1411,15 @@ class StaffApiController extends Controller
 
 
 
-    public function attendanceHistory(Request $request) {
+    public function attendanceHistory(Request $request)
+    {
         try {
             $user = Auth::user();
             $attendance = $this->staffAttendance->builder()->where('user_id', $user->id)
-                ->when($request->month, function($q) use($request){
+                ->when($request->month, function ($q) use ($request) {
                     $q->whereMonth('date', $request->month);
                 })
-                ->when($request->year, function($q) use($request){
+                ->when($request->year, function ($q) use ($request) {
                     $q->whereYear('date', $request->year);
                 })
                 ->orderBy('date', 'desc')
@@ -1388,7 +1431,8 @@ class StaffApiController extends Controller
         }
     }
 
-    public function attendanceReport(Request $request) {
+    public function attendanceReport(Request $request)
+    {
         try {
             $sql = $this->staffAttendance->builder()->with('user:id,first_name,last_name,image');
 
