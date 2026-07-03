@@ -509,6 +509,7 @@ class CertificateTemplateController extends Controller
         $qualifiedForHigherClass = (strtolower($lastExamResult) === 'pass') ? 'Yes' : 'No';     
 
         $placeholders = [
+            '{dob_in_words}'=>$dob_in_words,
             '{full_name}' => $user->full_name,
             '{first_name}' => $user->first_name,
             '{last_name}' => $user->last_name,
@@ -529,7 +530,6 @@ class CertificateTemplateController extends Controller
             '{remark}' => $user->student->remarks,
             '{application_date}' => date('d-m-Y'),
             '{date_of_issue}'    => date('d-m-Y'),
-            '{dob_in_words}'=>$dob_in_words,
             '{admission_date}' => date($settings['date_format'],strtotime($user->student->admission_date)),
             '{guardian_name}' => $user->student->guardian->first_name.' '.$user->student->guardian->last_name,
             '{mother_name}' => $user->student->guardian->mother_name,
@@ -675,12 +675,12 @@ class CertificateTemplateController extends Controller
         $dobWords = $this->dobToWords($user->dob);
 
         $placeholders = [
+            '{dob_words}' => $dobWords,
             '{full_name}' => $user->full_name,
             '{first_name}' => $user->first_name,
             '{last_name}' => $user->last_name,
             '{mobile}' => $user->mobile,
             '{dob}' => date($settings['date_format'],strtotime($user->dob)),
-            '{dob_words}' => $dobWords,
             '{current_address}' => $user->current_address,
             '{permanent_address}' => $user->permanent_address,
             '{gender}' => $user->gender,
