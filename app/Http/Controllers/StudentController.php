@@ -33,7 +33,8 @@ use PDF;
 use Throwable;
 use TypeError;
 
-class StudentController extends Controller {
+class StudentController extends Controller
+{
     private StudentInterface $student;
     private UserInterface $user;
     private ClassSectionInterface $classSection;
@@ -45,7 +46,8 @@ class StudentController extends Controller {
     private SubscriptionService $subscriptionService;
     private ClassSchoolInterface $classSchool;
 
-    public function __construct(StudentInterface $student, UserInterface $user, ClassSectionInterface $classSection, FormFieldsInterface $formFields, SessionYearInterface $sessionYear, CachingService $cachingService, SubscriptionInterface $subscription, SchoolSettingInterface $schoolSettings, SubscriptionService $subscriptionService, ClassSchoolInterface $classSchool) {
+    public function __construct(StudentInterface $student, UserInterface $user, ClassSectionInterface $classSection, FormFieldsInterface $formFields, SessionYearInterface $sessionYear, CachingService $cachingService, SubscriptionInterface $subscription, SchoolSettingInterface $schoolSettings, SubscriptionService $subscriptionService, ClassSchoolInterface $classSchool)
+    {
         $this->student = $student;
         $this->user = $user;
         $this->classSection = $classSection;
@@ -58,30 +60,32 @@ class StudentController extends Controller {
         $this->classSchool = $classSchool;
     }
 
-    public function index() {
+    public function index()
+    {
         ResponseService::noPermissionThenRedirect('student-list');
         $class_sections = $this->classSection->all(['*'], ['class', 'class.stream', 'section', 'medium', 'class.shift']);
-       
-        if(Auth::user()->school_id) {
-            $extraFields = $this->formFields->defaultModel()->where('user_type', 1)->orderBy('rank')->get();    
+
+        if (Auth::user()->school_id) {
+            $extraFields = $this->formFields->defaultModel()->where('user_type', 1)->orderBy('rank')->get();
         } else {
             $extraFields = $this->formFields->defaultModel()->orderBy('rank')->get();
         }
-       
+
         $sessionYears = $this->sessionYear->all();
         $features = FeaturesService::getFeatures();
         return view('students.details', compact('class_sections', 'extraFields', 'sessionYears', 'features'));
     }
 
-    public function create() {
+    public function create()
+    {
         ResponseService::noPermissionThenRedirect('student-create');
         $class_sections = $this->classSection->all(['*'], ['class', 'class.stream', 'section', 'medium', 'class.shift']);
         $sessionYear = $this->cache->getDefaultSessionYear();
         $get_student = $this->student->builder()->latest('id')->withTrashed()->pluck('id')->first();
-        $admission_no = $sessionYear->name .'0'. Auth::user()->school_id . '0' . ($get_student + 1);
+        $admission_no = $sessionYear->name . '0' . Auth::user()->school_id . '0' . ($get_student + 1);
 
-        if(Auth::user()->school_id) {
-            $extraFields = $this->formFields->defaultModel()->where('user_type', 1)->orderBy('rank')->get();    
+        if (Auth::user()->school_id) {
+            $extraFields = $this->formFields->defaultModel()->where('user_type', 1)->orderBy('rank')->get();
         } else {
             $extraFields = $this->formFields->defaultModel()->orderBy('rank')->get();
         }
@@ -91,38 +95,39 @@ class StudentController extends Controller {
         return view('students.create', compact('class_sections', 'admission_no', 'extraFields', 'sessionYears', 'features'));
     }
 
-    public function store(Request $request) {
+    public function store(Request $request)
+    {
         ResponseService::noPermissionThenRedirect(['student-create']);
         $request->validate([
-            'first_name'          => 'required',
-            'last_name'           => 'required',
-            'mobile'              => 'nullable|regex:/^([0-9\s\-\+\(\)]*)$/',
-            'image'               => 'nullable|mimes:jpeg,png,jpg,svg|image|max:2048',
-            'dob'                 => 'required',
-            'class_section_id'    => 'required|numeric',
+            'first_name' => 'required',
+            'last_name' => 'required',
+            'mobile' => 'nullable|regex:/^([0-9\s\-\+\(\)]*)$/',
+            'image' => 'nullable|mimes:jpeg,png,jpg,svg|image|max:2048',
+            'dob' => 'required',
+            'class_section_id' => 'required|numeric',
             /*NOTE : Unique constraint is used because it's not school specific*/
-            'admission_no'        => 'required|unique:users,email',
-            'admission_date'      => 'required',
-            'session_year_id'     => 'required|numeric',
-            'guardian_email'      => 'nullable|email',
+            'admission_no' => 'required|unique:users,email',
+            'admission_date' => 'required',
+            'session_year_id' => 'required|numeric',
+            'guardian_email' => 'nullable|email',
             'guardian_first_name' => 'required|string',
-            'guardian_last_name'  => 'required|string',
-            'guardian_mobile'     => 'required|numeric:users,mobile',
-            'student_mother_name'     => 'required',
-            'guardian_gender'     => 'required|in:male,female',
-            'guardian_image'      => 'nullable|mimes:jpg,jpeg,png|max:4096',
-            'status'              => 'nullable|in:0,1',
-            'rte_status'          => 'nullable|in:RTE,NON_RTE',
-            'cast'                => 'required|in:GENERAL,OBC,SC,ST,EWS',
-             'nationality'     => 'required',
-            'last_school'     => 'required',
-            'last_cleared_class'     => 'required',
-            'education_board'     => 'required',
-            'remarks'     => 'required',
-            'birth_place'     => 'required',
-            'blood_group'     => 'required',
-            'pen_no'          => 'required|digits:11',
-            'campus'          => 'nullable',
+            'guardian_last_name' => 'required|string',
+            'guardian_mobile' => 'required|numeric:users,mobile',
+            'student_mother_name' => 'required',
+            'guardian_gender' => 'required|in:male,female',
+            'guardian_image' => 'nullable|mimes:jpg,jpeg,png|max:4096',
+            'status' => 'nullable|in:0,1',
+            'rte_status' => 'nullable|in:RTE,NON_RTE',
+            'cast' => 'required|in:GENERAL,OBC,SC,ST,EWS',
+            'nationality' => 'required',
+            'last_school' => 'required',
+            'last_cleared_class' => 'required',
+            'education_board' => 'required',
+            'remarks' => 'required',
+            'birth_place' => 'required',
+            'blood_group' => 'required',
+            'pen_no' => 'required|digits:11',
+            'campus' => 'nullable',
         ]);
 
         try {
@@ -148,7 +153,7 @@ class StudentController extends Controller {
                 // If prepaid plan check student limit
                 if ($subscription && $subscription->package_type == 0) {
                     $status = $this->subscriptionService->check_user_limit($subscription, "Students");
-                    
+
                     if (!$status) {
                         ResponseService::errorResponse('You reach out limits');
                     }
@@ -164,20 +169,22 @@ class StudentController extends Controller {
             }
             $userService = app(UserService::class);
             $sessionYear = $this->sessionYear->findById($request->session_year_id);
-            $guardian = $userService->createOrUpdateParent($request->guardian_first_name, $request->guardian_last_name,$request->student_mother_name, $request->guardian_email, $request->guardian_mobile, $request->guardian_gender, $request->guardian_image, null, $request->guardian_id);
+            $guardian = $userService->createOrUpdateParent($request->guardian_first_name, $request->guardian_last_name, $request->student_mother_name, $request->guardian_email, $request->guardian_mobile, $request->guardian_gender, $request->guardian_image, null, $request->guardian_id);
             $is_send_notification = false;
-            $userService->createStudentUser($request->first_name,$request->middle_name, $request->last_name, $request->admission_no, $request->mobile, $request->dob, $request->gender, $request->image, $request->class_section_id, $request->admission_date, $request->current_address, $request->permanent_address, $sessionYear->id, $guardian->id, $request->extra_fields ?? [], $request->status ?? 0, $is_send_notification,$request->rte_status,$request->cast,$request->nationality,$request->birth_place,$request->blood_group,$request->last_school,$request->last_cleared_class,$request->education_board,$request->remarks,$request->pen_no, $request->campus);
+            $userService->createStudentUser($request->first_name, $request->middle_name, $request->last_name, $request->admission_no, $request->mobile, $request->dob, $request->gender, $request->image, $request->class_section_id, $request->admission_date, $request->current_address, $request->permanent_address, $sessionYear->id, $guardian->id, $request->extra_fields ?? [], $request->status ?? 0, $is_send_notification, $request->rte_status, $request->cast, $request->nationality, $request->birth_place, $request->blood_group, $request->last_school, $request->last_cleared_class, $request->education_board, $request->remarks, $request->pen_no, $request->campus);
 
             DB::commit();
             ResponseService::successResponse('Data Stored Successfully');
         } catch (Throwable $e) {
             // IF Exception is TypeError and message contains Mail keywords then email is not sent successfully
-            if ($e instanceof TypeError && Str::contains($e->getMessage(), [
+            if (
+                $e instanceof TypeError && Str::contains($e->getMessage(), [
                     'Failed',
                     'Mail',
                     'Mailer',
                     'MailManager'
-                ])) {
+                ])
+            ) {
                 DB::commit();
                 ResponseService::warningResponse("Student Registered successfully. But Email not sent.");
             } else {
@@ -189,36 +196,37 @@ class StudentController extends Controller {
         }
     }
 
-    public function update($id, Request $request) {
+    public function update($id, Request $request)
+    {
         ResponseService::noAnyPermissionThenSendJson(['student-create', 'student-edit']);
         $rules = [
-            'first_name'      => 'required',
-            'middle_name'       => 'required',
-            'last_name'       => 'required',
-            'admission_no'    => 'required|unique:users,email,' . $id,
-            'mobile'          => 'nullable|regex:/^([0-9\s\-\+\(\)]*)$/',
-            'image'           => 'nullable|mimes:jpeg,png,jpg,svg|image|max:2048',
-            'dob'             => 'required',
+            'first_name' => 'required',
+            'middle_name' => 'required',
+            'last_name' => 'required',
+            'admission_no' => 'required|unique:users,email,' . $id,
+            'mobile' => 'nullable|regex:/^([0-9\s\-\+\(\)]*)$/',
+            'image' => 'nullable|mimes:jpeg,png,jpg,svg|image|max:2048',
+            'dob' => 'required',
             'session_year_id' => 'required|numeric',
-            'rte_status'      => 'nullable|in:RTE,NON_RTE',
-            'cast'            => 'required|in:GENERAL,OBC,SC,ST,EWS',
-            'nationality'     => 'required',
-            'last_school'     => 'required',
-            'last_cleared_class'     => 'required',
-            'education_board'     => 'required',
-            'remarks'     => 'required',
-            'birth_place'     => 'required',
-            'blood_group'     => 'required',
-            'pen_no'          => 'required|digits:11',
-            'campus'          => 'nullable',
+            'rte_status' => 'nullable|in:RTE,NON_RTE',
+            'cast' => 'required|in:GENERAL,OBC,SC,ST,EWS',
+            'nationality' => 'required',
+            'last_school' => 'required',
+            'last_cleared_class' => 'required',
+            'education_board' => 'required',
+            'remarks' => 'required',
+            'birth_place' => 'required',
+            'blood_group' => 'required',
+            'pen_no' => 'required|digits:11',
+            'campus' => 'nullable',
 
 
 
 
-           // 'guardian_email'  => 'required|email|unique:users,email',
+            // 'guardian_email'  => 'required|email|unique:users,email',
         ];
         if (is_numeric($request->guardian_id)) {
-           // $rules['guardian_email'] = 'required|email|unique:users,email,' . $request->guardian_id;
+            // $rules['guardian_email'] = 'required|email|unique:users,email,' . $request->guardian_id;
         }
         $request->validate($rules);
 
@@ -226,8 +234,8 @@ class StudentController extends Controller {
             DB::beginTransaction();
             $userService = app(UserService::class);
             $sessionYear = $this->sessionYear->findById($request->session_year_id);
-            $guardian = $userService->createOrUpdateParent($request->guardian_first_name, $request->guardian_last_name,$request->student_mother_name, $request->guardian_email, $request->guardian_mobile, $request->guardian_gender, $request->guardian_image, $request->parent_reset_password, $request->guardian_id);
-            $userService->updateStudentUser($id, $request->first_name,$request->middle_name, $request->last_name, $request->mobile, $request->dob, $request->gender, $request->image, $sessionYear->id, $request->extra_fields ?? [], $guardian->id, $request->current_address, $request->permanent_address, $request->reset_password, $request->class_section_id,$request->admission_no,$request->rte_status,$request->cast,$request->nationality,$request->birth_place,$request->blood_group,$request->last_school,$request->last_cleared_class,$request->education_board,$request->remarks,$request->pen_no, $request->campus);
+            $guardian = $userService->createOrUpdateParent($request->guardian_first_name, $request->guardian_last_name, $request->student_mother_name, $request->guardian_email, $request->guardian_mobile, $request->guardian_gender, $request->guardian_image, $request->parent_reset_password, $request->guardian_id);
+            $userService->updateStudentUser($id, $request->first_name, $request->middle_name, $request->last_name, $request->mobile, $request->dob, $request->gender, $request->image, $sessionYear->id, $request->extra_fields ?? [], $guardian->id, $request->current_address, $request->permanent_address, $request->reset_password, $request->class_section_id, $request->admission_no, $request->rte_status, $request->cast, $request->nationality, $request->birth_place, $request->blood_group, $request->last_school, $request->last_cleared_class, $request->education_board, $request->remarks, $request->pen_no, $request->campus);
             DB::commit();
             ResponseService::successResponse('Data Updated Successfully');
         } catch (Throwable $e) {
@@ -237,7 +245,8 @@ class StudentController extends Controller {
         }
     }
 
-    public function show(Request $request) {
+    public function show(Request $request)
+    {
         ResponseService::noPermissionThenRedirect('student-list');
         $offset = request('offset', 0);
         $limit = request('limit', 10);
@@ -248,18 +257,18 @@ class StudentController extends Controller {
         if (Auth::user()->hasRole('Teacher')) {
             $request->validate([
                 'class_id' => 'required'
-            ],[
+            ], [
                 'class_id.required' => 'The class field is required.'
             ]);
         }
 
         $sql = $this->student->builder()->where(function ($q) {
             $q->where('application_type', 'offline')
-              ->orWhere(function ($query) {
-                  $query->where('application_status', 1)->where('application_type', 'online');
-              });
+                ->orWhere(function ($query) {
+                    $query->where('application_status', 1)->where('application_type', 'online');
+                });
         })
-        ->with('user.extra_student_details.form_field', 'guardian', 'class_section.class.stream', 'class_section.section', 'class_section.medium')
+            ->with('user.extra_student_details.form_field', 'guardian', 'class_section.class.stream', 'class_section.section', 'class_section.medium')
             ->where(function ($query) use ($search) {
                 $query->when($search, function ($query) use ($search) {
                     $query->where(function ($query) use ($search) {
@@ -312,8 +321,8 @@ class StudentController extends Controller {
         }
 
         if ($request->exam_id && $request->exam_id != 'data-not-found') {
-            $sql = $sql->has('exam_result')->whereHas('exam_result', function($q) use($request) {
-                $q->where('exam_id',$request->exam_id);
+            $sql = $sql->has('exam_result')->whereHas('exam_result', function ($q) use ($request) {
+                $q->where('exam_id', $request->exam_id);
             });
         }
 
@@ -357,16 +366,16 @@ class StudentController extends Controller {
             $tempRow['campus'] = $row->campus;
             // $tempRow['user.dob'] = format_date($row->user->dob);
             // $tempRow['admission_date'] = format_date($row->admission_date);
-            
+
             // $tempRow['extra_fields'] = $row->user->extra_student_details()->has('form_field')->with('form_field')->get();
             $tempRow['extra_fields'] = $row->user->extra_student_details;
             foreach ($row->user->extra_student_details as $key => $field) {
                 $data = '';
                 if ($field->form_field->type == 'checkbox') {
                     $data = json_decode($field->data);
-                } else if($field->form_field->type == 'file') {
-                    $data = '<a href="'.Storage::url($field->data).'" target="_blank">DOC</a>';
-                } else if($field->form_field->type == 'dropdown') {
+                } else if ($field->form_field->type == 'file') {
+                    $data = '<a href="' . Storage::url($field->data) . '" target="_blank">DOC</a>';
+                } else if ($field->form_field->type == 'dropdown') {
                     $data = $field->form_field->default_values;
                     $data = $field->data ?? '';
                 } else {
@@ -374,7 +383,7 @@ class StudentController extends Controller {
                 }
                 $tempRow[$field->form_field->name] = $data;
             }
-            
+
             $tempRow['operate'] = $operate;
             $rows[] = $tempRow;
         }
@@ -383,7 +392,8 @@ class StudentController extends Controller {
         return response()->json($bulkData);
     }
 
-    public function destroy($user_id) {
+    public function destroy($user_id)
+    {
         ResponseService::noPermissionThenSendJson('student-delete');
         try {
             $this->user->deleteById($user_id);
@@ -395,7 +405,8 @@ class StudentController extends Controller {
         }
     }
 
-    public function changeStatus($userId) {
+    public function changeStatus($userId)
+    {
         try {
             // ResponseService::noFeatureThenSendJson('Student Management');
             ResponseService::noPermissionThenRedirect('student-edit');
@@ -406,13 +417,13 @@ class StudentController extends Controller {
                 // If prepaid plan check student limit
                 if ($subscription && $subscription->package_type == 0) {
                     $status = $this->subscriptionService->check_user_limit($subscription, "Students");
-                    
+
                     if (!$status) {
                         ResponseService::errorResponse('You reach out limits');
                     }
                 }
             }
-                        
+
             $this->user->builder()->where('id', $userId)->withTrashed()->update(['status' => $user->status == 0 ? 1 : 0, 'deleted_at' => $user->status == 1 ? now() : null]);
             DB::commit();
             ResponseService::successResponse('Data Updated Successfully');
@@ -423,7 +434,8 @@ class StudentController extends Controller {
         }
     }
 
-    public function changeStatusBulk(Request $request) {
+    public function changeStatusBulk(Request $request)
+    {
         // ResponseService::noFeatureThenSendJson('Student Management');
         ResponseService::noPermissionThenRedirect('student-create');
         try {
@@ -434,8 +446,8 @@ class StudentController extends Controller {
                     $subscription = $this->subscriptionService->active_subscription(Auth::user()->school_id);
                     // If prepaid plan check student limit
                     if ($subscription && $subscription->package_type == 0) {
-                        $status = $this->subscriptionService->check_user_limit($subscription,"Students");
-                        
+                        $status = $this->subscriptionService->check_user_limit($subscription, "Students");
+
                         if (!$status) {
                             ResponseService::errorResponse('You reach out limits');
                         }
@@ -452,15 +464,16 @@ class StudentController extends Controller {
         }
     }
 
-    public function trash($id) {
+    public function trash($id)
+    {
         // ResponseService::noFeatureThenSendJson('Student Management');
         ResponseService::noPermissionThenSendJson('student-delete');
         try {
             DB::beginTransaction();
-            
+
             // Get student record with guardian
             $student = $this->student->builder()->with('guardian')->where('user_id', $id)->first();
-            
+
             if ($student && $student->guardian) {
                 // Count total students with same guardian_id
                 $guardianStudentCount = $this->student->builder()->where('guardian_id', $student->guardian_id)->count();
@@ -484,19 +497,21 @@ class StudentController extends Controller {
         }
     }
 
-    public function createBulkData() {
+    public function createBulkData()
+    {
         ResponseService::noPermissionThenRedirect('student-create');
         $class_section = $this->classSection->all(['*'], ['class', 'class.stream', 'section', 'medium']);
         $sessionYears = $this->sessionYear->all();
         return view('students.add_bulk_data', compact('class_section', 'sessionYears'));
     }
 
-    public function storeBulkData(Request $request) {
+    public function storeBulkData(Request $request)
+    {
         ResponseService::noPermissionThenRedirect('student-create');
         $validator = Validator::make($request->all(), [
-            'session_year_id'  => 'required|numeric',
+            'session_year_id' => 'required|numeric',
             'class_section_id' => 'required',
-            'file'             => 'required|mimes:csv,txt'
+            'file' => 'required|mimes:csv,txt'
         ]);
         if ($validator->fails()) {
             ResponseService::errorResponse($validator->errors()->first());
@@ -505,12 +520,14 @@ class StudentController extends Controller {
             Excel::import(new StudentsImport($request->class_section_id, $request->session_year_id, $request->is_send_notification), $request->file);
             ResponseService::successResponse('Data Stored Successfully');
         } catch (ValidationException $e) {
-            if ($e instanceof TypeError && Str::contains($e->getMessage(), [
-                'Failed',
-                'Mail',
-                'Mailer',
-                'MailManager'
-            ])) {
+            if (
+                $e instanceof TypeError && Str::contains($e->getMessage(), [
+                    'Failed',
+                    'Mail',
+                    'Mailer',
+                    'MailManager'
+                ])
+            ) {
                 DB::commit();
                 ResponseService::warningResponse("Student Registered successfully. But Email not sent.");
             } else {
@@ -522,12 +539,14 @@ class StudentController extends Controller {
         }
     }
 
-    public function resetPasswordIndex() {
+    public function resetPasswordIndex()
+    {
         $class_section = $this->classSection->builder()->with('class', 'class.stream', 'section')->get();
         return view('students.reset-password', compact('class_section'));
     }
 
-    public function resetPasswordShow() {
+    public function resetPasswordShow()
+    {
         ResponseService::noPermissionThenRedirect('reset-password-list');
         $offset = request('offset', 0);
         $limit = request('limit', 10);
@@ -566,7 +585,8 @@ class StudentController extends Controller {
         return response()->json($bulkData);
     }
 
-public function resetPasswordUpdate(Request $request) {
+    public function resetPasswordUpdate(Request $request)
+    {
         ResponseService::noPermissionThenRedirect('student-change-password');
         try {
             DB::beginTransaction();
@@ -583,14 +603,16 @@ public function resetPasswordUpdate(Request $request) {
         }
     }
 
-    public function rollNumberIndex() {
+    public function rollNumberIndex()
+    {
         ResponseService::noPermissionThenRedirect('student-list');
         $class_section = $this->classSection->all(['*'], ['class', 'class.stream', 'section', 'medium']);
 
         return view('students.assign_roll_no', compact('class_section'));
     }
 
-    public function rollNumberUpdate(Request $request) {
+    public function rollNumberUpdate(Request $request)
+    {
         ResponseService::noPermissionThenRedirect('student-list');
         $validator = Validator::make(
             $request->all(),
@@ -629,7 +651,8 @@ public function resetPasswordUpdate(Request $request) {
         }
     }
 
-    public function rollNumberShow(Request $request) {
+    public function rollNumberShow(Request $request)
+    {
         ResponseService::noPermissionThenRedirect('student-create');
         try {
             ResponseService::noPermissionThenRedirect('student-list');
@@ -706,7 +729,8 @@ public function resetPasswordUpdate(Request $request) {
         }
     }
 
-    public function downloadSampleFile() {
+    public function downloadSampleFile()
+    {
         try {
             return Excel::download(new StudentDataExport(), 'Student_import.xlsx');
         } catch (Throwable $e) {
@@ -718,10 +742,10 @@ public function resetPasswordUpdate(Request $request) {
     public function update_profile()
     {
         ResponseService::noPermissionThenRedirect('student-edit');
-        
+
         $class_sections = $this->classSection->all(['*'], ['class', 'class.stream', 'section', 'medium']);
-        return view('students.add_bulk_profile',compact('class_sections'));
-        
+        return view('students.add_bulk_profile', compact('class_sections'));
+
     }
 
     public function list($id = null, Request $request)
@@ -760,13 +784,13 @@ public function resetPasswordUpdate(Request $request) {
             $sql = $sql->orderBy('roll_number', 'ASC');
             $res = $sql->get();
         }
-        
+
         $bulkData = array();
         $bulkData['total'] = $total;
         $rows = array();
         $no = 1;
         foreach ($res as $row) {
-            
+
             $tempRow = $row->toArray();
             $tempRow['no'] = $no++;
             $rows[] = $tempRow;
@@ -799,17 +823,18 @@ public function resetPasswordUpdate(Request $request) {
                     ];
                 }
             }
-            $this->user->upsertProfile($data,['id'],['image']);
+            $this->user->upsertProfile($data, ['id'], ['image']);
             // $this->user->upsert($data,['id'],['image']);
             ResponseService::successResponse('Profile Updated Successfully');
-            
+
         } catch (\Throwable $th) {
             ResponseService::logErrorResponse($th);
             ResponseService::errorResponse();
         }
     }
 
-    public function generate_id_card_index() {
+    public function generate_id_card_index()
+    {
         ResponseService::noFeatureThenRedirect('ID Card - Certificate Generation');
         ResponseService::noAnyPermissionThenRedirect(['student-list', 'class-teacher']);
 
@@ -819,7 +844,8 @@ public function resetPasswordUpdate(Request $request) {
         return view('students.generate_id_card', compact('class_sections', 'sessionYears'));
     }
 
-    public function generate_id_card(Request $request) {
+    public function generate_id_card(Request $request)
+    {
         ResponseService::noFeatureThenRedirect('ID Card - Certificate Generation');
         ResponseService::noAnyPermissionThenRedirect(['student-list', 'class-teacher']);
         $request->validate([
@@ -828,13 +854,13 @@ public function resetPasswordUpdate(Request $request) {
             'user_id.required' => trans('Please select at least one record')
         ]);
         try {
-            $user_ids = explode(",",$request->user_id);
+            $user_ids = explode(",", $request->user_id);
             $settings = $this->cache->getSchoolSettings();
             if (!isset($settings['student_id_card_fields'])) {
-                return redirect()->route('id-card-settings')->with('error',trans('settings_not_found'));
+                return redirect()->route('id-card-settings')->with('error', trans('settings_not_found'));
             }
 
-            $settings['student_id_card_fields'] = explode(",",$settings['student_id_card_fields']);
+            $settings['student_id_card_fields'] = explode(",", $settings['student_id_card_fields']);
 
             $data = explode("storage/", $settings['signature'] ?? '');
             $settings['signature'] = end($data);
@@ -846,26 +872,28 @@ public function resetPasswordUpdate(Request $request) {
             $settings['horizontal_logo'] = end($data);
 
             $sessionYear = $this->cache->getDefaultSessionYear();
-            $valid_until = date('F j, Y',strtotime($sessionYear->end_date));
+            $valid_until = date('F j, Y', strtotime($sessionYear->end_date));
             $height = $settings['page_height'] * 2.8346456693;
             $width = $settings['page_width'] * 2.8346456693;
             // $customPaper = array(0,0,360,200);
-            $customPaper = array(0,0,$width,$height);
-            $students = $this->user->builder()->select('id','first_name','last_name','image','school_id','gender','dob','current_address','mobile')->with('student:id,user_id,class_section_id,school_id,guardian_id,roll_number','student.class_section.class','student.class_section.section','student.class_section.medium','student.class_section.class.stream','student.guardian:id,mobile,first_name,last_name')->whereHas('student',function($q) use($user_ids) {
-                $q->whereIn('id',$user_ids);
-            })->with(['extra_student_details' => function($q) {
-                $q->whereHas('form_field',function($query) {
-                    $query->where('display_on_id',1)->whereNull('deleted_at');
-                })->with('form_field');
-            }])->get();
+            $customPaper = array(0, 0, $width, $height);
+            $students = $this->user->builder()->select('id', 'first_name', 'last_name', 'image', 'school_id', 'gender', 'dob', 'current_address', 'mobile')->with('student:id,user_id,class_section_id,school_id,guardian_id,roll_number,campus', 'student.class_section.class', 'student.class_section.section', 'student.class_section.medium', 'student.class_section.class.stream', 'student.guardian:id,mobile,first_name,last_name')->whereHas('student', function ($q) use ($user_ids) {
+                $q->whereIn('id', $user_ids);
+            })->with([
+                        'extra_student_details' => function ($q) {
+                            $q->whereHas('form_field', function ($query) {
+                                $query->where('display_on_id', 1)->whereNull('deleted_at');
+                            })->with('form_field');
+                        }
+                    ])->get();
 
 
-            $settings['page_height'] = ($settings['page_height'] * 3.7795275591).'px';
-            
-            $pdf = PDF::loadView('students.students_id_card',compact('students','sessionYear','valid_until','settings'));
+            $settings['page_height'] = ($settings['page_height'] * 3.7795275591) . 'px';
+
+            $pdf = PDF::loadView('students.students_id_card', compact('students', 'sessionYear', 'valid_until', 'settings'));
             $pdf->setPaper($customPaper);
 
-            
+
             return $pdf->stream();
             return view('students.id_card_pdf');
         } catch (\Throwable $th) {
@@ -883,36 +911,36 @@ public function resetPasswordUpdate(Request $request) {
                 $fullDomain = $_SERVER['HTTP_HOST'] ?? '';
                 $parts = explode('.', $fullDomain);
                 $subdomain = $parts[0];
-                
+
                 $school = School::on('mysql')->where('domain', $fullDomain)->orwhere('domain', $subdomain)->first();
                 if ($school) {
                     $schoolSettings = $this->cache->getSchoolSettings('*', $school->id);
                 }
             }
-            
+
             $data = explode("storage/", $schoolSettings['horizontal_logo'] ?? '');
-                $schoolSettings['horizontal_logo'] = end($data);
-    
+            $schoolSettings['horizontal_logo'] = end($data);
+
             if ($schoolSettings['horizontal_logo'] == null) {
                 $systemSettings = $this->cache->getSystemSettings();
                 $data = explode("storage/", $systemSettings['horizontal_logo'] ?? '');
                 $schoolSettings['horizontal_logo'] = end($data);
             }
-    
-            $pdf = PDF::loadView('students.admission_form',compact('schoolSettings'));
+
+            $pdf = PDF::loadView('students.admission_form', compact('schoolSettings'));
             return $pdf->stream();
         } catch (\Throwable $th) {
-            
+
         }
-        
+
     }
 
     public function onlineRegistrationIndex()
     {
         ResponseService::noPermissionThenRedirect('student-list');
         $class_sections = $this->classSection->all(['*'], ['class', 'class.stream', 'section', 'medium']);
-        $classes = $this->classSchool->builder()->with('medium','stream')->get();
-     
+        $classes = $this->classSchool->builder()->with('medium', 'stream')->get();
+
         $extraFields = $this->formFields->defaultModel()->orderBy('rank')->get();
         $sessionYears = $this->sessionYear->all();
         $features = FeaturesService::getFeatures();
@@ -931,7 +959,7 @@ public function resetPasswordUpdate(Request $request) {
         $order = request('order', 'ASC');
         $search = request('search');
 
-        $sql = $this->student->builder()->where('application_type', 'online')->where('application_status', 0)->with('user.extra_student_details.form_field', 'guardian', 'class.medium','class.stream')
+        $sql = $this->student->builder()->where('application_type', 'online')->where('application_status', 0)->with('user.extra_student_details.form_field', 'guardian', 'class.medium', 'class.stream')
             ->where(function ($query) use ($search) {
                 $query->when($search, function ($query) use ($search) {
                     $query->where(function ($query) use ($search) {
@@ -955,9 +983,9 @@ public function resetPasswordUpdate(Request $request) {
                             });
                     });
                 })
-                ->whereHas('user', function($q) {
-                    $q->where('status', 0);
-                }) ;
+                    ->whereHas('user', function ($q) {
+                        $q->where('status', 0);
+                    });
                 //class filter data
             })
             ->when(request('class_id') != null, function ($query) {
@@ -972,8 +1000,8 @@ public function resetPasswordUpdate(Request $request) {
             });
 
         if ($request->exam_id && $request->exam_id != 'data-not-found') {
-            $sql = $sql->has('exam_result')->whereHas('exam_result', function($q) use($request) {
-                $q->where('exam_id',$request->exam_id);
+            $sql = $sql->has('exam_result')->whereHas('exam_result', function ($q) use ($request) {
+                $q->where('exam_id', $request->exam_id);
             });
         }
 
@@ -985,19 +1013,19 @@ public function resetPasswordUpdate(Request $request) {
         }
         $sql->skip($offset)->take($limit);
         $res = $sql->get();
-    
-      
+
+
         $bulkData = array();
         $bulkData['total'] = $total;
         $rows = array();
         $no = 1;
         foreach ($res as $row) {
             $operate = '';
-          
+
             if (Auth::user()->can('student-edit')) {
                 $operate .= BootstrapTableService::editButton(route('update-application-status', $row->user->id, ['data-id' => $row->id]));
             }
-             
+
 
             if (Auth::user()->can('student-delete')) {
                 $operate .= BootstrapTableService::trashButton(route('student.trash', $row->user_id));
@@ -1022,9 +1050,9 @@ public function resetPasswordUpdate(Request $request) {
                 $data = '';
                 if ($field->form_field->type == 'checkbox') {
                     $data = json_decode($field->data);
-                } else if($field->form_field->type == 'file') {
-                    $data = '<a href="'.Storage::url($field->data).'" target="_blank">DOC</a>';
-                } else if($field->form_field->type == 'dropdown') {
+                } else if ($field->form_field->type == 'file') {
+                    $data = '<a href="' . Storage::url($field->data) . '" target="_blank">DOC</a>';
+                } else if ($field->form_field->type == 'dropdown') {
                     $data = $field->form_field->default_values;
                     $data = $field->data ?? '';
                 } else {
@@ -1032,7 +1060,7 @@ public function resetPasswordUpdate(Request $request) {
                 }
                 $tempRow[$field->form_field->name] = $data;
             }
-            
+
             $tempRow['operate'] = $operate;
             $rows[] = $tempRow;
         }
@@ -1046,7 +1074,7 @@ public function resetPasswordUpdate(Request $request) {
         ResponseService::noPermissionThenRedirect('student-create');
         $request->validate([
             'class_section_id' => $request->application_status == '0' ? 'nullable' : 'required'
-        ],[
+        ], [
             'class_section_id' => 'The assign class section field is required'
         ]);
         try {
@@ -1059,28 +1087,26 @@ public function resetPasswordUpdate(Request $request) {
                     $subscription = $this->subscriptionService->active_subscription(Auth::user()->school_id);
                     // If prepaid plan check student limit
                     if ($subscription && $subscription->package_type == 0) {
-                        $status = $this->subscriptionService->check_user_limit($subscription,"Students");
-                        
+                        $status = $this->subscriptionService->check_user_limit($subscription, "Students");
+
                         if (!$status) {
                             ResponseService::errorResponse('You reach out limits');
                         }
                     }
                 }
-                if($request->application_status == 1)
-                {
+                if ($request->application_status == 1) {
                     $this->student->builder()->where('user_id', $userId)->withTrashed()->update(['application_status' => 1, 'class_section_id' => $request->class_section_id]);
                     $password = str_replace('-', '', date('d-m-Y', strtotime($user->dob)));
                     $guardian = $this->user->guardian()->where('id', $student->guardian_id)->firstOrFail();
                     $userService->sendRegistrationEmail($guardian, $user, $student->admission_no, $password);
-                }
-                else{
+                } else {
                     $this->student->builder()->where('user_id', $userId)->withTrashed()->update(['application_status' => 0, 'class_section_id' => $request->class_section_id]);
                     $guardian = $this->user->guardian()->where('id', $student->guardian_id)->firstOrFail();
-                    $class = $this->classSchool->builder()->where('id', $student->class_id)->with('medium','stream')->first();
+                    $class = $this->classSchool->builder()->where('id', $student->class_id)->with('medium', 'stream')->first();
                     $class_name = $class->full_name;
-                   
-                    $userService->sendApplicationRejectEmail($user,  $class_name, $guardian);
-                    
+
+                    $userService->sendApplicationRejectEmail($user, $class_name, $guardian);
+
                 }
             }
             DB::commit();
@@ -1103,8 +1129,8 @@ public function resetPasswordUpdate(Request $request) {
             'dob' => 'required',
             'gender' => 'required',
             'admission_no' => 'required',
-            'class_section_id'  => 'required_if:application_status,1',
-            'campus'          => 'nullable',
+            'class_section_id' => 'required_if:application_status,1',
+            'campus' => 'nullable',
         ], [
             'class_section_id.required_if' => 'The class section field is required when application status is accepted.'
         ]);
@@ -1203,121 +1229,122 @@ public function resetPasswordUpdate(Request $request) {
     public function getclassSectionByClass($class_id)
     {
         try {
-            $class_sections = $this->classSection->builder()->where('class_id',$class_id)->with('class', 'class.stream', 'section', 'medium')->get();
+            $class_sections = $this->classSection->builder()->where('class_id', $class_id)->with('class', 'class.stream', 'section', 'medium')->get();
             ResponseService::successResponse('Data Fetched Successfully', $class_sections);
         } catch (Throwable $e) {
-            
-                ResponseService::logErrorResponse($e, "Student Controller -> getclassSectionByClass method");
-                ResponseService::errorResponse();
+
+            ResponseService::logErrorResponse($e, "Student Controller -> getclassSectionByClass method");
+            ResponseService::errorResponse();
         }
     }
     public function showUpdateUniForm()
-{
+    {
 
-    try {
-        DB::beginTransaction();
+        try {
+            DB::beginTransaction();
 
-        // ✅ Example: All students list for GR Number dropdown
-      
+            // ✅ Example: All students list for GR Number dropdown
 
-        // ✅ Return the Blade view
-        return view('students.uni');
-    } catch (Throwable $e) {
-        DB::rollBack();
 
-        ResponseService::logErrorResponse($e);
-        return ResponseService::errorRedirect('Something went wrong while loading the form.');
+            // ✅ Return the Blade view
+            return view('students.uni');
+        } catch (Throwable $e) {
+            DB::rollBack();
+
+            ResponseService::logErrorResponse($e);
+            return ResponseService::errorRedirect('Something went wrong while loading the form.');
+        }
     }
-}
 
     public function updateUniNo(Request $request)
-{
-    ResponseService::noPermissionThenRedirect('student-edit');
+    {
+        ResponseService::noPermissionThenRedirect('student-edit');
         $request->validate([
-            'student_id'  => 'required|exists:students,id',
+            'student_id' => 'required|exists:students,id',
             'student_uni' => 'required|string|max:255',
-            'student_pen_no'      => 'nullable|string|max:11',
+            'student_pen_no' => 'nullable|string|max:11',
         ], [
-            'student_id.required'  => 'Student ID is required.',
+            'student_id.required' => 'Student ID is required.',
             'student_uni.required' => 'Student UDI Number is required.',
         ]);
 
 
-    try {
-        DB::beginTransaction();
+        try {
+            DB::beginTransaction();
 
-        // ✅ Student Record Fetch
-        $student = $this->student->builder()->where('id', $request->student_id)->firstOrFail();
-        // ✅ Update Field
-        $student->update([
-            'uni_no' => $request->student_uni,
-            'pen_no' => $request->student_pen_no,
-        ]);
+            // ✅ Student Record Fetch
+            $student = $this->student->builder()->where('id', $request->student_id)->firstOrFail();
+            // ✅ Update Field
+            $student->update([
+                'uni_no' => $request->student_uni,
+                'pen_no' => $request->student_pen_no,
+            ]);
 
-        DB::commit();
-        // ✅ Success response
-        ResponseService::successResponse('Student UNI Number updated successfully!');
-    } catch (Throwable $e) {
-        DB::rollBack();
+            DB::commit();
+            // ✅ Success response
+            ResponseService::successResponse('Student UNI Number updated successfully!');
+        } catch (Throwable $e) {
+            DB::rollBack();
 
-        // ✅ Error logging + response
-        ResponseService::logErrorResponse($e);
-        ResponseService::errorResponse();
+            // ✅ Error logging + response
+            ResponseService::logErrorResponse($e);
+            ResponseService::errorResponse();
+        }
     }
-}
-public function searchStudent(Request $request)
-{
-    try {
-        // JS sends ?email=xyz
-        $search = $request->input('email');
+    public function searchStudent(Request $request)
+    {
+        try {
+            // JS sends ?email=xyz
+            $search = $request->input('email');
 
-        $students = DB::table('users')
-            ->join('students', 'students.user_id', '=', 'users.id')
-            ->join('model_has_roles', 'model_has_roles.model_id', '=', 'users.id')
-            ->join('roles', 'roles.id', '=', 'model_has_roles.role_id')
-            ->where('roles.name', 'student')
-            ->when($search, function ($query, $search) {
-                $query->where('students.admission_no', 'like', "%{$search}%")  // ✅ Added GR Number
-                      ->orWhere('users.email', 'like', "%{$search}%")   // ✅ Keep email too
-                      ->orWhere('users.first_name', 'like', "%{$search}%")
-                      ->orWhere('users.last_name', 'like', "%{$search}%");
-            })
-            ->select(
-                'users.id as user_id',
-                'students.id as student_id',
-                'students.uni_no as uni_no',
-                'students.pen_no as pen_no',
-                'students.admission_no as gr_no',
-                'users.first_name',
-                'users.last_name',
-                'users.email',
-                'users.mobile'
-            )
-            ->orderBy('students.admission_no', 'asc')
-            ->limit(20)
-            ->get();
+            $students = DB::table('users')
+                ->join('students', 'students.user_id', '=', 'users.id')
+                ->join('model_has_roles', 'model_has_roles.model_id', '=', 'users.id')
+                ->join('roles', 'roles.id', '=', 'model_has_roles.role_id')
+                ->where('roles.name', 'student')
+                ->when($search, function ($query, $search) {
+                    $query->where('students.admission_no', 'like', "%{$search}%")  // ✅ Added GR Number
+                        ->orWhere('users.email', 'like', "%{$search}%")   // ✅ Keep email too
+                        ->orWhere('users.first_name', 'like', "%{$search}%")
+                        ->orWhere('users.last_name', 'like', "%{$search}%");
+                })
+                ->select(
+                    'users.id as user_id',
+                    'students.id as student_id',
+                    'students.uni_no as uni_no',
+                    'students.pen_no as pen_no',
+                    'students.admission_no as gr_no',
+                    'users.first_name',
+                    'users.last_name',
+                    'users.email',
+                    'users.mobile'
+                )
+                ->orderBy('students.admission_no', 'asc')
+                ->limit(20)
+                ->get();
 
-        $formatted = $students->map(function ($student) {
-            return [
-                'id'          => $student->student_id,
-                'text'        => $student->gr_no . ' - ' . $student->first_name . ' ' . $student->last_name,
-                'email'       => $student->email,
-                'uni_no'       => $student->uni_no,
-                'pen_no'       => $student->pen_no,
-                'first_name'  => $student->first_name,
-                'last_name'   => $student->last_name,
-                'mobile'      => $student->mobile,
-            ];
-        });
+            $formatted = $students->map(function ($student) {
+                return [
+                    'id' => $student->student_id,
+                    'text' => $student->gr_no . ' - ' . $student->first_name . ' ' . $student->last_name,
+                    'email' => $student->email,
+                    'uni_no' => $student->uni_no,
+                    'pen_no' => $student->pen_no,
+                    'first_name' => $student->first_name,
+                    'last_name' => $student->last_name,
+                    'mobile' => $student->mobile,
+                ];
+            });
 
-  return response()->json([
-        'data' => $formatted,
-        'total_count' => $formatted->count(),
-    ]);    } catch (\Throwable $e) {
-        \Log::error($e);
-        return response()->json([], 500);
+            return response()->json([
+                'data' => $formatted,
+                'total_count' => $formatted->count(),
+            ]);
+        } catch (\Throwable $e) {
+            \Log::error($e);
+            return response()->json([], 500);
+        }
     }
-}
 
 
 

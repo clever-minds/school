@@ -115,7 +115,6 @@ body {
 
 @foreach ($students as $student)
 <div class="card-body">
-
     <!-- LOGO -->
     <div class="logo-wrapper">
         <div class="logo-box">
