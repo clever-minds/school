@@ -115,7 +115,7 @@ body {
     <div class="logo-wrapper">
         <div class="logo-box">
             @if (isset($student->student->campus) && $student->student->campus == 'JIAM')
-                <img src="{{ public_path('assets/jiam_logo.png') }}" height=50 width=50>
+                <img src="{{ public_path('assets/jiam_logo.png') }}">
             @elseif (!empty($settings['horizontal_logo']))
                 <img src="{{ public_path('storage/'.$settings['horizontal_logo']) }}">
             @else
