@@ -31,23 +31,25 @@ body {
 .logo-wrapper {
     position: absolute;
     left: 50%;
-    top: 15px;
     transform: translateX(-50%);
-    width: 100%;
 }
 
 .logo-box {
-    width: 100%;
-    height: 100px;
+    width: auto;
+    height: 75px;
     display: flex;
     justify-content: center;
     align-items: center;
+    border-radius: 6px;
     overflow: hidden;
+    padding-top: 18%;
+
+
 }
 
 .logo-box img {
     width: auto;
-    height: 95px;
+    height: 70px;
     object-fit: contain;
 }
 
