@@ -36,7 +36,7 @@ body {
 
 .logo-box {
     width: auto;
-    height: 75px;
+    height: 80px;
     display: flex;
     justify-content: center;
     align-items: center;
@@ -49,7 +49,7 @@ body {
 
 .logo-box img {
     width: auto;
-    height: 70px;
+    height: 75px;
     object-fit: contain;
 }
 
