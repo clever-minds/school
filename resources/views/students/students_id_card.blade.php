@@ -119,7 +119,9 @@ body {
     <!-- LOGO -->
     <div class="logo-wrapper">
         <div class="logo-box">
-            @if (!empty($settings['horizontal_logo']))
+            @if (isset($student->student->campus) && $student->student->campus == 'JIAM')
+                <img src="{{ public_path('assets/jiam_logo.png') }}">
+            @elseif (!empty($settings['horizontal_logo']))
                 <img src="{{ public_path('storage/'.$settings['horizontal_logo']) }}">
             @else
                 <img src="{{ public_path('assets/horizontal-logo2.svg') }}">
@@ -166,15 +168,21 @@ body {
 
     <!-- FOOTER -->
     <div class="footer">
-        @php
-            $words = explode(' ', $settings['school_address'] ?? '');
-            $chunks = array_chunk($words, 5);
-        @endphp
+        @if (isset($student->student->campus) && $student->student->campus == 'JIAM')
+            Jiam English Medium School<br>
+            Tandalja, Vadodara<br>
+            Contact: {{ $settings['school_phone'] ?? '' }}
+        @else
+            @php
+                $words = explode(' ', $settings['school_address'] ?? '');
+                $chunks = array_chunk($words, 5);
+            @endphp
 
-        @foreach($chunks as $chunk)
-            {{ implode(' ', $chunk) }}<br>
-        @endforeach
-        Contact:  {{ $settings['school_phone'] }}
+            @foreach($chunks as $chunk)
+                {{ implode(' ', $chunk) }}<br>
+            @endforeach
+            Contact:  {{ $settings['school_phone'] }}
+        @endif
     </div>
 
 </div>
