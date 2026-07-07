@@ -48,11 +48,9 @@ body {
 }
 
 .logo-box img {
-     width:auto;
-    height:50px;
+    width: auto;
+    height: 70px;
     object-fit: contain;
-    border: 3px solid #rgba(65, 0, 244, 1) ;
-
 }
 
 /* PHOTO */
@@ -168,8 +166,7 @@ body {
     <!-- FOOTER -->
     <div class="footer">
         @if (isset($student->student->campus) && $student->student->campus == 'JIAM')
-            Jiam English Medium School<br>
-            Tandalja, Vadodara<br>
+            Saudagar park behind sunpharma lab tandalja<br>
             Contact: {{ $settings['school_phone'] ?? '' }}
         @else
             @php
