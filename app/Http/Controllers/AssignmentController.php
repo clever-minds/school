@@ -206,7 +206,7 @@ class AssignmentController extends Controller
             $students = $this->student->builder()->where('class_section_id', $request->class_section_id)->get();
             $guardian_id = $students->pluck('guardian_id')->toArray();
             $student_id = $students->pluck('user_id')->toArray();
-            $user = array_merge($student_id, $guardian_id);
+            $user = $student_id;
         
             $sessionYear = $this->cache->getDefaultSessionYear();
             $semester = $this->cache->getDefaultSemesterData();
@@ -613,11 +613,11 @@ class AssignmentController extends Controller
             // notification
             $type = "assignment";
             if (!empty($acceptedStudentIds) || !empty($acceptedGuardianIds)) {
-                $acceptedUsers = array_merge($acceptedStudentIds, $acceptedGuardianIds);
+                $acceptedUsers = $acceptedStudentIds;
                 send_notification($acceptedUsers, $acceptedTitle, $acceptedBody, $type);
             }
             if (!empty($rejectedStudentIds) || !empty($rejectedGuardianIds)) {
-                $rejectedUsers = array_merge($rejectedStudentIds, $rejectedGuardianIds);
+                $rejectedUsers = $rejectedStudentIds;
                 send_notification($rejectedUsers, $rejectedTitle, $rejectedBody, $type);
             }
             // dd($user);
@@ -743,7 +743,7 @@ class AssignmentController extends Controller
             $students = $this->student->builder()->where('user_id', $assignmentSubmission->student_id)->get();
             $guardian_id = $students->pluck('guardian_id')->toArray();
             $student_id = $students->pluck('user_id')->toArray();
-            $user = array_merge($student_id, $guardian_id);
+            $user = $student_id;
 
             DB::commit();
 

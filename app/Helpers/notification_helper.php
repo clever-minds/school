@@ -82,7 +82,7 @@ function send_notification($userIds, $title, $body, $type, $customData = [])
             $finalTitle = $title;
             $studentId  = null;
         }
-        $userRole = $user->getRoleNames()->first(); 
+        $userRole = $receiver->getRoleNames()->first(); 
 
         /* =====================================
          | notification_users (ALWAYS)
