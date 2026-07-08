@@ -110,11 +110,11 @@ class ParentApiController extends Controller
 
     #[NoReturn] public function login(Request $request)
     {
-       Log::info('Login Credentials', [
-                'mobile' => $request->email,
-                'password' => $request->password,
-                'school_code' => $request->school_code,
-            ]);
+        Log::info('Login Credentials', [
+            'mobile' => $request->email,
+            'password' => $request->password,
+            'school_code' => $request->school_code,
+        ]);
         $validator = Validator::make($request->all(), [
             'email' => 'required',
             'password' => 'required',
@@ -145,18 +145,20 @@ class ParentApiController extends Controller
             Auth::attempt([
                 'mobile' => $request->email,
                 'password' => $request->password,
-                fn ($query) => $query->whereHas('roles', fn ($q) => $q->where('name', 'Guardian'))
+                fn($query) => $query->whereHas('roles', fn($q) => $q->where('name', 'Guardian'))
             ])
         ) {
 
             // $auth = Auth::user()->load('child.user', 'child.class_section.class', 'child.class_section.section', 'child.class_section.medium', 'child.user.school');
 
             // Only active child
-            $auth = Auth::user()->load(['child' => function($q) {
-                $q->whereHas('user.student', function($q) {
-                    $q->where('status',1);
-                })->with('class_section.class', 'class_section.section', 'class_section.medium', 'user.school');
-            }]);
+            $auth = Auth::user()->load([
+                'child' => function ($q) {
+                    $q->whereHas('user.student', function ($q) {
+                        $q->where('status', 1);
+                    })->with('class_section.class', 'class_section.section', 'class_section.medium', 'user.school');
+                }
+            ]);
             // ==============================
 
             // $auth->assignRole('Guardian');
@@ -173,20 +175,20 @@ class ParentApiController extends Controller
             $token = $auth->createToken($auth->first_name)->plainTextToken;
             // $token = $auth->createToken('API Token', ['school_code' => $request->school_code])->plainTextToken;
             $user = $auth;
-          
-            if($user->status === 0){
+
+            if ($user->status === 0) {
                 ResponseService::errorResponse('Your account is inactive, please contact admin.', null, config('constants.RESPONSE_CODE.INVALID_LOGIN'));
             }
             $request->headers->set('school_code', $request->school_code);
             ResponseService::successResponse('User logged-in!', new UserDataResource($user), ['token' => $token], config('constants.RESPONSE_CODE.LOGIN_SUCCESS'));
         } else {
-              Log::info('Current Default Connection', [
-                    'connection' => DB::getDefaultConnection()
-                ]);
+            Log::info('Current Default Connection', [
+                'connection' => DB::getDefaultConnection()
+            ]);
 
-                Log::info('Current Database Name', [
-                    'database' => DB::connection()->getDatabaseName()
-                ]);
+            Log::info('Current Database Name', [
+                'database' => DB::connection()->getDatabaseName()
+            ]);
             ResponseService::errorResponse('Invalid Login Credentials', null, config('constants.RESPONSE_CODE.INVALID_LOGIN'));
         }
     }
@@ -315,19 +317,19 @@ class ParentApiController extends Controller
             if (empty($children)) {
                 ResponseService::errorResponse("Child's Account is not Active.Contact School Support", NULL, config('constants.RESPONSE_CODE.INACTIVE_CHILD'));
             }
-            $lessonQuery = $this->lesson->builder()->whereHas('lesson_commons', function($q) use ($request, $children) {
+            $lessonQuery = $this->lesson->builder()->whereHas('lesson_commons', function ($q) use ($request, $children) {
                 $q->where('class_subject_id', $request->class_subject_id)->where('class_section_id', $children->class_section_id);
             })->with('topic', 'file');
             if ($request->lesson_id) {
                 $lessonQuery->where('id', $request->lesson_id);
             }
 
-            if($session_year_id) {
+            if ($session_year_id) {
                 $lessonQuery->whereHas('session_years_trackings', function ($q) use ($session_year_id) {
                     $q->where('session_year_id', $session_year_id);
                 });
             }
-            
+
             $lessonData = $lessonQuery->get();
 
             ResponseService::successResponse("Lessons Fetched Successfully", $lessonData);
@@ -391,12 +393,16 @@ class ParentApiController extends Controller
             if (empty($children)) {
                 ResponseService::errorResponse("Child's Account is not Active.Contact School Support", NULL, config('constants.RESPONSE_CODE.INACTIVE_CHILD'));
             }
-            $data = $this->assignment->builder()->with(['file', 'class_subject.subject', 'submission' => function ($query) use ($children) {
-                $query->where('student_id', $children->user_id)->with('file');
-            }])
-            ->whereHas('assignment_commons', function ($query) use ($children) {
-                $query->where('class_section_id', $children->class_section_id);
-            });
+            $data = $this->assignment->builder()->with([
+                'file',
+                'class_subject.subject',
+                'submission' => function ($query) use ($children) {
+                    $query->where('student_id', $children->user_id)->with('file');
+                }
+            ])
+                ->whereHas('assignment_commons', function ($query) use ($children) {
+                    $query->where('class_section_id', $children->class_section_id);
+                });
             if ($request->assignment_id) {
                 $data->where('id', $request->assignment_id);
             }
@@ -416,7 +422,7 @@ class ParentApiController extends Controller
                     });
                 }
             }
-          //  dd($data->orderBy('id', 'desc')->paginate(15));
+            //  dd($data->orderBy('id', 'desc')->paginate(15));
 
             $data = $data->orderBy('id', 'desc')->paginate(15);
             ResponseService::successResponse("Assignments Fetched Successfully", $data);
@@ -1670,7 +1676,7 @@ class ParentApiController extends Controller
                 'payment_transaction_id' => $paymentTransactionData->id,
                 'installment' => json_encode($installmentDetails, JSON_THROW_ON_ERROR),
                 'total_amount' => $finalAmount,
-                'advance_amount' => $request->advance,
+                'advance_amount' => 0,
                 'dueChargesAmount' => $dueChargesAmount,
                 'school_id' => $schoolId,
                 'type' => 'fees',
@@ -1846,9 +1852,9 @@ class ParentApiController extends Controller
     public function feesPaidReceiptPDF(Request $request)
     {
         $validator = Validator::make($request->all(), [
-            'child_id'          => 'required_without_all:fees_paid_id,compulsory_fee_id|integer',
-            'fees_id'           => 'required_without_all:fees_paid_id,compulsory_fee_id|integer',
-            'fees_paid_id'      => 'required_without_all:child_id,compulsory_fee_id|numeric',
+            'child_id' => 'required_without_all:fees_paid_id,compulsory_fee_id|integer',
+            'fees_id' => 'required_without_all:fees_paid_id,compulsory_fee_id|integer',
+            'fees_paid_id' => 'required_without_all:child_id,compulsory_fee_id|numeric',
             'compulsory_fee_id' => 'required_without_all:child_id,fees_paid_id|numeric',
         ]);
 
@@ -1904,7 +1910,7 @@ class ParentApiController extends Controller
             $student = $this->student->builder()->with('user:id,first_name,last_name,email', 'class_section.class.stream', 'class_section.section', 'class_section.medium')
                 ->where(function ($q) use ($feesPaid) {
                     $q->where('id', $feesPaid->student_id)
-                      ->orWhere('user_id', $feesPaid->student_id);
+                        ->orWhere('user_id', $feesPaid->student_id);
                 })->firstOrFail();
 
             $school = $this->cache->getSchoolSettings();
@@ -1924,9 +1930,9 @@ class ParentApiController extends Controller
 
             $data = [
                 'fees_paid' => $feesPaid,
-                'student'   => $student,
-                'school'    => $school,
-                'pdf'       => base64_encode($output)
+                'student' => $student,
+                'school' => $school,
+                'pdf' => base64_encode($output)
             ];
 
             ResponseService::successResponse("Fees Receipt Fetched Successfully", $data);
@@ -2028,9 +2034,10 @@ class ParentApiController extends Controller
 //    }
 
     //get the fees paid list
-    public function feesPaidList(Request $request) {
+    public function feesPaidList(Request $request)
+    {
         $validator = Validator::make($request->all(), [
-            'child_id'        => 'required',
+            'child_id' => 'required',
             'session_year_id' => 'nullable'
         ]);
 
@@ -2051,9 +2058,10 @@ class ParentApiController extends Controller
     }
 
     //get the fees failed list
-    public function feesFailedList(Request $request) {
+    public function feesFailedList(Request $request)
+    {
         $validator = Validator::make($request->all(), [
-            'child_id'        => 'required',
+            'child_id' => 'required',
         ]);
 
         if ($validator->fails()) {
@@ -2164,14 +2172,14 @@ class ParentApiController extends Controller
     {
         $validator = Validator::make($request->all(), [
             'school_code' => 'required|string',
-            'mobile'      => 'required_without:email|nullable|digits:10',
-            'email'       => 'required_without:mobile|nullable|email',
+            'mobile' => 'required_without:email|nullable|digits:10',
+            'email' => 'required_without:mobile|nullable|email',
         ], [
             'school_code.required' => 'Please enter the school code.',
             'mobile.required_without' => 'Please enter either mobile number or email.',
             'email.required_without' => 'Please enter either mobile number or email.',
-            'mobile.digits'        => 'Mobile number must be 10 digits.',
-            'email.email'          => 'Please enter a valid email address.',
+            'mobile.digits' => 'Mobile number must be 10 digits.',
+            'email.email' => 'Please enter a valid email address.',
         ]);
 
         if ($validator->fails()) {
@@ -2202,7 +2210,7 @@ class ParentApiController extends Controller
                     }
 
                     $response = Password::sendResetLink(['email' => $request->email]);
-                   
+
                     if ($response == Password::RESET_LINK_SENT) {
                         return ResponseService::successResponse("Forgot Password email sent successfully");
                     } else {
@@ -2217,7 +2225,7 @@ class ParentApiController extends Controller
                     if (!empty($user)) {
                         $this->user->update($user->id, [
                             'reset_request' => 1,
-                            'school_id'     => $user->school_id ?? null,
+                            'school_id' => $user->school_id ?? null,
                         ]);
                         return ResponseService::successResponse("User verified successfully");
                     } else {
@@ -2237,15 +2245,15 @@ class ParentApiController extends Controller
     {
         $validator = Validator::make($request->all(), [
             'school_code' => 'required|string',
-            'mobile'   => 'required|digits:10',
+            'mobile' => 'required|digits:10',
             'password' => 'required|min:6|confirmed',
         ], [
             'school_code.required' => 'Please enter the school code.',
-            'mobile.required'   => 'Please enter the mobile number.',
-            'mobile.digits'     => 'Mobile number must be 10 digits.',
+            'mobile.required' => 'Please enter the mobile number.',
+            'mobile.digits' => 'Mobile number must be 10 digits.',
             'password.required' => 'Please enter the new password.',
-            'password.min'      => 'Password must be at least 6 characters.',
-            'password.confirmed'=> 'Password confirmation does not match.',
+            'password.min' => 'Password must be at least 6 characters.',
+            'password.confirmed' => 'Password confirmation does not match.',
         ]);
 
         if ($validator->fails()) {
@@ -2275,7 +2283,7 @@ class ParentApiController extends Controller
                         'password' => Hash::make($request->password),
                         'reset_request' => 0,
                     ]);
-                    
+
                     return ResponseService::successResponse("Password updated successfully");
                 } else {
                     return ResponseService::errorResponse("Invalid user details", null, config('constants.RESPONSE_CODE.INVALID_USER_DETAILS'));
@@ -2289,34 +2297,34 @@ class ParentApiController extends Controller
         }
     }
 
-public function getNotifications()
-{
-    try {
+    public function getNotifications()
+    {
+        try {
 
-        $userId = auth()->id(); // ✅ logged-in guardian
+            $userId = auth()->id(); // ✅ logged-in guardian
 
-        $notifications = Notification::with([
+            $notifications = Notification::with([
                 'notificationUsers' => function ($q) use ($userId) {
                     $q->where('user_id', $userId);
                 }
             ])
-            ->whereHas('notificationUsers', function ($q) use ($userId) {
-                $q->where('user_id', $userId);
-            })
-            ->orderBy('id', 'DESC')
-            ->get();
+                ->whereHas('notificationUsers', function ($q) use ($userId) {
+                    $q->where('user_id', $userId);
+                })
+                ->orderBy('id', 'DESC')
+                ->get();
 
-        return ResponseService::successResponse(
-            "Notifications fetched successfully",
-            $notifications
-        );
+            return ResponseService::successResponse(
+                "Notifications fetched successfully",
+                $notifications
+            );
 
-    } catch (Throwable $e) {
+        } catch (Throwable $e) {
 
-        ResponseService::logErrorResponse($e);
-        return ResponseService::errorResponse();
+            ResponseService::logErrorResponse($e);
+            return ResponseService::errorResponse();
+        }
     }
-}
 
 
 
