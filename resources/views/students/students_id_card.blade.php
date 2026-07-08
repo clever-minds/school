@@ -165,6 +165,10 @@ body {
 
     <!-- FOOTER -->
     <div class="footer" @if(isset($student->student->campus) && $student->student->campus == 'JIAM') style="bottom: 35px;" @endif>
+        @php
+            $schoolCode = \App\Models\School::find($student->school_id)->code ?? '';
+        @endphp
+
         @if (isset($student->student->campus) && $student->student->campus == 'JIAM')
             Saudagar park behind sunpharma lab tandalja<br>
             Contact: 8140027986, 6355162422
@@ -177,7 +181,16 @@ body {
             @foreach($chunks as $chunk)
                 {{ implode(' ', $chunk) }}<br>
             @endforeach
-            Contact:  {{ $settings['school_phone'] }}
+
+            @if ($schoolCode == 'GKGO202558')
+                Contact: 8140027986, 6355162422
+            @elseif ($schoolCode == 'LTA20251')
+                Contact: 9737371796, 9328301833
+            @elseif ($schoolCode == 'GKGO202511')
+                Contact: 9173282648, 7069410150
+            @else
+                Contact:  {{ $settings['school_phone'] }}
+            @endif
         @endif
     </div>
 
