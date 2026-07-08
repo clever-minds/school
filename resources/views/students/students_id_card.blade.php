@@ -99,7 +99,7 @@ body {
 /* FOOTER */
 .footer {
     position: absolute;
-    bottom: 25px;
+    bottom: 10px;
     left: 0;
     right: 0;
     text-align: center;
@@ -164,7 +164,7 @@ body {
     </div>
 
     <!-- FOOTER -->
-    <div class="footer">
+    <div class="footer" @if(isset($student->student->campus) && $student->student->campus == 'JIAM') style="bottom: 25px;" @endif>
         @if (isset($student->student->campus) && $student->student->campus == 'JIAM')
             Saudagar park behind sunpharma lab tandalja<br>
             Contact: 8140027986, 6355162422
