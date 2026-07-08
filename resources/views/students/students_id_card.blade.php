@@ -99,7 +99,7 @@ body {
 /* FOOTER */
 .footer {
     position: absolute;
-    bottom: 10px;
+    bottom: 25px;
     left: 0;
     right: 0;
     text-align: center;
@@ -117,7 +117,7 @@ body {
     <div class="logo-wrapper">
         <div class="logo-box">
             @if (isset($student->student->campus) && $student->student->campus == 'JIAM')
-                <img src="{{ public_path('assets/jiam_logo.png') }}">
+                <img src="{{ public_path('assets/jiam_logo_2.png') }}">
             @elseif (!empty($settings['horizontal_logo']))
                 <img src="{{ public_path('storage/'.$settings['horizontal_logo']) }}">
             @else
@@ -167,7 +167,7 @@ body {
     <div class="footer">
         @if (isset($student->student->campus) && $student->student->campus == 'JIAM')
             Saudagar park behind sunpharma lab tandalja<br>
-            Contact: {{ $settings['school_phone'] ?? '' }}
+            Contact: 8140027986, 6355162422
         @else
             @php
                 $words = explode(' ', $settings['school_address'] ?? '');
