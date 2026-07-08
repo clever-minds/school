@@ -164,7 +164,7 @@ body {
     </div>
 
     <!-- FOOTER -->
-    <div class="footer" @if(isset($student->student->campus) && $student->student->campus == 'JIAM') style="bottom: 25px;" @endif>
+    <div class="footer" @if(isset($student->student->campus) && $student->student->campus == 'JIAM') style="bottom: 35px;" @endif>
         @if (isset($student->student->campus) && $student->student->campus == 'JIAM')
             Saudagar park behind sunpharma lab tandalja<br>
             Contact: 8140027986, 6355162422
