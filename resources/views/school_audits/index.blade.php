@@ -40,6 +40,7 @@
                                         <th scope="col" data-field="no"> {{ __('no.') }} </th>
                                         <th scope="col" data-field="school_name" data-sortable="false">{{ __('School') }} </th>
                                         <th scope="col" data-field="auditor_name" data-sortable="false">{{ __('Auditor') }} </th>
+                                        <th scope="col" data-field="audit_type" data-sortable="true">{{ __('Type') }} </th>
                                         <th scope="col" data-field="audit_date" data-sortable="true">{{ __('Date') }} </th>
                                         <th data-events="schoolAuditEvents" data-width="150" scope="col" data-field="operate" data-escape="false">{{ __('action') }}</th>
                                     </tr>

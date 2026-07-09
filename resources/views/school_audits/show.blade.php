@@ -21,10 +21,13 @@
                             <div class="col-md-4">
                                 <h5><strong>{{ __('School') }}:</strong> {{ $audit->school ? $audit->school->name : '-' }}</h5>
                             </div>
-                            <div class="col-md-4">
+                            <div class="col-md-3">
                                 <h5><strong>{{ __('Auditor') }}:</strong> {{ $audit->auditor ? $audit->auditor->first_name . ' ' . $audit->auditor->last_name : '-' }}</h5>
                             </div>
-                            <div class="col-md-4">
+                            <div class="col-md-3">
+                                <h5><strong>{{ __('Audit Type') }}:</strong> {{ $audit->audit_type ?? '-' }}</h5>
+                            </div>
+                            <div class="col-md-3">
                                 <h5><strong>{{ __('Audit Date') }}:</strong> {{ date('d M, Y', strtotime($audit->audit_date)) }}</h5>
                             </div>
                         </div>
@@ -49,24 +52,32 @@
                                             <th width="30%">{{ __('Remarks') }}</th>
                                         </tr>
                                     </thead>
-                                    <tbody>
-                                        @foreach($audit->answers as $key => $answer)
-                                            <tr>
-                                                <td>{{ $key + 1 }}</td>
-                                                <td>{{ $answer->question ? $answer->question->question : '-' }}</td>
-                                                <td>
-                                                    @if($answer->answer == 'Yes')
-                                                        <span class="badge badge-success">{{ __('Yes') }}</span>
-                                                    @elseif($answer->answer == 'No')
-                                                        <span class="badge badge-danger">{{ __('No') }}</span>
-                                                    @else
-                                                        <span class="badge badge-secondary">{{ __('N/A') }}</span>
-                                                    @endif
-                                                </td>
-                                                <td>{{ $answer->remarks ?? '-' }}</td>
-                                            </tr>
-                                        @endforeach
-                                    </tbody>
+                                        <tbody>
+                                            @php $index = 0; @endphp
+                                            @foreach($audit->answers->groupBy('question.category') as $category => $categoryAnswers)
+                                                @if($category)
+                                                    <tr class="table-secondary">
+                                                        <td colspan="4"><strong>{{ $category }}</strong></td>
+                                                    </tr>
+                                                @endif
+                                                @foreach($categoryAnswers as $answer)
+                                                    <tr>
+                                                        <td>{{ ++$index }}</td>
+                                                        <td>{{ $answer->question ? $answer->question->question : '-' }}</td>
+                                                        <td>
+                                                            @if($answer->answer == 'Yes')
+                                                                <span class="badge badge-success">{{ __('Yes') }}</span>
+                                                            @elseif($answer->answer == 'No')
+                                                                <span class="badge badge-danger">{{ __('No') }}</span>
+                                                            @else
+                                                                <span class="badge badge-secondary">{{ __('N/A') }}</span>
+                                                            @endif
+                                                        </td>
+                                                        <td>{{ $answer->remarks ?? '-' }}</td>
+                                                    </tr>
+                                                @endforeach
+                                            @endforeach
+                                        </tbody>
                                 </table>
                             </div>
                         @else

@@ -88,6 +88,7 @@ class SchoolAuditController extends Controller
         $request->validate([
             'school_id' => 'required|exists:schools,id',
             'audit_date' => 'required|date',
+            'audit_type' => 'required|in:Monthly,Quarterly,Half Yearly,Yearly',
             'remarks' => 'nullable|string',
             'answers' => 'required|array',
             'answers.*.question_id' => 'required|exists:audit_questions,id',
@@ -102,6 +103,7 @@ class SchoolAuditController extends Controller
                 'school_id' => $request->school_id,
                 'auditor_id' => Auth::user()->id,
                 'audit_date' => date('Y-m-d', strtotime($request->audit_date)),
+                'audit_type' => $request->audit_type,
                 'remarks' => $request->remarks,
             ]);
 

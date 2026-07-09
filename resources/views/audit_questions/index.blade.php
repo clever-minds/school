@@ -23,9 +23,13 @@
                         <form class="create-form pt-3" id="create-form" action="{{route('audit-questions.store')}}" method="POST" novalidate="novalidate">
                             @csrf
                             <div class="row">
-                                <div class="form-group col-sm-12 col-md-9">
+                                <div class="form-group col-sm-12 col-md-6">
                                     <label>{{ __('question') }} <span class="text-danger">*</span></label>
                                     {!! Form::text('question', null, ['required', 'placeholder' => __('question'), 'class' => 'form-control']) !!}
+                                </div>
+                                <div class="form-group col-sm-12 col-md-3">
+                                    <label>{{ __('category') }}</label>
+                                    {!! Form::text('category', null, ['placeholder' => __('category'), 'class' => 'form-control']) !!}
                                 </div>
                                 <div class="form-group col-sm-12 col-md-3">
                                     <label>{{ __('status') }} <span class="text-danger">*</span></label>
@@ -66,6 +70,7 @@
                                         <th scope="col" data-field="id" data-sortable="true" data-visible="false"> {{ __('id') }} </th>
                                         <th scope="col" data-field="no"> {{ __('no.') }} </th>
                                         <th scope="col" data-field="question">{{ __('question') }} </th>
+                                        <th scope="col" data-field="category">{{ __('category') }} </th>
                                         <th scope="col" data-field="status_text" data-escape="false">{{ __('status') }} </th>
                                         <th data-events="auditQuestionEvents" data-width="150" scope="col" data-field="operate" data-escape="false">{{ __('action') }}</th>
                                     </tr>
@@ -103,6 +108,12 @@
                         </div>
                         <div class="row form-group">
                             <div class="col-sm-12 col-md-12">
+                                <label>{{ __('category') }}</label>
+                                {!! Form::text('category', null, ['placeholder' => __('category'), 'class' => 'form-control', 'id' => 'edit-category']) !!}
+                            </div>
+                        </div>
+                        <div class="row form-group">
+                            <div class="col-sm-12 col-md-12">
                                 <label>{{ __('status') }} <span class="text-danger">*</span></label>
                                 <select name="status" class="form-control" id="edit-status" required>
                                     <option value="1">{{ __('Active') }}</option>
@@ -127,6 +138,7 @@
         'click .edit-data': function (e, value, row, index) {
             $('#id').val(row.id);
             $('#edit-question').val(row.question);
+            $('#edit-category').val(row.category);
             $('#edit-status').val(row.status);
             $('#formdata').attr('action', "{{url('audit-questions')}}/" + row.id);
         }

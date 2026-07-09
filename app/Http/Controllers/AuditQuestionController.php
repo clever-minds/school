@@ -28,6 +28,7 @@ class AuditQuestionController extends Controller
         ResponseService::noPermissionThenRedirect('audit-question-create');
         $validator = Validator::make($request->all(), [
             'question' => 'required|string',
+            'category' => 'nullable|string',
             'status' => 'nullable|in:0,1'
         ]);
 
@@ -38,6 +39,7 @@ class AuditQuestionController extends Controller
         try {
             AuditQuestion::create([
                 'question' => $request->question,
+                'category' => $request->category,
                 'status' => $request->status ?? 1
             ]);
             ResponseService::successResponse('Data Stored Successfully');
@@ -61,7 +63,8 @@ class AuditQuestionController extends Controller
 
         $sql = AuditQuestion::query()
             ->when($search, function ($query) use ($search) {
-                $query->where('question', 'LIKE', "%$search%");
+                $query->where('question', 'LIKE', "%$search%")
+                      ->orWhere('category', 'LIKE', "%$search%");
             });
 
         $total = $sql->count();
@@ -95,6 +98,7 @@ class AuditQuestionController extends Controller
         ResponseService::noPermissionThenSendJson('audit-question-edit');
         $validator = Validator::make($request->all(), [
             'question' => 'required|string',
+            'category' => 'nullable|string',
             'status' => 'required|in:0,1'
         ]);
 
@@ -106,6 +110,7 @@ class AuditQuestionController extends Controller
             $question = AuditQuestion::findOrFail($id);
             $question->update([
                 'question' => $request->question,
+                'category' => $request->category,
                 'status' => $request->status
             ]);
             ResponseService::successResponse('Data Updated Successfully');
