@@ -43,8 +43,13 @@ function send_notification($userIds, $title, $body, $type, $customData = [])
         'sender_id'       => $customData['sender_id'] ?? (auth()->check() ? auth()->user()->id : null),
     ]);
 
-    if (!empty($customData['class_section_ids'])) {
-        foreach ($customData['class_section_ids'] as $class_id) {
+    $classSectionIds = $customData['class_section_ids'] ?? [];
+    if (empty($classSectionIds) && request()->has('class_section_id')) {
+        $classSectionIds = is_array(request()->class_section_id) ? request()->class_section_id : [request()->class_section_id];
+    }
+
+    if (!empty($classSectionIds)) {
+        foreach ($classSectionIds as $class_id) {
             \App\Models\NotificationClass::create([
                 'notification_id' => $notification->id,
                 'class_section_id' => $class_id
