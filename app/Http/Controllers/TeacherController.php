@@ -279,6 +279,7 @@ class TeacherController extends Controller {
                 
                 $operate = BootstrapTableService::menuEditButton('edit',route('teachers.update', $row->id));
                 $operate .= BootstrapTableService::menuButton('View Timetable',route('timetable.teacher.show', $row->id),[],[]);
+                $operate .= BootstrapTableService::menuButton('Sent Notifications',route('teachers.sent-notifications', $row->id),[],[]);
                 $operate .= BootstrapTableService::menuButton('inactive',route('teachers.change-status', $row->id),['deactivate-teacher'],[]);
                 $operate .= BootstrapTableService::menuButton('salary_structure',route('staff.payroll-structure', $row->id),[],[]);
                 $operate .= BootstrapTableService::menuTrashButton('delete',route('teachers.trash', $row->id));
@@ -501,6 +502,57 @@ class TeacherController extends Controller {
             ResponseService::logErrorResponse($e, 'Teacher Controller ---> Download Sample File');
             ResponseService::errorResponse();
         }
+    }
+
+    public function mySentNotifications(Request $request)
+    {
+        $teacher = Auth::user();
+        if (!$teacher->hasRole('Teacher')) {
+            ResponseService::noPermissionThenRedirect('teacher-list');
+        }
+
+        $offset = request('offset', 0);
+        $limit = request('limit', 10);
+        $sort = request('sort', 'id');
+        $order = request('order', 'DESC');
+        $search = request('search');
+
+        if ($request->expectsJson() || $request->ajax()) {
+            $query = \App\Models\Notification::where('sender_id', $teacher->id)
+                ->with(['notificationClasses.class_section.class', 'notificationClasses.class_section.section']);
+
+            if ($search) {
+                $query->where(function ($q) use ($search) {
+                    $q->where('title', 'LIKE', "%$search%")
+                      ->orWhere('message', 'LIKE', "%$search%");
+                });
+            }
+
+            if ($request->date) {
+                $query->whereDate('created_at', date('Y-m-d', strtotime($request->date)));
+            }
+
+            $total = $query->count();
+            $notifications = $query->orderBy($sort, $order)->skip($offset)->take($limit)->get();
+
+            $rows = [];
+            $no = 1;
+            foreach ($notifications as $notification) {
+                $tempRow = $notification->toArray();
+                $tempRow['no'] = $no++;
+                $classes = [];
+                foreach ($notification->notificationClasses as $nc) {
+                    $classes[] = $nc->class_section->class->name . ' - ' . $nc->class_section->section->name;
+                }
+                $tempRow['classes'] = implode(', ', $classes);
+                $tempRow['date'] = date('Y-m-d h:i A', strtotime($notification->created_at));
+                $rows[] = $tempRow;
+            }
+
+            return response()->json(['total' => $total, 'rows' => $rows]);
+        }
+
+        return view('teachers.sent_notifications', compact('teacher'));
     }
 
     public function sentNotifications(Request $request, $id)

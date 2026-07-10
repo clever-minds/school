@@ -120,6 +120,12 @@
                 </a>
             </li>
         @endcan
+        <li class="nav-item">
+            <a class="nav-link" href="{{ route('teacher.my-sent-notifications') }}">
+                <i class="fa fa-bell menu-icon"></i>
+                <span class="menu-title"> {{ __('Sent Notifications') }} </span>
+            </a>
+        </li>
         @endrole
 
         {{-- student --}}
