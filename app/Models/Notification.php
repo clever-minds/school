@@ -35,6 +35,11 @@ class Notification extends Model
         return $this->hasMany(NotificationClass::class);
     }
 
+    public function notificationUsers()
+    {
+        return $this->hasMany(NotificationUser::class);
+    }
+
     public function scopeOwner()
     {
         if (Auth::user()) {

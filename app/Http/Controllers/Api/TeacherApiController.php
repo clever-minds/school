@@ -3139,7 +3139,7 @@ class TeacherApiController extends Controller
         try {
             $user = Auth::user();
             $query = \App\Models\Notification::where('sender_id', $user->id)
-                ->with(['notificationClasses.class_section.class', 'notificationClasses.class_section.section']);
+                ->with(['notificationClasses.class_section.class', 'notificationClasses.class_section.section', 'notificationUsers.user']);
 
             if ($request->date) {
                 $query->whereDate('created_at', date('Y-m-d', strtotime($request->date)));
@@ -3164,6 +3164,12 @@ class TeacherApiController extends Controller
                         return [
                             'class_section_id' => $nc->class_section_id,
                             'name' => $nc->class_section->class->name . ' - ' . $nc->class_section->section->name
+                        ];
+                    }),
+                    'users' => $notification->notificationUsers->map(function ($nu) {
+                        return [
+                            'user_id' => $nu->user_id,
+                            'name' => $nu->user ? $nu->user->first_name . ' ' . $nu->user->last_name : 'Unknown',
                         ];
                     })
                 ];

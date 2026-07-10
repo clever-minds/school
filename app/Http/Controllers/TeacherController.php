@@ -519,7 +519,7 @@ class TeacherController extends Controller {
 
         if ($request->expectsJson() || $request->ajax()) {
             $query = \App\Models\Notification::where('sender_id', $teacher->id)
-                ->with(['notificationClasses.class_section.class', 'notificationClasses.class_section.section']);
+                ->with(['notificationClasses.class_section.class', 'notificationClasses.class_section.section', 'notificationUsers.user']);
 
             if ($search) {
                 $query->where(function ($q) use ($search) {
@@ -545,6 +545,15 @@ class TeacherController extends Controller {
                     $classes[] = $nc->class_section->class->name . ' - ' . $nc->class_section->section->name;
                 }
                 $tempRow['classes'] = implode(', ', $classes);
+                
+                $users = [];
+                foreach ($notification->notificationUsers as $nu) {
+                    if ($nu->user) {
+                        $users[] = $nu->user->first_name . ' ' . $nu->user->last_name;
+                    }
+                }
+                $tempRow['users'] = implode(', ', $users);
+                
                 $tempRow['date'] = date('Y-m-d h:i A', strtotime($notification->created_at));
                 $rows[] = $tempRow;
             }
@@ -569,7 +578,7 @@ class TeacherController extends Controller {
 
         if ($request->expectsJson() || $request->ajax()) {
             $query = \App\Models\Notification::where('sender_id', $id)
-                ->with(['notificationClasses.class_section.class', 'notificationClasses.class_section.section']);
+                ->with(['notificationClasses.class_section.class', 'notificationClasses.class_section.section', 'notificationUsers.user']);
 
             if ($search) {
                 $query->where(function ($q) use ($search) {
@@ -595,6 +604,15 @@ class TeacherController extends Controller {
                     $classes[] = $nc->class_section->class->name . ' - ' . $nc->class_section->section->name;
                 }
                 $tempRow['classes'] = implode(', ', $classes);
+                
+                $users = [];
+                foreach ($notification->notificationUsers as $nu) {
+                    if ($nu->user) {
+                        $users[] = $nu->user->first_name . ' ' . $nu->user->last_name;
+                    }
+                }
+                $tempRow['users'] = implode(', ', $users);
+                
                 $tempRow['date'] = date('Y-m-d h:i A', strtotime($notification->created_at));
                 $rows[] = $tempRow;
             }

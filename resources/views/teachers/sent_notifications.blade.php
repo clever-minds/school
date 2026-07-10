@@ -43,6 +43,7 @@
                                 <th scope="col" data-field="title" data-sortable="true">{{ __('title') }}</th>
                                 <th scope="col" data-field="message" data-sortable="true">{{ __('message') }}</th>
                                 <th scope="col" data-field="classes" data-sortable="false">{{ __('classes') }}</th>
+                                <th scope="col" data-field="users" data-sortable="false">{{ __('Sent To') }}</th>
                                 <th scope="col" data-field="date" data-sortable="true">{{ __('date') }}</th>
                             </tr>
                             </thead>
