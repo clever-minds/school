@@ -63,17 +63,32 @@
                         </button>
                     </div>
                     <div class="modal-body">
-                        <table class="table table-bordered">
+                        <div id="users_toolbar" class="d-flex">
+                            <select id="sent_filter" class="form-control">
+                                <option value="">{{ __('All') }}</option>
+                                <option value="1">{{ __('Sent') }}</option>
+                                <option value="0">{{ __('Not Sent') }}</option>
+                            </select>
+                        </div>
+                        <table class='table' id='users_table'
+                               data-toggle="table"
+                               data-pagination="true"
+                               data-page-list="[5, 10, 20, 50]"
+                               data-search="true"
+                               data-toolbar="#users_toolbar"
+                               data-show-columns="false"
+                               data-show-refresh="false"
+                               data-mobile-responsive="true"
+                               data-sort-name="no" data-sort-order="asc"
+                               data-escape="true">
                             <thead>
                                 <tr>
-                                    <th>{{ __('No.') }}</th>
-                                    <th>{{ __('Student Name') }}</th>
-                                    <th>{{ __('Class') }}</th>
-                                    <th>{{ __('Notification Sent') }}</th>
+                                    <th scope="col" data-field="no" data-sortable="true">{{ __('No.') }}</th>
+                                    <th scope="col" data-field="name" data-sortable="true">{{ __('Student Name') }}</th>
+                                    <th scope="col" data-field="class_section" data-sortable="true">{{ __('Class') }}</th>
+                                    <th scope="col" data-field="sent_badge" data-sortable="true" data-escape="false">{{ __('Notification Sent') }}</th>
                                 </tr>
                             </thead>
-                            <tbody id="usersTableBody">
-                            </tbody>
                         </table>
                     </div>
                 </div>
@@ -101,31 +116,43 @@
 
         window.userEvents = {
             'click .view-users': function (e, value, row, index) {
-                $('#usersTableBody').html('<tr><td colspan="4" class="text-center">Loading...</td></tr>');
                 $('#usersModal').modal('show');
+                $('#users_table').bootstrapTable('showLoading');
                 $.ajax({
                     url: "{{ url('timetable/teacher/sent-notifications') }}/" + row.id + "/users",
                     type: 'GET',
                     success: function (response) {
-                        let html = '';
+                        let data = [];
                         if (response.data && response.data.length > 0) {
                             response.data.forEach((student, i) => {
                                 let badgeClass = student.sent ? 'badge-success' : 'badge-danger';
                                 let badgeText = student.sent ? 'Yes' : 'No';
-                                html += `<tr>
-                                    <td>${i + 1}</td>
-                                    <td>${student.name}</td>
-                                    <td>${student.class_section}</td>
-                                    <td><label class="badge ${badgeClass}">${badgeText}</label></td>
-                                </tr>`;
+                                data.push({
+                                    no: i + 1,
+                                    name: student.name,
+                                    class_section: student.class_section,
+                                    sent_status: student.sent ? 1 : 0,
+                                    sent_badge: `<label class="badge ${badgeClass}">${badgeText}</label>`
+                                });
                             });
-                        } else {
-                            html = '<tr><td colspan="4" class="text-center">No students found</td></tr>';
                         }
-                        $('#usersTableBody').html(html);
+                        $('#users_table').bootstrapTable('load', data);
+                        $('#users_table').bootstrapTable('hideLoading');
+                        
+                        $('#sent_filter').off('change').on('change', function() {
+                            var val = $(this).val();
+                            if (val === "") {
+                                $('#users_table').bootstrapTable('filterBy', {});
+                            } else {
+                                $('#users_table').bootstrapTable('filterBy', { sent_status: parseInt(val) });
+                            }
+                        });
+                        $('#sent_filter').val('');
+                        $('#users_table').bootstrapTable('filterBy', {});
                     },
                     error: function () {
-                        $('#usersTableBody').html('<tr><td colspan="4" class="text-center text-danger">Error loading data</td></tr>');
+                        $('#users_table').bootstrapTable('hideLoading');
+                        $('#users_table').bootstrapTable('load', []);
                     }
                 });
             }
