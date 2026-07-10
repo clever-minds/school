@@ -74,9 +74,4 @@ class Notification extends Model
         return $this->formatDateValue($this->getRawOriginal('updated_at'));
     }
     
- public function notificationUsers()
-    {
-        return $this->hasMany(NotificationUser::class);
-    }
-
 }
