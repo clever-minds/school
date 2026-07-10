@@ -18,12 +18,14 @@
             </a>
         </li>
         {{-- student pickup --}}
+        @if(!Auth::user()->hasRole('Super Admin') && !Auth::user()->hasRole('Staff'))
         <li class="nav-item">
             <a class="nav-link" href="{{ route('student-pickup.index') }}">
                 <i class="fa fa-handshake-o menu-icon"></i>
                 <span class="menu-title">{{ __('Student Pickup') }}</span>
             </a>
         </li>
+        @endif
         {{-- Academics --}}
         @canany(['medium-list','assign-roll-no','section-list','subject-list','class-list','subject-list','promote-student-list','transfer-student-list'])
             <li class="nav-item">
