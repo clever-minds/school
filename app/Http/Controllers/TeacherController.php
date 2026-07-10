@@ -625,15 +625,20 @@ class TeacherController extends Controller {
         
         $classSectionIds = $notification->notificationClasses->pluck('class_section_id')->toArray();
         $students = \App\Models\Students::whereIn('class_section_id', $classSectionIds)->with(['user', 'class_section.class', 'class_section.section'])->get();
-        $notifiedStudentIds = $notification->notificationUsers->pluck('student_id')->toArray();
+        $notifiedStudentIds = $notification->notificationUsers->pluck('student_id')->filter()->toArray();
+        $notifiedUserIds = $notification->notificationUsers->pluck('user_id')->filter()->toArray();
         
         $data = [];
         foreach ($students as $student) {
+            $isSent = in_array($student->id, $notifiedStudentIds) || 
+                      in_array($student->user_id, $notifiedUserIds) || 
+                      ($student->guardian_id && in_array($student->guardian_id, $notifiedUserIds));
+
             $data[] = [
                 'id' => $student->id,
                 'name' => $student->user ? $student->user->first_name . ' ' . $student->user->last_name : '',
                 'class_section' => $student->class_section->class->name . ' - ' . $student->class_section->section->name,
-                'sent' => in_array($student->id, $notifiedStudentIds)
+                'sent' => $isSent
             ];
         }
 
