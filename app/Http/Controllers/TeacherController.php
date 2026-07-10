@@ -538,7 +538,11 @@ class TeacherController extends Controller {
             $rows = [];
             $no = 1;
             foreach ($notifications as $notification) {
-                $tempRow = $notification->toArray();
+                $tempRow = [
+                    'id' => $notification->id,
+                    'title' => $notification->title,
+                    'message' => $notification->message,
+                ];
                 $tempRow['no'] = $no++;
                 $classes = [];
                 foreach ($notification->notificationClasses as $nc) {
@@ -597,7 +601,11 @@ class TeacherController extends Controller {
             $rows = [];
             $no = 1;
             foreach ($notifications as $notification) {
-                $tempRow = $notification->toArray();
+                $tempRow = [
+                    'id' => $notification->id,
+                    'title' => $notification->title,
+                    'message' => $notification->message,
+                ];
                 $tempRow['no'] = $no++;
                 $classes = [];
                 foreach ($notification->notificationClasses as $nc) {
