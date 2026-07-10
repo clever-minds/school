@@ -550,13 +550,202 @@ class TeacherController extends Controller {
                 }
                 $tempRow['classes'] = implode(', ', $classes);
                 
-                $users = [];
-                foreach ($notification->notificationUsers as $nu) {
-                    if ($nu->user) {
-                        $users[] = $nu->user->first_name . ' ' . $nu->user->last_name;
+                $tempRow['operate'] = '<button class="btn btn-xs btn-gradient-primary btn-rounded btn-icon view-users" data-id="'.$notification->id.'" title="View Students"><i class="fa fa-users"></i></button>';
+                
+                $tempRow['date'] = date('Y-m-d h:i A', strtotime($notification->created_at));
+                $rows[] = $tempRow;
+            }
+
+            return response()->json(['total' => $total, 'rows' => $rows]);
+        }
+
+        $url = route('teacher.my-sent-notifications');
+        return view('teachers.sent_notifications', compact('teacher', 'url'));
+    }
+
+    public function sentNotifications(Request $request, $id)
+    {
+        ResponseService::noPermissionThenRedirect('teacher-list');
+        $teacher = User::findOrFail($id);
+
+        $offset = request('offset', 0);
+        $limit = request('limit', 10);
+        $sort = request('sort', 'id');
+        $order = request('order', 'DESC');
+        $search = request('search');
+
+        if ($request->expectsJson() || $request->ajax()) {
+            $query = \App\Models\Notification::where('sender_id', $id)
+                ->with(['notificationClasses.class_section.class', 'notificationClasses.class_section.section', 'notificationUsers.user']);
+
+            if ($search) {
+                $query->where(function ($q) use ($search) {
+                    $q->where('title', 'LIKE', "%$search%")
+                      ->orWhere('message', 'LIKE', "%$search%");
+                });
+            }
+
+            if ($request->date) {
+                $query->whereDate('created_at', date('Y-m-d', strtotime($request->date)));
+            }
+
+            $total = $query->count();
+            $notifications = $query->orderBy($sort, $order)->skip($offset)->take($limit)->get();
+
+            $rows = [];
+            $no = 1;
+            foreach ($notifications as $notification) {
+                $tempRow = [
+        ResponseService::noPermissionThenSendJson('teacher-delete');
+        try {
+            DB::beginTransaction();
+            $this->user->findTrashedById($id)->forceDelete();
+            DB::commit();
+            ResponseService::successResponse("Data Deleted Permanently");
+        } catch (Throwable $e) {
+            DB::rollBack();
+            ResponseService::logErrorResponse($e, "Teacher Controller ->trash Method", 'cannot_delete_because_data_is_associated_with_other_data');
+            ResponseService::errorResponse();
+        }
+    }
+
+    public function changeStatus($id) {
+        // ResponseService::noFeatureThenSendJson('Teacher Management');
+        ResponseService::noPermissionThenRedirect('teacher-delete');
+        try {
+            DB::beginTransaction();
+            $teacher = $this->user->findTrashedById($id);
+
+            if ($teacher->status == 0) {
+                // If prepaid plan check student limit
+                $subscription = $this->subscriptionService->active_subscription(Auth::user()->school_id);
+                if ($subscription && $subscription->package_type == 0) {
+                    $status = $this->subscriptionService->check_user_limit($subscription, "Staffs");
+                    
+                    if (!$status) {
+                        ResponseService::errorResponse('You reach out limits');
                     }
                 }
-                $tempRow['users'] = implode(', ', $users);
+            }
+
+            $this->user->builder()->where('id',$id)->withTrashed()->update(['status' => $teacher->status == 0 ? 1 : 0,'deleted_at' => $teacher->status == 1 ? now() : null]);
+            DB::commit();
+            ResponseService::successResponse('Data Updated Successfully');
+        } catch (Throwable $e) {
+            ResponseService::logErrorResponse($e, 'Status methods -> Teacher controller');
+            ResponseService::errorResponse();
+        }
+    }
+    public function changeStatusBulk(Request $request){
+        // ResponseService::noFeatureThenSendJson('Teacher Management');
+        ResponseService::noPermissionThenRedirect('teacher-delete');
+        try {
+            DB::beginTransaction();
+            $userIds = json_decode($request->ids);
+            foreach ($userIds as $userId) {
+                $teacher = $this->user->findTrashedById($userId);
+                if ($teacher->status == 0) {
+                    // If prepaid plan check student limit
+                    $subscription = $this->subscriptionService->active_subscription(Auth::user()->school_id);
+                    if ($subscription && $subscription->package_type == 0) {
+                        $status = $this->subscriptionService->check_user_limit($subscription, "Staffs");
+                        
+                        if (!$status) {
+                            ResponseService::errorResponse('You reach out limits');
+                        }
+                    }
+                }
+                $this->user->builder()->where('id',$userId)->withTrashed()->update(['status' => $teacher->status == 0 ? 1 : 0,'deleted_at' => $teacher->status == 1 ? now() : null]);
+            }
+            DB::commit();
+            ResponseService::successResponse("Status Updated Successfully");
+        } catch (Throwable $e) {
+            ResponseService::logErrorResponse($e);
+            ResponseService::errorResponse();
+        }
+    }
+    public function bulkUploadIndex()
+    {
+        ResponseService::noAnyPermissionThenSendJson(['teacher-create', 'teacher-edit']);
+        return view('teacher.bulk_upload');
+       
+    }
+    public function storeBulkUpload(Request $request)
+    {
+        ResponseService::noAnyPermissionThenSendJson(['teacher-create', 'teacher-edit']);
+        $validator = Validator::make($request->all(), [
+            'file'             => 'required|mimes:csv,txt'
+        ]);
+        if ($validator->fails()) {
+            ResponseService::errorResponse($validator->errors()->first());
+        }
+        try {
+            Excel::import(new TeacherImport($request->is_send_notification), $request->file('file'));
+            ResponseService::successResponse('Data Stored Successfully');
+        } catch (ValidationException $e) {
+            ResponseService::errorResponse($e->getMessage());
+        } catch (Throwable $e) {
+            ResponseService::logErrorResponse($e, "Teacher Controller -> Store Bulk method");
+            ResponseService::errorResponse();
+        }                                                                                                                               
+    }
+
+    public function downloadSampleFile() {
+        try {
+            return Excel::download(new TeacherDataExport(), 'teachers.xlsx');
+        } catch (Throwable $e) {
+            ResponseService::logErrorResponse($e, 'Teacher Controller ---> Download Sample File');
+            ResponseService::errorResponse();
+        }
+    }
+
+    public function mySentNotifications(Request $request)
+    {
+        $teacher = Auth::user();
+        if (!$teacher->hasRole('Teacher')) {
+            ResponseService::noPermissionThenRedirect('teacher-list');
+        }
+
+        $offset = request('offset', 0);
+        $limit = request('limit', 10);
+        $sort = request('sort', 'id');
+        $order = request('order', 'DESC');
+        $search = request('search');
+
+        if ($request->expectsJson() || $request->ajax()) {
+            $query = \App\Models\Notification::where('sender_id', $teacher->id)
+                ->with(['notificationClasses.class_section.class', 'notificationClasses.class_section.section', 'notificationUsers.user']);
+
+            if ($search) {
+                $query->where(function ($q) use ($search) {
+                    $q->where('title', 'LIKE', "%$search%")
+                      ->orWhere('message', 'LIKE', "%$search%");
+                });
+            }
+
+            if ($request->date) {
+                $query->whereDate('created_at', date('Y-m-d', strtotime($request->date)));
+            }
+
+            $total = $query->count();
+            $notifications = $query->orderBy($sort, $order)->skip($offset)->take($limit)->get();
+
+            $rows = [];
+            $no = 1;
+            foreach ($notifications as $notification) {
+                $tempRow = [
+                    'id' => $notification->id,
+                    'title' => $notification->title,
+                    'message' => $notification->message,
+                ];
+                $tempRow['no'] = $no++;
+                $classes = [];
+                foreach ($notification->notificationClasses as $nc) {
+                    $classes[] = $nc->class_section->class->name . ' - ' . $nc->class_section->section->name;
+                }
+                $tempRow['classes'] = implode(', ', $classes);
+                
+                $tempRow['operate'] = '<button class="btn btn-xs btn-gradient-primary btn-rounded btn-icon view-users" data-id="'.$notification->id.'" title="View Students"><i class="fa fa-users"></i></button>';
                 
                 $tempRow['date'] = date('Y-m-d h:i A', strtotime($notification->created_at));
                 $rows[] = $tempRow;
@@ -613,13 +802,7 @@ class TeacherController extends Controller {
                 }
                 $tempRow['classes'] = implode(', ', $classes);
                 
-                $users = [];
-                foreach ($notification->notificationUsers as $nu) {
-                    if ($nu->user) {
-                        $users[] = $nu->user->first_name . ' ' . $nu->user->last_name;
-                    }
-                }
-                $tempRow['users'] = implode(', ', $users);
+                $tempRow['operate'] = '<button class="btn btn-xs btn-gradient-primary btn-rounded btn-icon view-users" data-id="'.$notification->id.'" title="View Students"><i class="fa fa-users"></i></button>';
                 
                 $tempRow['date'] = date('Y-m-d h:i A', strtotime($notification->created_at));
                 $rows[] = $tempRow;
@@ -627,7 +810,29 @@ class TeacherController extends Controller {
 
             return response()->json(['total' => $total, 'rows' => $rows]);
         }
-        $url = route('teachers.sent-notifications', $id);
+
+        $url = route('teacher.sent-notifications', $id);
         return view('teachers.sent_notifications', compact('teacher', 'url'));
+    }
+
+    public function notificationUsers($id)
+    {
+        $notification = \App\Models\Notification::with(['notificationClasses.class_section.class', 'notificationClasses.class_section.section', 'notificationUsers'])->findOrFail($id);
+        
+        $classSectionIds = $notification->notificationClasses->pluck('class_section_id')->toArray();
+        $students = \App\Models\Students::whereIn('class_section_id', $classSectionIds)->with(['user', 'class_section.class', 'class_section.section'])->get();
+        $notifiedStudentIds = $notification->notificationUsers->pluck('student_id')->toArray();
+        
+        $data = [];
+        foreach ($students as $student) {
+            $data[] = [
+                'id' => $student->id,
+                'name' => $student->user ? $student->user->first_name . ' ' . $student->user->last_name : '',
+                'class_section' => $student->class_section->class->name . ' - ' . $student->class_section->section->name,
+                'sent' => in_array($student->id, $notifiedStudentIds)
+            ];
+        }
+
+        return response()->json(['data' => $data]);
     }
 }

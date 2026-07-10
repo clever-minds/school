@@ -43,10 +43,37 @@
                                 <th scope="col" data-field="title" data-sortable="true">{{ __('title') }}</th>
                                 <th scope="col" data-field="message" data-sortable="true">{{ __('message') }}</th>
                                 <th scope="col" data-field="classes" data-sortable="false">{{ __('classes') }}</th>
-                                <th scope="col" data-field="users" data-sortable="false">{{ __('Sent To') }}</th>
+                                <th scope="col" data-field="operate" data-sortable="false" data-events="userEvents">{{ __('Action') }}</th>
                                 <th scope="col" data-field="date" data-sortable="true">{{ __('date') }}</th>
                             </tr>
                             </thead>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="modal fade" id="usersModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-lg" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="exampleModalLabel">{{ __('Students List') }}</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <table class="table table-bordered">
+                            <thead>
+                                <tr>
+                                    <th>{{ __('No.') }}</th>
+                                    <th>{{ __('Student Name') }}</th>
+                                    <th>{{ __('Class') }}</th>
+                                    <th>{{ __('Notification Sent') }}</th>
+                                </tr>
+                            </thead>
+                            <tbody id="usersTableBody">
+                            </tbody>
                         </table>
                     </div>
                 </div>
@@ -71,5 +98,37 @@
         $('#filter_date').on('change', function() {
             $('#table_list').bootstrapTable('refresh');
         });
+
+        window.userEvents = {
+            'click .view-users': function (e, value, row, index) {
+                $('#usersTableBody').html('<tr><td colspan="4" class="text-center">Loading...</td></tr>');
+                $('#usersModal').modal('show');
+                $.ajax({
+                    url: "{{ url('teacher/sent-notifications') }}/" + row.id + "/users",
+                    type: 'GET',
+                    success: function (response) {
+                        let html = '';
+                        if (response.data && response.data.length > 0) {
+                            response.data.forEach((student, i) => {
+                                let badgeClass = student.sent ? 'badge-success' : 'badge-danger';
+                                let badgeText = student.sent ? 'Yes' : 'No';
+                                html += `<tr>
+                                    <td>${i + 1}</td>
+                                    <td>${student.name}</td>
+                                    <td>${student.class_section}</td>
+                                    <td><label class="badge ${badgeClass}">${badgeText}</label></td>
+                                </tr>`;
+                            });
+                        } else {
+                            html = '<tr><td colspan="4" class="text-center">No students found</td></tr>';
+                        }
+                        $('#usersTableBody').html(html);
+                    },
+                    error: function () {
+                        $('#usersTableBody').html('<tr><td colspan="4" class="text-center text-danger">Error loading data</td></tr>');
+                    }
+                });
+            }
+        };
     </script>
 @endsection

@@ -604,6 +604,7 @@ Route::post('/admin/impersonation-exit',
                 Route::get('/list', [TimetableController::class, 'teacherList'])->name('timetable.teacher.list');
                 Route::get('/show/{teacher_id}', [TimetableController::class, 'teacherShow'])->name('timetable.teacher.show');
                 Route::get('/sent-notifications', [TeacherController::class, 'mySentNotifications'])->name('teacher.my-sent-notifications');
+                Route::get('/sent-notifications/{id}/users', [TeacherController::class, 'notificationUsers'])->name('teacher.notification-users');
             });
             Route::delete('/delete/{id}', [TimetableController::class, 'deleteClassTimetable']);
         });
