@@ -223,7 +223,7 @@
                     </div>
                 </div>
                 {{-- Student Pickup --}}
-            @if(!Auth::user()->hasRole('Super Admin') && !Auth::user()->hasRole('Staff'))
+            @if(Auth::user()->school_id)
             <div class="col-md-2-4 stretch-card grid-margin">
                 <div class="card">
                     <div class="card-body custom-card-body">
