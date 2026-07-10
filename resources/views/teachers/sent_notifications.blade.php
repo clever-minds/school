@@ -104,7 +104,7 @@
                 $('#usersTableBody').html('<tr><td colspan="4" class="text-center">Loading...</td></tr>');
                 $('#usersModal').modal('show');
                 $.ajax({
-                    url: "{{ url('teacher/sent-notifications') }}/" + row.id + "/users",
+                    url: "{{ url('timetable/teacher/sent-notifications') }}/" + row.id + "/users",
                     type: 'GET',
                     success: function (response) {
                         let html = '';
