@@ -40,7 +40,7 @@ function send_notification($userIds, $title, $body, $type, $customData = [])
         'event_date'      => $customData['event_date'] ?? null, 
         'image'           => $customData['image'] ?? null,     
         'session_year_id' => $sessionYear->id,
-        'sender_id'       => $customData['sender_id'] ?? null,
+        'sender_id'       => $customData['sender_id'] ?? (auth()->check() ? auth()->user()->id : null),
     ]);
 
     if (!empty($customData['class_section_ids'])) {

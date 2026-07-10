@@ -552,7 +552,8 @@ class TeacherController extends Controller {
             return response()->json(['total' => $total, 'rows' => $rows]);
         }
 
-        return view('teachers.sent_notifications', compact('teacher'));
+        $url = route('teacher.my-sent-notifications');
+        return view('teachers.sent_notifications', compact('teacher', 'url'));
     }
 
     public function sentNotifications(Request $request, $id)
@@ -600,7 +601,7 @@ class TeacherController extends Controller {
 
             return response()->json(['total' => $total, 'rows' => $rows]);
         }
-
-        return view('teachers.sent_notifications', compact('teacher'));
+        $url = route('teachers.sent-notifications', $id);
+        return view('teachers.sent_notifications', compact('teacher', 'url'));
     }
 }
