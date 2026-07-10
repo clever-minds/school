@@ -43,7 +43,7 @@
                                 <th scope="col" data-field="title" data-sortable="true">{{ __('title') }}</th>
                                 <th scope="col" data-field="message" data-sortable="true">{{ __('message') }}</th>
                                 <th scope="col" data-field="classes" data-sortable="false">{{ __('classes') }}</th>
-                                <th scope="col" data-field="operate" data-sortable="false" data-events="userEvents">{{ __('Action') }}</th>
+                                <th scope="col" data-field="operate" data-sortable="false" data-events="userEvents" data-escape="false">{{ __('Action') }}</th>
                                 <th scope="col" data-field="date" data-sortable="true">{{ __('date') }}</th>
                             </tr>
                             </thead>
