@@ -1369,6 +1369,11 @@ class StaffApiController extends Controller
         }
         try {
             $user = Auth::user();
+
+            if (empty($user->school_id)) {
+                return ResponseService::errorResponse('Staff attendance is not applicable for central admin users.');
+            }
+
             $today = Carbon::now()->toDateString();
             $currentTime = Carbon::now()->toDateTimeString();
             $attendance = $this->staffAttendance->builder()->where('user_id', $user->id)->where('date', $today)->first();
@@ -1417,6 +1422,11 @@ class StaffApiController extends Controller
     {
         try {
             $user = Auth::user();
+
+            if (empty($user->school_id)) {
+                return ResponseService::successResponse('Data fetched successfully', []);
+            }
+
             $attendance = $this->staffAttendance->builder()->where('user_id', $user->id)
                 ->when($request->month, function ($q) use ($request) {
                     $q->whereMonth('date', $request->month);
@@ -1436,6 +1446,10 @@ class StaffApiController extends Controller
     public function attendanceReport(Request $request)
     {
         try {
+            if (empty(Auth::user()->school_id)) {
+                return ResponseService::successResponse('Data fetched successfully', []);
+            }
+
             $sql = $this->staffAttendance->builder()->with('user:id,first_name,last_name,image');
 
             if ($request->staff_id) {

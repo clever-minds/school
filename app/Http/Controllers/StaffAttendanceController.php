@@ -34,6 +34,10 @@ class StaffAttendanceController extends Controller
             ResponseService::noAnyPermissionThenSendJson(['staff-attendance-list']);
         }
 
+        if (empty($user->school_id)) {
+            return response()->json(['total' => 0, 'rows' => []]);
+        }
+
         $offset = $request->input('offset', 0);
         $limit = $request->input('limit', 10);
         $sort = $request->input('sort', 'date');

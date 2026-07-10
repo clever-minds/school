@@ -550,10 +550,30 @@ class CertificateTemplateController extends Controller
             '{last_studied_class_words}'  => $lastStudiedClassWords,
             '{qualified_for_higher_class}' => $qualifiedForHigherClass,
 
+            // Jiam specific placeholders
+            '{jiam_school_logo}' => '',
+            '{jiam_school_address}' => '',
+            '{jiam_school_mobile}' => '',
             ...$this->extraFormFields($user)
             // Add more placeholders as needed
         ];
 
+        $isJiamStudent = false;
+        // Placeholder for identifying Jiam students.
+        // TODO: Ask user how to identify Jiam students (e.g., class name, custom field)
+        if (str_contains(strtolower($user->student->class_section->full_name), 'jiam')) {
+            $isJiamStudent = true;
+        }
+
+        if ($isJiamStudent) {
+            $placeholders['{jiam_school_logo}'] = asset('images/Jiam Logo.png');
+            $placeholders['{jiam_school_address}'] = 'Jiam English Medium School Tandalja, Vadodara';
+            $placeholders['{jiam_school_mobile}'] = 'MOBILE_NUMBER_TO_BE_PROVIDED_BY_USER'; // Placeholder, will ask user
+        } else {
+            $placeholders['{jiam_school_logo}'] = '';
+            $placeholders['{jiam_school_address}'] = '';
+            $placeholders['{jiam_school_mobile}'] = '';
+        }
         $exam_data = array();
 
         if ($exam_id && count($user->student->exam_result)) {

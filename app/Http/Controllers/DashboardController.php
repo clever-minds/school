@@ -95,7 +95,7 @@ class DashboardController extends Controller
         $system_settings = $settings;
 
         $staffAttendance = null;
-        if (Auth::user()->staff || Auth::user()->hasRole('Teacher')) {
+        if (Auth::user()->school_id && (Auth::user()->staff || Auth::user()->hasRole('Teacher'))) {
             $staffAttendance = \App\Models\StaffAttendance::where('user_id', Auth::user()->id)->where('date', Carbon::now()->toDateString())->first();
         }
 
