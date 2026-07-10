@@ -503,4 +503,52 @@ class TeacherController extends Controller {
         }
     }
 
+    public function sentNotifications(Request $request, $id)
+    {
+        ResponseService::noPermissionThenRedirect('teacher-list');
+        $teacher = User::findOrFail($id);
+
+        $offset = request('offset', 0);
+        $limit = request('limit', 10);
+        $sort = request('sort', 'id');
+        $order = request('order', 'DESC');
+        $search = request('search');
+
+        if ($request->expectsJson() || $request->ajax()) {
+            $query = \App\Models\Notification::where('sender_id', $id)
+                ->with(['notificationClasses.class_section.class', 'notificationClasses.class_section.section']);
+
+            if ($search) {
+                $query->where(function ($q) use ($search) {
+                    $q->where('title', 'LIKE', "%$search%")
+                      ->orWhere('message', 'LIKE', "%$search%");
+                });
+            }
+
+            if ($request->date) {
+                $query->whereDate('created_at', date('Y-m-d', strtotime($request->date)));
+            }
+
+            $total = $query->count();
+            $notifications = $query->orderBy($sort, $order)->skip($offset)->take($limit)->get();
+
+            $rows = [];
+            $no = 1;
+            foreach ($notifications as $notification) {
+                $tempRow = $notification->toArray();
+                $tempRow['no'] = $no++;
+                $classes = [];
+                foreach ($notification->notificationClasses as $nc) {
+                    $classes[] = $nc->class_section->class->name . ' - ' . $nc->class_section->section->name;
+                }
+                $tempRow['classes'] = implode(', ', $classes);
+                $tempRow['date'] = date('Y-m-d h:i A', strtotime($notification->created_at));
+                $rows[] = $tempRow;
+            }
+
+            return response()->json(['total' => $total, 'rows' => $rows]);
+        }
+
+        return view('teachers.sent_notifications', compact('teacher'));
+    }
 }

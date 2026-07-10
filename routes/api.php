@@ -210,6 +210,7 @@ Route::group(['prefix' => 'teacher'], static function () {
 
         //Announcement
         Route::get('get-announcement', [TeacherApiController::class, 'getAnnouncement']);
+        Route::get('sent-notifications', [TeacherApiController::class, 'getSentNotifications']);
         Route::post('send-announcement', [TeacherApiController::class, 'sendAnnouncement']);
         Route::post('update-announcement', [TeacherApiController::class, 'updateAnnouncement']);
         Route::post('delete-announcement', [TeacherApiController::class, 'deleteAnnouncement']);

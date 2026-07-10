@@ -526,6 +526,7 @@ Route::post('/admin/impersonation-exit',
             Route::post("store-bulk-upload",[TeacherController::class,'storeBulkUpload'])->name('teachers.store-bulk-upload');
         });
         Route::resource('teachers', TeacherController::class);
+        Route::get('teachers/{id}/sent-notifications', [TeacherController::class, 'sentNotifications'])->name('teachers.sent-notifications');
 
 
         /*** Parents ***/

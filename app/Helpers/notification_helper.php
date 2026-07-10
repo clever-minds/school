@@ -40,7 +40,17 @@ function send_notification($userIds, $title, $body, $type, $customData = [])
         'event_date'      => $customData['event_date'] ?? null, 
         'image'           => $customData['image'] ?? null,     
         'session_year_id' => $sessionYear->id,
+        'sender_id'       => $customData['sender_id'] ?? null,
     ]);
+
+    if (!empty($customData['class_section_ids'])) {
+        foreach ($customData['class_section_ids'] as $class_id) {
+            \App\Models\NotificationClass::create([
+                'notification_id' => $notification->id,
+                'class_section_id' => $class_id
+            ]);
+        }
+    }
 
     /* =====================================
      | 2️⃣ LOOP ALL USERS

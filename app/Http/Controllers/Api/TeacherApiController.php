@@ -463,7 +463,11 @@ class TeacherApiController extends Controller
 
             DB::commit();
 
-            send_notification($user, $title, $body, $type);
+            $customData = [
+                'sender_id' => Auth::user()->id,
+                'class_section_ids' => [$request->class_section_id]
+            ];
+            send_notification($user, $title, $body, $type, $customData);
             // DB::statement('SET FOREIGN_KEY_CHECKS=1;');
             ResponseService::successResponse('Data Stored Successfully');
         } catch (Throwable $e) {
@@ -577,7 +581,11 @@ class TeacherApiController extends Controller
             $user = array_merge($student_id, $guardian_id);
             $assignment->save();
             DB::commit();
-            send_notification($user, $title, $body, $type);
+            $customData = [
+                'sender_id' => Auth::user()->id,
+                'class_section_ids' => [$request->class_section_id]
+            ];
+            send_notification($user, $title, $body, $type, $customData);
 
             ResponseService::successResponse('Data Updated Successfully');
         } catch (Throwable $e) {
@@ -668,7 +676,10 @@ class TeacherApiController extends Controller
             $user = array_merge($student_id, $guardian_id);
 
             DB::commit();
-            send_notification($user, $title, $body, $type);
+            $customData = [
+                'sender_id' => Auth::user()->id
+            ];
+            send_notification($user, $title, $body, $type, $customData);
             ResponseService::successResponse('Data Updated Successfully');
         } catch (Throwable $e) {
             if (Str::contains($e->getMessage(), [
@@ -862,7 +873,11 @@ class TeacherApiController extends Controller
             $body = 'New Lesson Added for ' . $subjectName;
             $type = "lesson";
             DB::commit();
-            send_notification($user, $title, $body, $type);
+            $customData = [
+                'sender_id' => Auth::user()->id,
+                'class_section_ids' => isset($section_ids) ? $section_ids : [$request->class_section_id]
+            ];
+            send_notification($user, $title, $body, $type, $customData);
 
             ResponseService::successResponse('Data Stored Successfully');
         } catch (Throwable $e) {
@@ -991,7 +1006,11 @@ class TeacherApiController extends Controller
             $type = "lesson";
            
             DB::commit();
-            send_notification($user, $title, $body, $type);
+            $customData = [
+                'sender_id' => Auth::user()->id,
+                'class_section_ids' => isset($section_ids) ? $section_ids : [$request->class_section_id]
+            ];
+            send_notification($user, $title, $body, $type, $customData);
             
             ResponseService::successResponse('Data Updated Successfully');
         } catch (Throwable $e) {
@@ -1174,7 +1193,11 @@ class TeacherApiController extends Controller
             $body = 'A new topic has been added to the lesson "' . $lesson . '" under the subject "' . $subjectName->subject->name . '".';
             $type = "lesson";
            
-            send_notification($user, $title, $body, $type);
+            $customData = [
+                'sender_id' => Auth::user()->id,
+                'class_section_ids' => [$request->class_section_id]
+            ];
+            send_notification($user, $title, $body, $type, $customData);
 
             ResponseService::successResponse('Data Stored Successfully');
         } catch (Throwable $e) {
@@ -1302,7 +1325,11 @@ class TeacherApiController extends Controller
             $body = 'A new topic has been updated for the lesson "' . $lesson . '" under the subject "' . $subjectName->subject->name . '".';
             $type = "lesson";
            
-            send_notification($user, $title, $body, $type);
+            $customData = [
+                'sender_id' => Auth::user()->id,
+                'class_section_ids' => [$request->class_section_id]
+            ];
+            send_notification($user, $title, $body, $type, $customData);
 
         
             ResponseService::successResponse('Data Updated Successfully');
@@ -1646,7 +1673,9 @@ class TeacherApiController extends Controller
             if ($notifyUser !== null && !empty($title)) {
                 $type = 'Class Section'; // Get The Type for Notification
                 $body = $request->title; // Get The Body for Notification
-                send_notification($notifyUser, $title, $body, $type); // Send Notification
+                $customData['sender_id'] = Auth::user()->id;
+                $customData['class_section_ids'] = is_array($request->class_section_id) ? $request->class_section_id : [$request->class_section_id];
+                send_notification($notifyUser, $title, $body, $type, $customData); // Send Notification
             }
 
         
@@ -1960,7 +1989,11 @@ class TeacherApiController extends Controller
                     $body = 'Your child is absent on ' . $date;
                     $type = "attendance";
     
-                    send_notification($user, $title, $body, $type);
+                    $customData = [
+                        'sender_id' => Auth::user()->id,
+                        'class_section_ids' => [$request->class_section_id]
+                    ];
+                    send_notification($user, $title, $body, $type, $customData);
                 }
             }
             
@@ -3027,6 +3060,8 @@ class TeacherApiController extends Controller
             $type = 'Notification';
 
             DB::commit();
+            $customData['sender_id'] = Auth::user()->id;
+            $customData['class_section_ids'] = isset($request->class_section_id) ? (is_array($request->class_section_id) ? $request->class_section_id : [$request->class_section_id]) : [];
             send_notification($notifyUser, $title, $body, $type, $customData); // Send Notification
             ResponseService::successResponse('Data Stored Successfully');
         } catch (Throwable $e) {
@@ -3096,6 +3131,48 @@ class TeacherApiController extends Controller
                 ResponseService::logErrorResponse($e);
                 ResponseService::errorResponse();
             }
+        }
+    }
+
+    public function getSentNotifications(Request $request)
+    {
+        try {
+            $user = Auth::user();
+            $query = \App\Models\Notification::where('sender_id', $user->id)
+                ->with(['notificationClasses.class_section.class', 'notificationClasses.class_section.section']);
+
+            if ($request->date) {
+                $query->whereDate('created_at', date('Y-m-d', strtotime($request->date)));
+            }
+
+            if ($request->class_section_id) {
+                $query->whereHas('notificationClasses', function ($q) use ($request) {
+                    $q->where('class_section_id', $request->class_section_id);
+                });
+            }
+
+            $notifications = $query->orderBy('created_at', 'desc')->get();
+
+            $data = $notifications->map(function ($notification) {
+                return [
+                    'id' => $notification->id,
+                    'title' => $notification->title,
+                    'message' => $notification->message,
+                    'image' => $notification->image,
+                    'date' => $notification->created_at,
+                    'classes' => $notification->notificationClasses->map(function ($nc) {
+                        return [
+                            'class_section_id' => $nc->class_section_id,
+                            'name' => $nc->class_section->class->name . ' - ' . $nc->class_section->section->name
+                        ];
+                    })
+                ];
+            });
+
+            return ResponseService::successResponse('Data Fetched Successfully', $data);
+        } catch (\Throwable $th) {
+            ResponseService::logErrorResponse($th);
+            return ResponseService::errorResponse();
         }
     }
 }

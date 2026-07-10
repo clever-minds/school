@@ -12,7 +12,7 @@ use App\Traits\LogsActivity;
 class Notification extends Model
 {
     use HasFactory, DateFormatTrait,LogsActivity;
-    protected $fillable = ['title','message','image','send_to','session_year_id','school_id','event_date'];
+    protected $fillable = ['title','message','image','send_to','session_year_id','school_id','event_date', 'sender_id'];
 
     protected static function boot() {
         parent::boot();
@@ -23,6 +23,16 @@ class Notification extends Model
                 }
             }
         });
+    }
+
+    public function sender()
+    {
+        return $this->belongsTo(User::class, 'sender_id');
+    }
+
+    public function notificationClasses()
+    {
+        return $this->hasMany(NotificationClass::class);
     }
 
     public function scopeOwner()
