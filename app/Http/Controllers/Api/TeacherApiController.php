@@ -437,7 +437,7 @@ class TeacherApiController extends Controller
             $classSection = $this->classSection
             ->builder()
             ->with(['class:id,name', 'section:id,name'])
-            ->where('id', $request->class_section_id)
+            ->whereIn('id', $section_ids)
             ->first();
 
         $classSectionName = $classSection
@@ -456,7 +456,7 @@ class TeacherApiController extends Controller
            
             $body = $request->name;
             $type = $request->type;
-            $students = $this->student->builder()->select('user_id')->where('class_section_id', $request->class_section_id)->get();
+            $students = $this->student->builder()->select('user_id', 'guardian_id')->whereIn('class_section_id', $section_ids)->get();
             $guardian_id = $students->pluck('guardian_id')->toArray();
             $student_id = $students->pluck('user_id')->toArray();
             $user = array_merge($student_id, $guardian_id);
@@ -465,7 +465,7 @@ class TeacherApiController extends Controller
 
             $customData = [
                 'sender_id' => Auth::user()->id,
-                'class_section_ids' => [$request->class_section_id]
+                'class_section_ids' => $section_ids
             ];
             send_notification($user, $title, $body, $type, $customData);
             // DB::statement('SET FOREIGN_KEY_CHECKS=1;');
@@ -575,7 +575,7 @@ class TeacherApiController extends Controller
             $body = $request->name;
             $type = "assignment";
 
-            $students = $this->student->builder()->where('class_section_id', $request->class_section_id)->get();
+            $students = $this->student->builder()->whereIn('class_section_id', $section_ids)->get();
             $guardian_id = $students->pluck('guardian_id')->toArray();
             $student_id = $students->pluck('user_id')->toArray();
             $user = array_merge($student_id, $guardian_id);
@@ -583,7 +583,7 @@ class TeacherApiController extends Controller
             DB::commit();
             $customData = [
                 'sender_id' => Auth::user()->id,
-                'class_section_ids' => [$request->class_section_id]
+                'class_section_ids' => $section_ids
             ];
             send_notification($user, $title, $body, $type, $customData);
 
