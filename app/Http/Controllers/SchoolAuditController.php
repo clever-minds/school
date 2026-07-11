@@ -52,6 +52,9 @@ class SchoolAuditController extends Controller
                 if (Auth::user()->can('school-audit-list')) {
                     $operate .= '<a href="' . route('school-audits.show', $row->id) . '" class="btn btn-xs btn-gradient-info btn-rounded btn-icon" title="View"><i class="fa fa-eye"></i></a>&nbsp;&nbsp;';
                 }
+                if ($row->status == 0 && Auth::user()->can('school-audit-edit')) {
+                    $operate .= '<a href="' . route('school-audits.edit', $row->id) . '" class="btn btn-xs btn-gradient-primary btn-rounded btn-icon" title="Conduct Audit"><i class="fa fa-edit"></i></a>&nbsp;&nbsp;';
+                }
                 if (Auth::user()->can('school-audit-delete')) {
                     $operate .= BootstrapTableService::deleteButton(route('school-audits.destroy', $row->id));
                 }
@@ -60,6 +63,7 @@ class SchoolAuditController extends Controller
                 $tempRow['no'] = $no++;
                 $tempRow['school_name'] = $row->school ? $row->school->name : '-';
                 $tempRow['auditor_name'] = $row->auditor ? $row->auditor->first_name . ' ' . $row->auditor->last_name : '-';
+                $tempRow['status_badge'] = $row->status == 1 ? '<span class="badge badge-success">'.__('Completed').'</span>' : '<span class="badge badge-warning">'.__('Pending').'</span>';
                 $tempRow['operate'] = $operate;
                 $rows[] = $tempRow;
             }
@@ -94,9 +98,8 @@ class SchoolAuditController extends Controller
             'audit_date' => 'required|date',
             'audit_type' => 'required|in:Monthly,Quarterly,Half Yearly,Yearly',
             'remarks' => 'nullable|string',
-            'answers' => 'required|array',
-            'answers.*.question_id' => 'required|exists:audit_questions,id',
-            'answers.*.assigned_user_id' => 'required|exists:users,id',
+            'question_ids' => 'required|array|min:1',
+            'question_ids.*' => 'required|exists:audit_questions,id',
         ]);
 
         try {
@@ -108,13 +111,13 @@ class SchoolAuditController extends Controller
                 'audit_date' => date('Y-m-d', strtotime($request->audit_date)),
                 'audit_type' => $request->audit_type,
                 'remarks' => $request->remarks,
+                'status' => 0,
             ]);
 
-            foreach ($request->answers as $answerData) {
+            foreach ($request->question_ids as $qId) {
                 SchoolAuditAnswer::create([
                     'school_audit_id' => $audit->id,
-                    'audit_question_id' => $answerData['question_id'],
-                    'assigned_user_id' => $answerData['assigned_user_id'],
+                    'audit_question_id' => $qId,
                     'answer' => 'Pending',
                     'remarks' => null,
                 ]);
@@ -135,6 +138,48 @@ class SchoolAuditController extends Controller
         $audit = SchoolAudit::with(['school', 'auditor', 'answers.question', 'answers.assignedUser'])->findOrFail($id);
 
         return view('school_audits.show', compact('audit'));
+    }
+
+    public function edit($id)
+    {
+        ResponseService::noPermissionThenRedirect('school-audit-edit');
+
+        $audit = SchoolAudit::with(['school', 'auditor', 'answers.question'])->findOrFail($id);
+
+        return view('school_audits.edit', compact('audit'));
+    }
+
+    public function update(Request $request, $id)
+    {
+        ResponseService::noPermissionThenRedirect('school-audit-edit');
+
+        $request->validate([
+            'answers' => 'required|array',
+            'answers.*.id' => 'required|exists:school_audit_answers,id',
+            'answers.*.answer' => 'required|in:Yes,No,N/A,Pending',
+            'answers.*.remarks' => 'nullable|string',
+        ]);
+
+        try {
+            DB::beginTransaction();
+
+            $audit = SchoolAudit::findOrFail($id);
+
+            foreach ($request->answers as $answerData) {
+                SchoolAuditAnswer::where('id', $answerData['id'])->update([
+                    'answer' => $answerData['answer'],
+                    'remarks' => $answerData['remarks'] ?? '',
+                ]);
+            }
+
+            $audit->update(['status' => 1]); // Mark completed
+
+            DB::commit();
+            return redirect()->route('school-audits.index')->with('success', trans('data_update_successfully'));
+        } catch (Throwable $e) {
+            DB::rollback();
+            return redirect()->back()->with('error', trans('error_occurred'));
+        }
     }
 
     public function destroy($id)

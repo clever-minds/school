@@ -21,10 +21,19 @@
                             <div class="col-md-4">
                                 <h5><strong>{{ __('School') }}:</strong> {{ $audit->school ? $audit->school->name : '-' }}</h5>
                             </div>
-                            <div class="col-md-3">
+                            <div class="col-md-2">
                                 <h5><strong>{{ __('Auditor') }}:</strong> {{ $audit->auditor ? $audit->auditor->first_name . ' ' . $audit->auditor->last_name : '-' }}</h5>
                             </div>
-                            <div class="col-md-3">
+                            <div class="col-md-2">
+                                <h5><strong>{{ __('Status') }}:</strong> 
+                                    @if($audit->status == 1)
+                                        <span class="badge badge-success">{{ __('Completed') }}</span>
+                                    @else
+                                        <span class="badge badge-warning">{{ __('Pending') }}</span>
+                                    @endif
+                                </h5>
+                            </div>
+                            <div class="col-md-2">
                                 <h5><strong>{{ __('Audit Type') }}:</strong> {{ $audit->audit_type ?? '-' }}</h5>
                             </div>
                             <div class="col-md-3">
@@ -47,10 +56,9 @@
                                     <thead>
                                         <tr>
                                             <th width="5%">#</th>
-                                            <th width="35%">{{ __('Question') }}</th>
-                                            <th width="20%">{{ __('Assigned To') }}</th>
+                                            <th width="50%">{{ __('Question') }}</th>
                                             <th width="15%">{{ __('Answer') }}</th>
-                                            <th width="25%">{{ __('Remarks') }}</th>
+                                            <th width="30%">{{ __('Remarks') }}</th>
                                         </tr>
                                     </thead>
                                         <tbody>
@@ -58,14 +66,13 @@
                                             @foreach($audit->answers->groupBy('question.category') as $category => $categoryAnswers)
                                                 @if($category)
                                                     <tr class="table-secondary">
-                                                        <td colspan="5"><strong>{{ $category }}</strong></td>
+                                                        <td colspan="4"><strong>{{ $category }}</strong></td>
                                                     </tr>
                                                 @endif
                                                 @foreach($categoryAnswers as $answer)
                                                     <tr>
                                                         <td>{{ ++$index }}</td>
                                                         <td>{{ $answer->question ? $answer->question->question : '-' }}</td>
-                                                        <td>{{ $answer->assignedUser ? $answer->assignedUser->first_name . ' ' . $answer->assignedUser->last_name : '-' }}</td>
                                                         <td>
                                                             @if($answer->answer == 'Yes')
                                                                 <span class="badge badge-success">{{ __('Yes') }}</span>

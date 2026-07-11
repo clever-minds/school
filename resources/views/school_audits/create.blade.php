@@ -69,9 +69,11 @@
                                     <table class="table table-bordered">
                                         <thead>
                                             <tr>
+                                                <th width="5%">
+                                                    <input type="checkbox" id="selectAll">
+                                                </th>
                                                 <th width="5%">#</th>
-                                                <th width="65%">{{ __('Question') }}</th>
-                                                <th width="30%">{{ __('Assign To') }}</th>
+                                                <th width="90%">{{ __('Question') }}</th>
                                             </tr>
                                         </thead>
                                         <tbody>
@@ -84,18 +86,12 @@
                                                 @endif
                                                 @foreach($categoryQuestions as $question)
                                                     <tr>
+                                                        <td>
+                                                            <input type="checkbox" name="question_ids[]" value="{{ $question->id }}" class="question-checkbox">
+                                                        </td>
                                                         <td>{{ ++$index }}</td>
                                                         <td>
                                                             {{ $question->question }}
-                                                            <input type="hidden" name="answers[{{ $index }}][question_id]" value="{{ $question->id }}">
-                                                        </td>
-                                                        <td>
-                                                            <select name="answers[{{ $index }}][assigned_user_id]" class="form-control" required>
-                                                                <option value="">{{ __('Select User') }}</option>
-                                                                @foreach($users as $user)
-                                                                    <option value="{{ $user->id }}">{{ $user->first_name }} {{ $user->last_name }}</option>
-                                                                @endforeach
-                                                            </select>
                                                         </td>
                                                     </tr>
                                                 @endforeach
@@ -121,6 +117,24 @@
             </div>
         </div>
     </div>
+@endsection
+
+@section('script')
+    <script>
+        $(document).ready(function() {
+            $('#selectAll').change(function() {
+                $('.question-checkbox').prop('checked', $(this).prop('checked'));
+            });
+            
+            $('.question-checkbox').change(function() {
+                if ($('.question-checkbox:checked').length === $('.question-checkbox').length) {
+                    $('#selectAll').prop('checked', true);
+                } else {
+                    $('#selectAll').prop('checked', false);
+                }
+            });
+        });
+    </script>
 @endsection
 
 
