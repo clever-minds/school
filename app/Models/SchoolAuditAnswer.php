@@ -9,7 +9,7 @@ class SchoolAuditAnswer extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['school_audit_id', 'audit_question_id', 'answer', 'remarks'];
+    protected $fillable = ['school_audit_id', 'audit_question_id', 'assigned_user_id', 'answer', 'remarks'];
 
     public function audit()
     {
@@ -19,5 +19,10 @@ class SchoolAuditAnswer extends Model
     public function question()
     {
         return $this->belongsTo(AuditQuestion::class, 'audit_question_id');
+    }
+
+    public function assignedUser()
+    {
+        return $this->belongsTo(User::class, 'assigned_user_id');
     }
 }

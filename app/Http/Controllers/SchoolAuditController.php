@@ -96,8 +96,7 @@ class SchoolAuditController extends Controller
             'remarks' => 'nullable|string',
             'answers' => 'required|array',
             'answers.*.question_id' => 'required|exists:audit_questions,id',
-            'answers.*.answer' => 'required|in:Yes,No,N/A',
-            'answers.*.remarks' => 'nullable|string',
+            'answers.*.assigned_user_id' => 'required|exists:users,id',
         ]);
 
         try {
@@ -115,8 +114,9 @@ class SchoolAuditController extends Controller
                 SchoolAuditAnswer::create([
                     'school_audit_id' => $audit->id,
                     'audit_question_id' => $answerData['question_id'],
-                    'answer' => $answerData['answer'],
-                    'remarks' => $answerData['remarks'] ?? '',
+                    'assigned_user_id' => $answerData['assigned_user_id'],
+                    'answer' => 'Pending',
+                    'remarks' => null,
                 ]);
             }
 
@@ -132,7 +132,7 @@ class SchoolAuditController extends Controller
     {
         ResponseService::noPermissionThenRedirect('school-audit-list');
 
-        $audit = SchoolAudit::with(['school', 'auditor', 'answers.question'])->findOrFail($id);
+        $audit = SchoolAudit::with(['school', 'auditor', 'answers.question', 'answers.assignedUser'])->findOrFail($id);
 
         return view('school_audits.show', compact('audit'));
     }

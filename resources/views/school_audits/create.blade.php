@@ -70,9 +70,8 @@
                                         <thead>
                                             <tr>
                                                 <th width="5%">#</th>
-                                                <th width="45%">{{ __('Question') }}</th>
-                                                <th width="20%">{{ __('Answer') }} <span class="text-danger">*</span></th>
-                                                <th width="30%">{{ __('Remarks') }}</th>
+                                                <th width="65%">{{ __('Question') }}</th>
+                                                <th width="30%">{{ __('Assign To') }}</th>
                                             </tr>
                                         </thead>
                                         <tbody>
@@ -80,7 +79,7 @@
                                             @foreach($questions->groupBy('category') as $category => $categoryQuestions)
                                                 @if($category)
                                                     <tr class="table-secondary">
-                                                        <td colspan="4"><strong>{{ $category }}</strong></td>
+                                                        <td colspan="3"><strong>{{ $category }}</strong></td>
                                                     </tr>
                                                 @endif
                                                 @foreach($categoryQuestions as $question)
@@ -91,15 +90,12 @@
                                                             <input type="hidden" name="answers[{{ $index }}][question_id]" value="{{ $question->id }}">
                                                         </td>
                                                         <td>
-                                                            <select name="answers[{{ $index }}][answer]" class="form-control" required>
-                                                                <option value="">{{ __('Select Answer') }}</option>
-                                                                <option value="Yes">{{ __('Yes') }}</option>
-                                                                <option value="No">{{ __('No') }}</option>
-                                                                <option value="N/A">{{ __('N/A') }}</option>
+                                                            <select name="answers[{{ $index }}][assigned_user_id]" class="form-control" required>
+                                                                <option value="">{{ __('Select User') }}</option>
+                                                                @foreach($users as $user)
+                                                                    <option value="{{ $user->id }}">{{ $user->first_name }} {{ $user->last_name }}</option>
+                                                                @endforeach
                                                             </select>
-                                                        </td>
-                                                        <td>
-                                                            <input type="text" name="answers[{{ $index }}][remarks]" class="form-control" placeholder="{{ __('Optional remarks...') }}">
                                                         </td>
                                                     </tr>
                                                 @endforeach

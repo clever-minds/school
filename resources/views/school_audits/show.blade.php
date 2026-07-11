@@ -47,9 +47,10 @@
                                     <thead>
                                         <tr>
                                             <th width="5%">#</th>
-                                            <th width="50%">{{ __('Question') }}</th>
+                                            <th width="35%">{{ __('Question') }}</th>
+                                            <th width="20%">{{ __('Assigned To') }}</th>
                                             <th width="15%">{{ __('Answer') }}</th>
-                                            <th width="30%">{{ __('Remarks') }}</th>
+                                            <th width="25%">{{ __('Remarks') }}</th>
                                         </tr>
                                     </thead>
                                         <tbody>
@@ -57,18 +58,21 @@
                                             @foreach($audit->answers->groupBy('question.category') as $category => $categoryAnswers)
                                                 @if($category)
                                                     <tr class="table-secondary">
-                                                        <td colspan="4"><strong>{{ $category }}</strong></td>
+                                                        <td colspan="5"><strong>{{ $category }}</strong></td>
                                                     </tr>
                                                 @endif
                                                 @foreach($categoryAnswers as $answer)
                                                     <tr>
                                                         <td>{{ ++$index }}</td>
                                                         <td>{{ $answer->question ? $answer->question->question : '-' }}</td>
+                                                        <td>{{ $answer->assignedUser ? $answer->assignedUser->first_name . ' ' . $answer->assignedUser->last_name : '-' }}</td>
                                                         <td>
                                                             @if($answer->answer == 'Yes')
                                                                 <span class="badge badge-success">{{ __('Yes') }}</span>
                                                             @elseif($answer->answer == 'No')
                                                                 <span class="badge badge-danger">{{ __('No') }}</span>
+                                                            @elseif($answer->answer == 'Pending')
+                                                                <span class="badge badge-warning">{{ __('Pending') }}</span>
                                                             @else
                                                                 <span class="badge badge-secondary">{{ __('N/A') }}</span>
                                                             @endif
