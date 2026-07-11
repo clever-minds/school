@@ -117,9 +117,9 @@ body {
     <div class="logo-wrapper">
         <div class="logo-box">
             @if (isset($student->student->campus) && $student->student->campus == 'JIAM')
-                <div style="text-align: center; color: blue;">
-                    <h2 style="margin: 0; line-height: 1;">JIAM</h2>
-                    <h4 style="margin: 0; line-height: 1.2;">English Medium School</h4>
+                <div style="text-align: center; color: navy;">
+                    <h1 style="margin: 0; line-height: 1; font-size: 34px; font-weight: 900;">JIAM</h1>
+                    <h4 style="margin: 0; line-height: 1.2; margin-top: 4px;">English Medium School</h4>
                 </div>
             @elseif (!empty($settings['horizontal_logo']))
                 <img src="{{ public_path('storage/'.$settings['horizontal_logo']) }}">
