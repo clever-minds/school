@@ -2048,7 +2048,7 @@ class ParentApiController extends Controller
             $child = $this->student->findById($request->child_id);
             $currentSessionYear = $this->cache->getDefaultSessionYear($child->user->school_id);
             $sessionYearId = $request->session_year_id ?? $currentSessionYear->id;
-            $fees_paid = $this->feesPaid->builder()->where(['student_id' => $child->user_id, 'session_year_id' => $sessionYearId])->with('session_year:id,name', 'class.medium')->get();
+            $fees_paid = $this->feesPaid->builder()->where(['student_id' => $child->user_id, 'session_year_id' => $sessionYearId])->with('session_year:id,name', 'class.medium', 'compulsory_fee', 'optional_fee')->get();
 
             ResponseService::successResponse("Fees Paid List Fetched Successfully", $fees_paid);
         } catch (Throwable $e) {
