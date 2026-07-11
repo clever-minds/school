@@ -31,16 +31,9 @@
                                     <label>{{ __('category') }}</label>
                                     <select name="category" class="form-control">
                                         <option value="">{{ __('Select Category') }}</option>
-                                        <option value="Academics & Teaching">{{ __('Academics & Teaching') }}</option>
-                                        <option value="Infrastructure & Maintenance">{{ __('Infrastructure & Maintenance') }}</option>
-                                        <option value="Health & Safety">{{ __('Health & Safety') }}</option>
-                                        <option value="Administration & Records">{{ __('Administration & Records') }}</option>
-                                        <option value="Financial Management">{{ __('Financial Management') }}</option>
-                                        <option value="Staff & HR">{{ __('Staff & HR') }}</option>
-                                        <option value="Students & Discipline">{{ __('Students & Discipline') }}</option>
-                                        <option value="Extracurricular Activities">{{ __('Extracurricular Activities') }}</option>
-                                        <option value="Transport & Logistics">{{ __('Transport & Logistics') }}</option>
-                                        <option value="Miscellaneous">{{ __('Miscellaneous') }}</option>
+                                        @foreach($categories as $cat)
+                                            <option value="{{ $cat }}">{{ $cat }}</option>
+                                        @endforeach
                                     </select>
                                 </div>
                                 <div class="form-group col-sm-12 col-md-3">
@@ -123,16 +116,9 @@
                                 <label>{{ __('category') }}</label>
                                 <select name="category" id="edit-category" class="form-control">
                                     <option value="">{{ __('Select Category') }}</option>
-                                    <option value="Academics & Teaching">{{ __('Academics & Teaching') }}</option>
-                                    <option value="Infrastructure & Maintenance">{{ __('Infrastructure & Maintenance') }}</option>
-                                    <option value="Health & Safety">{{ __('Health & Safety') }}</option>
-                                    <option value="Administration & Records">{{ __('Administration & Records') }}</option>
-                                    <option value="Financial Management">{{ __('Financial Management') }}</option>
-                                    <option value="Staff & HR">{{ __('Staff & HR') }}</option>
-                                    <option value="Students & Discipline">{{ __('Students & Discipline') }}</option>
-                                    <option value="Extracurricular Activities">{{ __('Extracurricular Activities') }}</option>
-                                    <option value="Transport & Logistics">{{ __('Transport & Logistics') }}</option>
-                                    <option value="Miscellaneous">{{ __('Miscellaneous') }}</option>
+                                    @foreach($categories as $cat)
+                                        <option value="{{ $cat }}">{{ $cat }}</option>
+                                    @endforeach
                                 </select>
                             </div>
                         </div>

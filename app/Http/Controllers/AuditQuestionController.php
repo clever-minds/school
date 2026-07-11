@@ -17,7 +17,8 @@ class AuditQuestionController extends Controller
     public function index()
     {
         ResponseService::noAnyPermissionThenRedirect(['audit-question-list','audit-question-create']);
-        return view('audit_questions.index');
+        $categories = AuditQuestion::select('category')->whereNotNull('category')->where('category', '!=', '')->distinct()->pluck('category');
+        return view('audit_questions.index', compact('categories'));
     }
 
     /**
