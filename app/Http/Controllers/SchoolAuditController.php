@@ -135,7 +135,7 @@ class SchoolAuditController extends Controller
     {
         ResponseService::noPermissionThenRedirect('school-audit-list');
 
-        $audit = SchoolAudit::with(['school', 'auditor', 'answers.question', 'answers.assignedUser'])->findOrFail($id);
+        $audit = SchoolAudit::with(['school', 'auditor', 'answers.question'])->findOrFail($id);
 
         return view('school_audits.show', compact('audit'));
     }
