@@ -90,12 +90,12 @@ class SchoolAuditController extends Controller
 
         $request->validate([
             'school_id' => 'required|exists:schools,id',
+            'auditor_id' => 'required|exists:users,id',
             'audit_date' => 'required|date',
             'audit_type' => 'required|in:Monthly,Quarterly,Half Yearly,Yearly',
             'remarks' => 'nullable|string',
             'answers' => 'required|array',
             'answers.*.question_id' => 'required|exists:audit_questions,id',
-            'answers.*.assigned_user_id' => 'nullable|exists:users,id',
             'answers.*.answer' => 'required|in:Yes,No,N/A',
             'answers.*.remarks' => 'nullable|string',
         ]);
@@ -105,7 +105,7 @@ class SchoolAuditController extends Controller
 
             $audit = SchoolAudit::create([
                 'school_id' => $request->school_id,
-                'auditor_id' => Auth::user()->id,
+                'auditor_id' => $request->auditor_id,
                 'audit_date' => date('Y-m-d', strtotime($request->audit_date)),
                 'audit_type' => $request->audit_type,
                 'remarks' => $request->remarks,
@@ -115,7 +115,6 @@ class SchoolAuditController extends Controller
                 SchoolAuditAnswer::create([
                     'school_audit_id' => $audit->id,
                     'audit_question_id' => $answerData['question_id'],
-                    'assigned_user_id' => $answerData['assigned_user_id'] ?? null,
                     'answer' => $answerData['answer'],
                     'remarks' => $answerData['remarks'] ?? '',
                 ]);
@@ -133,7 +132,7 @@ class SchoolAuditController extends Controller
     {
         ResponseService::noPermissionThenRedirect('school-audit-list');
 
-        $audit = SchoolAudit::with(['school', 'auditor', 'answers.question', 'answers.assignedUser'])->findOrFail($id);
+        $audit = SchoolAudit::with(['school', 'auditor', 'answers.question'])->findOrFail($id);
 
         return view('school_audits.show', compact('audit'));
     }

@@ -20,7 +20,7 @@
                         <form class="pt-3" action="{{ route('school-audits.store') }}" method="POST">
                             @csrf
                             <div class="row form-group">
-                                <div class="col-sm-12 col-md-4">
+                                <div class="col-sm-12 col-md-3">
                                     <label>{{ __('School') }} <span class="text-danger">*</span></label>
                                     <select name="school_id" id="school_id" class="form-control" required>
                                         <option value="">{{ __('Select School') }}</option>
@@ -29,7 +29,16 @@
                                         @endforeach
                                     </select>
                                 </div>
-                                <div class="col-sm-12 col-md-4">
+                                <div class="col-sm-12 col-md-3">
+                                    <label>{{ __('Auditor') }} <span class="text-danger">*</span></label>
+                                    <select name="auditor_id" id="auditor_id" class="form-control" required>
+                                        <option value="">{{ __('Select Auditor') }}</option>
+                                        @foreach($users as $user)
+                                            <option value="{{ $user->id }}">{{ $user->first_name }} {{ $user->last_name }}</option>
+                                        @endforeach
+                                    </select>
+                                </div>
+                                <div class="col-sm-12 col-md-3">
                                     <label>{{ __('Audit Type') }} <span class="text-danger">*</span></label>
                                     <select name="audit_type" id="audit_type" class="form-control" required>
                                         <option value="">{{ __('Select Type') }}</option>
@@ -39,7 +48,7 @@
                                         <option value="Yearly">{{ __('Yearly') }}</option>
                                     </select>
                                 </div>
-                                <div class="col-sm-12 col-md-4">
+                                <div class="col-sm-12 col-md-3">
                                     <label>{{ __('Audit Date') }} <span class="text-danger">*</span></label>
                                     <input type="date" name="audit_date" class="form-control" required value="{{ date('Y-m-d') }}">
                                 </div>
@@ -61,9 +70,8 @@
                                         <thead>
                                             <tr>
                                                 <th width="5%">#</th>
-                                                <th width="30%">{{ __('Question') }}</th>
-                                                <th width="20%">{{ __('Assign To') }}</th>
-                                                <th width="15%">{{ __('Answer') }} <span class="text-danger">*</span></th>
+                                                <th width="45%">{{ __('Question') }}</th>
+                                                <th width="20%">{{ __('Answer') }} <span class="text-danger">*</span></th>
                                                 <th width="30%">{{ __('Remarks') }}</th>
                                             </tr>
                                         </thead>
@@ -72,7 +80,7 @@
                                             @foreach($questions->groupBy('category') as $category => $categoryQuestions)
                                                 @if($category)
                                                     <tr class="table-secondary">
-                                                        <td colspan="5"><strong>{{ $category }}</strong></td>
+                                                        <td colspan="4"><strong>{{ $category }}</strong></td>
                                                     </tr>
                                                 @endif
                                                 @foreach($categoryQuestions as $question)
@@ -81,14 +89,6 @@
                                                         <td>
                                                             {{ $question->question }}
                                                             <input type="hidden" name="answers[{{ $index }}][question_id]" value="{{ $question->id }}">
-                                                        </td>
-                                                        <td>
-                                                            <select name="answers[{{ $index }}][assigned_user_id]" class="form-control">
-                                                                <option value="">{{ __('Select User') }}</option>
-                                                                @foreach($users as $user)
-                                                                    <option value="{{ $user->id }}">{{ $user->first_name }} {{ $user->last_name }}</option>
-                                                                @endforeach
-                                                            </select>
                                                         </td>
                                                         <td>
                                                             <select name="answers[{{ $index }}][answer]" class="form-control" required>
