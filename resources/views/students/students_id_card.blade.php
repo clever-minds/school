@@ -118,7 +118,7 @@ body {
         <div class="logo-box">
             @if (isset($student->student->campus) && $student->student->campus == 'JIAM')
                 <div style="text-align: center; color: navy;">
-                    <h1 style="margin: 0; line-height: 1; font-size: 34px; font-weight: 900;">JIAM</h1>
+                    <h1 style="margin: 0; line-height: 1; font-size: 34px;">JIAM</h1>
                     <h4 style="margin: 0; line-height: 1.2; margin-top: 4px;">English Medium School</h4>
                 </div>
             @elseif (!empty($settings['horizontal_logo']))
