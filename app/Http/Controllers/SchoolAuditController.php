@@ -77,8 +77,11 @@ class SchoolAuditController extends Controller
         
         $schools = School::where('status', 1)->get();
         $questions = AuditQuestion::where('status', 1)->get();
+        $users = \App\Models\User::whereHas('roles', function($q) {
+            $q->where('name', '!=', 'Student');
+        })->get();
 
-        return view('school_audits.create', compact('schools', 'questions'));
+        return view('school_audits.create', compact('schools', 'questions', 'users'));
     }
 
     public function store(Request $request)
@@ -92,6 +95,7 @@ class SchoolAuditController extends Controller
             'remarks' => 'nullable|string',
             'answers' => 'required|array',
             'answers.*.question_id' => 'required|exists:audit_questions,id',
+            'answers.*.assigned_user_id' => 'nullable|exists:users,id',
             'answers.*.answer' => 'required|in:Yes,No,N/A',
             'answers.*.remarks' => 'nullable|string',
         ]);
@@ -111,6 +115,7 @@ class SchoolAuditController extends Controller
                 SchoolAuditAnswer::create([
                     'school_audit_id' => $audit->id,
                     'audit_question_id' => $answerData['question_id'],
+                    'assigned_user_id' => $answerData['assigned_user_id'] ?? null,
                     'answer' => $answerData['answer'],
                     'remarks' => $answerData['remarks'] ?? '',
                 ]);
@@ -128,7 +133,7 @@ class SchoolAuditController extends Controller
     {
         ResponseService::noPermissionThenRedirect('school-audit-list');
 
-        $audit = SchoolAudit::with(['school', 'auditor', 'answers.question'])->findOrFail($id);
+        $audit = SchoolAudit::with(['school', 'auditor', 'answers.question', 'answers.assignedUser'])->findOrFail($id);
 
         return view('school_audits.show', compact('audit'));
     }
