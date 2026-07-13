@@ -140,6 +140,13 @@ Route::get('email/verify', [Controller::class, 'emailVerify']);
 Route::get('careers', [\App\Http\Controllers\CareerController::class, 'index'])->name('careers.index');
 Route::post('careers', [\App\Http\Controllers\CareerController::class, 'store'])->name('careers.store');
 
+// Teacher Interviews Backend
+Route::group(['middleware' => ['auth']], function () {
+    Route::get('teacher-interviews', [\App\Http\Controllers\TeacherInterviewController::class, 'index'])->name('teacher-interviews.index');
+    Route::get('teacher-interviews/{id}', [\App\Http\Controllers\TeacherInterviewController::class, 'show'])->name('teacher-interviews.show');
+    Route::post('teacher-interviews/{id}/status', [\App\Http\Controllers\TeacherInterviewController::class, 'updateStatus'])->name('teacher-interviews.update-status');
+});
+
 Route::group(['prefix' => 'school'], static function () {
     Route::get('about-us', [Controller::class, 'about_us']);
     Route::get('contact-us', [Controller::class, 'contact_us']);
