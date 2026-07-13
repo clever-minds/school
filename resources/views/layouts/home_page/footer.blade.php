@@ -39,6 +39,11 @@
                             {{ __('contact') }}
                         </a>
                     </span>
+                    <span>
+                        <a href="{{ url('careers') }}">
+                            {{ __('careers') }}
+                        </a>
+                    </span>
 
                     <span>
                         <a href="{{ url('page/type/privacy-policy') }}">

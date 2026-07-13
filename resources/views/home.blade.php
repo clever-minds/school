@@ -46,6 +46,9 @@
                     <li>
                         <a href="#contact-us">{{ __('contact') }}</a>
                     </li>
+                    <li>
+                        <a href="{{ url('careers') }}">{{ __('careers') }}</a>
+                    </li>
                     @if (count($guidances))
                         <li>
                             <div class="dropdown">
@@ -128,6 +131,9 @@
                     @endif
                     <li>
                         <a href="#contact-us">{{ __('contact') }}</a>
+                    </li>
+                    <li>
+                        <a href="{{ url('careers') }}">{{ __('careers') }}</a>
                     </li>
                     @if (count($guidances))
                         <li>
