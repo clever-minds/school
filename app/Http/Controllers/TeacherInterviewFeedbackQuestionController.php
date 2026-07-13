@@ -10,7 +10,7 @@ class TeacherInterviewFeedbackQuestionController extends Controller
 {
     public function index()
     {
-        if (!Auth::user()->can('teacher-interview-feedback-question-list')) {
+        if (!Auth::user()->can('teacher-interview-question-list')) {
             abort(403, 'Unauthorized action.');
         }
 
@@ -20,7 +20,7 @@ class TeacherInterviewFeedbackQuestionController extends Controller
 
     public function store(Request $request)
     {
-        if (!Auth::user()->can('teacher-interview-feedback-question-create')) {
+        if (!Auth::user()->can('teacher-interview-question-create')) {
             abort(403, 'Unauthorized action.');
         }
 
@@ -37,7 +37,7 @@ class TeacherInterviewFeedbackQuestionController extends Controller
 
     public function update(Request $request, $id)
     {
-        if (!Auth::user()->can('teacher-interview-feedback-question-edit')) {
+        if (!Auth::user()->can('teacher-interview-question-edit')) {
             abort(403, 'Unauthorized action.');
         }
 
@@ -55,7 +55,7 @@ class TeacherInterviewFeedbackQuestionController extends Controller
 
     public function destroy($id)
     {
-        if (!Auth::user()->can('teacher-interview-feedback-question-delete')) {
+        if (!Auth::user()->can('teacher-interview-question-delete')) {
             abort(403, 'Unauthorized action.');
         }
 
