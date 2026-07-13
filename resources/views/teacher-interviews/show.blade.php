@@ -70,5 +70,46 @@
                 </div>
             </div>
         </div>
+
+        @if(count($feedbackQuestions) > 0)
+        <div class="row mt-4">
+            <div class="col-md-12 grid-margin stretch-card">
+                <div class="card">
+                    <div class="card-body">
+                        <h4 class="card-title">{{ __('Interview Performance Feedback') }}</h4>
+                        
+                        <form action="{{ route('teacher-interviews.save-feedback', $application->id) }}" method="POST">
+                            @csrf
+                            <div class="table-responsive">
+                                <table class="table">
+                                    <thead>
+                                        <tr>
+                                            <th>{{ __('Category') }}</th>
+                                            <th>{{ __('Question') }}</th>
+                                            <th>{{ __('Feedback / Remarks') }}</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @foreach($feedbackQuestions as $question)
+                                            <tr>
+                                                <td>{{ $question->category ?? '-' }}</td>
+                                                <td class="text-wrap" style="min-width: 200px;">{{ $question->feedback_question }}</td>
+                                                <td>
+                                                    <textarea name="feedbacks[{{ $question->id }}]" class="form-control" rows="2" placeholder="{{ __('Enter your feedback here...') }}">{{ isset($feedbacks[$question->id]) ? $feedbacks[$question->id]->interviewer_feedback : '' }}</textarea>
+                                                </td>
+                                            </tr>
+                                        @endforeach
+                                    </tbody>
+                                </table>
+                            </div>
+                            <div class="mt-3">
+                                <button type="submit" class="btn btn-primary theme-btn">{{ __('Save Feedback') }}</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+        @endif
     </div>
 @endsection

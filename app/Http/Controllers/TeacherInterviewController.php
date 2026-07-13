@@ -3,6 +3,9 @@
 namespace App\Http\Controllers;
 
 use App\Models\TeacherInterviewApplication;
+use App\Models\TeacherInterview;
+use App\Models\TeacherInterviewFeedback;
+use App\Models\TeacherInterviewFeedbackQuestion;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -42,7 +45,15 @@ class TeacherInterviewController extends Controller
             abort(403);
         }
 
-        return view('teacher-interviews.show', compact('application'));
+        $interview = TeacherInterview::firstOrCreate(
+            ['application_id' => $id],
+            ['interviewer_id' => Auth::id(), 'status' => 'Pending']
+        );
+
+        $feedbackQuestions = TeacherInterviewFeedbackQuestion::where('status', 'active')->get();
+        $feedbacks = TeacherInterviewFeedback::where('interview_id', $interview->id)->get()->keyBy('question_id');
+
+        return view('teacher-interviews.show', compact('application', 'interview', 'feedbackQuestions', 'feedbacks'));
     }
 
     public function updateStatus(Request $request, $id)
@@ -69,5 +80,36 @@ class TeacherInterviewController extends Controller
         $application->save();
 
         return redirect()->back()->with('success', 'Application status updated successfully.');
+    }
+
+    public function saveFeedback(Request $request, $id)
+    {
+        if (!Auth::user()->can('teacher-interview-manage')) {
+            abort(403);
+        }
+
+        $application = TeacherInterviewApplication::findOrFail($id);
+        
+        if (Auth::user()->school_id && $application->school_id != Auth::user()->school_id) {
+            abort(403);
+        }
+
+        $interview = TeacherInterview::firstOrCreate(
+            ['application_id' => $id],
+            ['interviewer_id' => Auth::id(), 'status' => 'Pending']
+        );
+
+        if ($request->has('feedbacks')) {
+            foreach ($request->feedbacks as $question_id => $feedback_text) {
+                if (!empty($feedback_text)) {
+                    TeacherInterviewFeedback::updateOrCreate(
+                        ['interview_id' => $interview->id, 'question_id' => $question_id],
+                        ['interviewer_feedback' => $feedback_text]
+                    );
+                }
+            }
+        }
+
+        return redirect()->back()->with('success', 'Interview feedback saved successfully.');
     }
 }
