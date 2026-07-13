@@ -83,7 +83,7 @@ class WebhookController extends Controller
                         break;
                     }
 
-                    if ($paymentTransactionData->status == "succeed") {
+                    if ($paymentTransactionData->payment_status == "succeed") {
                         Log::info("Stripe Webhook : Transaction Already Successes");
                         break;
                     }
@@ -279,7 +279,8 @@ class WebhookController extends Controller
             Log::info("Razorpay Webhook Data:", ['data' => $data]);
 
             if (!$data || !isset($data->payload->payment->entity)) {
-                throw new \Exception('Invalid webhook payload structure');
+                Log::warning('Razorpay Webhook: Ignored unsupported or invalid payload structure');
+                return response()->json(['status' => 'ignored'], 200);
             }
 
             // Extract transaction data from the correct path in payload
@@ -668,8 +669,10 @@ class WebhookController extends Controller
                     Log::error("Flutterwave Webhook : Payment Transaction id not found");
                 }
 
-                if ($paymentTransactionData->status == "succeed") {
+                if ($paymentTransactionData->payment_status == "succeed") {
                     Log::info("Flutterwave Webhook : Transaction Already Succeed");
+                    http_response_code(200);
+                    exit();
                 }
                 $fees = Fee::where('id', $data->meta_data->fees_id)->with(['fees_class_type', 'fees_class_type.fees_type'])->firstOrFail();
 
@@ -840,7 +843,7 @@ class WebhookController extends Controller
 
     private function handleRazorpaySuccess($paymentTransaction, $webhookData, $metadata)
     {
-        if ($paymentTransaction->status === "succeed") {
+        if ($paymentTransaction->payment_status === "succeed") {
             Log::info("Transaction already processed successfully");
             return response()->json(['status' => 'success', 'message' => 'Transaction already processed']);
         }

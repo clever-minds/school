@@ -79,7 +79,7 @@ class ResponseService {
      */
     // Check Feature
     public static function noFeatureThenRedirect($feature) {
-        if (Auth::user()->school_id && !app(FeaturesService::class)->hasFeature($feature)) {
+        if (Auth::check() && Auth::user()->school_id && !app(FeaturesService::class)->hasFeature($feature)) {
             return redirect()->back()->withErrors([
                 'message' => trans('Purchase') . " " . trans($feature) . " " . trans("to Continue using this functionality")
             ])->send();
@@ -88,7 +88,7 @@ class ResponseService {
     }
 
     public static function noFeatureThenSendJson($feature) {
-        if (Auth::user()->school_id && !app(FeaturesService::class)->hasFeature($feature)) {
+        if (Auth::check() && Auth::user()->school_id && !app(FeaturesService::class)->hasFeature($feature)) {
             self::errorResponse(trans('Purchase') . " " . trans($feature) . " " . trans("to Continue using this functionality"));
         }
         return true;

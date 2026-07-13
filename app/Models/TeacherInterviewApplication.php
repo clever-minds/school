@@ -10,6 +10,7 @@ class TeacherInterviewApplication extends Model
     use HasFactory;
 
     protected $fillable = [
+        'school_id',
         'name',
         'email',
         'phone',
@@ -21,5 +22,10 @@ class TeacherInterviewApplication extends Model
     public function interview()
     {
         return $this->hasOne(TeacherInterview::class, 'application_id');
+    }
+
+    public function school()
+    {
+        return $this->belongsTo(School::class);
     }
 }

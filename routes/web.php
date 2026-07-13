@@ -136,6 +136,10 @@ Route::post('/students/update-uni', [StudentController::class, 'updateUniNo'])
     ->name('students.updateUniNo');
 Route::get('email/verify', [Controller::class, 'emailVerify']);
 
+// Careers
+Route::get('careers', [\App\Http\Controllers\CareerController::class, 'index'])->name('careers.index');
+Route::post('careers', [\App\Http\Controllers\CareerController::class, 'store'])->name('careers.store');
+
 Route::group(['prefix' => 'school'], static function () {
     Route::get('about-us', [Controller::class, 'about_us']);
     Route::get('contact-us', [Controller::class, 'contact_us']);
