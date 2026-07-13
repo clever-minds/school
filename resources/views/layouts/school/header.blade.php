@@ -49,6 +49,9 @@
                             <a href="{{ url('school/contact-us') }}">{{ __('contact_us') }}</a>
                         </li>
                     @endif
+                    <li>
+                        <a href="{{ url('careers') }}">{{ __('careers') }}</a>
+                    </li>
                     <!-- <li>
                         <div class="dropdown">
                             <a class="btn btn-secondary dropdown-toggle" href="#" role="button"
@@ -140,6 +143,9 @@
                             <a href="{{ url('school/contact-us') }}">{{ __('contact_us') }}</a>
                         </li>
                     @endif
+                    <li>
+                        <a href="{{ url('careers') }}">{{ __('careers') }}</a>
+                    </li>
                     <li>
                         <!-- <div class="dropdown">
                             <a class="btn btn-secondary dropdown-toggle" href="#" role="button"

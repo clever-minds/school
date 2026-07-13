@@ -100,6 +100,7 @@
                     @if(isset($schoolSettings['contact_us_status']) && $schoolSettings['contact_us_status'] == 1 )
                         <span><a href="{{ url('school/contact-us') }}">{{ __('contact_us') }}</a></span>
                     @endif
+                    <span><a href="{{ url('careers') }}">{{ __('careers') }}</a></span>
                 </div>
             </div>
 
