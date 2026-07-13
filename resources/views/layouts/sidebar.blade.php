@@ -1416,5 +1416,14 @@
             </li>
         @endcanany
 
+        @can('teacher-interview-feedback-question-list')
+            <li class="nav-item">
+                <a href="{{ route('teacher-interview-feedback-questions.index') }}" class="nav-link">
+                    <i class="fa fa-question-circle menu-icon"></i>
+                    <span class="menu-title">{{ __('Interview Questions') }}</span>
+                </a>
+            </li>
+        @endcan
+
     </ul>
 </nav>

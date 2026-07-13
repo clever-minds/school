@@ -145,6 +145,9 @@ Route::group(['middleware' => ['auth']], function () {
     Route::get('teacher-interviews', [\App\Http\Controllers\TeacherInterviewController::class, 'index'])->name('teacher-interviews.index');
     Route::get('teacher-interviews/{id}', [\App\Http\Controllers\TeacherInterviewController::class, 'show'])->name('teacher-interviews.show');
     Route::post('teacher-interviews/{id}/status', [\App\Http\Controllers\TeacherInterviewController::class, 'updateStatus'])->name('teacher-interviews.update-status');
+
+    // Teacher Interview Feedback Questions
+    Route::resource('teacher-interview-feedback-questions', \App\Http\Controllers\TeacherInterviewFeedbackQuestionController::class)->except(['create', 'show', 'edit']);
 });
 
 Route::group(['prefix' => 'school'], static function () {
