@@ -19,6 +19,7 @@
                     <div class="card-body">
                         <h4 class="card-title">{{ __('Applicant Information') }}</h4>
                         <ul class="list-ticked">
+                            <li><strong>{{ __('School') }}:</strong> {{ $application->school->name ?? '-' }}</li>
                             <li><strong>{{ __('Name') }}:</strong> {{ $application->name }}</li>
                             <li><strong>{{ __('Email') }}:</strong> {{ $application->email }}</li>
                             <li><strong>{{ __('Phone') }}:</strong> {{ $application->phone }}</li>

@@ -25,6 +25,7 @@
                                 <thead>
                                     <tr>
                                         <th>{{ __('No.') }}</th>
+                                        <th>{{ __('School') }}</th>
                                         <th>{{ __('Name') }}</th>
                                         <th>{{ __('Email') }}</th>
                                         <th>{{ __('Phone') }}</th>
@@ -37,6 +38,7 @@
                                     @foreach($applications as $key => $application)
                                         <tr>
                                             <td>{{ $applications->firstItem() + $key }}</td>
+                                            <td>{{ $application->school->name ?? '-' }}</td>
                                             <td>{{ $application->name }}</td>
                                             <td>{{ $application->email }}</td>
                                             <td>{{ $application->phone }}</td>
