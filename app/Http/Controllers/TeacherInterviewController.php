@@ -8,8 +8,9 @@ use Illuminate\Support\Facades\Auth;
 
 class TeacherInterviewController extends Controller
 {
-    public function index(Request $request)
+    public function index()
     {
+        $request = request();
         if (!Auth::user()->can('teacher-interview-list')) {
             abort(403);
         }
