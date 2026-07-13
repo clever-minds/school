@@ -222,13 +222,7 @@
                                 <span class="menu-title">{{ __('School Policies') }}</span>
                             </a>
                         </li>
-                        @canany(['teacher-interview-manage', 'teacher-interview-list'])
-                            <li class="nav-item">
-                                <a href="{{ url('teacher-interviews') }}" class="nav-link">
-                                    <span class="menu-title">{{ __('Teacher Interviews') }}</span>
-                                </a>
-                            </li>
-                        @endcanany
+
                     </ul>
                 </div>
             </li>
@@ -1410,7 +1404,17 @@
                     <span class="menu-title">{{ __('Documentation') }}</span>
                 </a>
             </li>
+            </li>
         @endif
+
+        @canany(['teacher-interview-manage', 'teacher-interview-list'])
+            <li class="nav-item">
+                <a href="{{ url('teacher-interviews') }}" class="nav-link">
+                    <i class="fa fa-users menu-icon"></i>
+                    <span class="menu-title">{{ __('Teacher Interviews') }}</span>
+                </a>
+            </li>
+        @endcanany
 
     </ul>
 </nav>
