@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\AuditQuestion;
+use App\Models\AuditOptionGroup;
 use App\Services\BootstrapTableService;
 use App\Services\ResponseService;
 use Illuminate\Http\Request;
@@ -18,7 +19,8 @@ class AuditQuestionController extends Controller
     {
         ResponseService::noAnyPermissionThenRedirect(['audit-question-list','audit-question-create']);
         $categories = AuditQuestion::select('category')->whereNotNull('category')->where('category', '!=', '')->distinct()->pluck('category');
-        return view('audit_questions.index', compact('categories'));
+        $optionGroups = AuditOptionGroup::all();
+        return view('audit_questions.index', compact('categories', 'optionGroups'));
     }
 
     /**
@@ -30,7 +32,9 @@ class AuditQuestionController extends Controller
         $validator = Validator::make($request->all(), [
             'question' => 'required|string',
             'category' => 'nullable|string',
-            'status' => 'nullable|in:0,1'
+            'status' => 'nullable|in:0,1',
+            'type' => 'nullable|string',
+            'audit_option_group_id' => 'nullable|exists:audit_option_groups,id'
         ]);
 
         if ($validator->fails()) {
@@ -41,7 +45,9 @@ class AuditQuestionController extends Controller
             AuditQuestion::create([
                 'question' => $request->question,
                 'category' => $request->category,
-                'status' => $request->status ?? 1
+                'status' => $request->status ?? 1,
+                'type' => $request->type,
+                'audit_option_group_id' => $request->audit_option_group_id
             ]);
             ResponseService::successResponse('Data Stored Successfully');
         } catch (Throwable $e) {
@@ -62,7 +68,7 @@ class AuditQuestionController extends Controller
         $order = request('order', 'DESC');
         $search = request('search');
 
-        $sql = AuditQuestion::query()
+        $sql = AuditQuestion::with('optionGroup')
             ->when($search, function ($query) use ($search) {
                 $query->where('question', 'LIKE', "%$search%")
                       ->orWhere('category', 'LIKE', "%$search%");
@@ -83,6 +89,7 @@ class AuditQuestionController extends Controller
             
             $tempRow = $row->toArray();
             $tempRow['no'] = $no++;
+            $tempRow['option_group_name'] = $row->optionGroup ? $row->optionGroup->name : '-';
             $tempRow['status_text'] = $row->status == 1 ? '<span class="badge badge-success">Active</span>' : '<span class="badge badge-danger">Inactive</span>';
             $tempRow['operate'] = $operate;
             $rows[] = $tempRow;
@@ -100,7 +107,9 @@ class AuditQuestionController extends Controller
         $validator = Validator::make($request->all(), [
             'question' => 'required|string',
             'category' => 'nullable|string',
-            'status' => 'required|in:0,1'
+            'status' => 'required|in:0,1',
+            'type' => 'nullable|string',
+            'audit_option_group_id' => 'nullable|exists:audit_option_groups,id'
         ]);
 
         if ($validator->fails()) {
@@ -112,7 +121,9 @@ class AuditQuestionController extends Controller
             $question->update([
                 'question' => $request->question,
                 'category' => $request->category,
-                'status' => $request->status
+                'status' => $request->status,
+                'type' => $request->type,
+                'audit_option_group_id' => $request->audit_option_group_id
             ]);
             ResponseService::successResponse('Data Updated Successfully');
         } catch (Throwable $e) {

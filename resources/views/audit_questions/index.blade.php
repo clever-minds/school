@@ -43,6 +43,25 @@
                                         <option value="0">{{ __('Inactive') }}</option>
                                     </select>
                                 </div>
+                                <div class="form-group col-sm-12 col-md-6">
+                                    <label>{{ __('Type') }}</label>
+                                    <select name="type" class="form-control">
+                                        <option value="">{{ __('Select Type') }}</option>
+                                        <option value="rating">{{ __('Rating') }}</option>
+                                        <option value="boolean">{{ __('Boolean (Yes/No)') }}</option>
+                                        <option value="text">{{ __('Text') }}</option>
+                                        <option value="conditional">{{ __('Conditional') }}</option>
+                                    </select>
+                                </div>
+                                <div class="form-group col-sm-12 col-md-6">
+                                    <label>{{ __('Option Group') }}</label>
+                                    <select name="audit_option_group_id" class="form-control">
+                                        <option value="">{{ __('Select Option Group') }}</option>
+                                        @foreach($optionGroups as $group)
+                                            <option value="{{ $group->id }}">{{ $group->name }}</option>
+                                        @endforeach
+                                    </select>
+                                </div>
                             </div>
                             <input class="btn btn-theme float-right ml-3" id="create-btn" type="submit" value={{ __('submit') }}>
                             <input class="btn btn-secondary float-right" type="reset" value={{ __('reset') }}>
@@ -76,6 +95,7 @@
                                         <th scope="col" data-field="no"> {{ __('no.') }} </th>
                                         <th scope="col" data-field="question">{{ __('question') }} </th>
                                         <th scope="col" data-field="category">{{ __('category') }} </th>
+                                        <th scope="col" data-field="option_group_name">{{ __('Option Group') }} </th>
                                         <th scope="col" data-field="status_text" data-escape="false">{{ __('status') }} </th>
                                         <th data-events="auditQuestionEvents" data-width="150" scope="col" data-field="operate" data-escape="false">{{ __('action') }}</th>
                                     </tr>
@@ -131,6 +151,29 @@
                                 </select>
                             </div>
                         </div>
+                        <div class="row form-group">
+                            <div class="col-sm-12 col-md-12">
+                                <label>{{ __('Type') }}</label>
+                                <select name="type" id="edit-type" class="form-control">
+                                    <option value="">{{ __('Select Type') }}</option>
+                                    <option value="rating">{{ __('Rating') }}</option>
+                                    <option value="boolean">{{ __('Boolean (Yes/No)') }}</option>
+                                    <option value="text">{{ __('Text') }}</option>
+                                    <option value="conditional">{{ __('Conditional') }}</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="row form-group">
+                            <div class="col-sm-12 col-md-12">
+                                <label>{{ __('Option Group') }}</label>
+                                <select name="audit_option_group_id" id="edit-audit_option_group_id" class="form-control">
+                                    <option value="">{{ __('Select Option Group') }}</option>
+                                    @foreach($optionGroups as $group)
+                                        <option value="{{ $group->id }}">{{ $group->name }}</option>
+                                    @endforeach
+                                </select>
+                            </div>
+                        </div>
                     </div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-secondary" data-dismiss="modal">{{ __('Cancel') }}</button>
@@ -150,6 +193,8 @@
             $('#edit-question').val(row.question);
             $('#edit-category').val(row.category);
             $('#edit-status').val(row.status);
+            $('#edit-type').val(row.type);
+            $('#edit-audit_option_group_id').val(row.audit_option_group_id);
             $('#formdata').attr('action', "{{url('audit-questions')}}/" + row.id);
         }
     };
