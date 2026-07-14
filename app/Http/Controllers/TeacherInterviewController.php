@@ -30,7 +30,8 @@ class TeacherInterviewController extends Controller
         }
 
         $applications = $query->latest()->paginate(15);
-        $staffMembers = User::role(['Teacher', 'School Admin', 'Super Admin'])->where('school_id', Auth::user()->school_id)->get();
+        $roles = \Spatie\Permission\Models\Role::whereIn('name', ['Teacher', 'School Admin', 'Super Admin'])->pluck('name')->toArray();
+        $staffMembers = empty($roles) ? collect() : User::role($roles)->where('school_id', Auth::user()->school_id)->get();
 
         return view('teacher-interviews.index', compact('applications', 'staffMembers'));
     }
