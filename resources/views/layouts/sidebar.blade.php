@@ -217,6 +217,13 @@
                                 </a>
                             </li>
                         @endcan
+                        @can('teacher-interview-my')
+                            <li class="nav-item">
+                                <a href="{{ route('teacher-interviews.my-assigned') }}" class="nav-link">
+                                    <span class="menu-title">{{ __('My Assigned Interviews') }}</span>
+                                </a>
+                            </li>
+                        @endcan
                         @can('teacher-interview-question-list')
                             <li class="nav-item">
                                 <a href="{{ route('teacher-interview-feedback-questions.index') }}" class="nav-link">

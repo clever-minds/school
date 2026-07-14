@@ -143,6 +143,7 @@ Route::post('careers', [\App\Http\Controllers\CareerController::class, 'store'])
 // Teacher Interviews Backend
 Route::group(['middleware' => ['auth']], function () {
     Route::get('teacher-interviews', [\App\Http\Controllers\TeacherInterviewController::class, 'index'])->name('teacher-interviews.index');
+    Route::get('teacher-interviews/my-assigned', [\App\Http\Controllers\TeacherInterviewController::class, 'myInterviews'])->name('teacher-interviews.my-assigned');
     Route::get('teacher-interviews/{id}', [\App\Http\Controllers\TeacherInterviewController::class, 'show'])->name('teacher-interviews.show');
     Route::post('teacher-interviews/{id}/assign', [\App\Http\Controllers\TeacherInterviewController::class, 'assignInterviewer'])->name('teacher-interviews.assign');
     Route::post('teacher-interviews/{id}/status', [\App\Http\Controllers\TeacherInterviewController::class, 'updateStatus'])->name('teacher-interviews.update-status');

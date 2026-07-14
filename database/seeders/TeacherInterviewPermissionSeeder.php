@@ -23,6 +23,7 @@ class TeacherInterviewPermissionSeeder extends Seeder
             'teacher-interview-question-create',
             'teacher-interview-question-edit',
             'teacher-interview-question-delete',
+            'teacher-interview-my',
         ];
 
         foreach ($permissions as $permission) {
@@ -39,11 +40,13 @@ class TeacherInterviewPermissionSeeder extends Seeder
         $schoolAdmin = Role::where('name', 'School Admin')->first();
         if ($schoolAdmin) {
             $schoolAdmin->revokePermissionTo($permissions);
+            $schoolAdmin->givePermissionTo('teacher-interview-my'); // Can conduct assigned interviews
         }
 
         $teacher = Role::where('name', 'Teacher')->first();
         if ($teacher) {
             $teacher->revokePermissionTo($permissions);
+            $teacher->givePermissionTo('teacher-interview-my'); // Can conduct assigned interviews
         }
     }
 }

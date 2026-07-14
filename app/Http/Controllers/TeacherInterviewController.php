@@ -36,6 +36,20 @@ class TeacherInterviewController extends Controller
         return view('teacher-interviews.index', compact('applications', 'staffMembers'));
     }
 
+    public function myInterviews()
+    {
+        if (!Auth::user()->can('teacher-interview-my')) {
+            abort(403);
+        }
+
+        $interviews = TeacherInterview::with('application')
+            ->where('interviewer_id', Auth::id())
+            ->latest()
+            ->paginate(15);
+
+        return view('teacher-interviews.my-assigned', compact('interviews'));
+    }
+
     public function show($id)
     {
         if (!Auth::user()->can('teacher-interview-list')) {
