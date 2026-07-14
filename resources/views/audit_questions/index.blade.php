@@ -52,6 +52,7 @@
                                         <option value="text">{{ __('Text') }}</option>
                                         <option value="conditional">{{ __('Conditional') }}</option>
                                     </select>
+                                    <small class="text-muted mt-1 d-block"><i class="fa fa-info-circle"></i> e.g., Select <strong>Rating</strong> for multiple choices, or <strong>Conditional</strong> for Yes/No based answers.</small>
                                 </div>
                                 <div class="form-group col-sm-12 col-md-6">
                                     <label>{{ __('Option Group') }}</label>
@@ -61,7 +62,8 @@
                                             <option value="{{ $group->id }}" data-options="{{ json_encode($group->option_values) }}">{{ $group->name }}</option>
                                         @endforeach
                                     </select>
-                                    <small id="create-option-preview" class="text-muted mt-2 d-block"></small>
+                                    <small class="text-muted mt-1 d-block"><i class="fa fa-info-circle"></i> e.g., Select the exact answer choices (like "4-Point Rating"). Leave blank for Text type.</small>
+                                    <small id="create-option-preview" class="text-info mt-2 d-block"></small>
                                 </div>
                             </div>
                             <input class="btn btn-theme float-right ml-3" id="create-btn" type="submit" value={{ __('submit') }}>
@@ -162,6 +164,7 @@
                                     <option value="text">{{ __('Text') }}</option>
                                     <option value="conditional">{{ __('Conditional') }}</option>
                                 </select>
+                                <small class="text-muted mt-1 d-block"><i class="fa fa-info-circle"></i> e.g., Select <strong>Rating</strong> for multiple choices, or <strong>Conditional</strong> for Yes/No based answers.</small>
                             </div>
                         </div>
                         <div class="row form-group">
@@ -173,7 +176,8 @@
                                         <option value="{{ $group->id }}" data-options="{{ json_encode($group->option_values) }}">{{ $group->name }}</option>
                                     @endforeach
                                 </select>
-                                <small id="edit-option-preview" class="text-muted mt-2 d-block"></small>
+                                <small class="text-muted mt-1 d-block"><i class="fa fa-info-circle"></i> e.g., Select the exact answer choices (like "4-Point Rating"). Leave blank for Text type.</small>
+                                <small id="edit-option-preview" class="text-info mt-2 d-block"></small>
                             </div>
                         </div>
                     </div>
