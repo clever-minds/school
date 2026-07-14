@@ -52,7 +52,9 @@ class TeacherInterviewFeedbackQuestionsSeeder extends Seeder
         );
 
         // 2. Clear existing questions for a fresh start (optional, but requested by logic to have this exact process)
+        \Illuminate\Support\Facades\Schema::disableForeignKeyConstraints();
         \App\Models\TeacherInterviewFeedbackQuestion::truncate();
+        \Illuminate\Support\Facades\Schema::enableForeignKeyConstraints();
 
         // 3. Insert Questions
         $questions = [
