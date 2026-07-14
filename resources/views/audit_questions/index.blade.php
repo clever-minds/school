@@ -55,12 +55,13 @@
                                 </div>
                                 <div class="form-group col-sm-12 col-md-6">
                                     <label>{{ __('Option Group') }}</label>
-                                    <select name="audit_option_group_id" class="form-control">
+                                    <select name="audit_option_group_id" id="create-option-group" class="form-control">
                                         <option value="">{{ __('Select Option Group') }}</option>
                                         @foreach($optionGroups as $group)
-                                            <option value="{{ $group->id }}">{{ $group->name }}</option>
+                                            <option value="{{ $group->id }}" data-options="{{ json_encode($group->option_values) }}">{{ $group->name }}</option>
                                         @endforeach
                                     </select>
+                                    <small id="create-option-preview" class="text-muted mt-2 d-block"></small>
                                 </div>
                             </div>
                             <input class="btn btn-theme float-right ml-3" id="create-btn" type="submit" value={{ __('submit') }}>
@@ -169,9 +170,10 @@
                                 <select name="audit_option_group_id" id="edit-audit_option_group_id" class="form-control">
                                     <option value="">{{ __('Select Option Group') }}</option>
                                     @foreach($optionGroups as $group)
-                                        <option value="{{ $group->id }}">{{ $group->name }}</option>
+                                        <option value="{{ $group->id }}" data-options="{{ json_encode($group->option_values) }}">{{ $group->name }}</option>
                                     @endforeach
                                 </select>
+                                <small id="edit-option-preview" class="text-muted mt-2 d-block"></small>
                             </div>
                         </div>
                     </div>
@@ -187,6 +189,48 @@
 
 @section('script')
 <script>
+    function renderOptionPreview(selectElement, previewContainerId) {
+        let selectedOption = $(selectElement).find('option:selected');
+        let optionsData = selectedOption.attr('data-options');
+        let previewHtml = '';
+
+        if (optionsData) {
+            try {
+                let options = JSON.parse(optionsData);
+                previewHtml = '<strong>Preview:</strong> ';
+                
+                // Helper to render simple nested options if it's conditional
+                function extractLabels(obj) {
+                    if (Array.isArray(obj)) {
+                        return obj.map(item => item.label).join(', ');
+                    } else if (typeof obj === 'object' && obj !== null) {
+                        let res = [];
+                        for (let key in obj) {
+                            if (key !== 'has_sub_options' && typeof obj[key] === 'object') {
+                                res.push(key + ' -> [' + extractLabels(obj[key]) + ']');
+                            }
+                        }
+                        return res.join(' | ');
+                    }
+                    return '';
+                }
+
+                previewHtml += extractLabels(options);
+            } catch (e) {
+                console.error("Invalid JSON in option group");
+            }
+        }
+        $('#' + previewContainerId).html(previewHtml);
+    }
+
+    $('#create-option-group').on('change', function() {
+        renderOptionPreview(this, 'create-option-preview');
+    });
+
+    $('#edit-audit_option_group_id').on('change', function() {
+        renderOptionPreview(this, 'edit-option-preview');
+    });
+
     window.auditQuestionEvents = {
         'click .edit-data': function (e, value, row, index) {
             $('#id').val(row.id);
@@ -194,7 +238,7 @@
             $('#edit-category').val(row.category);
             $('#edit-status').val(row.status);
             $('#edit-type').val(row.type);
-            $('#edit-audit_option_group_id').val(row.audit_option_group_id);
+            $('#edit-audit_option_group_id').val(row.audit_option_group_id).trigger('change');
             $('#formdata').attr('action', "{{url('audit-questions')}}/" + row.id);
         }
     };
