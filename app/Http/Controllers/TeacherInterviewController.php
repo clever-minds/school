@@ -40,7 +40,7 @@ class TeacherInterviewController extends Controller
 
     public function myInterviews()
     {
-        if (!Auth::user()->can('teacher-interview-my')) {
+        if (!Auth::user()->can('assigned-teacher-interview')) {
             abort(403);
         }
 
@@ -57,7 +57,7 @@ class TeacherInterviewController extends Controller
         $application = TeacherInterviewApplication::findOrFail($id);
         $isAssigned = TeacherInterview::where('application_id', $id)->where('interviewer_id', Auth::id())->exists();
 
-        if (!Auth::user()->can('teacher-interview-list') && !($isAssigned && Auth::user()->can('teacher-interview-my'))) {
+        if (!Auth::user()->can('teacher-interview-list') && !($isAssigned && Auth::user()->can('assigned-teacher-interview'))) {
             abort(403);
         }
 
@@ -142,7 +142,7 @@ class TeacherInterviewController extends Controller
         $application = TeacherInterviewApplication::findOrFail($id);
         $isAssigned = TeacherInterview::where('application_id', $id)->where('interviewer_id', Auth::id())->exists();
 
-        if (!Auth::user()->can('teacher-interview-manage') && !($isAssigned && Auth::user()->can('teacher-interview-my'))) {
+        if (!Auth::user()->can('teacher-interview-manage') && !($isAssigned && Auth::user()->can('assigned-teacher-interview'))) {
             abort(403);
         }
         

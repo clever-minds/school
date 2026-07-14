@@ -23,11 +23,17 @@ class TeacherInterviewPermissionSeeder extends Seeder
             'teacher-interview-question-create',
             'teacher-interview-question-edit',
             'teacher-interview-question-delete',
-            'teacher-interview-my',
+            'assigned-teacher-interview',
         ];
 
         foreach ($permissions as $permission) {
             Permission::firstOrCreate(['name' => $permission]);
+        }
+
+        // Cleanup old permission if it exists
+        $oldPermission = Permission::where('name', 'teacher-interview-my')->first();
+        if ($oldPermission) {
+            $oldPermission->delete();
         }
 
         // Automatically assign to Super Admin
@@ -36,17 +42,17 @@ class TeacherInterviewPermissionSeeder extends Seeder
             $superAdmin->givePermissionTo($permissions);
         }
 
-        // Revoke from School Admin and Teacher if previously assigned
+        // Revoke all teacher-interview permissions from School Admin and Teacher, then grant only assigned-teacher-interview
         $schoolAdmin = Role::where('name', 'School Admin')->first();
         if ($schoolAdmin) {
             $schoolAdmin->revokePermissionTo($permissions);
-            $schoolAdmin->givePermissionTo('teacher-interview-my'); // Can conduct assigned interviews
+            $schoolAdmin->givePermissionTo('assigned-teacher-interview');
         }
 
         $teacher = Role::where('name', 'Teacher')->first();
         if ($teacher) {
             $teacher->revokePermissionTo($permissions);
-            $teacher->givePermissionTo('teacher-interview-my'); // Can conduct assigned interviews
+            $teacher->givePermissionTo('assigned-teacher-interview');
         }
     }
 }

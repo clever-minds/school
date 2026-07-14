@@ -180,7 +180,7 @@
         @endcanany
 
         {{-- teacher --}}
-        @canany(['teacher-create', 'teacher-list', 'teacher-interview-list', 'teacher-interview-my', 'teacher-interview-question-list', 'staff-kyc-manage'])
+        @can('teacher-create')
             <li class="nav-item">
                 <a class="nav-link" data-toggle="collapse" href="#teacher-menu" aria-expanded="false" aria-controls="academics-menu">
                     <i class="fa fa-user menu-icon"></i>
@@ -190,28 +190,26 @@
                 <div class="collapse" id="teacher-menu">
                     <ul class="nav flex-column sub-menu">
                         {{-- Teacher Registration --}}
-                        @can('teacher-create')
-                            <li class="nav-item">
-                                <a href="{{ route('teachers.index') }}" class="nav-link">
-                                    <span class="menu-title">{{ __('manage_teacher') }}</span>
-                                </a>
-                            </li>
-                            <li class="nav-item">
-                                <a href="{{ route('teachers.create-bulk-upload') }}" class="nav-link">
-                                    <span class="menu-title">{{ __('bulk upload') }}</span>
-                                </a>
-                            </li>
-                            <li class="nav-item">
-                                <a href="{{ route('teacher-onboarding.jd.index') }}" class="nav-link">
-                                    <span class="menu-title">{{ __('Teacher JD') }}</span>
-                                </a>
-                            </li>
-                            <li class="nav-item">
-                                <a href="{{ route('teacher-onboarding.questions.index') }}" class="nav-link">
-                                    <span class="menu-title">{{ __('Onboarding Questions') }}</span>
-                                </a>
-                            </li>
-                        @endcan
+                        <li class="nav-item">
+                            <a href="{{ route('teachers.index') }}" class="nav-link">
+                                <span class="menu-title">{{ __('manage_teacher') }}</span>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="{{ route('teachers.create-bulk-upload') }}" class="nav-link">
+                                <span class="menu-title">{{ __('bulk upload') }}</span>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="{{ route('teacher-onboarding.jd.index') }}" class="nav-link">
+                                <span class="menu-title">{{ __('Teacher JD') }}</span>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="{{ route('teacher-onboarding.questions.index') }}" class="nav-link">
+                                <span class="menu-title">{{ __('Onboarding Questions') }}</span>
+                            </a>
+                        </li>
                         @can('teacher-interview-list')
                             <li class="nav-item">
                                 <a href="{{ route('teacher-interviews.index') }}" class="nav-link">
@@ -219,7 +217,7 @@
                                 </a>
                             </li>
                         @endcan
-                        @can('teacher-interview-my')
+                        @can('assigned-teacher-interview')
                             <li class="nav-item">
                                 <a href="{{ route('teacher-interviews.my-assigned') }}" class="nav-link">
                                     <span class="menu-title">{{ __('My Assigned Interviews') }}</span>
@@ -240,13 +238,11 @@
                                 </a>
                             </li>
                         @endcan
-                        @can('school-policy-list')
-                            <li class="nav-item">
-                                <a href="{{ route('school-policy.index') }}" class="nav-link">
-                                    <span class="menu-title">{{ __('School Policies') }}</span>
-                                </a>
-                            </li>
-                        @endcan
+                        <li class="nav-item">
+                            <a href="{{ route('school-policy.index') }}" class="nav-link">
+                                <span class="menu-title">{{ __('School Policies') }}</span>
+                            </a>
+                        </li>
 
                     </ul>
                 </div>
