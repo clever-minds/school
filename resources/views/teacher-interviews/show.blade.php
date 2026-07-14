@@ -95,7 +95,29 @@
                                                 <td>{{ $question->category ?? '-' }}</td>
                                                 <td class="text-wrap" style="min-width: 200px;">{{ $question->feedback_question }}</td>
                                                 <td>
-                                                    <textarea name="feedbacks[{{ $question->id }}]" class="form-control" rows="2" placeholder="{{ __('Enter your feedback here...') }}">{{ isset($feedbacks[$question->id]) ? $feedbacks[$question->id]->interviewer_feedback : '' }}</textarea>
+                                                    @php
+                                                        $currentAnswer = isset($feedbacks[$question->id]) ? $feedbacks[$question->id]->interviewer_feedback : '';
+                                                    @endphp
+                                                    
+                                                    @if($question->type == 'rating' && $question->optionGroup)
+                                                        @foreach($question->optionGroup->option_values as $opt)
+                                                            <div class="form-check form-check-inline mt-0 mb-2">
+                                                                <input class="form-check-input" type="radio" name="feedbacks[{{ $question->id }}]" id="q_{{ $question->id }}_{{ $loop->index }}" value="{{ $opt['label'] }}" {{ $currentAnswer == $opt['label'] ? 'checked' : '' }}>
+                                                                <label class="form-check-label" for="q_{{ $question->id }}_{{ $loop->index }}">{{ $opt['label'] }}</label>
+                                                            </div>
+                                                        @endforeach
+                                                    @elseif($question->type == 'boolean')
+                                                        <div class="form-check form-check-inline mt-0 mb-2">
+                                                            <input class="form-check-input" type="radio" name="feedbacks[{{ $question->id }}]" id="q_{{ $question->id }}_yes" value="Yes" {{ $currentAnswer == 'Yes' ? 'checked' : '' }}>
+                                                            <label class="form-check-label" for="q_{{ $question->id }}_yes">{{ __('Yes') }}</label>
+                                                        </div>
+                                                        <div class="form-check form-check-inline mt-0 mb-2">
+                                                            <input class="form-check-input" type="radio" name="feedbacks[{{ $question->id }}]" id="q_{{ $question->id }}_no" value="No" {{ $currentAnswer == 'No' ? 'checked' : '' }}>
+                                                            <label class="form-check-label" for="q_{{ $question->id }}_no">{{ __('No') }}</label>
+                                                        </div>
+                                                    @else
+                                                        <textarea name="feedbacks[{{ $question->id }}]" class="form-control" rows="2" placeholder="{{ __('Enter your feedback here...') }}">{{ $currentAnswer }}</textarea>
+                                                    @endif
                                                 </td>
                                             </tr>
                                         @endforeach

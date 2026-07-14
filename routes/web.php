@@ -144,6 +144,7 @@ Route::post('careers', [\App\Http\Controllers\CareerController::class, 'store'])
 Route::group(['middleware' => ['auth']], function () {
     Route::get('teacher-interviews', [\App\Http\Controllers\TeacherInterviewController::class, 'index'])->name('teacher-interviews.index');
     Route::get('teacher-interviews/{id}', [\App\Http\Controllers\TeacherInterviewController::class, 'show'])->name('teacher-interviews.show');
+    Route::post('teacher-interviews/{id}/assign', [\App\Http\Controllers\TeacherInterviewController::class, 'assignInterviewer'])->name('teacher-interviews.assign');
     Route::post('teacher-interviews/{id}/status', [\App\Http\Controllers\TeacherInterviewController::class, 'updateStatus'])->name('teacher-interviews.update-status');
     Route::post('teacher-interviews/{id}/feedback', [\App\Http\Controllers\TeacherInterviewController::class, 'saveFeedback'])->name('teacher-interviews.save-feedback');
 

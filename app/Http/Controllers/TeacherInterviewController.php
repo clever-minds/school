@@ -6,6 +6,7 @@ use App\Models\TeacherInterviewApplication;
 use App\Models\TeacherInterview;
 use App\Models\TeacherInterviewFeedback;
 use App\Models\TeacherInterviewFeedbackQuestion;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -29,8 +30,9 @@ class TeacherInterviewController extends Controller
         }
 
         $applications = $query->latest()->paginate(15);
+        $staffMembers = User::role(['Teacher', 'School Admin', 'Super Admin'])->where('school_id', Auth::user()->school_id)->get();
 
-        return view('teacher-interviews.index', compact('applications'));
+        return view('teacher-interviews.index', compact('applications', 'staffMembers'));
     }
 
     public function show($id)
@@ -45,12 +47,16 @@ class TeacherInterviewController extends Controller
             abort(403);
         }
 
-        $interview = TeacherInterview::firstOrCreate(
-            ['application_id' => $id],
-            ['interviewer_id' => Auth::id(), 'status' => 'Pending']
-        );
+        $interview = TeacherInterview::where('application_id', $id)->first();
+        if (!$interview) {
+            $interview = TeacherInterview::create([
+                'application_id' => $id,
+                'status' => 'Pending',
+                'interviewer_id' => Auth::id() // Default to the viewer if not assigned yet
+            ]);
+        }
 
-        $feedbackQuestions = TeacherInterviewFeedbackQuestion::where('status', 'active')->get();
+        $feedbackQuestions = TeacherInterviewFeedbackQuestion::with('optionGroup')->where('status', 'active')->get();
         $feedbacks = TeacherInterviewFeedback::where('interview_id', $interview->id)->get()->keyBy('question_id');
 
         return view('teacher-interviews.show', compact('application', 'interview', 'feedbackQuestions', 'feedbacks'));
@@ -80,6 +86,36 @@ class TeacherInterviewController extends Controller
         $application->save();
 
         return redirect()->back()->with('success', 'Application status updated successfully.');
+    }
+
+    public function assignInterviewer(Request $request, $id)
+    {
+        if (!Auth::user()->can('teacher-interview-list')) {
+            abort(403);
+        }
+
+        $request->validate([
+            'interviewer_id' => 'required|exists:users,id'
+        ]);
+
+        $application = TeacherInterviewApplication::findOrFail($id);
+        if (Auth::user()->school_id && $application->school_id != Auth::user()->school_id) {
+            abort(403);
+        }
+
+        $interview = TeacherInterview::where('application_id', $id)->first();
+        if (!$interview) {
+            $interview = TeacherInterview::create([
+                'application_id' => $id,
+                'status' => 'Pending',
+                'interviewer_id' => $request->interviewer_id
+            ]);
+        } else {
+            $interview->interviewer_id = $request->interviewer_id;
+            $interview->save();
+        }
+
+        return redirect()->back()->with('success', __('Interviewer assigned successfully.'));
     }
 
     public function saveFeedback(Request $request, $id)

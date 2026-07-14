@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\TeacherInterviewFeedbackQuestion;
+use App\Models\AuditOptionGroup;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -14,8 +15,9 @@ class TeacherInterviewFeedbackQuestionController extends Controller
             abort(403, 'Unauthorized action.');
         }
 
-        $questions = TeacherInterviewFeedbackQuestion::orderBy('id', 'desc')->get();
-        return view('teacher-interview-feedback-questions.index', compact('questions'));
+        $questions = TeacherInterviewFeedbackQuestion::with('optionGroup')->orderBy('id', 'desc')->get();
+        $optionGroups = AuditOptionGroup::all();
+        return view('teacher-interview-feedback-questions.index', compact('questions', 'optionGroups'));
     }
 
     public function store(Request $request)
@@ -27,7 +29,9 @@ class TeacherInterviewFeedbackQuestionController extends Controller
         $request->validate([
             'feedback_question' => 'required|string|max:255',
             'category' => 'nullable|string|max:255',
-            'status' => 'required|in:active,inactive'
+            'status' => 'required|in:active,inactive',
+            'type' => 'nullable|string',
+            'audit_option_group_id' => 'nullable|exists:audit_option_groups,id'
         ]);
 
         TeacherInterviewFeedbackQuestion::create($request->all());
@@ -44,7 +48,9 @@ class TeacherInterviewFeedbackQuestionController extends Controller
         $request->validate([
             'feedback_question' => 'required|string|max:255',
             'category' => 'nullable|string|max:255',
-            'status' => 'required|in:active,inactive'
+            'status' => 'required|in:active,inactive',
+            'type' => 'nullable|string',
+            'audit_option_group_id' => 'nullable|exists:audit_option_groups,id'
         ]);
 
         $question = TeacherInterviewFeedbackQuestion::findOrFail($id);

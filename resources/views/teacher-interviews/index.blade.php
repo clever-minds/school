@@ -63,6 +63,42 @@
                                                         <i class="fa fa-download"></i>
                                                     </a>
                                                 @endif
+                                                <button class="btn btn-sm btn-warning btn-rounded btn-icon" data-toggle="modal" data-target="#assignModal{{ $application->id }}" title="{{ __('Assign Interviewer') }}">
+                                                    <i class="fa fa-user-plus"></i>
+                                                </button>
+                                                
+                                                <!-- Assign Modal -->
+                                                <div class="modal fade" id="assignModal{{ $application->id }}" tabindex="-1" role="dialog" aria-hidden="true">
+                                                    <div class="modal-dialog" role="document">
+                                                        <div class="modal-content">
+                                                            <div class="modal-header">
+                                                                <h5 class="modal-title">{{ __('Assign Interviewer') }}</h5>
+                                                                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                                                    <span aria-hidden="true">&times;</span>
+                                                                </button>
+                                                            </div>
+                                                            <form action="{{ route('teacher-interviews.assign', $application->id) }}" method="POST">
+                                                                @csrf
+                                                                <div class="modal-body text-left">
+                                                                    <p>{{ __('Assign this application to a staff member to conduct the interview.') }}</p>
+                                                                    <div class="form-group">
+                                                                        <label>{{ __('Select Interviewer') }} <span class="text-danger">*</span></label>
+                                                                        <select name="interviewer_id" class="form-control" required>
+                                                                            <option value="">{{ __('Select Staff') }}</option>
+                                                                            @foreach($staffMembers as $staff)
+                                                                                <option value="{{ $staff->id }}">{{ $staff->full_name }} ({{ $staff->role }})</option>
+                                                                            @endforeach
+                                                                        </select>
+                                                                    </div>
+                                                                </div>
+                                                                <div class="modal-footer">
+                                                                    <button type="button" class="btn btn-secondary" data-dismiss="modal">{{ __('Close') }}</button>
+                                                                    <button type="submit" class="btn btn-primary theme-btn">{{ __('Assign') }}</button>
+                                                                </div>
+                                                            </form>
+                                                        </div>
+                                                    </div>
+                                                </div>
                                             </td>
                                         </tr>
                                     @endforeach
