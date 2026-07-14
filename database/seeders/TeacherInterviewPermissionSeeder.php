@@ -29,10 +29,21 @@ class TeacherInterviewPermissionSeeder extends Seeder
             Permission::firstOrCreate(['name' => $permission]);
         }
 
-        // Automatically assign to Super Admin if role exists
+        // Automatically assign to Super Admin
         $superAdmin = Role::where('name', 'Super Admin')->first();
         if ($superAdmin) {
             $superAdmin->givePermissionTo($permissions);
+        }
+
+        // Revoke from School Admin and Teacher if previously assigned
+        $schoolAdmin = Role::where('name', 'School Admin')->first();
+        if ($schoolAdmin) {
+            $schoolAdmin->revokePermissionTo($permissions);
+        }
+
+        $teacher = Role::where('name', 'Teacher')->first();
+        if ($teacher) {
+            $teacher->revokePermissionTo($permissions);
         }
     }
 }

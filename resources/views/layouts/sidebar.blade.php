@@ -210,16 +210,20 @@
                                 <span class="menu-title">{{ __('Onboarding Questions') }}</span>
                             </a>
                         </li>
-                        <li class="nav-item">
-                            <a href="{{ route('teacher-interviews.index') }}" class="nav-link">
-                                <span class="menu-title">{{ __('Teacher Interviews') }}</span>
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a href="{{ route('teacher-interview-feedback-questions.index') }}" class="nav-link">
-                                <span class="menu-title">{{ __('Teacher Interview Questions') }}</span>
-                            </a>
-                        </li>
+                        @can('teacher-interview-list')
+                            <li class="nav-item">
+                                <a href="{{ route('teacher-interviews.index') }}" class="nav-link">
+                                    <span class="menu-title">{{ __('Teacher Interviews') }}</span>
+                                </a>
+                            </li>
+                        @endcan
+                        @can('teacher-interview-question-list')
+                            <li class="nav-item">
+                                <a href="{{ route('teacher-interview-feedback-questions.index') }}" class="nav-link">
+                                    <span class="menu-title">{{ __('Teacher Interview Questions') }}</span>
+                                </a>
+                            </li>
+                        @endcan
                         @can('staff-kyc-manage')
                             <li class="nav-item">
                                 <a href="{{ route('staff.kyc.index') }}" class="nav-link">
