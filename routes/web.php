@@ -148,7 +148,7 @@ Route::group(['middleware' => ['auth']], function () {
     Route::post('teacher-interviews/{id}/feedback', [\App\Http\Controllers\TeacherInterviewController::class, 'saveFeedback'])->name('teacher-interviews.save-feedback');
 
     // Teacher Interview Feedback Questions
-    Route::resource('teacher-interview-feedback-questions', \App\Http\Controllers\TeacherInterviewFeedbackQuestionController::class)->except(['create', 'show', 'edit']);
+    Route::resource('teacher-interview-feedback-questions', \App\Http\Controllers\TeacherInterviewFeedbackQuestionController::class)->parameters(['teacher-interview-feedback-questions' => 'question'])->except(['create', 'show', 'edit']);
 });
 
 Route::group(['prefix' => 'school'], static function () {
