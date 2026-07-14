@@ -1143,6 +1143,12 @@
                     <span class="menu-title">{{ __('Audit Questions') }}</span>
                 </a>
             </li>
+            <li class="nav-item {{ request()->is('audit-option-groups*') ? 'active' : '' }}">
+                <a href="{{ route('audit-option-groups.index') }}" class="nav-link">
+                    <i class="fa fa-list-ul menu-icon"></i>
+                    <span class="menu-title">{{ __('Option Groups') }}</span>
+                </a>
+            </li>
         @endcanany
 
         {{-- School Audits --}}

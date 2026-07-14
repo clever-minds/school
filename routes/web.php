@@ -410,6 +410,7 @@ Route::post('/admin/impersonation-exit',
 
         Route::resource('guidances', GuidanceController::class);
         Route::resource('audit-questions', \App\Http\Controllers\AuditQuestionController::class);
+        Route::resource('audit-option-groups', \App\Http\Controllers\AuditOptionGroupController::class);
         Route::resource('school-audits', \App\Http\Controllers\SchoolAuditController::class);
 
         // End super admin routes
