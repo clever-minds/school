@@ -167,6 +167,8 @@ class TeacherInterviewController extends Controller
         }
 
         return redirect()->back()->with('success', 'Interview feedback saved successfully.');
+    }
+
     public function downloadPdf($id)
     {
         $application = TeacherInterviewApplication::findOrFail($id);
