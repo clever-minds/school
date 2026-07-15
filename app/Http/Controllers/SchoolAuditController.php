@@ -199,6 +199,8 @@ class SchoolAuditController extends Controller
         } catch (Throwable $e) {
             return ResponseService::logErrorResponse($e, 'SchoolAuditController -> destroy');
         }
+    }
+
     public function downloadPdf($id)
     {
         ResponseService::noPermissionThenRedirect('school-audit-list');
