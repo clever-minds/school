@@ -157,15 +157,15 @@
                         @if($question->type == 'rating' && $question->optionGroup)
                             @foreach($question->optionGroup->option_values as $opt)
                                 <span class="checkbox-item">
-                                    <span class="box">{{ $currentAnswer == $opt['label'] ? 'X' : '&nbsp;' }}</span> {{ $opt['label'] }}
+                                    <span class="box">{!! $currentAnswer == $opt['label'] ? 'X' : '&nbsp;' !!}</span> {{ $opt['label'] }}
                                 </span>
                             @endforeach
                         @elseif($question->type == 'boolean')
                             <span class="checkbox-item">
-                                <span class="box">{{ $currentAnswer == 'Yes' ? 'X' : '&nbsp;' }}</span> Yes
+                                <span class="box">{!! $currentAnswer == 'Yes' ? 'X' : '&nbsp;' !!}</span> Yes
                             </span>
                             <span class="checkbox-item">
-                                <span class="box">{{ $currentAnswer == 'No' ? 'X' : '&nbsp;' }}</span> No
+                                <span class="box">{!! $currentAnswer == 'No' ? 'X' : '&nbsp;' !!}</span> No
                             </span>
                         @else
                             {{ $currentAnswer }}

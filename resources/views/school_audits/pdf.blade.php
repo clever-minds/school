@@ -155,13 +155,13 @@
                         <td>{{ $answer->question ? $answer->question->question : '-' }}</td>
                         <td>
                             <span class="checkbox-item">
-                                <span class="box">{{ $answer->answer == 'Yes' ? 'X' : '&nbsp;' }}</span> Yes
+                                <span class="box">{!! $answer->answer == 'Yes' ? 'X' : '&nbsp;' !!}</span> Yes
                             </span>
                             <span class="checkbox-item">
-                                <span class="box">{{ $answer->answer == 'No' ? 'X' : '&nbsp;' }}</span> No
+                                <span class="box">{!! $answer->answer == 'No' ? 'X' : '&nbsp;' !!}</span> No
                             </span>
                             <span class="checkbox-item">
-                                <span class="box">{{ $answer->answer == 'N/A' ? 'X' : '&nbsp;' }}</span> N/A
+                                <span class="box">{!! $answer->answer == 'N/A' ? 'X' : '&nbsp;' !!}</span> N/A
                             </span>
                         </td>
                         <td>{{ $answer->remarks ?? '' }}</td>
