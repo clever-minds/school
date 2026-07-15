@@ -7,8 +7,9 @@ use Illuminate\Http\Request;
 
 class ManualUpiTransactionController extends Controller
 {
-    public function index(Request $request)
+    public function index()
     {
+        $request = request();
         if (!auth()->user()->can('manual-upi-transaction-list')) {
             abort(403, 'Unauthorized action.');
         }
