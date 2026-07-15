@@ -89,6 +89,12 @@
             line-height: 10px;
             font-size: 10px;
             font-weight: bold;
+            font-family: 'DejaVu Sans', sans-serif;
+        }
+        .box-selected {
+            background-color: #0000FF;
+            color: #FFFFFF;
+            border-color: #0000FF;
         }
     </style>
 </head>
@@ -122,8 +128,12 @@
         <tr>
             <td>Email</td>
             <td class="underline">{{ $application->email }}</td>
+            <td>Interviewer</td>
+            <td class="underline">{{ $interview->interviewer ? $interview->interviewer->first_name . ' ' . $interview->interviewer->last_name : '-' }}</td>
+        </tr>
+        <tr>
             <td>Date of Visit</td>
-            <td class="underline">{{ date('d M, Y') }}</td>
+            <td colspan="3" class="underline">{{ date('d M, Y') }}</td>
         </tr>
     </table>
 
@@ -156,16 +166,18 @@
                     <td>
                         @if($question->type == 'rating' && $question->optionGroup)
                             @foreach($question->optionGroup->option_values as $opt)
+                                @php $isSelected = ($currentAnswer == $opt['label']); @endphp
                                 <span class="checkbox-item">
-                                    <span class="box">{!! $currentAnswer == $opt['label'] ? 'X' : '&nbsp;' !!}</span> {{ $opt['label'] }}
+                                    <span class="box {{ $isSelected ? 'box-selected' : '' }}">{!! $isSelected ? '&#10003;' : '&nbsp;' !!}</span> {{ $opt['label'] }}
                                 </span>
                             @endforeach
                         @elseif($question->type == 'boolean')
+                            @php $isYes = ($currentAnswer == 'Yes'); $isNo = ($currentAnswer == 'No'); @endphp
                             <span class="checkbox-item">
-                                <span class="box">{!! $currentAnswer == 'Yes' ? 'X' : '&nbsp;' !!}</span> Yes
+                                <span class="box {{ $isYes ? 'box-selected' : '' }}">{!! $isYes ? '&#10003;' : '&nbsp;' !!}</span> Yes
                             </span>
                             <span class="checkbox-item">
-                                <span class="box">{!! $currentAnswer == 'No' ? 'X' : '&nbsp;' !!}</span> No
+                                <span class="box {{ $isNo ? 'box-selected' : '' }}">{!! $isNo ? '&#10003;' : '&nbsp;' !!}</span> No
                             </span>
                         @else
                             {{ $currentAnswer }}
