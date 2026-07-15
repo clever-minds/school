@@ -80,15 +80,15 @@
         }
         .box {
             display: inline-block;
-            width: 14px;
-            height: 14px;
+            width: 16px;
+            height: 16px;
             border: 2px solid #a8a8a8;
             border-radius: 3px;
             margin-right: 5px;
             vertical-align: middle;
             text-align: center;
-            line-height: 14px;
-            font-size: 11px;
+            line-height: 16px;
+            font-size: 14px;
             font-weight: bold;
             font-family: 'DejaVu Sans', sans-serif;
         }
