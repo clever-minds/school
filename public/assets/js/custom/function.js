@@ -1255,4 +1255,63 @@ function generateRandomColors(count) {
       }
     }
     return colors;
-  } 
+}
+
+function teacher_interview_graph(labels, data) {
+    if (labels.length === 0) return;
+    var parsedData = data.map(function(item) { return parseInt(item, 10); });
+    var options = {
+        series: parsedData,
+        labels: labels,
+        chart: {
+            type: 'donut',
+            height: 350
+        },
+        dataLabels: {
+            enabled: true
+        },
+        plotOptions: {
+            pie: {
+                donut: {
+                    size: '65%'
+                }
+            }
+        },
+        legend: {
+            position: 'bottom'
+        }
+    };
+    $('#teacherInterviewChart').html('');
+    var chart = new ApexCharts(document.querySelector("#teacherInterviewChart"), options);
+    chart.render();
+}
+
+function school_audit_graph(labels, data) {
+    if (labels.length === 0) return;
+    var parsedData = data.map(function(item) { return parseInt(item, 10); });
+    var options = {
+        series: parsedData,
+        labels: labels,
+        chart: {
+            type: 'donut',
+            height: 350
+        },
+        dataLabels: {
+            enabled: true
+        },
+        plotOptions: {
+            pie: {
+                donut: {
+                    size: '65%'
+                }
+            }
+        },
+        legend: {
+            position: 'bottom'
+        },
+        colors: ['#00E396', '#FEB019', '#FF4560', '#008FFB', '#775DD0']
+    };
+    $('#schoolAuditChart').html('');
+    var chart = new ApexCharts(document.querySelector("#schoolAuditChart"), options);
+    chart.render();
+} 

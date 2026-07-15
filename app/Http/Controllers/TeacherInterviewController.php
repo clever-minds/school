@@ -167,5 +167,29 @@ class TeacherInterviewController extends Controller
         }
 
         return redirect()->back()->with('success', 'Interview feedback saved successfully.');
+    public function downloadPdf($id)
+    {
+        $application = TeacherInterviewApplication::findOrFail($id);
+        $isAssigned = TeacherInterview::where('application_id', $id)->where('interviewer_id', Auth::id())->exists();
+
+        if (!Auth::user()->can('teacher-interview-list') && !($isAssigned && Auth::user()->can('assigned-teacher-interview'))) {
+            abort(403);
+        }
+
+        if (Auth::user()->school_id && $application->school_id != Auth::user()->school_id) {
+            abort(403);
+        }
+
+        $interview = TeacherInterview::where('application_id', $id)->first();
+        if (!$interview) {
+            abort(404, 'Interview not found');
+        }
+
+        $feedbackQuestions = TeacherInterviewFeedbackQuestion::with('optionGroup')->where('status', 'active')->get();
+        $feedbacks = TeacherInterviewFeedback::where('interview_id', $interview->id)->get()->keyBy('question_id');
+
+        $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView('teacher-interviews.pdf', compact('application', 'interview', 'feedbackQuestions', 'feedbacks'));
+        
+        return $pdf->download('interview_feedback_' . str_replace(' ', '_', strtolower($application->name)) . '.pdf');
     }
 }

@@ -146,6 +146,10 @@ class SchoolAuditController extends Controller
 
         $audit = SchoolAudit::with(['school', 'auditor', 'answers.question'])->findOrFail($id);
 
+        if ($audit->status == 1) {
+            return redirect()->route('school-audits.show', $id)->with('error', __('Audit is already completed and cannot be modified.'));
+        }
+
         return view('school_audits.edit', compact('audit'));
     }
 
@@ -195,5 +199,15 @@ class SchoolAuditController extends Controller
         } catch (Throwable $e) {
             return ResponseService::logErrorResponse($e, 'SchoolAuditController -> destroy');
         }
+    public function downloadPdf($id)
+    {
+        ResponseService::noPermissionThenRedirect('school-audit-list');
+
+        $audit = SchoolAudit::with(['school', 'auditor', 'answers.question'])->findOrFail($id);
+
+        $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView('school_audits.pdf', compact('audit'));
+        
+        $fileName = 'school_audit_' . ($audit->school ? str_replace(' ', '_', strtolower($audit->school->name)) : 'report') . '.pdf';
+        return $pdf->download($fileName);
     }
 }

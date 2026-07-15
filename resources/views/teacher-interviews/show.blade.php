@@ -76,10 +76,18 @@
             <div class="col-md-12 grid-margin stretch-card">
                 <div class="card">
                     <div class="card-body">
-                        <h4 class="card-title">{{ __('Interview Performance Feedback') }}</h4>
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <h4 class="card-title mb-0">{{ __('Interview Performance Feedback') }}</h4>
+                            @if(count($feedbacks) > 0)
+                                <a href="{{ route('teacher-interviews.download-pdf', $application->id) }}" class="btn btn-success btn-sm"><i class="fa fa-download"></i> {{ __('Download PDF') }}</a>
+                            @endif
+                        </div>
                         
                         <form action="{{ route('teacher-interviews.save-feedback', $application->id) }}" method="POST">
                             @csrf
+                            @php
+                                $isFeedbackSubmitted = count($feedbacks) > 0;
+                            @endphp
                             <div class="table-responsive">
                                 <table class="table">
                                     <thead>
@@ -104,7 +112,7 @@
                                                             @foreach($question->optionGroup->option_values as $opt)
                                                                 <div class="form-check form-check-inline mt-0 mb-2 mr-3">
                                                                     <label class="form-check-label" for="q_{{ $question->id }}_{{ $loop->index }}">
-                                                                        <input class="form-check-input" type="radio" name="feedbacks[{{ $question->id }}]" id="q_{{ $question->id }}_{{ $loop->index }}" value="{{ $opt['label'] }}" {{ $currentAnswer == $opt['label'] ? 'checked' : '' }}>
+                                                                        <input class="form-check-input" type="radio" name="feedbacks[{{ $question->id }}]" id="q_{{ $question->id }}_{{ $loop->index }}" value="{{ $opt['label'] }}" {{ $currentAnswer == $opt['label'] ? 'checked' : '' }} {{ $isFeedbackSubmitted ? 'disabled' : '' }}>
                                                                         {{ $opt['label'] }}
                                                                     </label>
                                                                 </div>
@@ -114,19 +122,19 @@
                                                         <div class="d-flex align-items-center flex-wrap">
                                                             <div class="form-check form-check-inline mt-0 mb-2 mr-3">
                                                                 <label class="form-check-label" for="q_{{ $question->id }}_yes">
-                                                                    <input class="form-check-input" type="radio" name="feedbacks[{{ $question->id }}]" id="q_{{ $question->id }}_yes" value="Yes" {{ $currentAnswer == 'Yes' ? 'checked' : '' }}>
+                                                                    <input class="form-check-input" type="radio" name="feedbacks[{{ $question->id }}]" id="q_{{ $question->id }}_yes" value="Yes" {{ $currentAnswer == 'Yes' ? 'checked' : '' }} {{ $isFeedbackSubmitted ? 'disabled' : '' }}>
                                                                     {{ __('Yes') }}
                                                                 </label>
                                                             </div>
                                                             <div class="form-check form-check-inline mt-0 mb-2 mr-3">
                                                                 <label class="form-check-label" for="q_{{ $question->id }}_no">
-                                                                    <input class="form-check-input" type="radio" name="feedbacks[{{ $question->id }}]" id="q_{{ $question->id }}_no" value="No" {{ $currentAnswer == 'No' ? 'checked' : '' }}>
+                                                                    <input class="form-check-input" type="radio" name="feedbacks[{{ $question->id }}]" id="q_{{ $question->id }}_no" value="No" {{ $currentAnswer == 'No' ? 'checked' : '' }} {{ $isFeedbackSubmitted ? 'disabled' : '' }}>
                                                                     {{ __('No') }}
                                                                 </label>
                                                             </div>
                                                         </div>
                                                     @else
-                                                        <textarea name="feedbacks[{{ $question->id }}]" class="form-control" rows="2" placeholder="{{ __('Enter your feedback here...') }}">{{ $currentAnswer }}</textarea>
+                                                        <textarea name="feedbacks[{{ $question->id }}]" class="form-control" rows="2" placeholder="{{ __('Enter your feedback here...') }}" {{ $isFeedbackSubmitted ? 'readonly' : '' }}>{{ $currentAnswer }}</textarea>
                                                     @endif
                                                 </td>
                                             </tr>
@@ -135,7 +143,9 @@
                                 </table>
                             </div>
                             <div class="mt-3">
-                                <button type="submit" class="btn btn-primary theme-btn">{{ __('Save Feedback') }}</button>
+                                @if(!$isFeedbackSubmitted)
+                                    <button type="submit" class="btn btn-primary theme-btn">{{ __('Save Feedback') }}</button>
+                                @endif
                             </div>
                         </form>
                     </div>

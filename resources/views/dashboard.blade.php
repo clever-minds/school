@@ -768,6 +768,29 @@
     </div>
 
     <div class="row">
+        <div class="col-md-6 grid-margin stretch-card">
+            <div class="card">
+                <div class="card-body custom-card-body">
+                    <h4 class="card-title">
+                        {{ __('Teacher Interviews') }}
+                    </h4>
+                    <div id="teacherInterviewChart"> </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6 grid-margin stretch-card">
+            <div class="card">
+                <div class="card-body custom-card-body">
+                    <h4 class="card-title">
+                        {{ __('School Audits') }}
+                    </h4>
+                    <div id="schoolAuditChart"> </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
         <div class="col-md-12 grid-margin stretch-card">
             <div class="card">
                 <div class="card-body custom-card-body">
@@ -799,6 +822,8 @@
 
         addon_graph(<?php echo json_encode($addon_graph[0]); ?>, <?php echo json_encode($addon_graph[1]); ?>);
         package_graph(<?php echo json_encode($package_graph[0]); ?>, <?php echo json_encode($package_graph[1]); ?>);
+        teacher_interview_graph(<?php echo json_encode($teacher_interview_graph[0]); ?>, <?php echo json_encode($teacher_interview_graph[1]); ?>);
+        school_audit_graph(<?php echo json_encode($school_audit_graph[0]); ?>, <?php echo json_encode($school_audit_graph[1]); ?>);
     }, 500);
 </script>
 @endif

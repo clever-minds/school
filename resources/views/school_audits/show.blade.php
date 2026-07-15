@@ -10,7 +10,12 @@
             <h3 class="page-title">
                 {{ __('View School Audit') }}
             </h3>
-            <a href="{{ route('school-audits.index') }}" class="btn btn-theme btn-sm">{{ __('Back') }}</a>
+            <div>
+                @if($audit->status == 1)
+                    <a href="{{ route('school-audits.download-pdf', $audit->id) }}" class="btn btn-success btn-sm mr-2"><i class="fa fa-download"></i> {{ __('Download PDF') }}</a>
+                @endif
+                <a href="{{ route('school-audits.index') }}" class="btn btn-theme btn-sm">{{ __('Back') }}</a>
+            </div>
         </div>
 
         <div class="row">

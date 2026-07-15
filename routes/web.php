@@ -148,6 +148,7 @@ Route::group(['middleware' => ['auth']], function () {
     Route::post('teacher-interviews/{id}/assign', [\App\Http\Controllers\TeacherInterviewController::class, 'assignInterviewer'])->name('teacher-interviews.assign');
     Route::post('teacher-interviews/{id}/status', [\App\Http\Controllers\TeacherInterviewController::class, 'updateStatus'])->name('teacher-interviews.update-status');
     Route::post('teacher-interviews/{id}/feedback', [\App\Http\Controllers\TeacherInterviewController::class, 'saveFeedback'])->name('teacher-interviews.save-feedback');
+    Route::get('teacher-interviews/{id}/pdf', [\App\Http\Controllers\TeacherInterviewController::class, 'downloadPdf'])->name('teacher-interviews.download-pdf');
 
     // Teacher Interview Feedback Questions
     Route::resource('teacher-interview-feedback-questions', \App\Http\Controllers\TeacherInterviewFeedbackQuestionController::class)->parameters(['teacher-interview-feedback-questions' => 'question'])->except(['create', 'show', 'edit']);
@@ -414,6 +415,7 @@ Route::post('/admin/impersonation-exit',
         Route::resource('audit-questions', \App\Http\Controllers\AuditQuestionController::class);
         Route::resource('audit-option-groups', \App\Http\Controllers\AuditOptionGroupController::class);
         Route::resource('school-audits', \App\Http\Controllers\SchoolAuditController::class);
+        Route::get('school-audits/{id}/pdf', [\App\Http\Controllers\SchoolAuditController::class, 'downloadPdf'])->name('school-audits.download-pdf');
 
         // End super admin routes
         // =================================================================

@@ -279,6 +279,32 @@ class DashboardController extends Controller
                 $package_data
             ];
 
+            // Teacher Interview graph
+            $interviews = \App\Models\TeacherInterviewApplication::select('status', DB::raw('count(*) as count'))->groupBy('status')->get();
+            $ti_labels = [];
+            $ti_data = [];
+            foreach ($interviews as $row) {
+                $ti_labels[] = $row->status;
+                $ti_data[] = $row->count;
+            }
+            $teacher_interview_graph = [
+                $ti_labels,
+                $ti_data
+            ];
+
+            // School Audit graph
+            $audits = \App\Models\SchoolAudit::select('status', DB::raw('count(*) as count'))->groupBy('status')->get();
+            $sa_labels = [];
+            $sa_data = [];
+            foreach ($audits as $row) {
+                $sa_labels[] = $row->status == 1 ? 'Completed' : 'Pending';
+                $sa_data[] = $row->count;
+            }
+            $school_audit_graph = [
+                $sa_labels,
+                $sa_data
+            ];
+
             DB::setDefaultConnection($original_connection);
         }
 
@@ -302,7 +328,7 @@ class DashboardController extends Controller
         }
 
         if (Auth::user()->hasRole('Super Admin') || Auth::user()->school_id == null) {
-            return view('dashboard', compact('settings', 'super_admin', 'boys', 'girls', 'fees_detail', 'start_year', 'schools', 'staffs', 'addon_graph', 'package_graph', 'paymentConfiguration'));
+            return view('dashboard', compact('settings', 'super_admin', 'boys', 'girls', 'fees_detail', 'start_year', 'schools', 'staffs', 'addon_graph', 'package_graph', 'paymentConfiguration', 'teacher_interview_graph', 'school_audit_graph'));
         }
 
     }

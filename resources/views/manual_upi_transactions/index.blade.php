@@ -16,6 +16,24 @@
             <div class="col-lg-12 grid-margin stretch-card">
                 <div class="card">
                     <div class="card-body">
+                        <form action="{{ route('manual_upi_transactions.index') }}" method="GET" class="mb-4">
+                            <div class="row align-items-end">
+                                <div class="col-md-3">
+                                    <label>{{ __('Date') }}</label>
+                                    <input type="date" name="date" class="form-control" value="{{ request('date') }}">
+                                </div>
+                                <div class="col-md-3">
+                                    <label>{{ __('Student Name') }}</label>
+                                    <input type="text" name="name" class="form-control" placeholder="{{ __('Search by Name') }}" value="{{ request('name') }}">
+                                </div>
+                                <div class="col-md-6 mt-3 mt-md-0">
+                                    <button type="submit" class="btn btn-theme mr-2">{{ __('Filter') }}</button>
+                                    <a href="{{ route('manual_upi_transactions.index') }}" class="btn btn-secondary mr-2">{{ __('Clear') }}</a>
+                                    <button type="submit" name="export" value="pdf" class="btn btn-danger mr-2"><i class="fa fa-file-pdf-o"></i> {{ __('PDF') }}</button>
+                                    <button type="submit" name="export" value="csv" class="btn btn-success"><i class="fa fa-file-excel-o"></i> {{ __('CSV') }}</button>
+                                </div>
+                            </div>
+                        </form>
                         <h4 class="card-title">{{ __('Transaction List') }}</h4>
                         <div class="table-responsive">
                             <table class="table table-striped">
