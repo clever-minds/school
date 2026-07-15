@@ -100,26 +100,30 @@
                                                     @endphp
                                                     
                                                     @if($question->type == 'rating' && $question->optionGroup)
-                                                        @foreach($question->optionGroup->option_values as $opt)
-                                                            <div class="form-check form-check-inline mt-0 mb-2">
-                                                                <label class="form-check-label" for="q_{{ $question->id }}_{{ $loop->index }}">
-                                                                    <input class="form-check-input" type="radio" name="feedbacks[{{ $question->id }}]" id="q_{{ $question->id }}_{{ $loop->index }}" value="{{ $opt['label'] }}" {{ $currentAnswer == $opt['label'] ? 'checked' : '' }}>
-                                                                    {{ $opt['label'] }}
+                                                        <div class="d-flex align-items-center flex-wrap">
+                                                            @foreach($question->optionGroup->option_values as $opt)
+                                                                <div class="form-check form-check-inline mt-0 mb-2 mr-3">
+                                                                    <label class="form-check-label" for="q_{{ $question->id }}_{{ $loop->index }}">
+                                                                        <input class="form-check-input" type="radio" name="feedbacks[{{ $question->id }}]" id="q_{{ $question->id }}_{{ $loop->index }}" value="{{ $opt['label'] }}" {{ $currentAnswer == $opt['label'] ? 'checked' : '' }}>
+                                                                        {{ $opt['label'] }}
+                                                                    </label>
+                                                                </div>
+                                                            @endforeach
+                                                        </div>
+                                                    @elseif($question->type == 'boolean')
+                                                        <div class="d-flex align-items-center flex-wrap">
+                                                            <div class="form-check form-check-inline mt-0 mb-2 mr-3">
+                                                                <label class="form-check-label" for="q_{{ $question->id }}_yes">
+                                                                    <input class="form-check-input" type="radio" name="feedbacks[{{ $question->id }}]" id="q_{{ $question->id }}_yes" value="Yes" {{ $currentAnswer == 'Yes' ? 'checked' : '' }}>
+                                                                    {{ __('Yes') }}
                                                                 </label>
                                                             </div>
-                                                        @endforeach
-                                                    @elseif($question->type == 'boolean')
-                                                        <div class="form-check form-check-inline mt-0 mb-2">
-                                                            <label class="form-check-label" for="q_{{ $question->id }}_yes">
-                                                                <input class="form-check-input" type="radio" name="feedbacks[{{ $question->id }}]" id="q_{{ $question->id }}_yes" value="Yes" {{ $currentAnswer == 'Yes' ? 'checked' : '' }}>
-                                                                {{ __('Yes') }}
-                                                            </label>
-                                                        </div>
-                                                        <div class="form-check form-check-inline mt-0 mb-2">
-                                                            <label class="form-check-label" for="q_{{ $question->id }}_no">
-                                                                <input class="form-check-input" type="radio" name="feedbacks[{{ $question->id }}]" id="q_{{ $question->id }}_no" value="No" {{ $currentAnswer == 'No' ? 'checked' : '' }}>
-                                                                {{ __('No') }}
-                                                            </label>
+                                                            <div class="form-check form-check-inline mt-0 mb-2 mr-3">
+                                                                <label class="form-check-label" for="q_{{ $question->id }}_no">
+                                                                    <input class="form-check-input" type="radio" name="feedbacks[{{ $question->id }}]" id="q_{{ $question->id }}_no" value="No" {{ $currentAnswer == 'No' ? 'checked' : '' }}>
+                                                                    {{ __('No') }}
+                                                                </label>
+                                                            </div>
                                                         </div>
                                                     @else
                                                         <textarea name="feedbacks[{{ $question->id }}]" class="form-control" rows="2" placeholder="{{ __('Enter your feedback here...') }}">{{ $currentAnswer }}</textarea>
