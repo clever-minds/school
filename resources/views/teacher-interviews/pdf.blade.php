@@ -88,10 +88,9 @@
             vertical-align: middle;
             text-align: center;
             line-height: 14px;
-            font-size: 12px;
+            font-size: 11px;
             font-weight: bold;
             font-family: 'DejaVu Sans', sans-serif;
-            color: transparent;
         }
         .box-selected {
             background-color: #007bff;
@@ -170,16 +169,16 @@
                             @foreach($question->optionGroup->option_values as $opt)
                                 @php $isSelected = ($currentAnswer == $opt['label']); @endphp
                                 <span class="checkbox-item">
-                                    <span class="box {{ $isSelected ? 'box-selected' : '' }}">{!! $isSelected ? '&#10003;' : '&nbsp;' !!}</span> {{ $opt['label'] }}
+                                    <span class="box {{ $isSelected ? 'box-selected' : '' }}">{!! $isSelected ? '&#10004;' : '' !!}</span> {{ $opt['label'] }}
                                 </span>
                             @endforeach
                         @elseif($question->type == 'boolean')
                             @php $isYes = ($currentAnswer == 'Yes'); $isNo = ($currentAnswer == 'No'); @endphp
                             <span class="checkbox-item">
-                                <span class="box {{ $isYes ? 'box-selected' : '' }}">{!! $isYes ? '&#10003;' : '&nbsp;' !!}</span> Yes
+                                <span class="box {{ $isYes ? 'box-selected' : '' }}">{!! $isYes ? '&#10004;' : '' !!}</span> Yes
                             </span>
                             <span class="checkbox-item">
-                                <span class="box {{ $isNo ? 'box-selected' : '' }}">{!! $isNo ? '&#10003;' : '&nbsp;' !!}</span> No
+                                <span class="box {{ $isNo ? 'box-selected' : '' }}">{!! $isNo ? '&#10004;' : '' !!}</span> No
                             </span>
                         @else
                             {{ $currentAnswer }}

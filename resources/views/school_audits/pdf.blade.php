@@ -88,10 +88,9 @@
             vertical-align: middle;
             text-align: center;
             line-height: 14px;
-            font-size: 12px;
+            font-size: 11px;
             font-weight: bold;
             font-family: 'DejaVu Sans', sans-serif;
-            color: transparent;
         }
         .box-selected {
             background-color: #007bff;
@@ -168,13 +167,13 @@
                                 $isNA = ($answer->answer == 'N/A'); 
                             @endphp
                             <span class="checkbox-item">
-                                <span class="box {{ $isYes ? 'box-selected' : '' }}">{!! $isYes ? '&#10003;' : '&nbsp;' !!}</span> Yes
+                                <span class="box {{ $isYes ? 'box-selected' : '' }}">{!! $isYes ? '&#10004;' : '' !!}</span> Yes
                             </span>
                             <span class="checkbox-item">
-                                <span class="box {{ $isNo ? 'box-selected' : '' }}">{!! $isNo ? '&#10003;' : '&nbsp;' !!}</span> No
+                                <span class="box {{ $isNo ? 'box-selected' : '' }}">{!! $isNo ? '&#10004;' : '' !!}</span> No
                             </span>
                             <span class="checkbox-item">
-                                <span class="box {{ $isNA ? 'box-selected' : '' }}">{!! $isNA ? '&#10003;' : '&nbsp;' !!}</span> N/A
+                                <span class="box {{ $isNA ? 'box-selected' : '' }}">{!! $isNA ? '&#10004;' : '' !!}</span> N/A
                             </span>
                         </td>
                         <td>{{ $answer->remarks ?? '' }}</td>
