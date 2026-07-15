@@ -80,21 +80,23 @@
         }
         .box {
             display: inline-block;
-            width: 10px;
-            height: 10px;
-            border: 1px solid #000;
+            width: 14px;
+            height: 14px;
+            border: 2px solid #a8a8a8;
+            border-radius: 3px;
             margin-right: 5px;
             vertical-align: middle;
             text-align: center;
-            line-height: 10px;
-            font-size: 10px;
+            line-height: 14px;
+            font-size: 12px;
             font-weight: bold;
             font-family: 'DejaVu Sans', sans-serif;
+            color: transparent;
         }
         .box-selected {
-            background-color: #0000FF;
-            color: #FFFFFF;
-            border-color: #0000FF;
+            background-color: #007bff;
+            border-color: #007bff;
+            color: #ffffff;
         }
     </style>
 </head>
