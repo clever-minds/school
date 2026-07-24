@@ -3,6 +3,7 @@
 use App\Http\Controllers\Api\ApiController;
 use App\Http\Controllers\Api\ParentApiController;
 use App\Http\Controllers\Api\StaffApiController;
+use App\Http\Controllers\Api\StaffManageApiController;
 use App\Http\Controllers\Api\StudentApiController;
 use App\Http\Controllers\Api\TeacherApiController;
 use App\Http\Controllers\Api\StudentPickupController;
@@ -326,6 +327,70 @@ Route::get('/schools', [StaffApiController::class, 'getAllSchools']);
         Route::post('attendance', [StaffApiController::class, 'markAttendance']);
         Route::get('attendance-history', [StaffApiController::class, 'attendanceHistory']);
         Route::get('attendance-report', [StaffApiController::class, 'attendanceReport']);
+
+        // Staff Management APIs
+        Route::get('student-list', [StaffManageApiController::class, 'studentList']);
+        Route::get('student-show/{id}', [StaffManageApiController::class, 'studentShow']);
+        Route::delete('student-destroy/{id}', [StaffManageApiController::class, 'destroy']);
+        Route::post('student-store', [StaffManageApiController::class, 'studentStore']);
+        Route::post('student-update/{id}', [StaffManageApiController::class, 'studentUpdate']);
+        Route::post('student-change-status/{id}', [StaffManageApiController::class, 'changeStudentStatus']);
+        Route::get('admission-inquiries', [StaffManageApiController::class, 'admissionInquiries']);
+        Route::post('admission-inquiry-status/{id}', [StaffManageApiController::class, 'updateApplicationStatus']);
+        Route::post('update-uni', [StaffManageApiController::class, 'updateUniNo']);
+        Route::post('update-profile', [StaffManageApiController::class, 'updateProfile']);
+        Route::get('student-search', [StaffManageApiController::class, 'searchStudent']);
+        
+        Route::get('guardian-list', [StaffManageApiController::class, 'guardianList']);
+        Route::post('guardian-store', [StaffManageApiController::class, 'guardianStore']);
+        Route::post('guardian-update/{id}', [StaffManageApiController::class, 'guardianUpdate']);
+        Route::delete('guardian-destroy/{id}', [StaffManageApiController::class, 'guardianDestroy']);
+
+        // Academics APIs
+        Route::get('medium-list', [\App\Http\Controllers\Api\StaffAcademicsApiController::class, 'mediumList']);
+        Route::post('medium-store', [\App\Http\Controllers\Api\StaffAcademicsApiController::class, 'mediumStore']);
+        Route::post('medium-update/{id}', [\App\Http\Controllers\Api\StaffAcademicsApiController::class, 'mediumUpdate']);
+        Route::delete('medium-destroy/{id}', [\App\Http\Controllers\Api\StaffAcademicsApiController::class, 'mediumDestroy']);
+
+        Route::get('section-list', [\App\Http\Controllers\Api\StaffAcademicsApiController::class, 'sectionList']);
+        Route::post('section-store', [\App\Http\Controllers\Api\StaffAcademicsApiController::class, 'sectionStore']);
+        Route::post('section-update/{id}', [\App\Http\Controllers\Api\StaffAcademicsApiController::class, 'sectionUpdate']);
+        Route::delete('section-destroy/{id}', [\App\Http\Controllers\Api\StaffAcademicsApiController::class, 'sectionDestroy']);
+
+        Route::get('subject-list', [\App\Http\Controllers\Api\StaffAcademicsApiController::class, 'subjectList']);
+        Route::post('subject-store', [\App\Http\Controllers\Api\StaffAcademicsApiController::class, 'subjectStore']);
+        Route::post('subject-update/{id}', [\App\Http\Controllers\Api\StaffAcademicsApiController::class, 'subjectUpdate']);
+        Route::delete('subject-destroy/{id}', [\App\Http\Controllers\Api\StaffAcademicsApiController::class, 'subjectDestroy']);
+
+        Route::get('semester-list', [\App\Http\Controllers\Api\StaffAcademicsApiController::class, 'semesterList']);
+        Route::post('semester-store', [\App\Http\Controllers\Api\StaffAcademicsApiController::class, 'semesterStore']);
+        Route::post('semester-update/{id}', [\App\Http\Controllers\Api\StaffAcademicsApiController::class, 'semesterUpdate']);
+        Route::delete('semester-destroy/{id}', [\App\Http\Controllers\Api\StaffAcademicsApiController::class, 'semesterDestroy']);
+
+        Route::get('stream-list', [\App\Http\Controllers\Api\StaffAcademicsApiController::class, 'streamList']);
+        Route::post('stream-store', [\App\Http\Controllers\Api\StaffAcademicsApiController::class, 'streamStore']);
+        Route::post('stream-update/{id}', [\App\Http\Controllers\Api\StaffAcademicsApiController::class, 'streamUpdate']);
+        Route::delete('stream-destroy/{id}', [\App\Http\Controllers\Api\StaffAcademicsApiController::class, 'streamDestroy']);
+
+        Route::get('shift-list', [\App\Http\Controllers\Api\StaffAcademicsApiController::class, 'shiftList']);
+        Route::post('shift-store', [\App\Http\Controllers\Api\StaffAcademicsApiController::class, 'shiftStore']);
+        Route::post('shift-update/{id}', [\App\Http\Controllers\Api\StaffAcademicsApiController::class, 'shiftUpdate']);
+        Route::delete('shift-destroy/{id}', [\App\Http\Controllers\Api\StaffAcademicsApiController::class, 'shiftDestroy']);
+
+        Route::get('class-list', [\App\Http\Controllers\Api\StaffAcademicsApiController::class, 'classList']);
+        Route::post('class-store', [\App\Http\Controllers\Api\StaffAcademicsApiController::class, 'classStore']);
+        Route::post('class-update/{id}', [\App\Http\Controllers\Api\StaffAcademicsApiController::class, 'classUpdate']);
+        Route::delete('class-destroy/{id}', [\App\Http\Controllers\Api\StaffAcademicsApiController::class, 'classDestroy']);
+
+        Route::get('class-section-list', [\App\Http\Controllers\Api\StaffAcademicsApiController::class, 'classSectionList']);
+        Route::post('class-section-store', [\App\Http\Controllers\Api\StaffAcademicsApiController::class, 'classSectionStore']);
+        Route::post('class-section-update/{id}', [\App\Http\Controllers\Api\StaffAcademicsApiController::class, 'classSectionUpdate']);
+        Route::delete('class-section-destroy/{id}', [\App\Http\Controllers\Api\StaffAcademicsApiController::class, 'classSectionDestroy']);
+
+        Route::post('class-teacher-assign', [\App\Http\Controllers\Api\StaffAcademicsApiController::class, 'classTeacherAssign']);
+        Route::delete('class-teacher-remove/{id}', [\App\Http\Controllers\Api\StaffAcademicsApiController::class, 'classTeacherRemove']);
+        
+        Route::post('reset-password', [StaffManageApiController::class, 'resetPassword']);
 
         // Student Pickup Verification
         Route::post('verify-student-pickup-otp', [StudentPickupController::class, 'verifyPickupOTP']);
