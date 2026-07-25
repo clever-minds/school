@@ -510,6 +510,7 @@ class CertificateTemplateController extends Controller
 
         $placeholders = [
             '{dob_in_words}'=>$dob_in_words,
+            '{dob_words}'=>$dob_in_words,
             '{full_name}' => $user->full_name,
             '{first_name}' => $user->first_name,
             '{last_name}' => $user->last_name,
@@ -525,6 +526,9 @@ class CertificateTemplateController extends Controller
             '{nationality}' => $user->student->nationality,
              '{dise_code}' => $settings['dise_code'] ?? '',
              "{promotion_class_figure}"=>"",
+             "{promotion_class_words}"=>"",
+             '{certificate_no}' => '',
+             '{from}' => $firstAttendance ? date($settings['date_format'], strtotime($firstAttendance->date)) : '',
              '{reason_for_leaving}'=> "",
             '{birth_place}' => $user->student->birth_place,
             '{remark}' => $user->student->remarks,
