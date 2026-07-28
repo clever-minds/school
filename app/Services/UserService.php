@@ -68,8 +68,8 @@ class UserService {
 
         $user = null;
         if (!empty($guardian_id)) {
-            $user = $this->user->guardian()->where(function($query) use ($guardian_id) {
-                $query->where('id', $guardian_id)->orWhere('mobile', $guardian_id);
+            $user = $this->user->guardian()->where(function ($q) use ($guardian_id) {
+                $q->where('id', $guardian_id)->orWhere('mobile', $guardian_id);
             })->first();
         } 
         

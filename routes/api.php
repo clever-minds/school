@@ -6,6 +6,8 @@ use App\Http\Controllers\Api\StaffApiController;
 use App\Http\Controllers\Api\StaffManageApiController;
 use App\Http\Controllers\Api\StudentApiController;
 use App\Http\Controllers\Api\TeacherApiController;
+use App\Http\Controllers\Api\StaffSliderApiController;
+use App\Http\Controllers\Api\StaffTeacherApiController;
 use App\Http\Controllers\Api\StudentPickupController;
 use App\Http\Controllers\SubscriptionWebhookController;
 use Illuminate\Support\Facades\Route;
@@ -345,8 +347,20 @@ Route::get('/schools', [StaffApiController::class, 'getAllSchools']);
         Route::post('guardian-store', [StaffManageApiController::class, 'guardianStore']);
         Route::post('guardian-update/{id}', [StaffManageApiController::class, 'guardianUpdate']);
         Route::delete('guardian-destroy/{id}', [StaffManageApiController::class, 'guardianDestroy']);
+        // Slider Management APIs
+        Route::get('slider-list', [StaffSliderApiController::class, 'sliderList']);
+        Route::post('slider-store', [StaffSliderApiController::class, 'sliderStore']);
+        Route::post('slider-update/{id}', [StaffSliderApiController::class, 'sliderUpdate']);
+        Route::delete('slider-destroy/{id}', [StaffSliderApiController::class, 'sliderDestroy']);
+
+        // Teacher Management APIs
+        Route::get('teacher-list', [StaffTeacherApiController::class, 'teacherList']);
+        Route::post('teacher-store', [StaffTeacherApiController::class, 'teacherStore']);
+        Route::post('teacher-update/{id}', [StaffTeacherApiController::class, 'teacherUpdate']);
+        Route::delete('teacher-destroy/{id}', [StaffTeacherApiController::class, 'teacherDestroy']);
 
         // Academics APIs
+        Route::post('promote-student', [\App\Http\Controllers\PromoteStudentController::class, 'store']);
         Route::get('medium-list', [\App\Http\Controllers\Api\StaffAcademicsApiController::class, 'mediumList']);
         Route::post('medium-store', [\App\Http\Controllers\Api\StaffAcademicsApiController::class, 'mediumStore']);
         Route::post('medium-update/{id}', [\App\Http\Controllers\Api\StaffAcademicsApiController::class, 'mediumUpdate']);
