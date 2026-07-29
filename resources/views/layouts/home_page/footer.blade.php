@@ -5,12 +5,12 @@
                 <div class="companyInfoWrapper">
                     <div>
                         <a href="{{ url('/') }}">
-                            <img src="{{ $settings['horizontal_logo'] ?? asset('assets/landing_page_images/Logo1.svg') }}" class="logo" alt="">
+                            <img src="{{ $systemSettings['horizontal_logo'] ?? asset('assets/landing_page_images/Logo1.svg') }}" class="logo" alt="">
                         </a>
                     </div>
                     <div>
                         <span class="commonDesc">
-                            {{ $settings['short_description'] ?? '' }}
+                            {{ $systemSettings['short_description'] ?? '' }}
                         </span>
                     </div>
                 </div>
@@ -65,14 +65,14 @@
                 </div>
             </div>
 
-            @if (isset($settings['facebook']) || isset($settings['instragram']) || isset($settings['linkedin']))
+            @if (isset($systemSettings['facebook']) || isset($systemSettings['instragram']) || isset($systemSettings['linkedin']))
                     <div class="col-sm-6 col-md-6 col-lg-2">
                         <div class="linksWrapper">
                             <span class="title">{{ __('follow') }}</span>
 
-                            @if (isset($settings['facebook']))
+                            @if (isset($systemSettings['facebook']))
                                 <span class="iconsWrapper">
-                                    <a href="{{ $settings['facebook'] }}" target="_blank">
+                                    <a href="{{ $systemSettings['facebook'] }}" target="_blank">
                                         <span>
                                             <img src="{{ asset('assets/landing_page_images/facebook.svg') }}" alt="">
                                         </span>
@@ -83,9 +83,9 @@
                                 </span>    
                             @endif
 
-                            @if (isset($settings['instagram']))
+                            @if (isset($systemSettings['instagram']))
                                 <span class="iconsWrapper">
-                                    <a href="{{ $settings['instagram'] }}" target="_blank">
+                                    <a href="{{ $systemSettings['instagram'] }}" target="_blank">
                                         <span>
                                             <img src="{{ asset('assets/landing_page_images/instagram.svg') }}" alt="">
                                         </span>
@@ -96,9 +96,9 @@
                                 </span>    
                             @endif
 
-                            @if (isset($settings['linkedin']))
+                            @if (isset($systemSettings['linkedin']))
                                 <span class="iconsWrapper">
-                                    <a href="{{ $settings['linkedin'] }}" target="_blank">
+                                    <a href="{{ $systemSettings['linkedin'] }}" target="_blank">
                                         <span>
                                             <img src="{{ asset('assets/landing_page_images/linkedin1.svg') }}" alt="">
                                         </span>
@@ -115,8 +115,8 @@
             <hr>
 
             <div class="col-12 copyright">
-                @if (isset($settings['footer_text']) && $settings['footer_text'])
-                    <span class="copyright footer-text"><span class="me-1">&copy; {{ date('Y') }}</span> {!! $settings['footer_text'] !!}</span>
+                @if (isset($systemSettings['footer_text']) && $systemSettings['footer_text'])
+                    <span class="copyright footer-text"><span class="me-1">&copy; {{ date('Y') }}</span> {!! $systemSettings['footer_text'] !!}</span>
                 @endif
             </div>
 
