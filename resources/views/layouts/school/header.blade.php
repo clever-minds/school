@@ -13,8 +13,10 @@
                     <li>
                         <a href="{{ url('/') }}">{{ __('home') }}</a>
                     </li>
-                    @if((isset($schoolSettings['about_us_status']) && $schoolSettings['about_us_status'] == 1) || 
-                    (isset($schoolSettings['our_mission_status']) && $schoolSettings['our_mission_status'] == 1))
+                    @if(
+                            (isset($schoolSettings['about_us_status']) && $schoolSettings['about_us_status'] == 1) ||
+                            (isset($schoolSettings['our_mission_status']) && $schoolSettings['our_mission_status'] == 1)
+                        )
                         <li>
                             <a href="{{ url('school/about-us') }}">{{ __('about_us') }}</a>
                         </li>
@@ -22,9 +24,9 @@
                     @if (isset($schoolSettings['gallery_status']) && $schoolSettings['gallery_status'] == 1)
                         <li>
                             <div class="dropdown">
-                                <a class="btn btn-secondary dropdown-toggle" href="#" role="button"
-                                    id="dropdownMenuLink" data-bs-toggle="dropdown" aria-expanded="false">
-                                   {{ __('gallery') }}
+                                <a class="btn btn-secondary dropdown-toggle" href="#" role="button" id="dropdownMenuLink"
+                                    data-bs-toggle="dropdown" aria-expanded="false">
+                                    {{ __('gallery') }}
                                 </a>
 
                                 <ul class="dropdown-menu" aria-labelledby="dropdownMenuLink">
@@ -39,18 +41,18 @@
                             </div>
                         </li>
                     @endif
-                    @if(isset($schoolSettings['faqs_status']) && $schoolSettings['faqs_status'] == 1 )
+                    @if(isset($schoolSettings['faqs_status']) && $schoolSettings['faqs_status'] == 1)
                         <li>
                             <a href="{{ url('/#faqs') }}">{{ __('faqs') }}</a>
                         </li>
                     @endif
-                    @if(isset($schoolSettings['contact_us_status']) && $schoolSettings['contact_us_status'] == 1 )     
+                    @if(isset($schoolSettings['contact_us_status']) && $schoolSettings['contact_us_status'] == 1)
                         <li>
                             <a href="{{ url('school/contact-us') }}">{{ __('contact_us') }}</a>
                         </li>
                     @endif
                     <li>
-                        <a href="{{ url('careers') }}">{{ __('careers') }}</a>
+                        <a href="{{ url('careers') }}">{{ __('Career') }}</a>
                     </li>
                     <!-- <li>
                         <div class="dropdown">
@@ -88,8 +90,9 @@
                             <a href="{{ route('online-admission.index') }}">{{ __('apply_now') }}</a>
                         </div>
                     </button>
-                    @endif
-                <button class="commonBtn redirect-login">{{ __('login') }}<i class="fa-regular fa-user pe-2"></i></button>
+                @endif
+                <button class="commonBtn redirect-login">{{ __('login') }}<i
+                        class="fa-regular fa-user pe-2"></i></button>
             </div>
         </div>
 
@@ -100,15 +103,18 @@
                         <img src="" alt="" class="nav-logo" />
                     </div>
                 </div>
-                <button type="button" class="btn-close text-reset" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+                <button type="button" class="btn-close text-reset" data-bs-dismiss="offcanvas"
+                    aria-label="Close"></button>
             </div>
             <div class="offcanvas-body">
                 <ul class="listItems">
                     <li>
                         <a href="{{ url('/') }}">{{ __('home') }}</a>
                     </li>
-                    @if((isset($schoolSettings['about_us_status']) && $schoolSettings['about_us_status'] == 1) || 
-                    (isset($schoolSettings['our_mission_status']) && $schoolSettings['our_mission_status'] == 1))
+                    @if(
+                            (isset($schoolSettings['about_us_status']) && $schoolSettings['about_us_status'] == 1) ||
+                            (isset($schoolSettings['our_mission_status']) && $schoolSettings['our_mission_status'] == 1)
+                        )
                         <li>
                             <a href="{{ url('school/about-us') }}">{{ __('about_us') }}</a>
                         </li>
@@ -116,8 +122,8 @@
                     @if (isset($schoolSettings['gallery_status']) && $schoolSettings['gallery_status'] == 1)
                         <li>
                             <div class="dropdown">
-                                <a class="btn btn-secondary dropdown-toggle" href="#" role="button"
-                                    id="dropdownMenuLink" data-bs-toggle="dropdown" aria-expanded="false">
+                                <a class="btn btn-secondary dropdown-toggle" href="#" role="button" id="dropdownMenuLink"
+                                    data-bs-toggle="dropdown" aria-expanded="false">
                                     {{ __('gallery') }}
                                 </a>
 
@@ -133,12 +139,12 @@
                             </div>
                         </li>
                     @endif
-                    @if(isset($schoolSettings['faqs_status']) && $schoolSettings['faqs_status'] == 1 )
+                    @if(isset($schoolSettings['faqs_status']) && $schoolSettings['faqs_status'] == 1)
                         <li>
                             <a href="#faqs">{{ __('faqs') }}</a>
                         </li>
                     @endif
-                    @if(isset($schoolSettings['contact_us_status']) && $schoolSettings['contact_us_status'] == 1 )    
+                    @if(isset($schoolSettings['contact_us_status']) && $schoolSettings['contact_us_status'] == 1)
                         <li>
                             <a href="{{ url('school/contact-us') }}">{{ __('contact_us') }}</a>
                         </li>
@@ -177,7 +183,8 @@
                                 </div>
                             </button>
                         @endif
-                        <button class="commonBtn redirect-login">{{ __('login') }}<i class="fa-regular fa-user"></i></button>
+                        <button class="commonBtn redirect-login">{{ __('login') }}<i
+                                class="fa-regular fa-user"></i></button>
                     </div>
                 </ul>
             </div>
