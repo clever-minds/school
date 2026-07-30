@@ -734,12 +734,12 @@
         @endif
         <!-- faqs ends here  -->
 
-        <section class="career-section commonMT" id="careers">
+        <section class="career-section commonMT" id="careers" style="scroll-margin-top: 100px;">
             <div class="container">
                 <div class="row">
                     <div class="col-12">
                         <div class="sectionTitle">
-                            <span>{{ __('join_our_team') }}</span>
+                            <span>{{ __('Join Our Team') }}</span>
                         </div>
                     </div>
                 </div>
