@@ -16,7 +16,7 @@
                 <div class="card">
                     <div class="card-body">
                         <div id="toolbar" class="row">
-                            <div class="form-group col-md-4">
+                            <div class="form-group col-md-3">
                                 <label class="filter-menu" for="filter_payment_status" style="font-size: 0.86rem;width: 110px">
                                     {{ __('Payment Status') }}
                                 </label>
@@ -43,6 +43,11 @@
                                     @endforeach
                                 </select>
                             </div>
+
+                            <div class="form-group col-md-3">
+                                <label class="filter-menu" for="filter_gr_no"> {{ __('GR Number') }} </label>
+                                <select class="grno-search form-control" id="filter_gr_no"><option>search</option></select>
+                            </div>
                         </div>
                         <table aria-describedby="mydesc" class='table' id='table_list'
                                data-toggle="table" data-url="{{ route('fees.transactions.log.list', 1) }}"
@@ -60,6 +65,7 @@
                                 <th scope="col" data-field="id" data-sortable="false" data-visible="false">{{__('id')}}</th>
                                 <th scope="col" data-field="no">{{ __('no.') }}</th>
                                 <th scope="col" data-field="user.full_name" data-align="center">{{ __('User')}}</th>
+                                <th scope="col" data-field="user.student.admission_no" data-align="center">{{ __('GR Number') }}</th>
                                 <th scope="col" data-field="amount" data-align="center">{{ __('Amount')}}</th>
                                 <th scope="col" data-field="payment_gateway" data-align="center" data-formatter="feesTransactionParentGateway">{{ __('Payment Gateway') }}</th>
                                 <th scope="col" data-field="payment_status" data-align="center" data-formatter="transactionPaymentStatus">{{ __('Payment Status') }}</th>
@@ -73,6 +79,15 @@
                     </div>
                 </div>
             </div>
-        </div>
     </div>
+@endsection
+
+@section('script')
+    <script>
+        $('#filter_gr_no').on('change keyup', function (e) {
+            if (e.type === 'change' || (e.type === 'keyup' && e.key === 'Enter')) {
+                $('#table_list').bootstrapTable('refresh');
+            }
+        });
+    </script>
 @endsection

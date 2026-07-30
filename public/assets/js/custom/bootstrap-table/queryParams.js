@@ -387,6 +387,7 @@ function feesPaymentTransactionQueryParams(p) {
         payment_status: $('#filter_payment_status').val(),
         session_year_id: $('#filter_session_year_id').val(),
         month: $('.paid-month').val(),
+        gr_no: $('#filter_gr_no').val(),
     };
 }
 

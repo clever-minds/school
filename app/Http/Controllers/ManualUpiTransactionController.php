@@ -27,6 +27,10 @@ class ManualUpiTransactionController extends Controller
             });
         }
 
+        if ($request->has('student_id') && $request->student_id != '') {
+            $query->where('student_id', $request->student_id);
+        }
+
         if ($request->export === 'csv') {
             $transactions = $query->get();
             $csvData = "ID,Student Name,Amount,Transaction ID,Status,Date\n";

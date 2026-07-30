@@ -653,7 +653,7 @@ class FeesController extends Controller
         $order = request('order', 'DESC');
 
         //Fetching Students Data on Basis of Class Section ID with Relation fees paid
-        $sql = $this->paymentTransaction->builder()->with('user:id,first_name,last_name');
+        $sql = $this->paymentTransaction->builder()->with(['user:id,first_name,last_name', 'user.student:user_id,admission_no']);
 
         if (!empty($request->search)) {
             $search = $request->search;
@@ -662,8 +662,15 @@ class FeesController extends Controller
                     ->orwhere('order_id', 'LIKE', "%$search%")->orwhere('payment_id', 'LIKE', "%$search%")
                     ->orwhere('payment_gateway', 'LIKE', "%$search%")->orwhere('amount', 'LIKE', "%$search%")
                     ->orWhereHas('user', function ($q) use ($search) {
-                        $q->where('first_name', 'LIKE', "%$search%")->orwhere('last_name', 'LIKE', "%$search%");
+                        $q->where('first_name', 'LIKE', "%$search%")
+                          ->orwhere('last_name', 'LIKE', "%$search%");
                     });
+            });
+        }
+
+        if (!empty($request->gr_no)) {
+            $sql->whereHas('user.student', function ($q) use ($request) {
+                $q->where('id', $request->gr_no);
             });
         }
 
@@ -1723,7 +1730,7 @@ class FeesController extends Controller
         $startDate = $request->start_date;
         $endDate = $request->end_date;
         $receiptNo = $request->receipt_no;
-        // $studentId = $request->student_id;
+        $studentId = $request->student_id;
 
         $compulsoryQuery = \App\Models\CompulsoryFee::query()
             ->with(['student:id,first_name,last_name', 'student.student.class_section.class', 'student.student.class_section.section'])
@@ -1760,12 +1767,10 @@ class FeesController extends Controller
             }
         }
 
-        /*
         if ($studentId && is_numeric($studentId)) {
             $compulsoryQuery->where('compulsory_fees.student_id', $studentId);
             $optionalQuery->where('optional_fees.student_id', $studentId);
         }
-        */
 
         if ($mode !== null && $mode !== '') {
             $compulsoryQuery->where('compulsory_fees.mode', $mode);

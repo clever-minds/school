@@ -114,11 +114,11 @@
                                     <label class="filter-menu" for="receipt_no">{{ __('Receipt No') }}</label>
                                     <input type="text" name="receipt_no" id="receipt_no" class="form-control" placeholder="e.g. C-327">
                                 </div>
-                                {{-- <div class="form-group col-md-3">
+                                <div class="form-group col-md-3">
                                     <label class="filter-menu" for="gr_no"> {{ __('GR Number') }} </label>
                                     <select class="grno-search form-control" id="gr_no"><option value="">search</option></select>
                                     <input type="hidden" id="student_id" class="student_id" name="student_id">
-                                </div> --}}
+                                </div>
                             </div>
                         </div>
 
@@ -169,7 +169,7 @@
                 start_date: $('#start_date').val(),
                 end_date: $('#end_date').val(),
                 receipt_no: $('#receipt_no').val(),
-                // student_id: $('#student_id').val()
+                student_id: $('#student_id').val()
             };
         }
 
@@ -177,12 +177,10 @@
             $('#table_list').bootstrapTable('refresh');
         });
 
-        /*
         $('#gr_no').on('change', function () {
             $('#student_id').val($(this).val());
             $('#table_list').bootstrapTable('refresh');
         });
-        */
 
         $('#table_list').on('load-success.bs.table', function (e, data) {
             let total = (data.total_compulsory_fees + data.total_optional_fees);

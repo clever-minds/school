@@ -26,6 +26,11 @@
                                     <label>{{ __('Student Name') }}</label>
                                     <input type="text" name="name" class="form-control" placeholder="{{ __('Search by Name') }}" value="{{ request('name') }}">
                                 </div>
+                                <div class="col-md-3">
+                                    <label>{{ __('GR Number') }}</label>
+                                    <select class="grno-search form-control" id="gr_no"><option value="">search</option></select>
+                                    <input type="hidden" id="student_id" name="student_id" value="{{ request('student_id') }}">
+                                </div>
                                 <div class="col-md-6 mt-3 mt-md-0">
                                     <button type="submit" class="btn btn-theme mr-2">{{ __('Filter') }}</button>
                                     <a href="{{ route('manual_upi_transactions.index') }}" class="btn btn-secondary mr-2">{{ __('Clear') }}</a>
@@ -98,4 +103,14 @@
             </div>
         </div>
     </div>
+@endsection
+
+@section('script')
+    <script>
+        $(document).ready(function() {
+            $('#gr_no').on('change', function () {
+                $('#student_id').val($(this).val());
+            });
+        });
+    </script>
 @endsection
