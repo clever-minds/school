@@ -1765,8 +1765,11 @@ class FeesController extends Controller
         }
 
         if ($studentId && is_numeric($studentId)) {
-            $compulsoryQuery->where('compulsory_fees.student_id', $studentId);
-            $optionalQuery->where('optional_fees.student_id', $studentId);
+            $userId = \App\Models\Student::where('id', $studentId)->value('user_id');
+            if ($userId) {
+                $compulsoryQuery->where('compulsory_fees.student_id', $userId);
+                $optionalQuery->where('optional_fees.student_id', $userId);
+            }
         }
 
         if ($mode !== null && $mode !== '') {
