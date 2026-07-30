@@ -663,14 +663,11 @@ class FeesController extends Controller
                     ->orwhere('payment_gateway', 'LIKE', "%$search%")->orwhere('amount', 'LIKE', "%$search%")
                     ->orWhereHas('user', function ($q) use ($search) {
                         $q->where('first_name', 'LIKE', "%$search%")
-                          ->orwhere('last_name', 'LIKE', "%$search%");
+                          ->orwhere('last_name', 'LIKE', "%$search%")
+                          ->orWhereHas('student', function ($q) use ($search) {
+                              $q->where('admission_no', 'LIKE', "%$search%");
+                          });
                     });
-            });
-        }
-
-        if (!empty($request->gr_no)) {
-            $sql->whereHas('user.student', function ($q) use ($request) {
-                $q->where('id', $request->gr_no);
             });
         }
 
