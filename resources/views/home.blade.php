@@ -366,7 +366,7 @@
                                 <div class="card p-3 d-flex justify-content-center align-items-center">
                                     <img src="{{ $school->logo }}" style="border-radius: 50%; width: 100px; height: 100px;" alt=""
                                         onerror="onErrorImage(event)">
-                                    <h6 class="mt-3">{{  Str::limit($school->name, 25, ' ...') }}</h6>
+                                    <h6 class="mt-3">{{ $school->name }}</h6>
                                 </div>
                             </div>
                         @endforeach
