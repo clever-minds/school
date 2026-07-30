@@ -40,8 +40,8 @@
                         </a>
                     </span>
                     <span>
-                        <a href="{{ url('careers') }}">
-                            {{ __('careers') }}
+                        <a href="{{ url('/#careers') }}">
+                            {{ __('Career') }}
                         </a>
                     </span>
 

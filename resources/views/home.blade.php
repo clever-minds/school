@@ -58,7 +58,7 @@
                             <a href="#contact-us">{{ __('contact') }}</a>
                         </li>
                         <li>
-                            <a href="{{ url('careers') }}">{{ __('careers') }}</a>
+                            <a href="{{ url('/#careers') }}">{{ __('Career') }}</a>
                         </li>
                         @if (count($guidances))
                             <li>
@@ -147,7 +147,7 @@
                             <a href="#contact-us">{{ __('contact') }}</a>
                         </li>
                         <li>
-                            <a href="{{ url('careers') }}">{{ __('Career') }}</a>
+                            <a href="{{ url('/#careers') }}">{{ __('Career') }}</a>
                         </li>
                         @if (count($guidances))
                             <li>
@@ -733,6 +733,94 @@
             </section>
         @endif
         <!-- faqs ends here  -->
+
+        <section class="career-section commonMT" id="careers">
+            <div class="container">
+                <div class="row">
+                    <div class="col-12">
+                        <div class="sectionTitle">
+                            <span>{{ __('join_our_team') }}</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="row align-items-center mt-4">
+                    <div class="col-md-6 mb-5 mb-md-0">
+                        <div class="career-text-wrapper" style="padding: 20px; height: 100%; display: flex; flex-direction: column; justify-content: center;">
+                            <h2 style="color: var(--secondary-color, #215679); font-weight: 700; margin-bottom: 20px; font-size: 2.2rem;">{{ __('Build Your Career With Us') }}</h2>
+                            <p style="color: var(--text--secondary-color, #5c788c); font-size: 1.1rem; line-height: 1.8; margin-bottom: 30px;">{{ __('We are always looking for passionate, talented, and creative individuals to join our team. If you are driven by excellence and want to make a real impact in the education sector, you are in the right place.') }}</p>
+                            
+                            <ul class="career-features" style="list-style: none; padding: 0;">
+                                <li style="margin-bottom: 15px; font-size: 1.1rem; color: var(--secondary-color, #215679); display: flex; align-items: center;"><i class="fa-solid fa-circle-check" style="color: var(--primary-color, #56cc99); margin-right: 15px; font-size: 1.2rem;"></i> {{ __('Innovative Work Environment') }}</li>
+                                <li style="margin-bottom: 15px; font-size: 1.1rem; color: var(--secondary-color, #215679); display: flex; align-items: center;"><i class="fa-solid fa-circle-check" style="color: var(--primary-color, #56cc99); margin-right: 15px; font-size: 1.2rem;"></i> {{ __('Career Growth & Development') }}</li>
+                                <li style="margin-bottom: 15px; font-size: 1.1rem; color: var(--secondary-color, #215679); display: flex; align-items: center;"><i class="fa-solid fa-circle-check" style="color: var(--primary-color, #56cc99); margin-right: 15px; font-size: 1.2rem;"></i> {{ __('Collaborative Team Culture') }}</li>
+                                <li style="margin-bottom: 15px; font-size: 1.1rem; color: var(--secondary-color, #215679); display: flex; align-items: center;"><i class="fa-solid fa-circle-check" style="color: var(--primary-color, #56cc99); margin-right: 15px; font-size: 1.2rem;"></i> {{ __('Make a Difference in Education') }}</li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="career-card" style="background: #fff; border-radius: 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.05); padding: 40px;">
+                            <h3 class="career-title" style="color: var(--secondary-color, #215679); font-weight: 700; margin-bottom: 30px;">{{ __('Apply Now') }}</h3>
+                            
+                            @if(session('success'))
+                                <div class="alert alert-success">
+                                    {{ session('success') }}
+                                </div>
+                            @endif
+
+                            @if($errors->any())
+                                <div class="alert alert-danger">
+                                    <ul class="mb-0">
+                                        @foreach($errors->all() as $error)
+                                            <li>{{ $error }}</li>
+                                        @endforeach
+                                    </ul>
+                                </div>
+                            @endif
+
+                            <form action="{{ url('/careers') }}" method="POST" enctype="multipart/form-data">
+                                @csrf
+                                <div class="row">
+                                    <div class="col-md-6 mb-4">
+                                        <label for="school_id" class="form-label">{{ __('Select School') }} <span class="text-danger">*</span></label>
+                                        <select name="school_id" id="school_id" class="form-select" style="border-radius: 8px; padding: 12px 15px; border: 1px solid #e0e0e0; width: 100%;" required>
+                                            <option value="">{{ __('Choose a school...') }}</option>
+                                            @if(isset($allSchools))
+                                                @foreach($allSchools as $school)
+                                                    <option value="{{ $school->id }}" {{ old('school_id') == $school->id ? 'selected' : '' }}>
+                                                        {{ $school->name }}
+                                                    </option>
+                                                @endforeach
+                                            @endif
+                                        </select>
+                                    </div>
+                                    <div class="col-md-6 mb-4">
+                                        <label for="name" class="form-label">{{ __('Full Name') }} <span class="text-danger">*</span></label>
+                                        <input type="text" name="name" id="name" class="form-control" style="border-radius: 8px; padding: 12px 15px; border: 1px solid #e0e0e0; width: 100%;" value="{{ old('name') }}" required placeholder="{{ __('Enter your full name') }}">
+                                    </div>
+                                    <div class="col-md-6 mb-4">
+                                        <label for="email" class="form-label">{{ __('Email Address') }} <span class="text-danger">*</span></label>
+                                        <input type="email" name="email" id="email" class="form-control" style="border-radius: 8px; padding: 12px 15px; border: 1px solid #e0e0e0; width: 100%;" value="{{ old('email') }}" required placeholder="{{ __('Enter your email') }}">
+                                    </div>
+                                    <div class="col-md-6 mb-4">
+                                        <label for="phone" class="form-label">{{ __('Phone Number') }} <span class="text-danger">*</span></label>
+                                        <input type="text" name="phone" id="phone" class="form-control" style="border-radius: 8px; padding: 12px 15px; border: 1px solid #e0e0e0; width: 100%;" value="{{ old('phone') }}" required placeholder="{{ __('Enter your phone number') }}">
+                                    </div>
+                                    <div class="col-md-12 mb-4">
+                                        <label for="resume" class="form-label">{{ __('Upload Resume') }} <span class="text-danger">*</span></label>
+                                        <input type="file" name="resume" id="resume" class="form-control" style="border-radius: 8px; padding: 12px 15px; border: 1px solid #e0e0e0; width: 100%;" accept=".pdf,.doc,.docx" required>
+                                        <small class="text-muted">{{ __('Max file size: 5MB') }}</small>
+                                    </div>
+                                </div>
+                                <div class="text-center mt-3">
+                                    <button type="submit" class="commonBtn w-100 py-2" style="border-radius: 8px;">{{ __('Submit Application') }}</button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+        <!-- careers section ends here -->
 
         <section class="getInTouch commonMT" id="contact-us">
             <div class="container">
