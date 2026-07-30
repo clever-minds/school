@@ -46,7 +46,7 @@
 
                             <div class="form-group col-md-3">
                                 <label class="filter-menu" for="filter_gr_no"> {{ __('GR Number') }} </label>
-                                <select class="grno-search form-control" id="filter_gr_no"><option>search</option></select>
+                                <select class="grno-search form-control" id="filter_gr_no"><option value="">search</option></select>
                             </div>
                         </div>
                         <table aria-describedby="mydesc" class='table' id='table_list'
