@@ -1765,7 +1765,7 @@ class FeesController extends Controller
         }
 
         if ($studentId && is_numeric($studentId)) {
-            $userId = \App\Models\Student::where('id', $studentId)->value('user_id');
+            $userId = \App\Models\Students::where('id', $studentId)->value('user_id');
             if ($userId) {
                 $compulsoryQuery->where('compulsory_fees.student_id', $userId);
                 $optionalQuery->where('optional_fees.student_id', $userId);
