@@ -85,7 +85,7 @@
                                                     </div>
                                                 </div>
 
-                                                @if(in_array($school->name, ['LCIS Tandalja', 'GKIS Tandalja']))
+                                                @if(in_array($school->id, [10, 58]))
                                                 <div class="col-lg-6 inputWrapper">
                                                     <label for="campus">{{ __('Campus') }} <span>*</span></label>
                                                     <div>

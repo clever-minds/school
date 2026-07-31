@@ -37,7 +37,7 @@
                                     @endforeach
                                 </select>
                             </div>
-                            @if(in_array(getSchoolSettings('school_name'), ['LCIS Tandalja', 'GKIS Tandalja']))
+                            @if(in_array(Auth::user()->school_id, [10, 58]))
                                 <div class="form-group col-sm-12 col-md-4">
                                     <label class="filter-menu">{{ __('Campus') }}</label>
                                     {!! Form::select('filter_campus', ['JIAM' => 'JIAM', 'Tandalja' => 'Tandalja'], null, ['class' => 'form-control', 'id' => 'filter_campus', 'placeholder' => __('Select Campus')]) !!}
@@ -74,7 +74,7 @@
                                         <th scope="col" data-field="user.email" data-visible="true">{{ __('GR NO.') }}</th>
                                         <th scope="col" data-field="user.dob" >{{ __('dob') }}</th>
                                         <th scope="col" data-field="class_section.full_name" data-formatter="classSectionFormatter">{{ __('class_section') }}</th>
-                                        @if(in_array(getSchoolSettings('school_name'), ['LCIS Tandalja', 'GKIS Tandalja']))
+                                        @if(in_array(Auth::user()->school_id, [10, 58]))
                                             <th scope="col" data-field="campus">{{ __('Campus') }}</th>
                                         @endif
                                         <th scope="col" data-field="roll_number">{{ __('roll_no') }}</th>
@@ -250,7 +250,7 @@
                                             ]
                                         ) !!}
                                     </div>
-                                    @if(in_array(getSchoolSettings('school_name'), ['LCIS Tandalja', 'GKIS Tandalja']))
+                                    @if(in_array(Auth::user()->school_id, [10, 58]))
                                         <div class="form-group col-sm-12 col-md-12 col-lg-6 col-xl-4">
                                             <label>{{ __('Campus') }} <span class="text-danger">*</span></label>
                                             {!! Form::select('campus', ['JIAM' => 'JIAM', 'Tandalja' => 'Tandalja'], null, ['class' => 'form-control', 'id' => 'edit_campus', 'placeholder' => __('Select Campus'), 'required' => true]) !!}
