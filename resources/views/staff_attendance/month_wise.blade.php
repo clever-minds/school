@@ -62,7 +62,7 @@
             var table = $('#table_list');
             if(month) {
                 try {
-                    const response = await fetch(`/staff-attendance/month-wise/list?month=${month}`);
+                    const response = await fetch(`{{ url('staff-attendance/month-wise/list') }}?month=${month}`);
                     const data = await response.json();
                     
                     // Destroy and recreate table to properly load dynamic columns and data
@@ -74,7 +74,19 @@
                             },
                             ...generateDayColumns(month)
                         ],
-                        data: data.rows
+                        data: data.rows,
+                        pagination: false,
+                        search: false,
+                        showColumns: false,
+                        showRefresh: false,
+                        fixedColumns: false,
+                        mobileResponsive: true,
+                        sortName: 'id',
+                        sortOrder: 'desc',
+                        maintainSelected: true,
+                        exportDataType: 'all',
+                        showExport: false,
+                        escape: true
                     });
                 } catch (error) {
                     console.error('Error fetching attendance data:', error);

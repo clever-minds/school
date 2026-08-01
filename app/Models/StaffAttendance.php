@@ -26,6 +26,7 @@ class StaffAttendance extends Model
         'check_in_ip',
         'check_out_ip',
         'status',
+        'type',
         'scanned_by'
     ];
 

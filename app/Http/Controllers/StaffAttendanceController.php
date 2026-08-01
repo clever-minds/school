@@ -261,6 +261,8 @@ class StaffAttendanceController extends Controller
         $bulkData['total'] = $total;
         $bulkData['rows'] = $rows;
         
+        \Log::info("Staff Attendance Month Wise List:", ['total' => $total, 'rows_count' => count($rows), 'school_id' => $school_id]);
+        
         return response()->json($bulkData);
     }
 
