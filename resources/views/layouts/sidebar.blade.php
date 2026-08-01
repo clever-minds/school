@@ -495,6 +495,11 @@
                                     {{ __('All Staff Attendance') }}
                                 </a>
                             </li>
+                            <li class="nav-item">
+                                <a href="{{ route('staff-attendance.month') }}" class="nav-link">
+                                    {{ __('Month-wise Attendance') }}
+                                </a>
+                            </li>
                         @endcan
                     </ul>
                 </div>

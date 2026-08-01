@@ -209,4 +209,110 @@ class StaffAttendanceController extends Controller
             return ResponseService::errorResponse();
         }
     }
+
+    public function monthWiseIndex()
+    {
+        ResponseService::noAnyPermissionThenRedirect(['staff-attendance-list']);
+        return view('staff_attendance.month_wise');
+    }
+
+    public function monthWiseList(Request $request)
+    {
+        $user = Auth::user();
+        if (!$user->can('staff-attendance-list')) {
+            ResponseService::noAnyPermissionThenSendJson(['staff-attendance-list']);
+        }
+
+        $month = $request->month;
+        $date = Carbon::create(null, $month, 1);
+        $school_id = $user->school_id;
+
+        // Fetch all staff for this school
+        $staffUsers = User::where('school_id', $school_id)
+            ->whereHas('roles', function($q) {
+                $q->whereNotIn('name', ['Student', 'Parent']);
+            })->orderBy('first_name', 'ASC')->get();
+            
+        $total = $staffUsers->count();
+        $rows = array();
+        
+        foreach ($staffUsers as $staffUser) {            
+            $staffAttendance = ['full_name' => $staffUser->full_name, 'user_id' => $staffUser->id];
+            
+            for ($day=1; $day <= $date->daysInMonth; $day++) {
+                $currentDate = $date->copy()->day($day)->format('Y-m-d');
+                $attendance = $this->staffAttendance->builder()->where('user_id', $staffUser->id)->where('date', $currentDate)->first();
+                if ($attendance) {
+                    if ($attendance->type === 'Work From Home') {
+                        $staffAttendance["day_$day"] = 'WFH';
+                    } elseif ($attendance->status == 1) {
+                        $staffAttendance["day_$day"] = 'P';
+                    } else {
+                        $staffAttendance["day_$day"] = 'A';
+                    }
+                } else {
+                    $staffAttendance["day_$day"] = null;
+                }
+            }
+            $rows[] = $staffAttendance;
+        }
+
+        $bulkData = array();
+        $bulkData['total'] = $total;
+        $bulkData['rows'] = $rows;
+        
+        return response()->json($bulkData);
+    }
+
+    public function storeMonthWise(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'user_id' => 'required|exists:users,id',
+            'date' => 'required|date',
+            'status' => 'required',
+            'type' => 'nullable|string'
+        ]);
+
+        if ($validator->fails()) {
+            return ResponseService::errorResponse($validator->errors()->first());
+        }
+
+        try {
+            $user = Auth::user();
+            if (!$user->can('staff-attendance-list')) {
+                return ResponseService::errorResponse('Permission Denied');
+            }
+
+            $attendance = $this->staffAttendance->builder()
+                ->where('user_id', $request->user_id)
+                ->where('date', $request->date)
+                ->first();
+
+            $status = $request->status;
+            $type = $request->type;
+
+            if (!$attendance) {
+                $targetUser = User::find($request->user_id);
+                $data = [
+                    'user_id' => $request->user_id,
+                    'school_id' => $targetUser->school_id,
+                    'date' => $request->date,
+                    'status' => $status,
+                    'type' => $type
+                ];
+                $this->staffAttendance->create($data);
+            } else {
+                $data = [
+                    'status' => $status,
+                    'type' => $type
+                ];
+                $this->staffAttendance->update($attendance->id, $data);
+            }
+
+            return ResponseService::successResponse('Successfully Saved');
+        } catch (Throwable $th) {
+            ResponseService::logErrorResponse($th);
+            return ResponseService::errorResponse();
+        }
+    }
 }
