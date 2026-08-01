@@ -61,27 +61,24 @@
             var month = $('#month').val();
             var table = $('#table_list');
             if(month) {
-                const response = await fetch(`/staff-attendance/month-wise/list?month=${month}`);
-            const data = await response.json();
-            table.bootstrapTable('load', data);
-            try {
-                // Fetch the attendance data
-                // Ensure data is loaded before refreshing the table
-                        
-                // Update the table columns dynamically based on the month
-                table.bootstrapTable('refreshOptions', {
-                    columns: [
-                        {
-                            field: 'full_name',
-                            title: 'Staff Name'
-                        },
-                        ...generateDayColumns(month)
-                    ]
-                });
-                
-                
-            } catch (error) {
-                console.error('Error fetching attendance data:', error);
+                try {
+                    const response = await fetch(`/staff-attendance/month-wise/list?month=${month}`);
+                    const data = await response.json();
+                    
+                    // Update the table columns dynamically based on the month, and pass data
+                    table.bootstrapTable('refreshOptions', {
+                        columns: [
+                            {
+                                field: 'full_name',
+                                title: 'Staff Name'
+                            },
+                            ...generateDayColumns(month)
+                        ],
+                        data: data.rows
+                    });
+                } catch (error) {
+                    console.error('Error fetching attendance data:', error);
+                }
             }
         }
 
@@ -180,6 +177,12 @@
                         showToastMessage('An error occurred', 'error');
                     }
                 });
+            }
+        });
+
+        $(document).ready(function() {
+            if ($('#month').val()) {
+                handleSelectChange();
             }
         });
     
