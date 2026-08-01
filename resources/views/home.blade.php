@@ -892,7 +892,7 @@
                                         </div>
                                         <div>
                                             <span>{{ __('location') }}</span>
-                                            <span>{{ $settings['address'] ?? '' }}</span>
+                                            <span><a href="https://maps.app.goo.gl/rj3yCsncDzQx5tJe8 "></a>{{ $settings['address'] ?? '' }}</a></span>
                                         </div>
                                     </div>
                                     <div>
