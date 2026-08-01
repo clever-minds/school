@@ -247,6 +247,8 @@ class StaffAttendanceController extends Controller
                         $staffAttendance["day_$day"] = 'WFH';
                     } elseif ($attendance->status == 1) {
                         $staffAttendance["day_$day"] = 'P';
+                    } elseif ($attendance->status == 3) {
+                        $staffAttendance["day_$day"] = 'HD';
                     } else {
                         $staffAttendance["day_$day"] = 'A';
                     }

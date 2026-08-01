@@ -120,17 +120,20 @@
             let pSelected = value === 'P' ? 'selected' : '';
             let aSelected = value === 'A' ? 'selected' : '';
             let wfhSelected = value === 'WFH' ? 'selected' : '';
+            let hdSelected = value === 'HD' ? 'selected' : '';
 
             let colorClass = 'text-secondary';
             if (value === 'P') colorClass = 'text-success';
             else if (value === 'A') colorClass = 'text-danger';
             else if (value === 'WFH') colorClass = 'text-info';
+            else if (value === 'HD') colorClass = 'text-warning';
 
             return `
                 <select class="form-control form-control-sm ${colorClass} update-attendance font-weight-bold" style="width: 70px; padding: 2px; height: auto;" data-userid="${userId}" data-day="${day}">
                     <option value="">-</option>
                     <option value="P" class="text-success" ${pSelected}>P</option>
                     <option value="A" class="text-danger" ${aSelected}>A</option>
+                    <option value="HD" class="text-warning" ${hdSelected}>HD</option>
                     <option value="WFH" class="text-info" ${wfhSelected}>WFH</option>
                 </select>
             `;
@@ -155,15 +158,19 @@
             } else if (val === 'A') {
                 status = 4;
                 type = '';
+            } else if (val === 'HD') {
+                status = 3;
+                type = '';
             } else if (val === 'WFH') {
                 status = 1;
                 type = 'Work From Home';
             }
 
             let selectElem = $(this);
-            selectElem.removeClass('text-success text-danger text-info text-secondary');
+            selectElem.removeClass('text-success text-danger text-info text-warning text-secondary');
             if (val === 'P') selectElem.addClass('text-success');
             else if (val === 'A') selectElem.addClass('text-danger');
+            else if (val === 'HD') selectElem.addClass('text-warning');
             else if (val === 'WFH') selectElem.addClass('text-info');
             else selectElem.addClass('text-secondary');
 
