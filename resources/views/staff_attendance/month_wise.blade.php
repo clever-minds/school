@@ -28,7 +28,7 @@
                         <div class="show_attendance_student_list">
                             <table aria-describedby="mydesc" class='table student_table' id='table_list'
                                    data-toggle="table"  data-click-to-select="true"
-                                   data-side-pagination="server" data-pagination="false"
+                                   data-pagination="false"
                                    data-page-list="[5, 10, 20, 50, 100, 200,All]" data-search="false" data-toolbar="#toolbar"
                                    data-show-columns="false" data-show-refresh="false" data-fixed-columns="false"
                                    data-fixed-number="2" data-fixed-right-number="1" data-trim-on-search="false"
@@ -65,8 +65,8 @@
                     const response = await fetch(`/staff-attendance/month-wise/list?month=${month}`);
                     const data = await response.json();
                     
-                    // Update the table columns dynamically based on the month, and pass data
-                    table.bootstrapTable('refreshOptions', {
+                    // Destroy and recreate table to properly load dynamic columns and data
+                    table.bootstrapTable('destroy').bootstrapTable({
                         columns: [
                             {
                                 field: 'full_name',
