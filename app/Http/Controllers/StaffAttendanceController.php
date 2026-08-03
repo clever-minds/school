@@ -239,6 +239,7 @@ class StaffAttendanceController extends Controller
 
         // Fetch all staff for this school
         $staffUsers = User::where('school_id', $school_id)
+            ->where('status', 1)
             ->whereHas('roles', function($q) {
                 $q->whereNotIn('name', ['Student', 'Parent']);
             })->orderBy('first_name', 'ASC')->get();
