@@ -23,6 +23,14 @@
                                 <label class="filter-menu">{{ __('month') }} <span class="text-danger">*</span></label>
                                 {!! Form::selectMonth('month',null,['class' => 'form-control','id' => 'month']) !!}
                             </div>
+                            <div class="col-sm-12 col-md-9 d-flex align-items-center justify-content-end">
+                                <div class="mt-3">
+                                    <span class="badge badge-success mr-2 p-2">P : Present</span>
+                                    <span class="badge badge-danger mr-2 p-2">A : Absent</span>
+                                    <span class="badge badge-warning mr-2 p-2">H : Half Day</span>
+                                    <span class="badge badge-info p-2">W : Work From Home</span>
+                                </div>
+                            </div>
                         </div>
 
                         <div class="show_attendance_student_list">
@@ -121,22 +129,22 @@
 
             let pSelected = value === 'P' ? 'selected' : '';
             let aSelected = value === 'A' ? 'selected' : '';
-            let wfhSelected = value === 'WFH' ? 'selected' : '';
-            let hdSelected = value === 'HD' ? 'selected' : '';
+            let wfhSelected = value === 'W' ? 'selected' : '';
+            let hdSelected = value === 'H' ? 'selected' : '';
 
             let colorClass = 'text-secondary';
             if (value === 'P') colorClass = 'text-success';
             else if (value === 'A') colorClass = 'text-danger';
-            else if (value === 'WFH') colorClass = 'text-info';
-            else if (value === 'HD') colorClass = 'text-warning';
+            else if (value === 'W') colorClass = 'text-info';
+            else if (value === 'H') colorClass = 'text-warning';
 
             return `
                 <select class="form-control form-control-sm ${colorClass} update-attendance font-weight-bold" style="width: 70px; padding: 2px; height: auto;" data-userid="${userId}" data-day="${day}">
                     <option value="">-</option>
                     <option value="P" class="text-success" ${pSelected}>P</option>
                     <option value="A" class="text-danger" ${aSelected}>A</option>
-                    <option value="HD" class="text-warning" ${hdSelected}>HD</option>
-                    <option value="WFH" class="text-info" ${wfhSelected}>WFH</option>
+                    <option value="H" class="text-warning" ${hdSelected}>H</option>
+                    <option value="W" class="text-info" ${wfhSelected}>W</option>
                 </select>
             `;
         }    
@@ -160,10 +168,10 @@
             } else if (val === 'A') {
                 status = 4;
                 type = '';
-            } else if (val === 'HD') {
+            } else if (val === 'H') {
                 status = 3;
                 type = '';
-            } else if (val === 'WFH') {
+            } else if (val === 'W') {
                 status = 1;
                 type = 'Work From Home';
             }
@@ -172,8 +180,8 @@
             selectElem.removeClass('text-success text-danger text-info text-warning text-secondary');
             if (val === 'P') selectElem.addClass('text-success');
             else if (val === 'A') selectElem.addClass('text-danger');
-            else if (val === 'HD') selectElem.addClass('text-warning');
-            else if (val === 'WFH') selectElem.addClass('text-info');
+            else if (val === 'H') selectElem.addClass('text-warning');
+            else if (val === 'W') selectElem.addClass('text-info');
             else selectElem.addClass('text-secondary');
 
             if(val !== '') {

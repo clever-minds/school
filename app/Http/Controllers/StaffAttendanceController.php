@@ -268,11 +268,11 @@ class StaffAttendanceController extends Controller
                 
                 if ($attendance) {
                     if ($attendance->type === 'Work From Home') {
-                        $staffAttendance["day_$day"] = 'WFH';
+                        $staffAttendance["day_$day"] = 'W';
                     } elseif ($attendance->status == 1) {
                         $staffAttendance["day_$day"] = 'P';
                     } elseif ($attendance->status == 3) {
-                        $staffAttendance["day_$day"] = 'HD';
+                        $staffAttendance["day_$day"] = 'H';
                     } else {
                         $staffAttendance["day_$day"] = 'A';
                     }
