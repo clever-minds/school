@@ -10,6 +10,9 @@ use App\Http\Controllers\Api\StaffSliderApiController;
 use App\Http\Controllers\Api\StaffTeacherApiController;
 use App\Http\Controllers\Api\StudentPickupController;
 use App\Http\Controllers\SubscriptionWebhookController;
+use App\Http\Controllers\Api\SessionYearApiController;
+use App\Http\Controllers\Api\HolidayApiController;
+use App\Http\Controllers\Api\TimetableApiController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -480,4 +483,26 @@ Route::group(['prefix' => 'super-admin', 'middleware' => ['APISwitchDatabase']],
         Route::post('school-audits', [\App\Http\Controllers\Api\SuperAdminAuditController::class, 'storeSchoolAudit']);
         Route::get('school-audits/{id}', [\App\Http\Controllers\Api\SuperAdminAuditController::class, 'getSchoolAuditDetails']);
     });
+});
+
+/**
+ * APP ADMIN APIs
+ **/
+Route::group(['prefix' => 'admin', 'middleware' => ['auth:sanctum', 'APISwitchDatabase']], static function () {
+    // Session Years
+    Route::get('session-years', [SessionYearApiController::class, 'index']);
+    Route::post('session-years', [SessionYearApiController::class, 'store']);
+    Route::put('session-years/{id}', [SessionYearApiController::class, 'update']);
+    Route::delete('session-years/{id}', [SessionYearApiController::class, 'destroy']);
+
+    // Holidays
+    Route::get('holidays', [HolidayApiController::class, 'index']);
+    Route::post('holidays', [HolidayApiController::class, 'store']);
+    Route::put('holidays/{id}', [HolidayApiController::class, 'update']);
+    Route::delete('holidays/{id}', [HolidayApiController::class, 'destroy']);
+
+    // Timetable
+    Route::get('timetable', [TimetableApiController::class, 'index']);
+    Route::post('timetable', [TimetableApiController::class, 'store']);
+    Route::delete('timetable/{id}', [TimetableApiController::class, 'destroy']);
 });
