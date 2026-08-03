@@ -62,6 +62,7 @@
             var table = $('#table_list');
             if(month) {
                 try {
+                    table.bootstrapTable('showLoading');
                     const response = await fetch(`{{ url('staff-attendance/month-wise/list') }}?month=${month}`);
                     const data = await response.json();
                     
@@ -90,6 +91,7 @@
                     });
                 } catch (error) {
                     console.error('Error fetching attendance data:', error);
+                    table.bootstrapTable('hideLoading');
                 }
             }
         }

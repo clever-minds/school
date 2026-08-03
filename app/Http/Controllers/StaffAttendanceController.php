@@ -76,7 +76,17 @@ class StaffAttendanceController extends Controller
             $tempRow['check_out'] = $row->check_out ? Carbon::parse($row->check_out)->format('H:i:s') : '-';
             $tempRow['check_in_location'] = $row->check_in_location;
             $tempRow['check_out_location'] = $row->check_out_location;
-            $tempRow['status'] = $row->status == 1 ? 'Present' : 'Absent';
+            if ($row->type === 'Work From Home') {
+                $tempRow['status'] = 'Work From Home';
+            } elseif ($row->status == 1) {
+                $tempRow['status'] = 'Present';
+            } elseif ($row->status == 2) {
+                $tempRow['status'] = 'Late';
+            } elseif ($row->status == 3) {
+                $tempRow['status'] = 'Half Day';
+            } else {
+                $tempRow['status'] = 'Absent';
+            }
             $rows[] = $tempRow;
         }
 
@@ -236,12 +246,24 @@ class StaffAttendanceController extends Controller
         $total = $staffUsers->count();
         $rows = array();
         
+        $startDate = $date->copy()->startOfMonth()->format('Y-m-d');
+        $endDate = $date->copy()->endOfMonth()->format('Y-m-d');
+        $staffUserIds = $staffUsers->pluck('id')->toArray();
+        
+        $allAttendances = $this->staffAttendance->builder()
+            ->whereIn('user_id', $staffUserIds)
+            ->whereBetween('date', [$startDate, $endDate])
+            ->get()
+            ->groupBy('user_id');
+        
         foreach ($staffUsers as $staffUser) {            
             $staffAttendance = ['full_name' => $staffUser->full_name, 'user_id' => $staffUser->id];
+            $userAttendances = $allAttendances->has($staffUser->id) ? $allAttendances[$staffUser->id]->keyBy('date') : collect();
             
             for ($day=1; $day <= $date->daysInMonth; $day++) {
                 $currentDate = $date->copy()->day($day)->format('Y-m-d');
-                $attendance = $this->staffAttendance->builder()->where('user_id', $staffUser->id)->where('date', $currentDate)->first();
+                $attendance = $userAttendances->has($currentDate) ? $userAttendances[$currentDate] : null;
+                
                 if ($attendance) {
                     if ($attendance->type === 'Work From Home') {
                         $staffAttendance["day_$day"] = 'WFH';
