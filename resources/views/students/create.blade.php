@@ -81,7 +81,7 @@
                                         ) !!}
                                     </div>
 
-                                    @if(in_array($school->id, [10,58]))
+                                    @if(Auth::check() && in_array(Auth::user()->school_id, [10,58]))
                                         <div class="form-group col-sm-12 col-md-12 col-lg-6 col-xl-3">
                                             <label>{{ __('Campus') }} <span class="text-danger">*</span></label>
                                             {!! Form::select('campus', ['JIAM' => 'JIAM', 'Tandalja' => 'Tandalja'], null, ['class' => 'form-control', 'placeholder' => __('Select Campus'), 'required' => true]) !!}

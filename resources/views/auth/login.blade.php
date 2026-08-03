@@ -114,7 +114,7 @@
                                     </div>
                                 </div>
 
-                                @if ($school ?? '')
+                                @if (isset($school))
                                     <div class="form-group d-none">
                                         <label for="school_code">{{ __('school_code') }}</label>
                                         <input id="school_code" type="text" class="form-control rounded-lg form-control-lg"
@@ -155,7 +155,7 @@
                                 <hr style="width: -webkit-fill-available;">
                                 <div class="col-12 text-center mb-4 text-black-50">Demo Credentials</div>
                             </div>
-                            @if (empty($school) ?? '')
+                            @if (empty($school))
                                 <div class="col-12 text-center">
                                     Super Admin Panels
                                 </div>
