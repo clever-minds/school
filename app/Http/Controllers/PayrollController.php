@@ -225,32 +225,22 @@ class PayrollController extends Controller {
             $salary = $row->salary;
             
             $userAttendances = $allAttendances->has($row->user->id) ? $allAttendances[$row->user->id] : collect();
-            $userLeaves = $allLeaves->has($row->user->id) ? $allLeaves[$row->user->id] : collect();
             
-            $total_leave = 0;
-            $processedDates = [];
+            $daysInMonth = Carbon::create($year, $month, 1)->daysInMonth;
+            $total_present = 0;
 
-            // 1. Process Attendance records
+            // Process Attendance records (Only P, W and H give present marks)
             foreach ($userAttendances as $att) {
-                if ($att->status == 4) {
-                    $total_leave += 1;
-                } elseif ($att->status == 3) {
-                    $total_leave += 0.5;
+                if ($att->status == 1) { // 1 = Present / WFH
+                    $total_present += 1;
+                } elseif ($att->status == 3) { // 3 = Half Day
+                    $total_present += 0.5;
                 }
-                $processedDates[] = date('Y-m-d', strtotime($att->date));
             }
 
-            // 2. Process Leave records (skip if already handled by Attendance)
-            foreach ($userLeaves as $lv) {
-                $lvDate = date('Y-m-d', strtotime($lv->getRawOriginal('date')));
-                if (!in_array($lvDate, $processedDates)) {
-                    if ($lv->type === 'Full') {
-                        $total_leave += 1;
-                    } else {
-                        $total_leave += 0.5;
-                    }
-                }
-            }
+            // Unmarked days (including holidays) are treated as leaves/absent
+            $total_leave = $daysInMonth - $total_present;
+
             $tempRow['total_leaves'] = $total_leave;
             $tempRow['salary_deduction'] = number_format($salary_deduction, 2);
             $allowanceAmount = [];
@@ -486,36 +476,18 @@ class PayrollController extends Controller {
                 ->whereBetween('date', [$startDate, $endDate])
                 ->get();
 
-            $userLeaves = \App\Models\LeaveDetail::whereHas('leave', function($q) use ($salary) {
-                    $q->where('user_id', $salary->staff->user_id)->where('status', 1);
-                })
-                ->whereBetween('date', [$startDate, $endDate])
-                ->get();
-                
-            $total_leave = 0;
-            $processedDates = [];
+            $daysInMonth = Carbon::create($salary->year, $salary->month, 1)->daysInMonth;
+            $total_present = 0;
 
-            // 1. Process Attendance records
             foreach ($userAttendances as $att) {
-                if ($att->status == 4) {
-                    $total_leave += 1;
+                if ($att->status == 1) {
+                    $total_present += 1;
                 } elseif ($att->status == 3) {
-                    $total_leave += 0.5;
+                    $total_present += 0.5;
                 }
-                $processedDates[] = date('Y-m-d', strtotime($att->date));
             }
 
-            // 2. Process Leave records (skip if already handled by Attendance)
-            foreach ($userLeaves as $lv) {
-                $lvDate = date('Y-m-d', strtotime($lv->getRawOriginal('date')));
-                if (!in_array($lvDate, $processedDates)) {
-                    if ($lv->type === 'Full') {
-                        $total_leave += 1;
-                    } else {
-                        $total_leave += 0.5;
-                    }
-                }
-            }
+            $total_leave = $daysInMonth - $total_present;
 
             $allow_leaves = 0;
             if ($salary) {
