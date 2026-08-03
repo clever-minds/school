@@ -165,7 +165,7 @@
             else if (value === 'H') colorClass = 'text-warning';
 
             return `
-                <select class="form-control form-control-sm ${colorClass} update-attendance font-weight-bold" style="width: 50px; padding: 2px; height: auto; font-size: 13px;" data-userid="${userId}" data-day="${day}">
+                <select class="form-control form-control-sm ${colorClass} update-attendance font-weight-bold" style="width: auto; padding: 2px; height: auto; font-size: 13px; min-width: 45px;" data-userid="${userId}" data-day="${day}">
                     <option value="">-</option>
                     <option value="P" class="text-success" ${pSelected}>P</option>
                     <option value="A" class="text-danger" ${aSelected}>A</option>
