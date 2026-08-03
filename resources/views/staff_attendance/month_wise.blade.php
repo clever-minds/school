@@ -38,8 +38,8 @@
                                    data-toggle="table"  data-click-to-select="true"
                                    data-pagination="false"
                                    data-page-list="[5, 10, 20, 50, 100, 200,All]" data-search="false" data-toolbar="#toolbar"
-                                   data-show-columns="false" data-show-refresh="false" data-fixed-columns="false"
-                                   data-fixed-number="2" data-fixed-right-number="1" data-trim-on-search="false"
+                                   data-show-columns="false" data-show-refresh="false" data-fixed-columns="true"
+                                   data-fixed-number="1" data-fixed-right-number="1" data-trim-on-search="false"
                                    data-mobile-responsive="true" data-sort-name="id" data-sort-order="desc"
                                    data-maintain-selected="true" data-export-data-type='all' data-show-export="false"
                                    data-export-options='{ "fileName": "view-attendance-list-<?= date('d-m-y') ?>" ,"ignoreColumn": ["operate"]}'
@@ -65,21 +65,6 @@
     .show_attendance_student_list .table th {
         padding: 4px 5px !important;
         vertical-align: middle;
-    }
-    
-    /* Make the Staff Name column sticky */
-    .show_attendance_student_list .table th:first-child,
-    .show_attendance_student_list .table td:first-child {
-        position: sticky;
-        left: 0;
-        background-color: #fff;
-        z-index: 1;
-        min-width: 150px;
-        box-shadow: 2px 0 5px rgba(0,0,0,0.05);
-    }
-    
-    .show_attendance_student_list .table th:first-child {
-        z-index: 2;
     }
 </style>
 @endsection
@@ -114,7 +99,8 @@
                         search: false,
                         showColumns: false,
                         showRefresh: false,
-                        fixedColumns: false,
+                        fixedColumns: true,
+                        fixedNumber: 1,
                         mobileResponsive: true,
                         sortName: 'id',
                         sortOrder: 'desc',
