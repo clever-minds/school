@@ -296,12 +296,15 @@ class PayrollController extends Controller {
                     $salary = $expense->getRawOriginal('basic_salary');
 
                     $tempRow['status'] = $status;
-                    $tempRow['paid_leaves'] = $expense->paid_leaves;
-                    if ($expense->paid_leaves < $total_leave && $expense->paid_leaves) {
-                        $unpaid_leave = $total_leave - $expense->paid_leaves;
+                    $tempRow['paid_leaves'] = $expense->paid_leaves !== null ? $expense->paid_leaves : '-';
+                    $paid_leaves = $expense->paid_leaves ?? 0;
+                    if ($paid_leaves < $total_leave) {
+                        $unpaid_leave = $total_leave - $paid_leaves;
                         $per_day_salary = $salary / 30;
                         $salary_deduction = $unpaid_leave * $per_day_salary;
                         $tempRow['salary_deduction'] = number_format($salary_deduction,2);
+                    } else {
+                        $tempRow['salary_deduction'] = number_format(0, 2);
                     }
                     $tempRow['net_salary'] = $expense->amount;
                     $tempRow['operate'] = $operate;
@@ -363,20 +366,26 @@ class PayrollController extends Controller {
                         $tempRow['deductions'] = number_format($deduction ,2);
                     }
 
-                } else if ($leaveMaster) {
-                    $salary = $row->salary;
-                    $tempRow['paid_leaves'] = $leaveMaster->leaves;
-                    if ($leaveMaster->leaves < $total_leave) {
-                        if ($leaveMaster->leaves) {
-                            $unpaid_leave = $total_leave - $leaveMaster->leaves;
-                            $per_day_salary = $salary / 30;
-                            $salary_deduction = $unpaid_leave * $per_day_salary;
-                        }
-                        $tempRow['salary_deduction'] = number_format($salary_deduction,2);
-                    }
-                    $tempRow['net_salary'] = $salary - $salary_deduction + $totalAllowanceAmount - $totalDeductionAmount;
                 } else {
-                    $tempRow['net_salary'] = $salary + $totalAllowanceAmount - $totalDeductionAmount;
+                    $salary = $row->salary;
+                    $paid_leaves = 0;
+                    if ($leaveMaster) {
+                        $tempRow['paid_leaves'] = $leaveMaster->leaves;
+                        $paid_leaves = $leaveMaster->leaves ?? 0;
+                    } else {
+                        $tempRow['paid_leaves'] = '-';
+                    }
+
+                    if ($paid_leaves < $total_leave) {
+                        $unpaid_leave = $total_leave - $paid_leaves;
+                        $per_day_salary = $salary / 30;
+                        $salary_deduction = $unpaid_leave * $per_day_salary;
+                        $tempRow['salary_deduction'] = number_format($salary_deduction,2);
+                    } else {
+                        $tempRow['salary_deduction'] = number_format(0, 2);
+                    }
+                    
+                    $tempRow['net_salary'] = $salary - $salary_deduction + $totalAllowanceAmount - $totalDeductionAmount;
                 }
             }
             $rows[] = $tempRow;
