@@ -173,6 +173,9 @@ class PayrollController extends Controller {
 
         
 
+        $startDate = Carbon::create(null, $month, 1)->startOfMonth()->format('Y-m-d');
+        $endDate = Carbon::create(null, $month, 1)->endOfMonth()->format('Y-m-d');
+
         $leaveMaster = $this->leaveMaster->builder()->whereHas('session_year', function ($q) use ($month, $year) {
             $q->where(function ($q) use ($month, $year) {
                 $q->whereMonth('start_date', '<=', $month)->whereYear('start_date', $year);
@@ -181,13 +184,7 @@ class PayrollController extends Controller {
             });
         })->first();
 
-        $sql = $this->staff->builder()->with(['user','staffSalary.payrollSetting', 'expense.staff_payroll.payroll_setting', 'leave' => function ($q) use ($month,$year) {
-            $q->where('status', 1)->withCount(['leave_detail as full_leave' => function ($q) use ($month,$year) {
-                $q->whereMonth('date', $month)->whereYear('date',$year)->where('type', 'Full');
-            }])->withCount(['leave_detail as half_leave' => function ($q) use ($month,$year) {
-                $q->whereMonth('date', $month)->whereYear('date',$year)->whereNot('type', 'Full');
-            }]);
-        }])->whereHas('user', function ($q) {
+        $sql = $this->staff->builder()->with(['user','staffSalary.payrollSetting', 'expense.staff_payroll.payroll_setting'])->whereHas('user', function ($q) {
             $q->whereNull('deleted_at')->Owner();
         })->when($search, function ($query) use ($search) {
             $query->where(function ($query) use ($search) {
@@ -202,6 +199,12 @@ class PayrollController extends Controller {
         $sql->orderBy($sort, $order);
         $res = $sql->get();
 
+        $userIds = $res->pluck('user.id')->toArray();
+        $allAttendances = \App\Models\StaffAttendance::whereIn('user_id', $userIds)
+            ->whereBetween('date', [$startDate, $endDate])
+            ->get()
+            ->groupBy('user_id');
+
         $bulkData = array();
         $bulkData['total'] = $total;
         $rows = array();
@@ -212,9 +215,11 @@ class PayrollController extends Controller {
             $tempRow['no'] = $no++;
             $salary_deduction = 0;
             $salary = $row->salary;
-            $full_leave = isset($row->leave) ? $row->leave->sum('full_leave') : 0;
-            $half_leave = isset($row->leave) ? ($row->leave->sum('half_leave') / 2) : 0;
-            $total_leave = $full_leave + $half_leave;
+            
+            $userAttendances = $allAttendances->has($row->user->id) ? $allAttendances[$row->user->id] : collect();
+            $full_leave = $userAttendances->where('status', 4)->count();
+            $half_leave = $userAttendances->where('status', 3)->count();
+            $total_leave = $full_leave + ($half_leave / 2);
             $tempRow['total_leaves'] = $total_leave;
             $tempRow['salary_deduction'] = number_format($salary_deduction, 2);
             $allowanceAmount = [];
@@ -433,19 +438,23 @@ class PayrollController extends Controller {
             if (!$salary) {
                 return redirect()->back()->with('error',trans('no_data_found'));
             }
-            // Get total leaves
-            $leaves = $this->leave->builder()->where('status',1)->where('user_id',$salary->staff->user_id)->withCount(['leave_detail as full_leave' => function ($q) use ($salary) {
-                $q->whereMonth('date', $salary->month)->whereYear('date',$salary->year)->where('type', 'Full');
-            }])->withCount(['leave_detail as half_leave' => function ($q) use ($salary) {
-                $q->whereMonth('date', $salary->month)->whereYear('date',$salary->year)->whereNot('type', 'Full');
-            }])->get();
+            // Get total leaves from StaffAttendance
+            $startDate = Carbon::create($salary->year, $salary->month, 1)->startOfMonth()->format('Y-m-d');
+            $endDate = Carbon::create($salary->year, $salary->month, 1)->endOfMonth()->format('Y-m-d');
+            
+            $userAttendances = \App\Models\StaffAttendance::where('user_id', $salary->staff->user_id)
+                ->whereBetween('date', [$startDate, $endDate])
+                ->get();
+                
+            $full_leave = $userAttendances->where('status', 4)->count();
+            $half_leave = $userAttendances->where('status', 3)->count();
 
             $allow_leaves = 0;
             if ($salary) {
                 $allow_leaves = $salary->paid_leaves;
             }
 
-            $total_leaves = $leaves->sum('full_leave') + ($leaves->sum('half_leave') / 2);
+            $total_leaves = $full_leave + ($half_leave / 2);
             // Total days
             $days = Carbon::now()->year($salary->year)->month($salary->month)->daysInMonth;
 
