@@ -58,6 +58,32 @@
     </div>
 @endsection
 
+@section('style')
+<style>
+    /* Reduce padding for table cells */
+    .show_attendance_student_list .table td, 
+    .show_attendance_student_list .table th {
+        padding: 4px 5px !important;
+        vertical-align: middle;
+    }
+    
+    /* Make the Staff Name column sticky */
+    .show_attendance_student_list .table th:first-child,
+    .show_attendance_student_list .table td:first-child {
+        position: sticky;
+        left: 0;
+        background-color: #fff;
+        z-index: 1;
+        min-width: 150px;
+        box-shadow: 2px 0 5px rgba(0,0,0,0.05);
+    }
+    
+    .show_attendance_student_list .table th:first-child {
+        z-index: 2;
+    }
+</style>
+@endsection
+
 @section('script')
 
 
@@ -139,7 +165,7 @@
             else if (value === 'H') colorClass = 'text-warning';
 
             return `
-                <select class="form-control form-control-sm ${colorClass} update-attendance font-weight-bold" style="width: 70px; padding: 2px; height: auto;" data-userid="${userId}" data-day="${day}">
+                <select class="form-control form-control-sm ${colorClass} update-attendance font-weight-bold" style="width: 50px; padding: 2px; height: auto; font-size: 13px;" data-userid="${userId}" data-day="${day}">
                     <option value="">-</option>
                     <option value="P" class="text-success" ${pSelected}>P</option>
                     <option value="A" class="text-danger" ${aSelected}>A</option>
