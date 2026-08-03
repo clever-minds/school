@@ -218,6 +218,41 @@ class PayrollController extends Controller {
         $rows = array();
         $no = 1;
 
+        // Calculate non-working days (Sundays + Holidays)
+        $startOfMonthObj = Carbon::create($year, $month, 1);
+        $endOfMonthObj = $startOfMonthObj->copy()->endOfMonth();
+        $startOfMonthStr = $startOfMonthObj->format('Y-m-d');
+        $endOfMonthStr = $endOfMonthObj->format('Y-m-d');
+        $daysInMonth = $startOfMonthObj->daysInMonth;
+        
+        $holidays = \App\Models\Holiday::where(function($q) use ($startOfMonthStr, $endOfMonthStr) {
+            $q->whereBetween('date', [$startOfMonthStr, $endOfMonthStr])
+              ->orWhereBetween('end_date', [$startOfMonthStr, $endOfMonthStr])
+              ->orWhere(function($q2) use ($startOfMonthStr, $endOfMonthStr) {
+                  $q2->where('date', '<', $startOfMonthStr)->where('end_date', '>', $endOfMonthStr);
+              });
+        })->get();
+
+        $holidayDates = [];
+        foreach($holidays as $holiday) {
+            $start = Carbon::parse($holiday->getRawOriginal('date'));
+            $end = $holiday->getRawOriginal('end_date') ? Carbon::parse($holiday->getRawOriginal('end_date')) : $start->copy();
+            for($d = $start->copy(); $d->lte($end); $d->addDay()) {
+                if ($d->month == $month && $d->year == $year) {
+                    $holidayDates[] = $d->format('Y-m-d');
+                }
+            }
+        }
+
+        $sundayDates = [];
+        for($d = $startOfMonthObj->copy(); $d->lte($endOfMonthObj); $d->addDay()) {
+            if ($d->isSunday()) {
+                $sundayDates[] = $d->format('Y-m-d');
+            }
+        }
+        $nonWorkingDates = array_unique(array_merge($holidayDates, $sundayDates));
+        $total_working_days = $daysInMonth - count($nonWorkingDates);
+
         foreach ($res as $row) {
             $tempRow = $row->toArray();
             $tempRow['no'] = $no++;
@@ -226,7 +261,6 @@ class PayrollController extends Controller {
             
             $userAttendances = $allAttendances->has($row->user->id) ? $allAttendances[$row->user->id] : collect();
             
-            $daysInMonth = Carbon::create($year, $month, 1)->daysInMonth;
             $total_present = 0;
 
             // Process Attendance records (Only P, W and H give present marks)
@@ -238,8 +272,8 @@ class PayrollController extends Controller {
                 }
             }
 
-            // Unmarked days (including holidays) are treated as leaves/absent
-            $total_leave = $daysInMonth - $total_present;
+            // Unmarked working days are treated as leaves/absent
+            $total_leave = max(0, $total_working_days - $total_present);
 
             $tempRow['total_leaves'] = $total_leave;
             $tempRow['salary_deduction'] = number_format($salary_deduction, 2);
@@ -477,6 +511,39 @@ class PayrollController extends Controller {
                 ->get();
 
             $daysInMonth = Carbon::create($salary->year, $salary->month, 1)->daysInMonth;
+            
+            // Calculate non-working days
+            $startOfMonthObj = Carbon::create($salary->year, $salary->month, 1);
+            $endOfMonthObj = $startOfMonthObj->copy()->endOfMonth();
+            
+            $holidays = \App\Models\Holiday::where(function($q) use ($startDate, $endDate) {
+                $q->whereBetween('date', [$startDate, $endDate])
+                  ->orWhereBetween('end_date', [$startDate, $endDate])
+                  ->orWhere(function($q2) use ($startDate, $endDate) {
+                      $q2->where('date', '<', $startDate)->where('end_date', '>', $endDate);
+                  });
+            })->get();
+
+            $holidayDates = [];
+            foreach($holidays as $holiday) {
+                $start = Carbon::parse($holiday->getRawOriginal('date'));
+                $end = $holiday->getRawOriginal('end_date') ? Carbon::parse($holiday->getRawOriginal('end_date')) : $start->copy();
+                for($d = $start->copy(); $d->lte($end); $d->addDay()) {
+                    if ($d->month == $salary->month && $d->year == $salary->year) {
+                        $holidayDates[] = $d->format('Y-m-d');
+                    }
+                }
+            }
+
+            $sundayDates = [];
+            for($d = $startOfMonthObj->copy(); $d->lte($endOfMonthObj); $d->addDay()) {
+                if ($d->isSunday()) {
+                    $sundayDates[] = $d->format('Y-m-d');
+                }
+            }
+            $nonWorkingDates = array_unique(array_merge($holidayDates, $sundayDates));
+            $total_working_days = $daysInMonth - count($nonWorkingDates);
+
             $total_present = 0;
 
             foreach ($userAttendances as $att) {
@@ -487,7 +554,7 @@ class PayrollController extends Controller {
                 }
             }
 
-            $total_leave = $daysInMonth - $total_present;
+            $total_leave = max(0, $total_working_days - $total_present);
 
             $allow_leaves = 0;
             if ($salary) {
