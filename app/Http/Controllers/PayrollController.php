@@ -205,6 +205,14 @@ class PayrollController extends Controller {
             ->get()
             ->groupBy('user_id');
 
+        $allLeaves = \App\Models\LeaveDetail::whereHas('leave', function($q) use ($userIds) {
+                $q->whereIn('user_id', $userIds)->where('status', 1);
+            })
+            ->whereBetween('date', [$startDate, $endDate])
+            ->with('leave:id,user_id')
+            ->get()
+            ->groupBy('leave.user_id');
+
         $bulkData = array();
         $bulkData['total'] = $total;
         $rows = array();
@@ -217,9 +225,32 @@ class PayrollController extends Controller {
             $salary = $row->salary;
             
             $userAttendances = $allAttendances->has($row->user->id) ? $allAttendances[$row->user->id] : collect();
-            $full_leave = $userAttendances->where('status', 4)->count();
-            $half_leave = $userAttendances->where('status', 3)->count();
-            $total_leave = $full_leave + ($half_leave / 2);
+            $userLeaves = $allLeaves->has($row->user->id) ? $allLeaves[$row->user->id] : collect();
+            
+            $total_leave = 0;
+            $processedDates = [];
+
+            // 1. Process Attendance records
+            foreach ($userAttendances as $att) {
+                if ($att->status == 4) {
+                    $total_leave += 1;
+                } elseif ($att->status == 3) {
+                    $total_leave += 0.5;
+                }
+                $processedDates[] = date('Y-m-d', strtotime($att->date));
+            }
+
+            // 2. Process Leave records (skip if already handled by Attendance)
+            foreach ($userLeaves as $lv) {
+                $lvDate = date('Y-m-d', strtotime($lv->getRawOriginal('date')));
+                if (!in_array($lvDate, $processedDates)) {
+                    if ($lv->type === 'Full') {
+                        $total_leave += 1;
+                    } else {
+                        $total_leave += 0.5;
+                    }
+                }
+            }
             $tempRow['total_leaves'] = $total_leave;
             $tempRow['salary_deduction'] = number_format($salary_deduction, 2);
             $allowanceAmount = [];
@@ -438,23 +469,51 @@ class PayrollController extends Controller {
             if (!$salary) {
                 return redirect()->back()->with('error',trans('no_data_found'));
             }
-            // Get total leaves from StaffAttendance
+            // Get total leaves from StaffAttendance and LeaveDetail
             $startDate = Carbon::create($salary->year, $salary->month, 1)->startOfMonth()->format('Y-m-d');
             $endDate = Carbon::create($salary->year, $salary->month, 1)->endOfMonth()->format('Y-m-d');
             
             $userAttendances = \App\Models\StaffAttendance::where('user_id', $salary->staff->user_id)
                 ->whereBetween('date', [$startDate, $endDate])
                 ->get();
+
+            $userLeaves = \App\Models\LeaveDetail::whereHas('leave', function($q) use ($salary) {
+                    $q->where('user_id', $salary->staff->user_id)->where('status', 1);
+                })
+                ->whereBetween('date', [$startDate, $endDate])
+                ->get();
                 
-            $full_leave = $userAttendances->where('status', 4)->count();
-            $half_leave = $userAttendances->where('status', 3)->count();
+            $total_leave = 0;
+            $processedDates = [];
+
+            // 1. Process Attendance records
+            foreach ($userAttendances as $att) {
+                if ($att->status == 4) {
+                    $total_leave += 1;
+                } elseif ($att->status == 3) {
+                    $total_leave += 0.5;
+                }
+                $processedDates[] = date('Y-m-d', strtotime($att->date));
+            }
+
+            // 2. Process Leave records (skip if already handled by Attendance)
+            foreach ($userLeaves as $lv) {
+                $lvDate = date('Y-m-d', strtotime($lv->getRawOriginal('date')));
+                if (!in_array($lvDate, $processedDates)) {
+                    if ($lv->type === 'Full') {
+                        $total_leave += 1;
+                    } else {
+                        $total_leave += 0.5;
+                    }
+                }
+            }
 
             $allow_leaves = 0;
             if ($salary) {
                 $allow_leaves = $salary->paid_leaves;
             }
 
-            $total_leaves = $full_leave + ($half_leave / 2);
+            $total_leaves = $total_leave;
             // Total days
             $days = Carbon::now()->year($salary->year)->month($salary->month)->daysInMonth;
 
