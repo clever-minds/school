@@ -13,8 +13,9 @@ use Throwable;
 
 class HolidayApiController extends Controller
 {
-    public function index(Request $request)
+    public function index()
     {
+        $request = request();
         try {
             $holidays = Holiday::where('school_id', Auth::user()->school_id)
                 ->when($request->session_year_id, function($q) use($request) {
