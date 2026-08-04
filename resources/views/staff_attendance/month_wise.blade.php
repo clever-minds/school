@@ -236,7 +236,16 @@
         });
 
         $(document).on('change', '#global-mark-p', function() {
-            if(!$(this).is(':checked')) return;
+            if(!$(this).is(':checked')) {
+                $('.update-attendance.checkbox-marked').each(function() {
+                    if($(this).val() === 'P') {
+                        $(this).val('');
+                        $(this).removeClass('text-success text-danger text-info text-warning text-secondary is-dirty checkbox-marked');
+                        $(this).addClass('text-secondary');
+                    }
+                });
+                return;
+            }
             try {
                 let type = 'P';
                 let status = 1;
@@ -253,7 +262,7 @@
                         if(type === 'P') $(this).addClass('text-success');
                         else $(this).addClass('text-danger');
 
-                        $(this).addClass('is-dirty');
+                        $(this).addClass('is-dirty checkbox-marked');
                         count++;
                     }
                 });
@@ -269,11 +278,20 @@
                     showToastMessage('JS Error: ' + e.message, 'error');
                 }
             }
-            setTimeout(() => { $(this).prop('checked', false); }, 500);
         });
 
         $(document).on('change', '.row-mark-p', function() {
-            if(!$(this).is(':checked')) return;
+            let userId = $(this).data('userid');
+            if(!$(this).is(':checked')) {
+                $(`.update-attendance[data-userid="${userId}"].checkbox-marked`).each(function() {
+                    if($(this).val() === 'P') {
+                        $(this).val('');
+                        $(this).removeClass('text-success text-danger text-info text-warning text-secondary is-dirty checkbox-marked');
+                        $(this).addClass('text-secondary');
+                    }
+                });
+                return;
+            }
             try {
                 let type = 'P';
                 let status = 1;
@@ -291,7 +309,7 @@
                         if(type === 'P') $(this).addClass('text-success');
                         else $(this).addClass('text-danger');
 
-                        $(this).addClass('is-dirty');
+                        $(this).addClass('is-dirty checkbox-marked');
                         count++;
                     }
                 });
@@ -355,10 +373,13 @@
                         btn.prop('disabled', false);
 
                         if (!response.error) {
-                            $('.update-attendance.is-dirty').removeClass('is-dirty');
+                            $('.update-attendance.is-dirty').removeClass('is-dirty checkbox-marked');
                             if (typeof showToastMessage === 'function') {
                                 showToastMessage(response.message || 'Successfully Saved', 'success');
                             }
+                            // Reset all checkboxes visually after successful submit
+                            $('#global-mark-p').prop('checked', false);
+                            $('.row-mark-p').prop('checked', false);
                         } else {
                             if (typeof showToastMessage === 'function') {
                                 showToastMessage(response.message, 'error');
