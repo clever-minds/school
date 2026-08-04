@@ -36,11 +36,8 @@
                         <div id="toolbar" class="mb-3 d-flex align-items-center justify-content-between w-100">
                             <div class="d-flex align-items-center">
                                 <span class="mr-3 font-weight-bold">Mark All Empty:</span>
-                                <div class="form-check form-check-inline mt-0 mb-0 mr-3">
-                                    <label class="form-check-label text-success" style="cursor: pointer;">
-                                        <input type="checkbox" class="form-check-input" id="global-mark-p"> P (Present)
-                                    </label>
-                                </div>
+                                <button type="button" class="btn btn-success btn-sm mr-2" id="global-mark-p">P (Present)</button>
+                                <button type="button" class="btn btn-secondary btn-sm" id="global-uncheck">Uncheck</button>
                             </div>
                             <div>
                                 <button type="button" class="btn btn-theme btn-sm" id="save-all-attendance">
@@ -159,12 +156,9 @@
         function actionFormatter(value, row, index) {
             let userId = row.user_id;
             return `
-                <div class="d-flex justify-content-center" style="min-width: 50px;">
-                    <div class="form-check form-check-inline mt-0 mb-0">
-                        <label class="form-check-label text-success" style="font-size: 13px; cursor: pointer;">
-                            <input type="checkbox" class="form-check-input row-mark-p" data-userid="${userId}"> P
-                        </label>
-                    </div>
+                <div class="d-flex justify-content-center align-items-center" style="min-width: 90px;">
+                    <span class="badge badge-success row-mark-p mr-2" data-userid="${userId}" style="cursor: pointer; font-size: 13px; padding: 5px 8px;">P</span>
+                    <span class="badge badge-secondary row-uncheck" data-userid="${userId}" style="cursor: pointer; font-size: 11px; padding: 5px 8px;">Uncheck</span>
                 </div>
             `;
         }
@@ -235,24 +229,10 @@
             selectElem.addClass('is-dirty');
         });
 
-        $(document).on('change', '#global-mark-p', function() {
-            if(!$(this).is(':checked')) {
-                $('.update-attendance.checkbox-marked').each(function() {
-                    if($(this).val() === 'P') {
-                        $(this).prop('selectedIndex', 0);
-                        $(this).removeClass('text-success text-danger text-info text-warning text-secondary is-dirty checkbox-marked');
-                        $(this).addClass('text-secondary');
-                    }
-                });
-                return;
-            }
+        $(document).on('click', '#global-mark-p', function() {
             try {
                 let type = 'P';
-                let status = 1;
-                
                 let count = 0;
-                let month = $('#month').val();
-                let currentYear = new Date().getFullYear();
 
                 $('.update-attendance').each(function() {
                     let currentVal = $(this).val();
@@ -280,26 +260,21 @@
             }
         });
 
-        $(document).on('change', '.row-mark-p', function() {
-            let userId = $(this).data('userid');
-            if(!$(this).is(':checked')) {
-                $(`.update-attendance[data-userid="${userId}"].checkbox-marked`).each(function() {
-                    if($(this).val() === 'P') {
-                        $(this).prop('selectedIndex', 0);
-                        $(this).removeClass('text-success text-danger text-info text-warning text-secondary is-dirty checkbox-marked');
-                        $(this).addClass('text-secondary');
-                    }
-                });
-                return;
-            }
+        $(document).on('click', '#global-uncheck', function() {
+            $('.update-attendance.checkbox-marked').each(function() {
+                if($(this).val() === 'P') {
+                    $(this).prop('selectedIndex', 0);
+                    $(this).removeClass('text-success text-danger text-info text-warning text-secondary is-dirty checkbox-marked');
+                    $(this).addClass('text-secondary');
+                }
+            });
+        });
+
+        $(document).on('click', '.row-mark-p', function() {
             try {
                 let type = 'P';
-                let status = 1;
                 let userId = $(this).data('userid');
-
                 let count = 0;
-                let month = $('#month').val();
-                let currentYear = new Date().getFullYear();
 
                 $(`.update-attendance[data-userid="${userId}"]`).each(function() {
                     let currentVal = $(this).val();
@@ -325,7 +300,17 @@
                     showToastMessage('JS Error: ' + e.message, 'error');
                 }
             }
-            setTimeout(() => { $(this).prop('checked', false); }, 500);
+        });
+
+        $(document).on('click', '.row-uncheck', function() {
+            let userId = $(this).data('userid');
+            $(`.update-attendance[data-userid="${userId}"].checkbox-marked`).each(function() {
+                if($(this).val() === 'P') {
+                    $(this).prop('selectedIndex', 0);
+                    $(this).removeClass('text-success text-danger text-info text-warning text-secondary is-dirty checkbox-marked');
+                    $(this).addClass('text-secondary');
+                }
+            });
         });
 
         $(document).on('click', '#save-all-attendance', function() {
@@ -377,9 +362,6 @@
                             if (typeof showToastMessage === 'function') {
                                 showToastMessage(response.message || 'Successfully Saved', 'success');
                             }
-                            // Reset all checkboxes visually after successful submit
-                            $('#global-mark-p').prop('checked', false);
-                            $('.row-mark-p').prop('checked', false);
                         } else {
                             if (typeof showToastMessage === 'function') {
                                 showToastMessage(response.message, 'error');
