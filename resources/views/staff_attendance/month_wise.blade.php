@@ -37,8 +37,8 @@
                             <div class="d-flex align-items-center">
                                 <span class="mr-3 font-weight-bold">Mark All Empty:</span>
                                 <div class="form-check form-check-inline mt-0 mb-0 mr-3">
-                                    <label class="form-check-label text-success" style="cursor: pointer;">
-                                        <input type="checkbox" class="form-check-input" id="global-mark-p"> P (Present)
+                                    <label class="form-check-label text-success font-weight-bold" style="cursor: pointer; font-size: 15px;">
+                                        <input type="checkbox" class="d-none" id="global-mark-p"> P (Present)
                                     </label>
                                 </div>
                             </div>
@@ -161,8 +161,8 @@
             return `
                 <div class="d-flex justify-content-center" style="min-width: 50px;">
                     <div class="form-check form-check-inline mt-0 mb-0">
-                        <label class="form-check-label text-success" style="font-size: 13px; cursor: pointer;">
-                            <input type="checkbox" class="form-check-input row-mark-p" data-userid="${userId}"> P
+                        <label class="form-check-label text-success font-weight-bold" style="font-size: 14px; cursor: pointer;">
+                            <input type="checkbox" class="d-none row-mark-p" data-userid="${userId}"> P
                         </label>
                     </div>
                 </div>
