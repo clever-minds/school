@@ -36,11 +36,9 @@
                         <div id="toolbar" class="mb-3 d-flex align-items-center justify-content-between w-100">
                             <div class="d-flex align-items-center">
                                 <span class="mr-3 font-weight-bold">Mark All Empty:</span>
-                                <div class="form-check form-check-inline mt-0 mb-0 mr-3">
-                                    <label class="form-check-label text-success">
-                                        <input type="checkbox" class="form-check-input" id="global-mark-p"> P (Present)
-                                    </label>
-                                </div>
+                                <label class="text-success mb-0" style="cursor: pointer;">
+                                    <input type="checkbox" id="global-mark-p" style="margin-right: 5px; cursor: pointer;"> P (Present)
+                                </label>
                             </div>
                             <div>
                                 <button type="button" class="btn btn-theme btn-sm" id="save-all-attendance">
@@ -159,12 +157,10 @@
         function actionFormatter(value, row, index) {
             let userId = row.user_id;
             return `
-                <div class="d-flex justify-content-center" style="min-width: 50px;">
-                    <div class="form-check form-check-inline mt-0 mb-0">
-                        <label class="form-check-label text-success" style="font-size: 12px; margin-left: 1.5rem;">
-                            <input type="checkbox" class="form-check-input row-mark-p" data-userid="${userId}"> P
-                        </label>
-                    </div>
+                <div class="d-flex justify-content-center align-items-center" style="min-width: 50px;">
+                    <label class="text-success mb-0 d-flex align-items-center" style="cursor: pointer; font-size: 13px;">
+                        <input type="checkbox" class="row-mark-p" data-userid="${userId}" style="margin-right: 5px; cursor: pointer;"> P
+                    </label>
                 </div>
             `;
         }
