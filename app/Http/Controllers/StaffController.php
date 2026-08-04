@@ -314,7 +314,7 @@ class StaffController extends Controller {
         $limit = request('limit', 10);
         $sort = request('sort', 'id');
         $order = request('order', 'DESC');
-        $session_year_id = request('session_year_id');
+
 
         $sql = $this->user->builder()
             ->where(function ($query) {
@@ -326,11 +326,7 @@ class StaffController extends Controller {
             })
             ->with('staff', 'roles', 'support_school.school');
 
-        if ($session_year_id) {
-            $sql->whereHas('staff', function ($q) use ($session_year_id) {
-                $q->where('session_year_id', $session_year_id);
-            });
-        }
+
       
         if ($request->show_deactive == 1) {
             $sql = $sql->where('status', 0)->withTrashed(); 

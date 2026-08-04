@@ -343,4 +343,59 @@ class StaffAttendanceController extends Controller
             return ResponseService::errorResponse();
         }
     }
+
+    public function storeBulkMonthWise(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'attendances' => 'required|array',
+            'attendances.*.user_id' => 'required|exists:users,id',
+            'attendances.*.date' => 'required|date',
+            'attendances.*.status' => 'required',
+            'attendances.*.type' => 'nullable|string'
+        ]);
+
+        if ($validator->fails()) {
+            return ResponseService::errorResponse($validator->errors()->first());
+        }
+
+        try {
+            $user = Auth::user();
+            if (!$user->can('staff-attendance-list')) {
+                return ResponseService::errorResponse('Permission Denied');
+            }
+
+            foreach($request->attendances as $att) {
+                $attendance = $this->staffAttendance->builder()
+                    ->where('user_id', $att['user_id'])
+                    ->where('date', $att['date'])
+                    ->first();
+
+                $status = $att['status'];
+                $type = $att['type'] ?? '';
+
+                if (!$attendance) {
+                    $targetUser = User::find($att['user_id']);
+                    $data = [
+                        'user_id' => $att['user_id'],
+                        'school_id' => $targetUser->school_id,
+                        'date' => $att['date'],
+                        'status' => $status,
+                        'type' => $type
+                    ];
+                    $this->staffAttendance->create($data);
+                } else {
+                    $data = [
+                        'status' => $status,
+                        'type' => $type
+                    ];
+                    $this->staffAttendance->update($attendance->id, $data);
+                }
+            }
+
+            return ResponseService::successResponse('Successfully Saved');
+        } catch (Throwable $th) {
+            ResponseService::logErrorResponse($th);
+            return ResponseService::errorResponse();
+        }
+    }
 }

@@ -316,19 +316,7 @@
                         <h4 class="card-title">{{ __('Staff List') }}</h4>
                         <div class="row" id="toolbar">
                             <div class="col-12 d-flex align-items-end mb-3">
-                                @if (Auth::user() && Auth::user()->school_id)
-                                    <div class="form-group mb-0 mr-3" style="min-width: 200px;">
-                                        <label for="filter_session_year_id" class="filter-menu">{{ __('session_year') }}</label>
-                                        <select name="session_year_id" id="filter_session_year_id" class="form-control">
-                                            @foreach ($sessionYears as $sessionYear)
-                                                <option value="{{ $sessionYear->id }}"
-                                                    {{ $sessionYear->default == 1 ? 'selected' : '' }}>
-                                                    {{ $sessionYear->name }}
-                                                </option>
-                                            @endforeach
-                                        </select>
-                                    </div>
-                                @endif
+
 
                                 <div class="form-group mb-0">
                                     <button id="update-status" class="btn btn-secondary" disabled>

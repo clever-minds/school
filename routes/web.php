@@ -467,6 +467,7 @@ Route::post('/admin/impersonation-exit',
             Route::get('/month-wise', [StaffAttendanceController::class, 'monthWiseIndex'])->name('staff-attendance.month');
             Route::get('/month-wise/list', [StaffAttendanceController::class, 'monthWiseList'])->name('staff-attendance.month-wise-list');
             Route::post('/month-wise/save', [StaffAttendanceController::class, 'storeMonthWise'])->name('staff-attendance.month-wise-save');
+            Route::post('/month-wise/bulk-save', [StaffAttendanceController::class, 'storeBulkMonthWise'])->name('staff-attendance.month-wise-bulk-save');
         });
 
         // Teacher KYC

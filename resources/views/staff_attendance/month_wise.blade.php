@@ -33,6 +33,20 @@
                             </div>
                         </div>
 
+                        <div id="toolbar" class="mb-3 d-flex align-items-center">
+                            <span class="mr-3 font-weight-bold">Mark All Empty:</span>
+                            <div class="form-check form-check-inline mt-0 mb-0 mr-3">
+                                <label class="form-check-label text-success">
+                                    <input type="checkbox" class="form-check-input" id="global-mark-p"> P (Present)
+                                </label>
+                            </div>
+                            <div class="form-check form-check-inline mt-0 mb-0">
+                                <label class="form-check-label text-danger">
+                                    <input type="checkbox" class="form-check-input" id="global-mark-a"> A (Absent)
+                                </label>
+                            </div>
+                        </div>
+
                         <div class="show_attendance_student_list">
                             <table aria-describedby="mydesc" class='table student_table' id='table_list'
                                    data-toggle="table"  data-click-to-select="true"
@@ -130,8 +144,33 @@
                     formatter: attendanceFormatter
                 });
             }
+
+            columns.push({
+                field: 'action',
+                title: 'Action',
+                formatter: actionFormatter
+            });
+
             return columns;
             
+        }
+
+        function actionFormatter(value, row, index) {
+            let userId = row.user_id;
+            return `
+                <div class="d-flex justify-content-center" style="min-width: 90px;">
+                    <div class="form-check form-check-inline mt-0 mb-0 mr-2">
+                        <label class="form-check-label text-success" style="font-size: 12px; margin-left: 1.5rem;">
+                            <input type="checkbox" class="form-check-input row-mark-p" data-userid="${userId}"> P
+                        </label>
+                    </div>
+                    <div class="form-check form-check-inline mt-0 mb-0">
+                        <label class="form-check-label text-danger" style="font-size: 12px; margin-left: 1.5rem;">
+                            <input type="checkbox" class="form-check-input row-mark-a" data-userid="${userId}"> A
+                        </label>
+                    </div>
+                </div>
+            `;
         }
 
     
@@ -220,6 +259,104 @@
                 });
             }
         });
+
+        $(document).on('change', '#global-mark-p, #global-mark-a', function() {
+            if(!$(this).is(':checked')) return;
+            let type = $(this).attr('id') === 'global-mark-p' ? 'P' : 'A';
+            let status = type === 'P' ? 1 : 4;
+            
+            if(type === 'P') $('#global-mark-a').prop('checked', false);
+            else $('#global-mark-p').prop('checked', false);
+
+            let updates = [];
+            let month = $('#month').val();
+            let currentYear = new Date().getFullYear();
+
+            $('.update-attendance').each(function() {
+                if($(this).val() === '') {
+                    $(this).val(type);
+                    $(this).removeClass('text-success text-danger text-info text-warning text-secondary');
+                    if(type === 'P') $(this).addClass('text-success');
+                    else $(this).addClass('text-danger');
+
+                    let day = $(this).data('day');
+                    let userId = $(this).data('userid');
+                    let date = `${currentYear}-${month.toString().padStart(2, '0')}-${day.toString().padStart(2, '0')}`;
+                    
+                    updates.push({
+                        user_id: userId,
+                        date: date,
+                        status: status,
+                        type: ''
+                    });
+                }
+            });
+
+            if(updates.length > 0) {
+                bulkSaveMonthWise(updates);
+            }
+            setTimeout(() => { $(this).prop('checked', false); }, 500);
+        });
+
+        $(document).on('change', '.row-mark-p, .row-mark-a', function() {
+            if(!$(this).is(':checked')) return;
+            let isP = $(this).hasClass('row-mark-p');
+            let type = isP ? 'P' : 'A';
+            let status = isP ? 1 : 4;
+            let userId = $(this).data('userid');
+
+            if(isP) $(this).closest('div.d-flex').find('.row-mark-a').prop('checked', false);
+            else $(this).closest('div.d-flex').find('.row-mark-p').prop('checked', false);
+
+            let updates = [];
+            let month = $('#month').val();
+            let currentYear = new Date().getFullYear();
+
+            $(`.update-attendance[data-userid="${userId}"]`).each(function() {
+                if($(this).val() === '') {
+                    $(this).val(type);
+                    $(this).removeClass('text-success text-danger text-info text-warning text-secondary');
+                    if(type === 'P') $(this).addClass('text-success');
+                    else $(this).addClass('text-danger');
+
+                    let day = $(this).data('day');
+                    let date = `${currentYear}-${month.toString().padStart(2, '0')}-${day.toString().padStart(2, '0')}`;
+                    
+                    updates.push({
+                        user_id: userId,
+                        date: date,
+                        status: status,
+                        type: ''
+                    });
+                }
+            });
+
+            if(updates.length > 0) {
+                bulkSaveMonthWise(updates);
+            }
+            setTimeout(() => { $(this).prop('checked', false); }, 500);
+        });
+
+        function bulkSaveMonthWise(updates) {
+            $.ajax({
+                url: '{{ route("staff-attendance.month-wise-bulk-save") }}',
+                type: 'POST',
+                data: {
+                    attendances: updates,
+                    _token: '{{ csrf_token() }}'
+                },
+                success: function(response) {
+                    if (!response.error) {
+                        showToastMessage(response.message, 'success');
+                    } else {
+                        showToastMessage(response.message, 'error');
+                    }
+                },
+                error: function() {
+                    showToastMessage('An error occurred during bulk save', 'error');
+                }
+            });
+        }
 
         $(document).ready(function() {
             if ($('#month').val()) {
