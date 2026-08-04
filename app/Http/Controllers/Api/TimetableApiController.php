@@ -12,8 +12,9 @@ use Throwable;
 
 class TimetableApiController extends Controller
 {
-    public function index(Request $request)
+    public function index()
     {
+        $request = request();
         try {
             $timetables = Timetable::whereHas('class_subject.class_section', function($q) {
                 $q->where('school_id', Auth::user()->school_id);

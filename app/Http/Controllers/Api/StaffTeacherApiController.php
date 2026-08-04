@@ -7,7 +7,7 @@ use Illuminate\Http\Request;
 use App\Repositories\User\UserInterface;
 use App\Repositories\Staff\StaffInterface;
 use App\Repositories\StaffSalary\StaffSalaryInterface;
-use App\Repositories\ExtraFormFields\ExtraFormFieldsInterface;
+use App\Repositories\ExtraFormField\ExtraFormFieldsInterface;
 use App\Services\ResponseService;
 use App\Services\UserService;
 use Illuminate\Support\Facades\DB;
