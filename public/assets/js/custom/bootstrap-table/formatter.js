@@ -203,9 +203,9 @@ function planDetailFormatter(value, row) {
 function salaryInputFormatter(value, row) {
     let html;
     if (value) {
-        html = '<input style="min-width: 120px;" type="number" min="0" required name="basic_salary[' + row.id + ']" class="form-control" readonly value="' + value + '">';
+        html = '<input style="min-width: 140px;" type="number" min="0" required name="basic_salary[' + row.id + ']" class="form-control" readonly value="' + value + '">';
     } else {
-        html = '<input style="min-width: 120px;" type="number" required min="0" name="basic_salary[' + row.id + ']" class="form-control" readonly value="0">';
+        html = '<input style="min-width: 140px;" type="number" required min="0" name="basic_salary[' + row.id + ']" class="form-control" readonly value="0">';
     }
     return html;
 }
@@ -214,9 +214,9 @@ function netSalaryInputFormatter(value, row) {
     let html = '';
     if (value) {
         value = parseFloat(value);
-        html = '<input style="min-width: 120px;" type="number" min="0" required name="net_salary[' + row.id + ']" class="form-control" value="' + value.toFixed(2) + '">';
+        html = '<input style="min-width: 140px;" type="number" min="0" required name="net_salary[' + row.id + ']" class="form-control" value="' + value.toFixed(2) + '">';
     } else {
-        html = '<input style="min-width: 120px;" type="number" required min="0" name="net_salary[' + row.id + ']" class="form-control" value="0">';
+        html = '<input style="min-width: 140px;" type="number" required min="0" name="net_salary[' + row.id + ']" class="form-control" value="0">';
     }
 
     html += paid_leave = '<input type="hidden" required name="paid_leave[' + row.id + ']" class="form-control" value="' + row.paid_leaves + '">'
