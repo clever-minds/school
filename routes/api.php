@@ -415,6 +415,17 @@ Route::get('/schools', [StaffApiController::class, 'getAllSchools']);
         Route::put('holidays/{id}', [\App\Http\Controllers\Api\HolidayApiController::class, 'update']);
         Route::delete('holidays/{id}', [\App\Http\Controllers\Api\HolidayApiController::class, 'destroy']);
 
+        // Session Years
+        Route::get('session-years', [\App\Http\Controllers\Api\SessionYearApiController::class, 'index']);
+        Route::post('session-years', [\App\Http\Controllers\Api\SessionYearApiController::class, 'store']);
+        Route::put('session-years/{id}', [\App\Http\Controllers\Api\SessionYearApiController::class, 'update']);
+        Route::delete('session-years/{id}', [\App\Http\Controllers\Api\SessionYearApiController::class, 'destroy']);
+
+        // Timetable
+        Route::get('timetable', [\App\Http\Controllers\Api\TimetableApiController::class, 'index']);
+        Route::post('timetable', [\App\Http\Controllers\Api\TimetableApiController::class, 'store']);
+        Route::delete('timetable/{id}', [\App\Http\Controllers\Api\TimetableApiController::class, 'destroy']);
+
         // Student Pickup Verification
         Route::post('verify-student-pickup-otp', [StudentPickupController::class, 'verifyPickupOTP']);
         Route::get('student-pickup-requests', [StudentPickupController::class, 'getAllPickupRequests']);
