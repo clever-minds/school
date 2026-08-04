@@ -409,6 +409,12 @@ Route::get('/schools', [StaffApiController::class, 'getAllSchools']);
         
         Route::post('reset-password', [StaffManageApiController::class, 'resetPassword']);
 
+        // Holidays
+        Route::get('holidays', [\App\Http\Controllers\Api\HolidayApiController::class, 'index']);
+        Route::post('holidays', [\App\Http\Controllers\Api\HolidayApiController::class, 'store']);
+        Route::put('holidays/{id}', [\App\Http\Controllers\Api\HolidayApiController::class, 'update']);
+        Route::delete('holidays/{id}', [\App\Http\Controllers\Api\HolidayApiController::class, 'destroy']);
+
         // Student Pickup Verification
         Route::post('verify-student-pickup-otp', [StudentPickupController::class, 'verifyPickupOTP']);
         Route::get('student-pickup-requests', [StudentPickupController::class, 'getAllPickupRequests']);
