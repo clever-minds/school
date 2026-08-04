@@ -33,17 +33,19 @@
                             </div>
                         </div>
 
-                        <div id="toolbar" class="mb-3 d-flex align-items-center">
-                            <span class="mr-3 font-weight-bold">Mark All Empty:</span>
-                            <div class="form-check form-check-inline mt-0 mb-0 mr-3">
-                                <label class="form-check-label text-success">
-                                    <input type="checkbox" class="form-check-input" id="global-mark-p"> P (Present)
-                                </label>
+                        <div id="toolbar" class="mb-3 d-flex align-items-center justify-content-between w-100">
+                            <div class="d-flex align-items-center">
+                                <span class="mr-3 font-weight-bold">Mark All Empty:</span>
+                                <div class="form-check form-check-inline mt-0 mb-0 mr-3">
+                                    <label class="form-check-label text-success">
+                                        <input type="checkbox" class="form-check-input" id="global-mark-p"> P (Present)
+                                    </label>
+                                </div>
                             </div>
-                            <div class="form-check form-check-inline mt-0 mb-0">
-                                <label class="form-check-label text-danger">
-                                    <input type="checkbox" class="form-check-input" id="global-mark-a"> A (Absent)
-                                </label>
+                            <div>
+                                <button type="button" class="btn btn-theme btn-sm" id="save-all-attendance">
+                                    <i class="fa fa-save mr-1"></i> Submit All Changes
+                                </button>
                             </div>
                         </div>
 
@@ -157,15 +159,10 @@
         function actionFormatter(value, row, index) {
             let userId = row.user_id;
             return `
-                <div class="d-flex justify-content-center" style="min-width: 90px;">
-                    <div class="form-check form-check-inline mt-0 mb-0 mr-2">
+                <div class="d-flex justify-content-center" style="min-width: 50px;">
+                    <div class="form-check form-check-inline mt-0 mb-0">
                         <label class="form-check-label text-success" style="font-size: 12px; margin-left: 1.5rem;">
                             <input type="checkbox" class="form-check-input row-mark-p" data-userid="${userId}"> P
-                        </label>
-                    </div>
-                    <div class="form-check form-check-inline mt-0 mb-0">
-                        <label class="form-check-label text-danger" style="font-size: 12px; margin-left: 1.5rem;">
-                            <input type="checkbox" class="form-check-input row-mark-a" data-userid="${userId}"> A
                         </label>
                     </div>
                 </div>
@@ -234,41 +231,17 @@
             else if (val === 'W') selectElem.addClass('text-info');
             else selectElem.addClass('text-secondary');
 
-            if(val !== '') {
-                $.ajax({
-                    url: '{{ route("staff-attendance.month-wise-save") }}',
-                    type: 'POST',
-                    data: {
-                        user_id: userId,
-                        date: date,
-                        status: status,
-                        type: type,
-                        _token: '{{ csrf_token() }}'
-                    },
-                    success: function(response) {
-                        if (!response.error) {
-                            showToastMessage(response.message, 'success');
-                        } else {
-                            showToastMessage(response.message, 'error');
-                        }
-                    },
-                    error: function() {
-                        showToastMessage('An error occurred', 'error');
-                    }
-                });
-            }
+            // Mark as dirty to save on submit
+            selectElem.addClass('is-dirty');
         });
 
-        $(document).on('change', '#global-mark-p, #global-mark-a', function() {
+        $(document).on('change', '#global-mark-p', function() {
             if(!$(this).is(':checked')) return;
             try {
-                let type = $(this).attr('id') === 'global-mark-p' ? 'P' : 'A';
-                let status = type === 'P' ? 1 : 4;
+                let type = 'P';
+                let status = 1;
                 
-                if(type === 'P') $('#global-mark-a').prop('checked', false);
-                else $('#global-mark-p').prop('checked', false);
-
-                let updates = [];
+                let count = 0;
                 let month = $('#month').val();
                 let currentYear = new Date().getFullYear();
 
@@ -280,24 +253,14 @@
                         if(type === 'P') $(this).addClass('text-success');
                         else $(this).addClass('text-danger');
 
-                        let day = $(this).data('day');
-                        let userId = $(this).data('userid');
-                        let date = `${currentYear}-${month.toString().padStart(2, '0')}-${day.toString().padStart(2, '0')}`;
-                        
-                        updates.push({
-                            user_id: userId,
-                            date: date,
-                            status: status,
-                            type: ''
-                        });
+                        $(this).addClass('is-dirty');
+                        count++;
                     }
                 });
 
-                if(updates.length > 0) {
-                    bulkSaveMonthWise(updates);
-                } else {
+                if(count === 0) {
                     if (typeof showToastMessage === 'function') {
-                        showToastMessage('No empty slots to update', 'warning');
+                        showToastMessage('No empty slots found to update', 'warning');
                     }
                 }
             } catch (e) {
@@ -309,18 +272,14 @@
             setTimeout(() => { $(this).prop('checked', false); }, 500);
         });
 
-        $(document).on('change', '.row-mark-p, .row-mark-a', function() {
+        $(document).on('change', '.row-mark-p', function() {
             if(!$(this).is(':checked')) return;
             try {
-                let isP = $(this).hasClass('row-mark-p');
-                let type = isP ? 'P' : 'A';
-                let status = isP ? 1 : 4;
+                let type = 'P';
+                let status = 1;
                 let userId = $(this).data('userid');
 
-                if(isP) $(this).closest('div.d-flex').find('.row-mark-a').prop('checked', false);
-                else $(this).closest('div.d-flex').find('.row-mark-p').prop('checked', false);
-
-                let updates = [];
+                let count = 0;
                 let month = $('#month').val();
                 let currentYear = new Date().getFullYear();
 
@@ -332,23 +291,14 @@
                         if(type === 'P') $(this).addClass('text-success');
                         else $(this).addClass('text-danger');
 
-                        let day = $(this).data('day');
-                        let date = `${currentYear}-${month.toString().padStart(2, '0')}-${day.toString().padStart(2, '0')}`;
-                        
-                        updates.push({
-                            user_id: userId,
-                            date: date,
-                            status: status,
-                            type: ''
-                        });
+                        $(this).addClass('is-dirty');
+                        count++;
                     }
                 });
 
-                if(updates.length > 0) {
-                    bulkSaveMonthWise(updates);
-                } else {
+                if(count === 0) {
                     if (typeof showToastMessage === 'function') {
-                        showToastMessage('No empty slots to update', 'warning');
+                        showToastMessage('No empty slots found to update', 'warning');
                     }
                 }
             } catch (e) {
@@ -360,33 +310,76 @@
             setTimeout(() => { $(this).prop('checked', false); }, 500);
         });
 
-        function bulkSaveMonthWise(updates) {
-            $.ajax({
-                url: '{{ route("staff-attendance.month-wise-bulk-save") }}',
-                type: 'POST',
-                data: {
-                    _token: '{{ csrf_token() }}', // Placed first in case payload truncates
-                    attendances: updates
-                },
-                success: function(response) {
-                    if (!response.error) {
-                        if (typeof showToastMessage === 'function') {
-                            showToastMessage(response.message || 'Successfully Saved', 'success');
-                        }
-                    } else {
-                        if (typeof showToastMessage === 'function') {
-                            showToastMessage(response.message, 'error');
-                        }
-                    }
-                },
-                error: function(xhr) {
-                    console.error('Bulk save error:', xhr);
-                    if (typeof showToastMessage === 'function') {
-                        showToastMessage('An error occurred during bulk save', 'error');
-                    }
+        $(document).on('click', '#save-all-attendance', function() {
+            let updates = [];
+            let month = $('#month').val();
+            let currentYear = new Date().getFullYear();
+
+            $('.update-attendance.is-dirty').each(function() {
+                let val = $(this).val();
+                if(val && val !== '-' && val !== '') {
+                    let day = $(this).data('day');
+                    let userId = $(this).data('userid');
+                    let date = `${currentYear}-${month.toString().padStart(2, '0')}-${day.toString().padStart(2, '0')}`;
+                    
+                    let status = 1;
+                    let type = '';
+                    if (val === 'A') status = 4;
+                    else if (val === 'H') status = 3;
+                    else if (val === 'W') { status = 1; type = 'Work From Home'; }
+
+                    updates.push({
+                        user_id: userId,
+                        date: date,
+                        status: status,
+                        type: type
+                    });
                 }
             });
-        }
+
+            if (updates.length > 0) {
+                let btn = $(this);
+                let originalText = btn.html();
+                btn.html('<i class="fa fa-spinner fa-spin mr-1"></i> Saving...');
+                btn.prop('disabled', true);
+
+                $.ajax({
+                    url: '{{ route("staff-attendance.month-wise-bulk-save") }}',
+                    type: 'POST',
+                    data: {
+                        _token: '{{ csrf_token() }}',
+                        attendances: updates
+                    },
+                    success: function(response) {
+                        btn.html(originalText);
+                        btn.prop('disabled', false);
+
+                        if (!response.error) {
+                            $('.update-attendance.is-dirty').removeClass('is-dirty');
+                            if (typeof showToastMessage === 'function') {
+                                showToastMessage(response.message || 'Successfully Saved', 'success');
+                            }
+                        } else {
+                            if (typeof showToastMessage === 'function') {
+                                showToastMessage(response.message, 'error');
+                            }
+                        }
+                    },
+                    error: function(xhr) {
+                        btn.html(originalText);
+                        btn.prop('disabled', false);
+                        console.error('Bulk save error:', xhr);
+                        if (typeof showToastMessage === 'function') {
+                            showToastMessage('An error occurred during bulk save', 'error');
+                        }
+                    }
+                });
+            } else {
+                if (typeof showToastMessage === 'function') {
+                    showToastMessage('No changes to save', 'info');
+                }
+            }
+        });
 
         $(document).ready(function() {
             if ($('#month').val()) {
