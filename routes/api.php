@@ -332,6 +332,8 @@ Route::get('/schools', [StaffApiController::class, 'getAllSchools']);
         Route::post('attendance', [StaffApiController::class, 'markAttendance']);
         Route::get('attendance-history', [StaffApiController::class, 'attendanceHistory']);
         Route::get('attendance-report', [StaffApiController::class, 'attendanceReport']);
+        Route::get('attendance-month-wise', [StaffApiController::class, 'attendanceMonthWiseList']);
+        Route::post('attendance-month-wise', [StaffApiController::class, 'storeAttendanceMonthWise']);
 
         // Staff Management APIs
         Route::get('student-list', [StaffManageApiController::class, 'studentList']);

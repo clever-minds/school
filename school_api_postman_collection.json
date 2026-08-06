@@ -2263,6 +2263,74 @@
                     ]
                 }
             ]
+        },
+        {
+            "name": "Month-wise Staff Attendance",
+            "item": [
+                {
+                    "name": "Get Month-wise Attendance",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{token}}"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}api/attendance-month-wise?month=8&year=2026",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "attendance-month-wise"
+                            ],
+                            "query": [
+                                {
+                                    "key": "month",
+                                    "value": "8"
+                                },
+                                {
+                                    "key": "year",
+                                    "value": "2026"
+                                }
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Store Month-wise Attendance",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{token}}"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"attendances\": [\n    {\n      \"user_id\": 1,\n      \"date\": \"2026-08-01\",\n      \"status\": 1,\n      \"type\": \"\"\n    }\n  ]\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        },
+                        "url": {
+                            "raw": "{{base_url}}api/attendance-month-wise",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "attendance-month-wise"
+                            ]
+                        }
+                    }
+                }
+            ]
         }
     ],
     "variable": [

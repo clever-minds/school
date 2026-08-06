@@ -1477,5 +1477,125 @@ class StaffApiController extends Controller
             return ResponseService::errorResponse();
         }
     }
+    public function attendanceMonthWiseList(Request $request)
+    {
+        try {
+            $user = Auth::user();
+            $month = $request->month;
+            if (!$month) {
+                return ResponseService::errorResponse('Month is required');
+            }
+            $year = $request->year ?? date('Y');
+            $date = Carbon::create($year, $month, 1);
+            $school_id = $user->school_id;
+
+            // Fetch all staff for this school
+            $staffUsers = User::where('school_id', $school_id)
+                ->where('status', 1)
+                ->has('staff')
+                ->whereHas('roles', function($q) {
+                    $q->whereNotIn('name', ['Student', 'Parent']);
+                })->orderBy('first_name', 'ASC')->get();
+                
+            $total = $staffUsers->count();
+            $rows = array();
+            
+            $startDate = $date->copy()->startOfMonth()->format('Y-m-d');
+            $endDate = $date->copy()->endOfMonth()->format('Y-m-d');
+            $staffUserIds = $staffUsers->pluck('id')->toArray();
+            
+            $allAttendances = $this->staffAttendance->builder()
+                ->whereIn('user_id', $staffUserIds)
+                ->whereBetween('date', [$startDate, $endDate])
+                ->get()
+                ->groupBy('user_id');
+            
+            foreach ($staffUsers as $staffUser) {            
+                $staffAttendance = ['full_name' => $staffUser->full_name, 'user_id' => $staffUser->id];
+                $userAttendances = $allAttendances->has($staffUser->id) ? $allAttendances[$staffUser->id]->keyBy('date') : collect();
+                
+                for ($day=1; $day <= $date->daysInMonth; $day++) {
+                    $currentDate = $date->copy()->day($day)->format('Y-m-d');
+                    $attendance = $userAttendances->has($currentDate) ? $userAttendances[$currentDate] : null;
+                    
+                    if ($attendance) {
+                        if ($attendance->type === 'Work From Home') {
+                            $staffAttendance["day_$day"] = 'W';
+                        } elseif ($attendance->status == 1) {
+                            $staffAttendance["day_$day"] = 'P';
+                        } elseif ($attendance->status == 3) {
+                            $staffAttendance["day_$day"] = 'H';
+                        } else {
+                            $staffAttendance["day_$day"] = 'A';
+                        }
+                    } else {
+                        $staffAttendance["day_$day"] = null;
+                    }
+                }
+                $rows[] = $staffAttendance;
+            }
+
+            $bulkData = array();
+            $bulkData['total'] = $total;
+            $bulkData['rows'] = $rows;
+            
+            return ResponseService::successResponse('Data fetched successfully', $bulkData);
+        } catch (\Throwable $th) {
+            ResponseService::logErrorResponse($th);
+            return ResponseService::errorResponse();
+        }
+    }
+
+    public function storeAttendanceMonthWise(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'attendances' => 'required|array',
+            'attendances.*.user_id' => 'required|exists:users,id',
+            'attendances.*.date' => 'required|date',
+            'attendances.*.status' => 'required',
+            'attendances.*.type' => 'nullable|string'
+        ]);
+
+        if ($validator->fails()) {
+            return ResponseService::errorResponse($validator->errors()->first());
+        }
+
+        try {
+            $user = Auth::user();
+
+            foreach($request->attendances as $att) {
+                $attendance = $this->staffAttendance->builder()
+                    ->where('user_id', $att['user_id'])
+                    ->where('date', $att['date'])
+                    ->first();
+
+                $status = $att['status'];
+                $type = $att['type'] ?? '';
+
+                if (!$attendance) {
+                    $targetUser = User::find($att['user_id']);
+                    $data = [
+                        'user_id' => $att['user_id'],
+                        'school_id' => $targetUser->school_id,
+                        'date' => $att['date'],
+                        'status' => $status,
+                        'type' => $type
+                    ];
+                    $this->staffAttendance->create($data);
+                } else {
+                    $data = [
+                        'status' => $status,
+                        'type' => $type
+                    ];
+                    $this->staffAttendance->update($attendance->id, $data);
+                }
+            }
+
+            return ResponseService::successResponse('Successfully Saved');
+        } catch (\Throwable $th) {
+            ResponseService::logErrorResponse($th);
+            return ResponseService::errorResponse();
+        }
+    }
 }
 
