@@ -11,6 +11,20 @@ use App\Http\Controllers\Api\StaffTeacherApiController;
 use App\Http\Controllers\Api\StudentPickupController;
 use App\Http\Controllers\SubscriptionWebhookController;
 use App\Http\Controllers\Api\SessionYearApiController;
+use App\Http\Controllers\Api\StaffExamApiController;
+use App\Http\Controllers\Api\StaffGradeApiController;
+use App\Http\Controllers\Api\StaffExamResultApiController;
+use App\Http\Controllers\Api\StaffOnlineExamApiController;
+use App\Http\Controllers\Api\StaffOnlineExamQuestionApiController;
+use App\Http\Controllers\Api\StaffOnlineExamResultApiController;
+use App\Http\Controllers\Api\StaffLessonApiController;
+use App\Http\Controllers\Api\StaffLessonTopicApiController;
+use App\Http\Controllers\Api\StaffAttendanceApiController;
+use App\Http\Controllers\Api\StaffLeaveApiController;
+use App\Http\Controllers\Api\StaffFeesApiController;
+use App\Http\Controllers\Api\StaffAssignmentApiController;
+use App\Http\Controllers\Api\StaffAnnouncementApiController;
+use App\Http\Controllers\Api\StaffGalleryApiController;
 use App\Http\Controllers\Api\HolidayApiController;
 use App\Http\Controllers\Api\TimetableApiController;
 use Illuminate\Support\Facades\Route;
@@ -398,6 +412,100 @@ Route::get('/schools', [StaffApiController::class, 'getAllSchools']);
 
         Route::get('class-list', [\App\Http\Controllers\Api\StaffAcademicsApiController::class, 'classList']);
         Route::post('class-store', [\App\Http\Controllers\Api\StaffAcademicsApiController::class, 'classStore']);
+
+        // Exam APIs
+        Route::get('exam-list', [StaffExamApiController::class, 'examList']);
+        Route::post('exam-store', [StaffExamApiController::class, 'examStore']);
+        Route::post('exam-update/{id}', [StaffExamApiController::class, 'examUpdate']);
+        Route::delete('exam-destroy/{id}', [StaffExamApiController::class, 'examDestroy']);
+
+        Route::get('exam-timetable/{id}', [StaffExamApiController::class, 'getExamTimetable']);
+        Route::post('exam-timetable/{id}', [StaffExamApiController::class, 'updateExamTimetable']);
+
+        // Grade APIs
+        Route::get('grades', [StaffGradeApiController::class, 'index']);
+        Route::post('grades', [StaffGradeApiController::class, 'store']);
+        Route::delete('grades/{id}', [StaffGradeApiController::class, 'destroy']);
+
+        // Exam Result APIs
+        Route::get('exam-result', [StaffExamResultApiController::class, 'showExamResult']);
+        Route::post('exam-result/publish/{id}', [StaffExamResultApiController::class, 'publishExamResult']);
+        Route::post('exam-result/update-marks', [StaffExamResultApiController::class, 'updateExamResultMarks']);
+
+        // Online Exam APIs
+        Route::get('online-exam', [StaffOnlineExamApiController::class, 'index']);
+        Route::post('online-exam', [StaffOnlineExamApiController::class, 'store']);
+        Route::post('online-exam/{id}', [StaffOnlineExamApiController::class, 'update']);
+        Route::delete('online-exam/{id}', [StaffOnlineExamApiController::class, 'destroy']);
+
+        // Online Exam Question APIs
+        Route::get('online-exam-question', [StaffOnlineExamQuestionApiController::class, 'index']);
+        Route::post('online-exam-question', [StaffOnlineExamQuestionApiController::class, 'store']);
+        Route::post('online-exam-question/{id}', [StaffOnlineExamQuestionApiController::class, 'update']);
+        Route::delete('online-exam-question/{id}', [StaffOnlineExamQuestionApiController::class, 'destroy']);
+
+        // Online Exam Result APIs
+        Route::get('online-exam-result/{id}', [StaffOnlineExamResultApiController::class, 'show']);
+
+        // Lesson APIs
+        Route::get('lesson', [StaffLessonApiController::class, 'index']);
+        Route::post('lesson', [StaffLessonApiController::class, 'store']);
+        Route::post('lesson/{id}', [StaffLessonApiController::class, 'update']);
+        Route::delete('lesson/{id}', [StaffLessonApiController::class, 'destroy']);
+
+        // Lesson Topic APIs
+        Route::get('lesson-topic', [StaffLessonTopicApiController::class, 'index']);
+        Route::post('lesson-topic', [StaffLessonTopicApiController::class, 'store']);
+        Route::post('lesson-topic/{id}', [StaffLessonTopicApiController::class, 'update']);
+        Route::delete('lesson-topic/{id}', [StaffLessonTopicApiController::class, 'destroy']);
+
+        // Attendance APIs
+        Route::get('attendance/data', [StaffAttendanceApiController::class, 'getAttendanceData']);
+        Route::get('attendance', [StaffAttendanceApiController::class, 'show']);
+        Route::post('attendance', [StaffAttendanceApiController::class, 'store']);
+        Route::get('attendance/report', [StaffAttendanceApiController::class, 'attendanceReport']);
+
+        // Leave APIs
+        Route::get('leave', [StaffLeaveApiController::class, 'index']);
+        Route::post('leave', [StaffLeaveApiController::class, 'store']);
+        Route::post('leave/{id}', [StaffLeaveApiController::class, 'update']);
+        Route::delete('leave/{id}', [StaffLeaveApiController::class, 'destroy']);
+        
+        Route::get('leave-request', [StaffLeaveApiController::class, 'leaveRequests']);
+        Route::post('leave-status', [StaffLeaveApiController::class, 'updateLeaveStatus']);
+        Route::get('leave-report', [StaffLeaveApiController::class, 'leaveReport']);
+        Route::get('leave-master', [StaffLeaveApiController::class, 'leaveMasterIndex']);
+        Route::post('leave-master', [StaffLeaveApiController::class, 'leaveMasterStore']);
+        Route::post('leave-master/{id}', [StaffLeaveApiController::class, 'leaveMasterUpdate']);
+        Route::delete('leave-master/{id}', [StaffLeaveApiController::class, 'leaveMasterDestroy']);
+
+        // Fees APIs
+        Route::get('fees-class', [StaffFeesApiController::class, 'show']);
+        Route::post('fees-class', [StaffFeesApiController::class, 'store']);
+        Route::post('fees-class/{id}', [StaffFeesApiController::class, 'update']);
+        Route::delete('fees-class/{id}', [StaffFeesApiController::class, 'destroy']);
+        Route::post('fees-paid/compulsory', [StaffFeesApiController::class, 'compulsoryFeesPaidStore']);
+        Route::post('fees-paid/optional', [StaffFeesApiController::class, 'optionalFeesPaidStore']);
+
+        // Assignment/Homework APIs
+        Route::get('assignment', [StaffAssignmentApiController::class, 'show']);
+        Route::post('assignment', [StaffAssignmentApiController::class, 'store']);
+        Route::post('assignment/{id}', [StaffAssignmentApiController::class, 'update']);
+        Route::delete('assignment/{id}', [StaffAssignmentApiController::class, 'destroy']);
+        Route::get('assignment-submission/{id}', [StaffAssignmentApiController::class, 'showAssignmentSubmissionDetails']);
+        Route::post('assignment-submission/evaluate', [StaffAssignmentApiController::class, 'bulkAssignmentSubmissionUpdate']);
+
+        // Announcement APIs
+        Route::get('announcement', [StaffAnnouncementApiController::class, 'index']);
+        Route::post('announcement', [StaffAnnouncementApiController::class, 'store']);
+        Route::post('announcement/{id}', [StaffAnnouncementApiController::class, 'update']);
+        Route::delete('announcement/{id}', [StaffAnnouncementApiController::class, 'destroy']);
+
+        // Gallery APIs
+        Route::get('gallery', [StaffGalleryApiController::class, 'index']);
+        Route::post('gallery', [StaffGalleryApiController::class, 'store']);
+        Route::delete('gallery/{id}', [StaffGalleryApiController::class, 'destroy']);
+
         Route::post('class-update/{id}', [\App\Http\Controllers\Api\StaffAcademicsApiController::class, 'classUpdate']);
         Route::delete('class-destroy/{id}', [\App\Http\Controllers\Api\StaffAcademicsApiController::class, 'classDestroy']);
 
