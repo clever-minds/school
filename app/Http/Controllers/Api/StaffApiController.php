@@ -845,6 +845,20 @@ class StaffApiController extends Controller
         }
     }
 
+    public function getRolePermissions($id)
+    {
+        try {
+            $role = Role::with('permissions')->find($id);
+            if (!$role) {
+                return ResponseService::errorResponse('Role not found');
+            }
+            ResponseService::successResponse('Data Fetched Successfully', $role->permissions);
+        } catch (\Throwable $th) {
+            ResponseService::logErrorResponse($th);
+            ResponseService::errorResponse();
+        }
+    }
+
     public function getUsers(Request $request)
     {
         ResponseService::noFeatureThenSendJson('Announcement Management');
