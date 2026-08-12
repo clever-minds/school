@@ -2261,6 +2261,30 @@
                             }
                         }
                     ]
+                },
+                {
+                    "name": "Get Role Permissions",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{token}}"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/api/staff/role-permissions/1",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "staff",
+                                "role-permissions",
+                                "1"
+                            ]
+                        }
+                    }
                 }
             ]
         },
