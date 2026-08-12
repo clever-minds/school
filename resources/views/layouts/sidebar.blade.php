@@ -220,6 +220,13 @@
 
                         @can('teacher-interview-question-list')
                             <li class="nav-item">
+                                <a href="{{ route('teacher-interview-categories.index') }}" class="nav-link">
+                                    <span class="menu-title">{{ __('Interview Categories') }}</span>
+                                </a>
+                            </li>
+                        @endcan
+                        @can('teacher-interview-question-list')
+                            <li class="nav-item">
                                 <a href="{{ route('teacher-interview-feedback-questions.index') }}" class="nav-link">
                                     <span class="menu-title">{{ __('Teacher Interview Questions') }}</span>
                                 </a>
@@ -1164,29 +1171,33 @@
         
 
 
-        {{-- Audit Questions --}}
-        @canany(['audit-question-list','audit-question-create','audit-question-edit','audit-question-delete'])
+        {{-- School Audit --}}
+        @canany(['audit-question-list','audit-question-create','audit-question-edit','audit-question-delete', 'school-audit-list','school-audit-create','school-audit-edit','school-audit-delete'])
             <li class="nav-item">
-                <a href="{{ route('audit-questions.index') }}" class="nav-link">
-                    <i class="fa fa-question-circle menu-icon"></i>
-                    <span class="menu-title">{{ __('Audit Questions') }}</span>
-                </a>
-            </li>
-            <li class="nav-item {{ request()->is('audit-option-groups*') ? 'active' : '' }}">
-                <a href="{{ route('audit-option-groups.index') }}" class="nav-link">
-                    <i class="fa fa-list-ul menu-icon"></i>
-                    <span class="menu-title">{{ __('Option Groups') }}</span>
-                </a>
-            </li>
-        @endcanany
-
-        {{-- School Audits --}}
-        @canany(['school-audit-list','school-audit-create','school-audit-edit','school-audit-delete'])
-            <li class="nav-item">
-                <a href="{{ route('school-audits.index') }}" class="nav-link">
+                <a class="nav-link" data-toggle="collapse" href="#school-audit-menu" aria-expanded="false"
+                    aria-controls="school-audit-menu">
                     <i class="fa fa-check-square menu-icon"></i>
-                    <span class="menu-title">{{ __('School Audits') }}</span>
+                    <span class="menu-title">{{ __('School Audit') }}</span>
+                    <i class="menu-arrow"></i>
                 </a>
+                <div class="collapse" id="school-audit-menu">
+                    <ul class="nav flex-column sub-menu">
+                        @canany(['audit-question-list','audit-question-create','audit-question-edit','audit-question-delete'])
+                            <li class="nav-item">
+                                <a class="nav-link" href="{{ route('audit-categories.index') }}">{{ __('Audit Categories') }}</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" href="{{ route('audit-questions.index') }}">{{ __('Audit Questions') }}</a>
+                            </li>
+                        @endcanany
+
+                        @canany(['school-audit-list','school-audit-create','school-audit-edit','school-audit-delete'])
+                            <li class="nav-item">
+                                <a class="nav-link" href="{{ route('school-audits.index') }}">{{ __('School Audits') }}</a>
+                            </li>
+                        @endcanany
+                    </ul>
+                </div>
             </li>
         @endcanany
 
@@ -1442,23 +1453,35 @@
             </li>
         @endif
 
-        @canany(['teacher-interview-manage', 'teacher-interview-list'])
+        {{-- Teacher Interview --}}
+        @canany(['teacher-interview-manage', 'teacher-interview-list', 'teacher-interview-question-list'])
             <li class="nav-item">
-                <a href="{{ url('teacher-interviews') }}" class="nav-link">
+                <a class="nav-link" data-toggle="collapse" href="#teacher-interview-menu" aria-expanded="false"
+                    aria-controls="teacher-interview-menu">
                     <i class="fa fa-users menu-icon"></i>
-                    <span class="menu-title">{{ __('Teacher Interviews') }}</span>
+                    <span class="menu-title">{{ __('Teacher Interview') }}</span>
+                    <i class="menu-arrow"></i>
                 </a>
+                <div class="collapse" id="teacher-interview-menu">
+                    <ul class="nav flex-column sub-menu">
+                        @canany(['teacher-interview-manage', 'teacher-interview-list'])
+                            <li class="nav-item">
+                                <a class="nav-link" href="{{ url('teacher-interviews') }}">{{ __('Teacher Interviews') }}</a>
+                            </li>
+                        @endcanany
+
+                        @can('teacher-interview-question-list')
+                            <li class="nav-item">
+                                <a class="nav-link" href="{{ route('teacher-interview-categories.index') }}">{{ __('Interview Categories') }}</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" href="{{ route('teacher-interview-feedback-questions.index') }}">{{ __('Interview Questions') }}</a>
+                            </li>
+                        @endcan
+                    </ul>
+                </div>
             </li>
         @endcanany
-
-        @can('teacher-interview-question-list')
-            <li class="nav-item">
-                <a href="{{ route('teacher-interview-feedback-questions.index') }}" class="nav-link">
-                    <i class="fa fa-question-circle menu-icon"></i>
-                    <span class="menu-title">{{ __('Interview Questions') }}</span>
-                </a>
-            </li>
-        @endcan
 
     </ul>
 </nav>

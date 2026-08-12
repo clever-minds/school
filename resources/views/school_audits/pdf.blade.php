@@ -150,7 +150,7 @@
             </tr>
         </thead>
         <tbody>
-            @foreach($audit->answers->groupBy('question.category') as $category => $categoryAnswers)
+            @foreach($audit->answers->groupBy('question.category.name') as $category => $categoryAnswers)
                 @if($category)
                     <tr>
                         <td colspan="3" class="category-header">{{ $category }}</td>
@@ -161,20 +161,30 @@
                     <tr>
                         <td>{{ $answer->question ? $answer->question->question : '-' }}</td>
                         <td>
-                            @php 
-                                $isYes = ($answer->answer == 'Yes'); 
-                                $isNo = ($answer->answer == 'No'); 
-                                $isNA = ($answer->answer == 'N/A'); 
-                            @endphp
-                            <span class="checkbox-item">
-                                <span class="box {{ $isYes ? 'box-selected' : '' }}">{!! $isYes ? '&#10004;' : '' !!}</span> Yes
-                            </span>
-                            <span class="checkbox-item">
-                                <span class="box {{ $isNo ? 'box-selected' : '' }}">{!! $isNo ? '&#10004;' : '' !!}</span> No
-                            </span>
-                            <span class="checkbox-item">
-                                <span class="box {{ $isNA ? 'box-selected' : '' }}">{!! $isNA ? '&#10004;' : '' !!}</span> N/A
-                            </span>
+                            @if($answer->question && in_array($answer->question->type, ['Yes/No', 'Conditional']))
+                                @php 
+                                    $conditionalOptions = $answer->question->custom_options ? array_map('trim', explode(',', $answer->question->custom_options)) : ['Excellent', 'Good', 'Average', 'Unsatisfactory'];
+                                    $isYes = ($answer->answer == 'Yes' || in_array($answer->answer, $conditionalOptions)); 
+                                    $isNo = ($answer->answer == 'No'); 
+                                    $isNA = ($answer->answer == 'N/A'); 
+                                @endphp
+                                <span class="checkbox-item">
+                                    <span class="box {{ $isYes ? 'box-selected' : '' }}">{!! $isYes ? '&#10004;' : '' !!}</span> Yes
+                                </span>
+                                <span class="checkbox-item">
+                                    <span class="box {{ $isNo ? 'box-selected' : '' }}">{!! $isNo ? '&#10004;' : '' !!}</span> No
+                                </span>
+                                <span class="checkbox-item">
+                                    <span class="box {{ $isNA ? 'box-selected' : '' }}">{!! $isNA ? '&#10004;' : '' !!}</span> N/A
+                                </span>
+                                @if(in_array($answer->answer, $conditionalOptions))
+                                    <br><strong>Rating:</strong> {{ $answer->answer }}
+                                @endif
+                            @elseif($answer->question && in_array($answer->question->type, ['Rating', 'Custom']))
+                                <strong>{{ $answer->answer }}</strong>
+                            @else
+                                {{ $answer->answer }}
+                            @endif
                         </td>
                         <td>{{ $answer->remarks ?? '' }}</td>
                     </tr>

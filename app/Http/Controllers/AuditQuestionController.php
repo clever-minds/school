@@ -18,7 +18,7 @@ class AuditQuestionController extends Controller
     public function index()
     {
         ResponseService::noAnyPermissionThenRedirect(['audit-question-list','audit-question-create']);
-        $categories = AuditQuestion::select('category')->whereNotNull('category')->where('category', '!=', '')->distinct()->pluck('category');
+        $categories = \App\Models\AuditCategory::all();
         $optionGroups = AuditOptionGroup::all();
         return view('audit_questions.index', compact('categories', 'optionGroups'));
     }
@@ -31,10 +31,10 @@ class AuditQuestionController extends Controller
         ResponseService::noPermissionThenRedirect('audit-question-create');
         $validator = Validator::make($request->all(), [
             'question' => 'required|string',
-            'category' => 'nullable|string',
+            'audit_category_id' => 'required|exists:audit_categories,id',
             'status' => 'nullable|in:0,1',
             'type' => 'nullable|string',
-            'audit_option_group_id' => 'nullable|exists:audit_option_groups,id'
+            'custom_options' => 'nullable|string'
         ]);
 
         if ($validator->fails()) {
@@ -44,10 +44,10 @@ class AuditQuestionController extends Controller
         try {
             AuditQuestion::create([
                 'question' => $request->question,
-                'category' => $request->category,
+                'audit_category_id' => $request->audit_category_id,
                 'status' => $request->status ?? 1,
                 'type' => $request->type,
-                'audit_option_group_id' => $request->audit_option_group_id
+                'custom_options' => $request->custom_options
             ]);
             ResponseService::successResponse('Data Stored Successfully');
         } catch (Throwable $e) {
@@ -68,10 +68,12 @@ class AuditQuestionController extends Controller
         $order = request('order', 'DESC');
         $search = request('search');
 
-        $sql = AuditQuestion::with('optionGroup')
+        $sql = AuditQuestion::with(['category'])
             ->when($search, function ($query) use ($search) {
                 $query->where('question', 'LIKE', "%$search%")
-                      ->orWhere('category', 'LIKE', "%$search%");
+                      ->orWhereHas('category', function($q) use($search) {
+                          $q->where('name', 'LIKE', "%$search%");
+                      });
             });
 
         $total = $sql->count();
@@ -89,7 +91,8 @@ class AuditQuestionController extends Controller
             
             $tempRow = $row->toArray();
             $tempRow['no'] = $no++;
-            $tempRow['option_group_name'] = $row->optionGroup ? $row->optionGroup->name : '-';
+            $tempRow['category'] = $row->category ? $row->category->name : '-';
+
             $tempRow['status_text'] = $row->status == 1 ? '<span class="badge badge-success">Active</span>' : '<span class="badge badge-danger">Inactive</span>';
             $tempRow['operate'] = $operate;
             $rows[] = $tempRow;
@@ -106,10 +109,10 @@ class AuditQuestionController extends Controller
         ResponseService::noPermissionThenSendJson('audit-question-edit');
         $validator = Validator::make($request->all(), [
             'question' => 'required|string',
-            'category' => 'nullable|string',
+            'audit_category_id' => 'required|exists:audit_categories,id',
             'status' => 'required|in:0,1',
             'type' => 'nullable|string',
-            'audit_option_group_id' => 'nullable|exists:audit_option_groups,id'
+            'custom_options' => 'nullable|string'
         ]);
 
         if ($validator->fails()) {
@@ -120,10 +123,10 @@ class AuditQuestionController extends Controller
             $question = AuditQuestion::findOrFail($id);
             $question->update([
                 'question' => $request->question,
-                'category' => $request->category,
+                'audit_category_id' => $request->audit_category_id,
                 'status' => $request->status,
                 'type' => $request->type,
-                'audit_option_group_id' => $request->audit_option_group_id
+                'custom_options' => $request->custom_options
             ]);
             ResponseService::successResponse('Data Updated Successfully');
         } catch (Throwable $e) {

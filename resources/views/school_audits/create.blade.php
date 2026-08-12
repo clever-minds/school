@@ -20,7 +20,11 @@
                         <form class="pt-3" action="{{ route('school-audits.store') }}" method="POST">
                             @csrf
                             <div class="row form-group">
-                                <div class="col-sm-12 col-md-3">
+                                <div class="col-sm-12 col-md-4">
+                                    <label>{{ __('Audit Name') }} <span class="text-danger">*</span></label>
+                                    <input type="text" name="name" class="form-control" required placeholder="e.g. Monthly Academic Audit">
+                                </div>
+                                <div class="col-sm-12 col-md-4">
                                     <label>{{ __('School') }} <span class="text-danger">*</span></label>
                                     <select name="school_id" id="school_id" class="form-control" required>
                                         <option value="">{{ __('Select School') }}</option>
@@ -29,7 +33,7 @@
                                         @endforeach
                                     </select>
                                 </div>
-                                <div class="col-sm-12 col-md-3">
+                                <div class="col-sm-12 col-md-4">
                                     <label>{{ __('Auditor') }} <span class="text-danger">*</span></label>
                                     <select name="auditor_id" id="auditor_id" class="form-control" required>
                                         <option value="">{{ __('Select Auditor') }}</option>
@@ -38,19 +42,26 @@
                                         @endforeach
                                     </select>
                                 </div>
-                                <div class="col-sm-12 col-md-3">
-                                    <label>{{ __('Audit Type') }} <span class="text-danger">*</span></label>
-                                    <select name="audit_type" id="audit_type" class="form-control" required>
-                                        <option value="">{{ __('Select Type') }}</option>
+                            </div>
+                            <div class="row form-group">
+                                <div class="col-sm-12 col-md-4">
+                                    <label>{{ __('Audit Frequency') }} <span class="text-danger">*</span></label>
+                                    <select name="frequency" id="frequency" class="form-control" required>
+                                        <option value="">{{ __('Select Frequency') }}</option>
+                                        <option value="One-Time">{{ __('One-Time') }}</option>
                                         <option value="Monthly">{{ __('Monthly') }}</option>
                                         <option value="Quarterly">{{ __('Quarterly') }}</option>
                                         <option value="Half Yearly">{{ __('Half Yearly') }}</option>
                                         <option value="Yearly">{{ __('Yearly') }}</option>
                                     </select>
                                 </div>
-                                <div class="col-sm-12 col-md-3">
+                                <div class="col-sm-12 col-md-4">
                                     <label>{{ __('Audit Date') }} <span class="text-danger">*</span></label>
                                     <input type="date" name="audit_date" class="form-control" required value="{{ date('Y-m-d') }}">
+                                </div>
+                                <div class="col-sm-12 col-md-4">
+                                    <label>{{ __('Due Date') }} <span class="text-danger">*</span></label>
+                                    <input type="date" name="due_date" class="form-control" required value="{{ date('Y-m-d', strtotime('+7 days')) }}">
                                 </div>
                             </div>
                             
@@ -62,9 +73,9 @@
                             </div>
 
                             <hr>
-                            <h4 class="card-title mt-4 mb-4">{{ __('Audit Questions') }}</h4>
+                            <h4 class="card-title mt-4 mb-4">{{ __('Select Audit Categories') }}</h4>
                             
-                            @if(count($questions) > 0)
+                            @if(count($categories) > 0)
                                 <div class="table-responsive">
                                     <table class="table table-bordered">
                                         <thead>
@@ -73,35 +84,32 @@
                                                     <input type="checkbox" id="selectAll">
                                                 </th>
                                                 <th width="5%">#</th>
-                                                <th width="90%">{{ __('Question') }}</th>
+                                                <th width="45%">{{ __('Category') }}</th>
+                                                <th width="45%">{{ __('Total Questions') }}</th>
                                             </tr>
                                         </thead>
                                         <tbody>
                                             @php $index = 0; @endphp
-                                            @foreach($questions->groupBy('category') as $category => $categoryQuestions)
-                                                @if($category)
-                                                    <tr class="table-secondary">
-                                                        <td colspan="3"><strong>{{ $category }}</strong></td>
-                                                    </tr>
-                                                @endif
-                                                @foreach($categoryQuestions as $question)
-                                                    <tr>
-                                                        <td>
-                                                            <input type="checkbox" name="question_ids[]" value="{{ $question->id }}" class="question-checkbox">
-                                                        </td>
-                                                        <td>{{ ++$index }}</td>
-                                                        <td>
-                                                            {{ $question->question }}
-                                                        </td>
-                                                    </tr>
-                                                @endforeach
+                                            @foreach($categories as $category)
+                                                <tr>
+                                                    <td>
+                                                        <input type="checkbox" name="category_ids[]" value="{{ $category->id }}" class="category-checkbox">
+                                                    </td>
+                                                    <td>{{ ++$index }}</td>
+                                                    <td>
+                                                        {{ $category->name }}
+                                                    </td>
+                                                    <td>
+                                                        {{ $category->questions->count() }} Questions
+                                                    </td>
+                                                </tr>
                                             @endforeach
                                         </tbody>
                                     </table>
                                 </div>
                             @else
                                 <div class="alert alert-warning">
-                                    {{ __('No active audit questions found. Please add questions in the Audit Questions module first.') }}
+                                    {{ __('No active audit categories found. Please add categories first.') }}
                                 </div>
                             @endif
 
@@ -123,11 +131,11 @@
     <script>
         $(document).ready(function() {
             $('#selectAll').change(function() {
-                $('.question-checkbox').prop('checked', $(this).prop('checked'));
+                $('.category-checkbox').prop('checked', $(this).prop('checked'));
             });
             
-            $('.question-checkbox').change(function() {
-                if ($('.question-checkbox:checked').length === $('.question-checkbox').length) {
+            $('.category-checkbox').change(function() {
+                if ($('.category-checkbox:checked').length === $('.category-checkbox').length) {
                     $('#selectAll').prop('checked', true);
                 } else {
                     $('#selectAll').prop('checked', false);

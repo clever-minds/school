@@ -9,11 +9,16 @@ class AuditQuestion extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['question', 'category', 'type', 'audit_option_group_id', 'status'];
+    protected $fillable = ['question', 'audit_category_id', 'type', 'audit_option_group_id', 'status', 'category'];
 
     public function optionGroup()
     {
         return $this->belongsTo(AuditOptionGroup::class, 'audit_option_group_id');
+    }
+
+    public function category()
+    {
+        return $this->belongsTo(AuditCategory::class, 'audit_category_id');
     }
 
     public function answers()

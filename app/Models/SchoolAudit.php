@@ -9,7 +9,10 @@ class SchoolAudit extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['school_id', 'auditor_id', 'audit_date', 'audit_type', 'remarks', 'status'];
+    protected $fillable = [
+        'school_id', 'auditor_id', 'audit_date', 'audit_type', 'remarks', 'status', 
+        'name', 'frequency', 'due_date', 'submission_date', 'percentage_score', 'archived_at'
+    ];
 
     public function school()
     {
@@ -24,5 +27,10 @@ class SchoolAudit extends Model
     public function answers()
     {
         return $this->hasMany(SchoolAuditAnswer::class);
+    }
+
+    public function categories()
+    {
+        return $this->belongsToMany(AuditCategory::class, 'school_audit_category');
     }
 }

@@ -11,11 +11,17 @@ class TeacherInterviewFeedbackQuestion extends Model
 
     protected $fillable = [
         'feedback_question',
-        'category',
+        'teacher_interview_category_id',
         'status',
         'type',
+        'custom_options',
         'audit_option_group_id'
     ];
+
+    public function category()
+    {
+        return $this->belongsTo(TeacherInterviewCategory::class, 'teacher_interview_category_id');
+    }
 
     public function optionGroup()
     {

@@ -31,7 +31,7 @@ class TeacherInterviewController extends Controller
 
         $applications = $query->latest()->paginate(15);
         $staffMembers = User::where('school_id', Auth::user()->school_id)
-            ->whereHas('roles', function($q) {
+            ->whereHas('roles', function ($q) {
                 $q->whereNotIn('name', ['Student', 'Parent', 'Guardian']);
             })->get();
 
@@ -61,7 +61,7 @@ class TeacherInterviewController extends Controller
             abort(403);
         }
 
-        
+
         if (Auth::user()->school_id && $application->school_id != Auth::user()->school_id) {
             abort(403);
         }
@@ -89,11 +89,15 @@ class TeacherInterviewController extends Controller
 
         $request->validate([
             'status' => 'required|string|in:Pending,Shortlisted,Interview Scheduled,Hired,Rejected',
-            'remarks' => 'nullable|string'
+            'remarks' => 'nullable|string',
+            'interview_date' => 'required_if:status,Interview Scheduled|date',
+            'time' => 'required_if:status,Interview Scheduled',
+            'location' => 'required_if:status,Interview Scheduled|string',
+            'instructions' => 'nullable|string'
         ]);
 
         $application = TeacherInterviewApplication::findOrFail($id);
-        
+
         if (Auth::user()->school_id && $application->school_id != Auth::user()->school_id) {
             abort(403);
         }
@@ -103,6 +107,26 @@ class TeacherInterviewController extends Controller
             $application->remarks = $request->remarks;
         }
         $application->save();
+
+        if ($request->status == 'Interview Scheduled') {
+            $interview = TeacherInterview::updateOrCreate(
+                ['application_id' => $id],
+                [
+                    'interviewer_id' => Auth::id(),
+                    'interview_date' => $request->interview_date,
+                    'time' => $request->time,
+                    'location' => $request->location,
+                    'instructions' => $request->instructions,
+                    'status' => 'pending'
+                ]
+            );
+
+            try {
+                \Illuminate\Support\Facades\Mail::to($application->email)->send(new \App\Mail\InterviewScheduledMail($application, $interview));
+            } catch (\Exception $e) {
+                \Illuminate\Support\Facades\Log::error("Interview Email failed: " . $e->getMessage());
+            }
+        }
 
         return redirect()->back()->with('success', 'Application status updated successfully.');
     }
@@ -145,7 +169,7 @@ class TeacherInterviewController extends Controller
         if (!Auth::user()->can('teacher-interview-manage') && !($isAssigned && Auth::user()->can('assigned-teacher-interview'))) {
             abort(403);
         }
-        
+
         if (Auth::user()->school_id && $application->school_id != Auth::user()->school_id) {
             abort(403);
         }
@@ -191,7 +215,7 @@ class TeacherInterviewController extends Controller
         $feedbacks = TeacherInterviewFeedback::where('interview_id', $interview->id)->get()->keyBy('question_id');
 
         $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView('teacher-interviews.pdf', compact('application', 'interview', 'feedbackQuestions', 'feedbacks'));
-        
+
         return $pdf->download('interview_feedback_' . str_replace(' ', '_', strtolower($application->name)) . '.pdf');
     }
 }

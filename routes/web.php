@@ -151,6 +151,7 @@ Route::group(['middleware' => ['auth']], function () {
     Route::get('teacher-interviews/{id}/pdf', [\App\Http\Controllers\TeacherInterviewController::class, 'downloadPdf'])->name('teacher-interviews.download-pdf');
 
     // Teacher Interview Feedback Questions
+    Route::resource('teacher-interview-categories', \App\Http\Controllers\TeacherInterviewCategoryController::class)->except(['create', 'show', 'edit']);
     Route::resource('teacher-interview-feedback-questions', \App\Http\Controllers\TeacherInterviewFeedbackQuestionController::class)->parameters(['teacher-interview-feedback-questions' => 'question'])->except(['create', 'show', 'edit']);
 });
 
@@ -412,6 +413,7 @@ Route::post('/admin/impersonation-exit',
         Route::post('features/enable', [PackageController::class, 'features_enable']);
 
         Route::resource('guidances', GuidanceController::class);
+        Route::resource('audit-categories', \App\Http\Controllers\AuditCategoryController::class);
         Route::resource('audit-questions', \App\Http\Controllers\AuditQuestionController::class);
         Route::resource('audit-option-groups', \App\Http\Controllers\AuditOptionGroupController::class);
         Route::resource('school-audits', \App\Http\Controllers\SchoolAuditController::class);
@@ -1275,3 +1277,9 @@ Route::get('demo-tokens', static function () {
     }
 });
 
+// Teacher Career Document Upload Routes
+Route::get('/career/document-upload/{token}', [App\Http\Controllers\TeacherInterviewController::class, 'showDocumentUploadForm'])->name('career.document-upload');
+Route::post('/career/document-upload/{token}', [App\Http\Controllers\TeacherInterviewController::class, 'submitDocuments'])->name('career.document-upload.submit');
+
+Route::get('/career/offer-letter/{token}', [App\Http\Controllers\TeacherInterviewController::class, 'showOfferLetter'])->name('career.offer-letter'); Route::post('/career/offer-letter/{token}', [App\Http\Controllers\TeacherInterviewController::class, 'actionOfferLetter'])->name('career.offer-letter.action');
+Route::get('/career/teacher-registration/{token}', [App\Http\Controllers\TeacherInterviewController::class, 'showRegistrationForm'])->name('career.teacher-registration'); Route::post('/career/teacher-registration/{token}', [App\Http\Controllers\TeacherInterviewController::class, 'submitRegistrationForm'])->name('career.teacher-registration.submit');

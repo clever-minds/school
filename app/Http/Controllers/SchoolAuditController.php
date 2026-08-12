@@ -80,12 +80,12 @@ class SchoolAuditController extends Controller
         ResponseService::noPermissionThenRedirect('school-audit-create');
         
         $schools = School::where('status', 1)->get();
-        $questions = AuditQuestion::where('status', 1)->get();
+        $categories = \App\Models\AuditCategory::where('status', 1)->with('questions')->get();
         $users = \App\Models\User::whereHas('roles', function($q) {
             $q->where('name', '!=', 'Student');
         })->get();
 
-        return view('school_audits.create', compact('schools', 'questions', 'users'));
+        return view('school_audits.create', compact('schools', 'categories', 'users'));
     }
 
     public function store(Request $request)
@@ -93,31 +93,41 @@ class SchoolAuditController extends Controller
         ResponseService::noPermissionThenRedirect('school-audit-create');
 
         $request->validate([
+            'name' => 'required|string',
             'school_id' => 'required|exists:schools,id',
             'auditor_id' => 'required|exists:users,id',
             'audit_date' => 'required|date',
-            'audit_type' => 'required|in:Monthly,Quarterly,Half Yearly,Yearly',
+            'due_date' => 'required|date|after_or_equal:audit_date',
+            'frequency' => 'required|in:One-Time,Monthly,Quarterly,Half Yearly,Yearly',
             'remarks' => 'nullable|string',
-            'question_ids' => 'required|array|min:1',
-            'question_ids.*' => 'required|exists:audit_questions,id',
+            'category_ids' => 'required|array|min:1',
+            'category_ids.*' => 'required|exists:audit_categories,id',
         ]);
 
         try {
             DB::beginTransaction();
 
             $audit = SchoolAudit::create([
+                'name' => $request->name,
                 'school_id' => $request->school_id,
                 'auditor_id' => $request->auditor_id,
                 'audit_date' => date('Y-m-d', strtotime($request->audit_date)),
-                'audit_type' => $request->audit_type,
+                'due_date' => date('Y-m-d', strtotime($request->due_date)),
+                'frequency' => $request->frequency,
                 'remarks' => $request->remarks,
                 'status' => 0,
             ]);
 
-            foreach ($request->question_ids as $qId) {
+            // Attach categories
+            $audit->categories()->attach($request->category_ids);
+
+            // Fetch questions for these categories
+            $questions = AuditQuestion::whereIn('audit_category_id', $request->category_ids)->where('status', 1)->get();
+
+            foreach ($questions as $question) {
                 SchoolAuditAnswer::create([
                     'school_audit_id' => $audit->id,
-                    'audit_question_id' => $qId,
+                    'audit_question_id' => $question->id,
                     'answer' => 'Pending',
                     'remarks' => null,
                 ]);
@@ -160,23 +170,48 @@ class SchoolAuditController extends Controller
         $request->validate([
             'answers' => 'required|array',
             'answers.*.id' => 'required|exists:school_audit_answers,id',
-            'answers.*.answer' => 'required|in:Yes,No,N/A,Pending',
+            'answers.*.answer' => 'required',
             'answers.*.remarks' => 'nullable|string',
+            'answers.*.image' => 'nullable|image|max:2048',
         ]);
 
         try {
             DB::beginTransaction();
 
             $audit = SchoolAudit::findOrFail($id);
+            $totalScorable = 0;
+            $earnedScore = 0;
 
-            foreach ($request->answers as $answerData) {
-                SchoolAuditAnswer::where('id', $answerData['id'])->update([
+            foreach ($request->answers as $key => $answerData) {
+                $auditAnswer = SchoolAuditAnswer::findOrFail($answerData['id']);
+                
+                $imagePath = $auditAnswer->image;
+                if ($request->hasFile("answers.{$key}.image")) {
+                    $imagePath = $request->file("answers.{$key}.image")->store('audit_images', 'public');
+                }
+
+                $auditAnswer->update([
                     'answer' => $answerData['answer'],
                     'remarks' => $answerData['remarks'] ?? '',
+                    'image' => $imagePath,
                 ]);
+
+                // Simple scoring logic for Yes/No/Number/Rating if needed, here we just do basic Yes/No for MVP
+                if (in_array($auditAnswer->answer, ['Yes', 'No'])) {
+                    $totalScorable++;
+                    if ($auditAnswer->answer == 'Yes') {
+                        $earnedScore++;
+                    }
+                }
             }
 
-            $audit->update(['status' => 1]); // Mark completed
+            $percentage = $totalScorable > 0 ? ($earnedScore / $totalScorable) * 100 : 0;
+
+            $audit->update([
+                'status' => 1, 
+                'submission_date' => now(),
+                'percentage_score' => $percentage
+            ]);
 
             DB::commit();
             return redirect()->route('school-audits.index')->with('success', trans('data_update_successfully'));

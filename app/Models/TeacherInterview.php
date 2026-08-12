@@ -13,6 +13,9 @@ class TeacherInterview extends Model
         'application_id',
         'interviewer_id',
         'interview_date',
+        'time',
+        'location',
+        'instructions',
         'status',
         'remarks'
     ];

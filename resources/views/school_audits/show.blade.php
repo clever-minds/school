@@ -68,7 +68,7 @@
                                     </thead>
                                         <tbody>
                                             @php $index = 0; @endphp
-                                            @foreach($audit->answers->groupBy('question.category') as $category => $categoryAnswers)
+                                            @foreach($audit->answers->groupBy('question.category.name') as $category => $categoryAnswers)
                                                 @if($category)
                                                     <tr class="table-secondary">
                                                         <td colspan="4"><strong>{{ $category }}</strong></td>
@@ -79,14 +79,18 @@
                                                         <td>{{ ++$index }}</td>
                                                         <td>{{ $answer->question ? $answer->question->question : '-' }}</td>
                                                         <td>
-                                                            @if($answer->answer == 'Yes')
-                                                                <span class="badge badge-success">{{ __('Yes') }}</span>
-                                                            @elseif($answer->answer == 'No')
-                                                                <span class="badge badge-danger">{{ __('No') }}</span>
-                                                            @elseif($answer->answer == 'Pending')
+                                                            @if($answer->answer == 'Pending')
                                                                 <span class="badge badge-warning">{{ __('Pending') }}</span>
+                                                            @elseif(in_array($answer->answer, ['Yes', 'No', 'N/A']))
+                                                                @if($answer->answer == 'Yes')
+                                                                    <span class="badge badge-success">{{ __('Yes') }}</span>
+                                                                @elseif($answer->answer == 'No')
+                                                                    <span class="badge badge-danger">{{ __('No') }}</span>
+                                                                @else
+                                                                    <span class="badge badge-secondary">{{ __('N/A') }}</span>
+                                                                @endif
                                                             @else
-                                                                <span class="badge badge-secondary">{{ __('N/A') }}</span>
+                                                                <strong>{{ $answer->answer }}</strong>
                                                             @endif
                                                         </td>
                                                         <td>{{ $answer->remarks ?? '-' }}</td>

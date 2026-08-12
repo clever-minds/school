@@ -31,7 +31,7 @@
 
                         <hr>
 
-                        <form class="pt-3" action="{{ route('school-audits.update', $audit->id) }}" method="POST">
+                        <form class="pt-3" action="{{ route('school-audits.update', $audit->id) }}" method="POST" enctype="multipart/form-data">
                             @csrf
                             @method('PUT')
                             <h4 class="card-title mt-4 mb-4">{{ __('Audit Checklist') }}</h4>
@@ -42,17 +42,18 @@
                                         <thead>
                                             <tr>
                                                 <th width="5%">#</th>
-                                                <th width="50%">{{ __('Question') }}</th>
-                                                <th width="20%">{{ __('Answer') }} <span class="text-danger">*</span></th>
-                                                <th width="25%">{{ __('Remarks') }}</th>
+                                                <th width="40%">{{ __('Question') }}</th>
+                                                <th width="30%">{{ __('Answer') }} <span class="text-danger">*</span></th>
+                                                <th width="15%">{{ __('Remarks') }}</th>
+                                                <th width="10%">{{ __('Image (Opt)') }}</th>
                                             </tr>
                                         </thead>
                                         <tbody>
                                             @php $index = 0; @endphp
-                                            @foreach($audit->answers->groupBy('question.category') as $category => $categoryAnswers)
+                                            @foreach($audit->answers->groupBy('question.category.name') as $category => $categoryAnswers)
                                                 @if($category)
                                                     <tr class="table-secondary">
-                                                        <td colspan="4"><strong>{{ $category }}</strong></td>
+                                                        <td colspan="5"><strong>{{ $category }}</strong></td>
                                                     </tr>
                                                 @endif
                                                 @foreach($categoryAnswers as $answer)
@@ -63,26 +64,111 @@
                                                             <input type="hidden" name="answers[{{ $index }}][id]" value="{{ $answer->id }}">
                                                         </td>
                                                         <td>
-                                                            <div class="d-flex align-items-center">
-                                                                <div class="form-check form-check-inline mt-0 mb-0 mr-3">
-                                                                    <label class="form-check-label">
-                                                                        <input type="radio" class="form-check-input" name="answers[{{ $index }}][answer]" value="Yes" required {{ $answer->answer == 'Yes' ? 'checked' : '' }}> {{ __('Yes') }}
-                                                                    </label>
+                                                            @if($answer->question && $answer->question->type == 'Yes/No')
+                                                                <div class="d-flex align-items-center">
+                                                                    <div class="form-check form-check-inline mt-0 mb-0 mr-3">
+                                                                        <label class="form-check-label">
+                                                                            <input type="radio" class="form-check-input" name="answers[{{ $index }}][answer]" value="Yes" required {{ $answer->answer == 'Yes' ? 'checked' : '' }}> {{ __('Yes') }}
+                                                                        </label>
+                                                                    </div>
+                                                                    <div class="form-check form-check-inline mt-0 mb-0 mr-3">
+                                                                        <label class="form-check-label">
+                                                                            <input type="radio" class="form-check-input" name="answers[{{ $index }}][answer]" value="No" required {{ $answer->answer == 'No' ? 'checked' : '' }}> {{ __('No') }}
+                                                                        </label>
+                                                                    </div>
+                                                                    <div class="form-check form-check-inline mt-0 mb-0">
+                                                                        <label class="form-check-label">
+                                                                            <input type="radio" class="form-check-input" name="answers[{{ $index }}][answer]" value="N/A" required {{ $answer->answer == 'N/A' ? 'checked' : '' }}> {{ __('N/A') }}
+                                                                        </label>
+                                                                    </div>
                                                                 </div>
-                                                                <div class="form-check form-check-inline mt-0 mb-0 mr-3">
-                                                                    <label class="form-check-label">
-                                                                        <input type="radio" class="form-check-input" name="answers[{{ $index }}][answer]" value="No" required {{ $answer->answer == 'No' ? 'checked' : '' }}> {{ __('No') }}
-                                                                    </label>
+                                                            @elseif($answer->question && $answer->question->type == 'Rating')
+                                                                <div class="d-flex align-items-center">
+                                                                    <div class="form-check form-check-inline mt-0 mb-0 mr-3">
+                                                                        <label class="form-check-label">
+                                                                            <input type="radio" class="form-check-input" name="answers[{{ $index }}][answer]" value="Excellent" required {{ $answer->answer == 'Excellent' ? 'checked' : '' }}> {{ __('Excellent') }}
+                                                                        </label>
+                                                                    </div>
+                                                                    <div class="form-check form-check-inline mt-0 mb-0 mr-3">
+                                                                        <label class="form-check-label">
+                                                                            <input type="radio" class="form-check-input" name="answers[{{ $index }}][answer]" value="Good" required {{ $answer->answer == 'Good' ? 'checked' : '' }}> {{ __('Good') }}
+                                                                        </label>
+                                                                    </div>
+                                                                    <div class="form-check form-check-inline mt-0 mb-0 mr-3">
+                                                                        <label class="form-check-label">
+                                                                            <input type="radio" class="form-check-input" name="answers[{{ $index }}][answer]" value="Average" required {{ $answer->answer == 'Average' ? 'checked' : '' }}> {{ __('Average') }}
+                                                                        </label>
+                                                                    </div>
+                                                                    <div class="form-check form-check-inline mt-0 mb-0">
+                                                                        <label class="form-check-label">
+                                                                            <input type="radio" class="form-check-input" name="answers[{{ $index }}][answer]" value="Unsatisfactory" required {{ $answer->answer == 'Unsatisfactory' ? 'checked' : '' }}> {{ __('Unsatisfactory') }}
+                                                                        </label>
+                                                                    </div>
                                                                 </div>
-                                                                <div class="form-check form-check-inline mt-0 mb-0">
-                                                                    <label class="form-check-label">
-                                                                        <input type="radio" class="form-check-input" name="answers[{{ $index }}][answer]" value="N/A" required {{ $answer->answer == 'N/A' ? 'checked' : '' }}> {{ __('N/A') }}
-                                                                    </label>
+                                                            @elseif($answer->question && $answer->question->type == 'Conditional')
+                                                                @php
+                                                                    $conditionalOptions = $answer->question->custom_options ? array_map('trim', explode(',', $answer->question->custom_options)) : ['Excellent', 'Good', 'Average', 'Unsatisfactory'];
+                                                                    $targetVisibleOptions = array_merge(['Yes'], $conditionalOptions);
+                                                                @endphp
+                                                                <div class="d-flex align-items-center mb-2">
+                                                                    <div class="form-check form-check-inline mt-0 mb-0 mr-3">
+                                                                        <label class="form-check-label">
+                                                                            <input type="radio" class="form-check-input conditional-trigger" name="answers[{{ $index }}][answer]" value="Yes" required {{ in_array($answer->answer, $targetVisibleOptions) ? 'checked' : '' }} onclick="toggleConditionalRating(this, {{ $index }})"> {{ __('Yes') }}
+                                                                        </label>
+                                                                    </div>
+                                                                    <div class="form-check form-check-inline mt-0 mb-0 mr-3">
+                                                                        <label class="form-check-label">
+                                                                            <input type="radio" class="form-check-input conditional-trigger" name="answers[{{ $index }}][answer]" value="No" required {{ $answer->answer == 'No' ? 'checked' : '' }} onclick="toggleConditionalRating(this, {{ $index }})"> {{ __('No') }}
+                                                                        </label>
+                                                                    </div>
                                                                 </div>
-                                                            </div>
+                                                                <div class="align-items-center flex-wrap conditional-target-{{ $index }}" style="display: {{ in_array($answer->answer, $targetVisibleOptions) ? 'flex' : 'none' }}; margin-left: 20px; border-left: 2px solid #ccc; padding-left: 10px;">
+                                                                    @foreach($conditionalOptions as $opt)
+                                                                        @if($opt)
+                                                                            <div class="form-check form-check-inline mt-0 mb-0 mr-3">
+                                                                                <label class="form-check-label">
+                                                                                    <input type="radio" class="form-check-input" name="answers[{{ $index }}][answer]" value="{{ $opt }}" {{ $answer->answer == $opt ? 'checked' : '' }}> {{ $opt }}
+                                                                                </label>
+                                                                            </div>
+                                                                        @endif
+                                                                    @endforeach
+                                                                </div>
+                                                            @elseif($answer->question && $answer->question->type == 'Custom')
+                                                                @php
+                                                                    $options = $answer->question->custom_options ? array_map('trim', explode(',', $answer->question->custom_options)) : [];
+                                                                @endphp
+                                                                <div class="d-flex align-items-center flex-wrap">
+                                                                    @foreach($options as $opt)
+                                                                        @if($opt)
+                                                                            <div class="form-check form-check-inline mt-0 mb-0 mr-3">
+                                                                                <label class="form-check-label">
+                                                                                    <input type="radio" class="form-check-input" name="answers[{{ $index }}][answer]" value="{{ $opt }}" required {{ $answer->answer == $opt ? 'checked' : '' }}> {{ $opt }}
+                                                                                </label>
+                                                                            </div>
+                                                                        @endif
+                                                                    @endforeach
+                                                                </div>
+                                                            @elseif($answer->question && $answer->question->type == 'Text')
+                                                                <input type="text" name="answers[{{ $index }}][answer]" class="form-control" required value="{{ $answer->answer !== 'Pending' ? $answer->answer : '' }}">
+                                                            @elseif($answer->question && $answer->question->type == 'Paragraph')
+                                                                <textarea name="answers[{{ $index }}][answer]" class="form-control" required rows="2">{{ $answer->answer !== 'Pending' ? $answer->answer : '' }}</textarea>
+                                                            @elseif($answer->question && $answer->question->type == 'Number')
+                                                                <input type="number" name="answers[{{ $index }}][answer]" class="form-control" required value="{{ $answer->answer !== 'Pending' ? $answer->answer : '' }}">
+                                                            @elseif($answer->question && $answer->question->type == 'Date')
+                                                                <input type="date" name="answers[{{ $index }}][answer]" class="form-control" required value="{{ $answer->answer !== 'Pending' ? $answer->answer : '' }}">
+                                                            @else
+                                                                {{-- Fallback --}}
+                                                                <input type="text" name="answers[{{ $index }}][answer]" class="form-control" required value="{{ $answer->answer !== 'Pending' ? $answer->answer : '' }}">
+                                                            @endif
                                                         </td>
                                                         <td>
-                                                            <input type="text" name="answers[{{ $index }}][remarks]" class="form-control" placeholder="{{ __('Optional remarks...') }}" value="{{ $answer->remarks }}">
+                                                            <input type="text" name="answers[{{ $index }}][remarks]" class="form-control" placeholder="{{ __('Remarks...') }}" value="{{ $answer->remarks }}">
+                                                        </td>
+                                                        <td>
+                                                            <input type="file" name="answers[{{ $index }}][image]" class="form-control-file" accept="image/*">
+                                                            @if($answer->image)
+                                                                <a href="{{ asset('storage/'.$answer->image) }}" target="_blank" class="text-info mt-1 d-block"><i class="fa fa-eye"></i> View</a>
+                                                            @endif
                                                         </td>
                                                     </tr>
                                                 @endforeach
@@ -108,4 +194,16 @@
             </div>
         </div>
     </div>
+@endsection
+
+@section('script')
+    <script>
+        function toggleConditionalRating(el, index) {
+            if (el.value === 'Yes') {
+                $('.conditional-target-' + index).css('display', 'flex');
+            } else if (el.value === 'No') {
+                $('.conditional-target-' + index).css('display', 'none');
+            }
+        }
+    </script>
 @endsection

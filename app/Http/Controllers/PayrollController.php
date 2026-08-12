@@ -263,8 +263,12 @@ class PayrollController extends Controller {
             
             $total_present = 0;
 
+            $attendance_map = [];
             // Process Attendance records (Only P, W and H give present marks)
             foreach ($userAttendances as $att) {
+                $dateStr = Carbon::parse($att->date)->format('Y-m-d');
+                $attendance_map[$dateStr] = $att->status;
+
                 if ($att->status == 1) { // 1 = Present / WFH
                     $total_present += 1;
                 } elseif ($att->status == 3) { // 3 = Half Day
@@ -272,8 +276,63 @@ class PayrollController extends Controller {
                 }
             }
 
+            $monthDates = [];
+            for($d = $startOfMonthObj->copy(); $d->lte($endOfMonthObj); $d->addDay()) {
+                $dateStr = $d->format('Y-m-d');
+                $monthDates[] = [
+                    'date' => $dateStr,
+                    'is_working' => !in_array($dateStr, $nonWorkingDates),
+                ];
+            }
+
+            $sandwiched_days = 0;
+            $blocks = [];
+            $current_block = [];
+            foreach ($monthDates as $index => $dayInfo) {
+                if (!$dayInfo['is_working']) {
+                    $current_block[] = $index;
+                } else {
+                    if (!empty($current_block)) {
+                        $blocks[] = $current_block;
+                        $current_block = [];
+                    }
+                }
+            }
+            if (!empty($current_block)) {
+                $blocks[] = $current_block;
+            }
+
+            foreach ($blocks as $block) {
+                $first_index = $block[0];
+                $last_index = end($block);
+                
+                $preceding_absent = false;
+                if ($first_index > 0) {
+                    $prev_index = $first_index - 1;
+                    $prev_date = $monthDates[$prev_index]['date'];
+                    $status = isset($attendance_map[$prev_date]) ? $attendance_map[$prev_date] : null;
+                    if (!in_array($status, [1, 2, 3])) {
+                        $preceding_absent = true;
+                    }
+                }
+                
+                $following_absent = false;
+                if ($last_index < count($monthDates) - 1) {
+                    $next_index = $last_index + 1;
+                    $next_date = $monthDates[$next_index]['date'];
+                    $status = isset($attendance_map[$next_date]) ? $attendance_map[$next_date] : null;
+                    if (!in_array($status, [1, 2, 3])) {
+                        $following_absent = true;
+                    }
+                }
+                
+                if ($preceding_absent && $following_absent) {
+                    $sandwiched_days += count($block);
+                }
+            }
+
             // Unmarked working days are treated as leaves/absent
-            $total_leave = max(0, $total_working_days - $total_present);
+            $total_leave = max(0, $total_working_days - $total_present) + $sandwiched_days;
 
             $tempRow['total_leaves'] = $total_leave;
             $tempRow['salary_deduction'] = number_format($salary_deduction, 2);
@@ -546,7 +605,11 @@ class PayrollController extends Controller {
 
             $total_present = 0;
 
+            $attendance_map = [];
             foreach ($userAttendances as $att) {
+                $dateStr = Carbon::parse($att->date)->format('Y-m-d');
+                $attendance_map[$dateStr] = $att->status;
+
                 if ($att->status == 1) {
                     $total_present += 1;
                 } elseif ($att->status == 3) {
@@ -554,7 +617,62 @@ class PayrollController extends Controller {
                 }
             }
 
-            $total_leave = max(0, $total_working_days - $total_present);
+            $monthDates = [];
+            for($d = $startOfMonthObj->copy(); $d->lte($endOfMonthObj); $d->addDay()) {
+                $dateStr = $d->format('Y-m-d');
+                $monthDates[] = [
+                    'date' => $dateStr,
+                    'is_working' => !in_array($dateStr, $nonWorkingDates),
+                ];
+            }
+
+            $sandwiched_days = 0;
+            $blocks = [];
+            $current_block = [];
+            foreach ($monthDates as $index => $dayInfo) {
+                if (!$dayInfo['is_working']) {
+                    $current_block[] = $index;
+                } else {
+                    if (!empty($current_block)) {
+                        $blocks[] = $current_block;
+                        $current_block = [];
+                    }
+                }
+            }
+            if (!empty($current_block)) {
+                $blocks[] = $current_block;
+            }
+
+            foreach ($blocks as $block) {
+                $first_index = $block[0];
+                $last_index = end($block);
+                
+                $preceding_absent = false;
+                if ($first_index > 0) {
+                    $prev_index = $first_index - 1;
+                    $prev_date = $monthDates[$prev_index]['date'];
+                    $status = isset($attendance_map[$prev_date]) ? $attendance_map[$prev_date] : null;
+                    if (!in_array($status, [1, 2, 3])) {
+                        $preceding_absent = true;
+                    }
+                }
+                
+                $following_absent = false;
+                if ($last_index < count($monthDates) - 1) {
+                    $next_index = $last_index + 1;
+                    $next_date = $monthDates[$next_index]['date'];
+                    $status = isset($attendance_map[$next_date]) ? $attendance_map[$next_date] : null;
+                    if (!in_array($status, [1, 2, 3])) {
+                        $following_absent = true;
+                    }
+                }
+                
+                if ($preceding_absent && $following_absent) {
+                    $sandwiched_days += count($block);
+                }
+            }
+
+            $total_leave = max(0, $total_working_days - $total_present) + $sandwiched_days;
 
             $allow_leaves = 0;
             if ($salary) {

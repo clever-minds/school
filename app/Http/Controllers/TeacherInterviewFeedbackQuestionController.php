@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\TeacherInterviewFeedbackQuestion;
+use App\Models\TeacherInterviewCategory;
 use App\Models\AuditOptionGroup;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -15,9 +16,9 @@ class TeacherInterviewFeedbackQuestionController extends Controller
             abort(403, 'Unauthorized action.');
         }
 
-        $questions = TeacherInterviewFeedbackQuestion::with('optionGroup')->orderBy('id', 'desc')->get();
-        $optionGroups = AuditOptionGroup::all();
-        return view('teacher-interview-feedback-questions.index', compact('questions', 'optionGroups'));
+        $questions = TeacherInterviewFeedbackQuestion::with('category')->orderBy('id', 'desc')->get();
+        $categories = TeacherInterviewCategory::where('status', 1)->get();
+        return view('teacher-interview-feedback-questions.index', compact('questions', 'categories'));
     }
 
     public function store(Request $request)
@@ -28,9 +29,10 @@ class TeacherInterviewFeedbackQuestionController extends Controller
 
         $request->validate([
             'feedback_question' => 'required|string|max:255',
-            'category' => 'nullable|string|max:255',
+            'teacher_interview_category_id' => 'nullable|exists:teacher_interview_categories,id',
             'status' => 'required|in:active,inactive',
             'type' => 'nullable|string',
+            'custom_options' => 'nullable|string',
             'audit_option_group_id' => 'nullable|exists:audit_option_groups,id'
         ]);
 
@@ -47,9 +49,10 @@ class TeacherInterviewFeedbackQuestionController extends Controller
 
         $request->validate([
             'feedback_question' => 'required|string|max:255',
-            'category' => 'nullable|string|max:255',
+            'teacher_interview_category_id' => 'nullable|exists:teacher_interview_categories,id',
             'status' => 'required|in:active,inactive',
             'type' => 'nullable|string',
+            'custom_options' => 'nullable|string',
             'audit_option_group_id' => 'nullable|exists:audit_option_groups,id'
         ]);
 

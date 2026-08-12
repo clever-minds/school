@@ -50,13 +50,32 @@
                             @csrf
                             <div class="form-group">
                                 <label>{{ __('Current Status') }}</label>
-                                <select name="status" class="form-control" required>
+                                <select name="status" id="status-select" class="form-control" required>
                                     <option value="Pending" {{ $application->status == 'Pending' ? 'selected' : '' }}>{{ __('Pending') }}</option>
                                     <option value="Shortlisted" {{ $application->status == 'Shortlisted' ? 'selected' : '' }}>{{ __('Shortlisted') }}</option>
                                     <option value="Interview Scheduled" {{ $application->status == 'Interview Scheduled' ? 'selected' : '' }}>{{ __('Interview Scheduled') }}</option>
                                     <option value="Hired" {{ $application->status == 'Hired' ? 'selected' : '' }}>{{ __('Hired') }}</option>
                                     <option value="Rejected" {{ $application->status == 'Rejected' ? 'selected' : '' }}>{{ __('Rejected') }}</option>
                                 </select>
+                            </div>
+
+                            <div id="interview-details" style="{{ $application->status == 'Interview Scheduled' ? '' : 'display: none;' }}">
+                                <div class="form-group">
+                                    <label>{{ __('Interview Date') }} <span class="text-danger">*</span></label>
+                                    <input type="date" name="interview_date" class="form-control" value="{{ $interview->interview_date ?? '' }}">
+                                </div>
+                                <div class="form-group">
+                                    <label>{{ __('Interview Time') }} <span class="text-danger">*</span></label>
+                                    <input type="time" name="time" class="form-control" value="{{ $interview->time ?? '' }}">
+                                </div>
+                                <div class="form-group">
+                                    <label>{{ __('Venue / Location') }} <span class="text-danger">*</span></label>
+                                    <input type="text" name="location" class="form-control" value="{{ $interview->location ?? '' }}">
+                                </div>
+                                <div class="form-group">
+                                    <label>{{ __('Instructions for Candidate') }}</label>
+                                    <textarea name="instructions" class="form-control" rows="3">{{ $interview->instructions ?? '' }}</textarea>
+                                </div>
                             </div>
 
                             <div class="form-group">
@@ -107,16 +126,27 @@
                                                         $currentAnswer = isset($feedbacks[$question->id]) ? $feedbacks[$question->id]->interviewer_feedback : '';
                                                     @endphp
                                                     
-                                                    @if($question->type == 'rating' && $question->optionGroup)
+                                                    @if($question->type == 'rating')
                                                         <div class="d-flex align-items-center flex-wrap">
-                                                            @foreach($question->optionGroup->option_values as $opt)
-                                                                <div class="form-check form-check-inline mt-0 mb-2 mr-3">
-                                                                    <label class="form-check-label" for="q_{{ $question->id }}_{{ $loop->index }}">
-                                                                        <input class="form-check-input" type="radio" name="feedbacks[{{ $question->id }}]" id="q_{{ $question->id }}_{{ $loop->index }}" value="{{ $opt['label'] }}" {{ $currentAnswer == $opt['label'] ? 'checked' : '' }} {{ $isFeedbackSubmitted ? 'disabled' : '' }}>
-                                                                        {{ $opt['label'] }}
-                                                                    </label>
-                                                                </div>
-                                                            @endforeach
+                                                            @if($question->optionGroup)
+                                                                @foreach($question->optionGroup->option_values as $opt)
+                                                                    <div class="form-check form-check-inline mt-0 mb-2 mr-3">
+                                                                        <label class="form-check-label" for="q_{{ $question->id }}_{{ $loop->index }}">
+                                                                            <input class="form-check-input" type="radio" name="feedbacks[{{ $question->id }}]" id="q_{{ $question->id }}_{{ $loop->index }}" value="{{ $opt['label'] }}" {{ $currentAnswer == $opt['label'] ? 'checked' : '' }} {{ $isFeedbackSubmitted ? 'disabled' : '' }}>
+                                                                            {{ $opt['label'] }}
+                                                                        </label>
+                                                                    </div>
+                                                                @endforeach
+                                                            @else
+                                                                @for($i = 1; $i <= 5; $i++)
+                                                                    <div class="form-check form-check-inline mt-0 mb-2 mr-3">
+                                                                        <label class="form-check-label" for="q_{{ $question->id }}_{{ $i }}">
+                                                                            <input class="form-check-input" type="radio" name="feedbacks[{{ $question->id }}]" id="q_{{ $question->id }}_{{ $i }}" value="{{ $i }}" {{ $currentAnswer == $i ? 'checked' : '' }} {{ $isFeedbackSubmitted ? 'disabled' : '' }}>
+                                                                            {{ $i }} Star
+                                                                        </label>
+                                                                    </div>
+                                                                @endfor
+                                                            @endif
                                                         </div>
                                                     @elseif($question->type == 'boolean')
                                                         <div class="d-flex align-items-center flex-wrap">
@@ -154,4 +184,19 @@
         </div>
         @endif
     </div>
+@endsection
+@section('script')
+<script>
+    document.getElementById('status-select').addEventListener('change', function() {
+        var detailsDiv = document.getElementById('interview-details');
+        var inputs = detailsDiv.querySelectorAll('input');
+        if (this.value === 'Interview Scheduled') {
+            detailsDiv.style.display = 'block';
+            inputs.forEach(input => input.setAttribute('required', 'required'));
+        } else {
+            detailsDiv.style.display = 'none';
+            inputs.forEach(input => input.removeAttribute('required'));
+        }
+    });
+</script>
 @endsection

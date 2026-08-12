@@ -356,7 +356,7 @@ class ApiController extends Controller
                             // For Flutterwave, use tx_ref for verification
                             if ($data->payment_gateway == "Flutterwave") {
                                 $paymentService = PaymentService::create($data->payment_gateway, $data->school_id);
-                                // $paymentIntent = $paymentService->verifyPayment($data->order_id);
+                                $paymentIntent = $paymentService->verifyPayment($data->order_id);
                                 
                                 // Update transaction status based on verification
                                 if (isset($paymentIntent['status'])) {

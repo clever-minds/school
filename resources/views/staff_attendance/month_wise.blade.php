@@ -86,6 +86,26 @@
 
 
     <script>
+        function showToastMessage(message, type) {
+            var toast_position = $('html').attr('dir') === 'rtl' ? 'top-left' : 'top-right';
+            if (type === 'success' || type === 'info') {
+                if (typeof showSuccessToast === 'function') {
+                    showSuccessToast(message);
+                } else if (typeof $.toast === 'function') {
+                    $.toast({ text: message, showHideTransition: 'slide', icon: 'success', loaderBg: '#f96868', position: toast_position });
+                } else {
+                    console.log("Success: " + message);
+                }
+            } else {
+                if (typeof showErrorToast === 'function') {
+                    showErrorToast(message);
+                } else if (typeof $.toast === 'function') {
+                    $.toast({ text: message, showHideTransition: 'slide', icon: 'error', loaderBg: '#f2a654', position: toast_position, hideAfter: 5000 });
+                } else {
+                    console.error("Error: " + message);
+                }
+            }
+        }
         
         const monthSelect = document.getElementById('month');
 

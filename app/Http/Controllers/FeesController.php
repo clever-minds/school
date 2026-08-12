@@ -818,23 +818,22 @@ class FeesController extends Controller
 
 
 
-            if ($request->paid_status == 0) {
-                $sql->where(function ($query) use ($fees) {
-                    $query->where(function ($q) use ($fees) {
-                        $q->whereDoesntHave('fees_paid', function ($q) use ($fees) {
-                            $q->where('fees_id', $fees->id);
-                        })->whereDoesntHave('student.fees_paid', function ($q) use ($fees) {
-                            $q->where('fees_id', $fees->id);
+            if (isset($request->paid_status) && $request->paid_status !== '') {
+                if ($request->paid_status == 0) {
+                    $sql->where(function ($query) use ($fees) {
+                        $query->where(function ($q) use ($fees) {
+                            $q->whereDoesntHave('fees_paid', function ($q) use ($fees) {
+                                $q->where('fees_id', $fees->id);
+                            })->whereDoesntHave('student.fees_paid', function ($q) use ($fees) {
+                                $q->where('fees_id', $fees->id);
+                            });
+                        })->orWhereHas('fees_paid', function ($q) use ($fees) {
+                            $q->where(['fees_id' => $fees->id, 'is_fully_paid' => 0]);
+                        })->orWhereHas('student.fees_paid', function ($q) use ($fees) {
+                            $q->where(['fees_id' => $fees->id, 'is_fully_paid' => 0]);
                         });
-                    })->orWhereHas('fees_paid', function ($q) use ($fees) {
-                        $q->where(['fees_id' => $fees->id, 'is_fully_paid' => 0]);
-                    })->orWhereHas('student.fees_paid', function ($q) use ($fees) {
-                        $q->where(['fees_id' => $fees->id, 'is_fully_paid' => 0]);
                     });
-                });
-            } else {
-
-                if ($request->paid_status == 1) {
+                } else if ($request->paid_status == 1) {
                     $sql->where(function ($query) use ($fees) {
                         $query->whereHas('fees_paid', function ($q) use ($fees) {
                             $q->where(['fees_id' => $fees->id, 'is_fully_paid' => 1]);
@@ -842,7 +841,7 @@ class FeesController extends Controller
                             $q->where(['fees_id' => $fees->id, 'is_fully_paid' => 1]);
                         });
                     });
-                } else {
+                } else if ($request->paid_status == 2) {
                     $sql->where(function ($query) use ($fees) {
                         $query->whereHas('fees_paid', function ($q) use ($fees) {
                             $q->where(['fees_id' => $fees->id, 'is_fully_paid' => 0]);
@@ -851,7 +850,9 @@ class FeesController extends Controller
                         });
                     });
                 }
+            }
 
+            if (!isset($request->paid_status) || (string)$request->paid_status !== '0') {
                 if ($request->month) {
                     $sql->where(function ($query) use ($request, $fees) {
                         $query->whereHas('fees_paid', function ($q) use ($request, $fees) {
@@ -901,7 +902,6 @@ class FeesController extends Controller
                         });
                     });
                 }
-
             }
 
 
@@ -953,6 +953,7 @@ class FeesController extends Controller
                 if (!$feesPaid && $row->student && $row->student->fees_paid->isNotEmpty()) {
                     $feesPaid = $row->student->fees_paid->first();
                     $row->setRelation('fees_paid', $feesPaid);
+                    $tempRow['fees_paid'] = $feesPaid->toArray(); // FIX: Updates the tempRow so 'fees_paid.date' is sent to frontend
                 }
 
                 if (!empty($feesPaid)) {
@@ -968,21 +969,8 @@ class FeesController extends Controller
                 }
                 if ($feesPaid && isset($feesPaid->compulsory_fee[0]->mode)) {
                     $tempRow['payment_method'] = $feesPaid->compulsory_fee[0]->mode;
-                }// if (!empty($row->fees_paid->is_fully_paid)) {
-                //     $operate .= ($fees->session_year_id == $sessionYearId) ? $operate : "";
-                //     $operate .= BootstrapTableService::button('fa fa-file-pdf-o', route('fees.paid.receipt.pdf', $row->fees_paid->id), ['btn', 'btn-xs', 'btn-gradient-info', 'btn-rounded', 'btn-icon', 'generate-paid-fees-pdf'], ['target' => "_blank", 'data-id' => $row->fees_paid->id, 'title' => trans('generate_pdf') . ' ' . trans('fees')]);
-                //     $tempRow['fees_status'] = $row->fees_paid->is_fully_paid;
-                // }
+                }
 
-                if ($row->fees_paid) {
-                    // $tempRow['paid_amount'] = $row->compulsory_fees_sum_amount + $row->compulsory_fees_sum_due_charges;
-                    $tempRow['paid_amount'] = $row->compulsory_fees_sum_amount;
-                } else {
-                    $tempRow['paid_amount'] = 0;
-                }
-                if ($row->fees_paid && isset($row->fees_paid->compulsory_fee[0]->mode)) {
-                    $tempRow['payment_method'] = $row->fees_paid->compulsory_fee[0]->mode;
-                }
 
                 $tempRow['operate'] = $operate;
                 $rows[] = $tempRow;

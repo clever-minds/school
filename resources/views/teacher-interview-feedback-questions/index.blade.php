@@ -29,7 +29,12 @@
                                 </div>
                                 <div class="form-group col-sm-12 col-md-4">
                                     <label>{{ __('Category') }}</label>
-                                    <input type="text" name="category" class="form-control" placeholder="{{ __('Category (Optional)') }}">
+                                    <select name="teacher_interview_category_id" class="form-control">
+                                        <option value="">{{ __('Select Category') }}</option>
+                                        @foreach($categories as $category)
+                                            <option value="{{ $category->id }}">{{ $category->name }}</option>
+                                        @endforeach
+                                    </select>
                                 </div>
                                 <div class="form-group col-sm-12 col-md-4">
                                     <label>{{ __('Status') }}</label>
@@ -42,25 +47,23 @@
                             <div class="row">
                                 <div class="form-group col-sm-12 col-md-5">
                                     <label>{{ __('Type') }}</label>
-                                    <select name="type" class="form-control">
+                                    <select name="type" id="create-type" class="form-control">
                                         <option value="">{{ __('Select Type') }}</option>
-                                        <option value="rating">{{ __('Rating') }}</option>
-                                        <option value="boolean">{{ __('Boolean (Yes/No)') }}</option>
-                                        <option value="text">{{ __('Text') }}</option>
-                                        <option value="conditional">{{ __('Conditional') }}</option>
+                                        <option value="Yes/No">{{ __('Yes / No / N/A') }}</option>
+                                        <option value="Conditional">{{ __('Conditional (Yes/No -> Rating)') }}</option>
+                                        <option value="Custom">{{ __('Custom (Radio Buttons)') }}</option>
+                                        <option value="Text">{{ __('Text (Short Answer)') }}</option>
+                                        <option value="Paragraph">{{ __('Paragraph (Long Answer)') }}</option>
+                                        <option value="Number">{{ __('Number') }}</option>
+                                        <option value="Rating">{{ __('Rating (Excellent, Good, Average, Unsatisfactory)') }}</option>
+                                        <option value="Date">{{ __('Date') }}</option>
                                     </select>
-                                    <small class="text-muted mt-1 d-block"><i class="fa fa-info-circle"></i> e.g., Select <strong>Rating</strong> for multiple choices, or <strong>Conditional</strong> for Yes/No based answers.</small>
+                                    <small class="text-muted mt-1 d-block"><i class="fa fa-info-circle"></i> e.g., Select <strong>Conditional</strong> for questions that open rating when YES.</small>
                                 </div>
-                                <div class="form-group col-sm-12 col-md-5">
-                                    <label>{{ __('Option Group') }}</label>
-                                    <select name="audit_option_group_id" id="create-option-group" class="form-control" onchange="renderOptionPreview(this, 'create-option-preview')">
-                                        <option value="">{{ __('Select Option Group') }}</option>
-                                        @foreach($optionGroups as $group)
-                                            <option value="{{ $group->id }}" data-options="{{ json_encode($group->option_values) }}">{{ $group->name }}</option>
-                                        @endforeach
-                                    </select>
-                                    <small class="text-muted mt-1 d-block"><i class="fa fa-info-circle"></i> e.g., Select the exact answer choices (like "4-Point Rating"). Leave blank for Text type.</small>
-                                    <small id="create-option-preview" class="text-info mt-2 d-block"></small>
+                                <div class="form-group col-sm-12 col-md-5 custom-options-wrapper" style="display: none;">
+                                    <label>{{ __('Custom Options') }} <span class="text-danger">*</span></label>
+                                    <input type="text" name="custom_options" id="create-custom-options" class="form-control" placeholder="e.g. Good, Bad or Inside, Outside">
+                                    <small class="text-muted mt-1 d-block"><i class="fa fa-info-circle"></i> Enter options separated by comma (,).</small>
                                 </div>
                                 <div class="col-sm-12 col-md-2 d-flex align-items-center mt-3">
                                     <button type="submit" class="btn btn-primary theme-btn btn-block">{{ __('Submit') }}</button>
@@ -85,7 +88,6 @@
                                         <th>{{ __('No.') }}</th>
                                         <th>{{ __('Question') }}</th>
                                         <th>{{ __('Category') }}</th>
-                                        <th>{{ __('Option Group') }}</th>
                                         <th>{{ __('Status') }}</th>
                                         <th>{{ __('Action') }}</th>
                                     </tr>
@@ -95,8 +97,7 @@
                                         <tr>
                                             <td>{{ $key + 1 }}</td>
                                             <td>{{ $question->feedback_question }}</td>
-                                            <td>{{ $question->category ?? '-' }}</td>
-                                            <td>{{ $question->optionGroup ? $question->optionGroup->name : '-' }}</td>
+                                            <td>{{ $question->category->name ?? '-' }}</td>
                                             <td>
                                                 @if($question->status == 'active')
                                                     <span class="badge badge-success">{{ __('Active') }}</span>
@@ -137,7 +138,12 @@
                                                                     </div>
                                                                     <div class="form-group">
                                                                         <label>{{ __('Category') }}</label>
-                                                                        <input type="text" name="category" class="form-control" value="{{ $question->category }}">
+                                                                        <select name="teacher_interview_category_id" class="form-control">
+                                                                            <option value="">{{ __('Select Category') }}</option>
+                                                                            @foreach($categories as $category)
+                                                                                <option value="{{ $category->id }}" {{ $question->teacher_interview_category_id == $category->id ? 'selected' : '' }}>{{ $category->name }}</option>
+                                                                            @endforeach
+                                                                        </select>
                                                                     </div>
                                                                     <div class="form-group">
                                                                         <label>{{ __('Status') }}</label>
@@ -148,25 +154,23 @@
                                                                     </div>
                                                                     <div class="form-group">
                                                                         <label>{{ __('Type') }}</label>
-                                                                        <select name="type" class="form-control">
+                                                                        <select name="type" id="edit-type-{{ $question->id }}" class="form-control edit-type-select" data-id="{{ $question->id }}">
                                                                             <option value="">{{ __('Select Type') }}</option>
-                                                                            <option value="rating" {{ $question->type == 'rating' ? 'selected' : '' }}>{{ __('Rating') }}</option>
-                                                                            <option value="boolean" {{ $question->type == 'boolean' ? 'selected' : '' }}>{{ __('Boolean (Yes/No)') }}</option>
-                                                                            <option value="text" {{ $question->type == 'text' ? 'selected' : '' }}>{{ __('Text') }}</option>
-                                                                            <option value="conditional" {{ $question->type == 'conditional' ? 'selected' : '' }}>{{ __('Conditional') }}</option>
+                                                                            <option value="Yes/No" {{ $question->type == 'Yes/No' ? 'selected' : '' }}>{{ __('Yes / No / N/A') }}</option>
+                                                                            <option value="Conditional" {{ $question->type == 'Conditional' ? 'selected' : '' }}>{{ __('Conditional (Yes/No -> Rating)') }}</option>
+                                                                            <option value="Custom" {{ $question->type == 'Custom' ? 'selected' : '' }}>{{ __('Custom (Radio Buttons)') }}</option>
+                                                                            <option value="Text" {{ $question->type == 'Text' ? 'selected' : '' }}>{{ __('Text (Short Answer)') }}</option>
+                                                                            <option value="Paragraph" {{ $question->type == 'Paragraph' ? 'selected' : '' }}>{{ __('Paragraph (Long Answer)') }}</option>
+                                                                            <option value="Number" {{ $question->type == 'Number' ? 'selected' : '' }}>{{ __('Number') }}</option>
+                                                                            <option value="Rating" {{ $question->type == 'Rating' ? 'selected' : '' }}>{{ __('Rating (Excellent, Good, Average, Unsatisfactory)') }}</option>
+                                                                            <option value="Date" {{ $question->type == 'Date' ? 'selected' : '' }}>{{ __('Date') }}</option>
                                                                         </select>
-                                                                        <small class="text-muted mt-1 d-block"><i class="fa fa-info-circle"></i> e.g., Select <strong>Rating</strong> for multiple choices, or <strong>Conditional</strong> for Yes/No based answers.</small>
+                                                                        <small class="text-muted mt-1 d-block"><i class="fa fa-info-circle"></i> e.g., Select <strong>Conditional</strong> for questions that open rating when YES.</small>
                                                                     </div>
-                                                                    <div class="form-group">
-                                                                        <label>{{ __('Option Group') }}</label>
-                                                                        <select name="audit_option_group_id" class="form-control option-group-edit" data-preview-id="edit-option-preview-{{ $question->id }}" onchange="renderOptionPreview(this, 'edit-option-preview-{{ $question->id }}')">
-                                                                            <option value="">{{ __('Select Option Group') }}</option>
-                                                                            @foreach($optionGroups as $group)
-                                                                                <option value="{{ $group->id }}" data-options="{{ json_encode($group->option_values) }}" {{ $question->audit_option_group_id == $group->id ? 'selected' : '' }}>{{ $group->name }}</option>
-                                                                            @endforeach
-                                                                        </select>
-                                                                        <small class="text-muted mt-1 d-block"><i class="fa fa-info-circle"></i> e.g., Select the exact answer choices (like "4-Point Rating"). Leave blank for Text type.</small>
-                                                                        <small id="edit-option-preview-{{ $question->id }}" class="text-info mt-2 d-block"></small>
+                                                                    <div class="form-group edit-custom-options-wrapper-{{ $question->id }}" style="{{ in_array($question->type, ['Custom', 'Conditional']) ? '' : 'display: none;' }}">
+                                                                        <label>{{ __('Custom Options') }} <span class="text-danger">*</span></label>
+                                                                        <input type="text" name="custom_options" id="edit-custom-options-{{ $question->id }}" class="form-control" value="{{ $question->custom_options }}" placeholder="e.g. Good, Bad or Inside, Outside" {{ in_array($question->type, ['Custom']) ? 'required' : '' }}>
+                                                                        <small class="text-muted mt-1 d-block"><i class="fa fa-info-circle"></i> Enter options separated by comma (,).</small>
                                                                     </div>
                                                                 </div>
                                                                 <div class="modal-footer">
@@ -192,44 +196,29 @@
 
 @section('script')
 <script>
-    function renderOptionPreview(selectElement, previewContainerId) {
-        let selectedOption = $(selectElement).find('option:selected');
-        let optionsData = selectedOption.attr('data-options');
-        let previewHtml = '';
-
-        if (optionsData) {
-            try {
-                let options = JSON.parse(optionsData);
-                previewHtml = '<strong>Preview:</strong> ';
-                
-                function extractLabels(obj) {
-                    if (Array.isArray(obj)) {
-                        return obj.map(item => item.label).join(', ');
-                    } else if (typeof obj === 'object' && obj !== null) {
-                        let res = [];
-                        for (let key in obj) {
-                            if (key !== 'has_sub_options' && typeof obj[key] === 'object') {
-                                res.push(key + ' -> [' + extractLabels(obj[key]) + ']');
-                            }
-                        }
-                        return res.join(' | ');
-                    }
-                    return '';
-                }
-
-                previewHtml += extractLabels(options);
-            } catch (e) {
-                console.error("Invalid JSON in option group");
-            }
+    $('#create-type').on('change', function() {
+        if ($(this).val() === 'Custom' || $(this).val() === 'Conditional') {
+            $('.custom-options-wrapper').show();
+            $('#create-custom-options').prop('required', $(this).val() === 'Custom');
+        } else {
+            $('.custom-options-wrapper').hide();
+            $('#create-custom-options').prop('required', false);
         }
-        $('#' + previewContainerId).html(previewHtml);
-    }
+    });
+
+    $('.edit-type-select').on('change', function() {
+        let id = $(this).data('id');
+        if ($(this).val() === 'Custom' || $(this).val() === 'Conditional') {
+            $('.edit-custom-options-wrapper-' + id).show();
+            $('#edit-custom-options-' + id).prop('required', $(this).val() === 'Custom');
+        } else {
+            $('.edit-custom-options-wrapper-' + id).hide();
+            $('#edit-custom-options-' + id).prop('required', false);
+        }
+    });
 
     $(document).ready(function() {
-        $('.option-group-edit').each(function() {
-            let previewId = $(this).data('preview-id');
-            renderOptionPreview(this, previewId);
-        });
+        // Any initial setup
     });
 </script>
 @endsection
