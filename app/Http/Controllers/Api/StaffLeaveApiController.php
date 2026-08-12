@@ -205,8 +205,12 @@ class StaffLeaveApiController extends Controller
             $semester = $this->cache->getDefaultSemesterData();
             $this->sessionYearsTrackingsService->storeSessionYearsTracking('App\Models\Leave', $leave->id, Auth::user()->id, $sessionYear->id, Auth::user()->school_id, $semester ? $semester->id : null);
 
-            $user = $this->user->builder()->whereHas('roles.permissions', function ($q) {
-                $q->where('name', 'approve-leave');
+            $user = $this->user->builder()->where(function ($query) {
+                $query->whereHas('roles.permissions', function ($q) {
+                    $q->where('name', 'approve-leave');
+                })->orWhereHas('roles', function ($q) {
+                    $q->where('name', 'Principal');
+                });
             })->pluck('id');
             
             $type_push = "Leave";

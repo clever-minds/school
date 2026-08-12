@@ -145,8 +145,12 @@ class LeaveController extends Controller
                 $this->sessionYearsTrackingsService->storeSessionYearsTracking('App\Models\Leave', $leave->id, Auth::user()->id, $sessionYear->id, Auth::user()->school_id, null);
             }
 
-            $user = $this->user->builder()->whereHas('roles.permissions', function ($q) {
-                $q->where('name', 'approve-leave');
+            $user = $this->user->builder()->where(function ($query) {
+                $query->whereHas('roles.permissions', function ($q) {
+                    $q->where('name', 'approve-leave');
+                })->orWhereHas('roles', function ($q) {
+                    $q->where('name', 'Principal');
+                });
             })->pluck('id');
             $type = "Leave";
             $title = Auth::user()->full_name . ' has submitted a new leave request.';
