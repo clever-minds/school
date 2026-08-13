@@ -1477,7 +1477,7 @@ window.staffEvents = {
         $('#edit_staff_image').attr('src',row.image);
         $('.edit-dob').val(moment(row.dob_org, 'YYYY-MM-DD').format('DD-MM-YYYY'));
 
-        $('#edit_joining_date').val(moment(row.staff.joining_date, 'YYYY-MM-DD').format('DD-MM-YYYY'));
+        $('#edit_joining_date').val(moment(row.joining_date_org, 'YYYY-MM-DD').format('DD-MM-YYYY'));
 
         if (row.two_factor_enabled == 1) {
             $('#two_factor_verification').prop('checked', true);

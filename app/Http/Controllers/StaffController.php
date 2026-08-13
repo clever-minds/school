@@ -385,6 +385,7 @@ class StaffController extends Controller {
             $tempRow = $row->toArray();
             $tempRow['no'] = $no++;
             $tempRow['dob_org'] = $row->getRawOriginal('dob');
+            $tempRow['joining_date_org'] = $row->staff ? $row->staff->getRawOriginal('joining_date') : null;
             $tempRow['support_school_id'] = $row->support_school->pluck('school_id');
             $tempRow['operate'] = $operate;
             $tempRow['roles_name'] = $row->roles->pluck('name');   
