@@ -54,10 +54,7 @@
                         <div class="card-body">
                             <h4 class="card-title">{{ __('list') . ' ' . __('payroll') }}</h4>
                             <div class="row" id="toolbar">
-                                <div class="form-group col-sm-12 col-md-3">
-                                    <label class="filter-menu">{{ __('date') }} <span class="text-danger">*</span></label>
-                                    {!! Form::text('date', null, ['required', 'class' => 'form-control datepicker-popup', 'id' => 'date']) !!}
-                                </div>
+
                             </div>
                             <div class="staff-table">
 
@@ -114,8 +111,7 @@
             let year = $('#year').val();
             $('#table_list').bootstrapTable('uncheckAll');
 
-            var lastDate = getLastDateOfMonth(month, year);
-            $('#date').val(lastDate);
+
         });
         window.onload = $('.staff-table').hide();
     </script>

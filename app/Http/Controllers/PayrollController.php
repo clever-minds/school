@@ -77,7 +77,7 @@ class PayrollController extends Controller {
 
         $request->validate([
             'net_salary' => 'required',
-            'date'       => 'required',
+
             'user_id' => 'required'
         ], [
             'net_salary.required' => trans('no_records_found'),
@@ -118,7 +118,7 @@ class PayrollController extends Controller {
                     'paid_leaves'     => $request->paid_leave[$user_id],
                     'amount'          => $request->net_salary[$user_id],
                     'session_year_id' => $sessionYearInterface->id,
-                    'date'            => date('Y-m-d', strtotime($request->date)),
+                    'date'            => $endDate->format('Y-m-d'),
                 ];
 
                 $expense = $this->expense->updateOrCreate(['staff_id' => $data['staff_id'], 'month' => $data['month'], 'year' => $data['year']], ['amount' => $data['amount'], 'session_year_id' => $data['session_year_id'],'basic_salary' => $data['basic_salary'],'date' => $data['date'],'title' => $data['title'],'paid_leaves' => $data['paid_leaves'],'description' => $data['description']]);

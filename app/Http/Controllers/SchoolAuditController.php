@@ -6,6 +6,7 @@ use App\Models\AuditQuestion;
 use App\Models\School;
 use App\Models\SchoolAudit;
 use App\Models\SchoolAuditAnswer;
+use App\Models\StaffSupportSchool;
 use App\Services\BootstrapTableService;
 use App\Services\ResponseService;
 use Illuminate\Http\Request;
@@ -28,6 +29,12 @@ class SchoolAuditController extends Controller
             $search = request('search');
 
             $sql = SchoolAudit::with('school', 'auditor');
+
+            // Filter by assigned schools for non-super-admin users
+            $assignedSchoolIds = StaffSupportSchool::where('user_id', Auth::id())->pluck('school_id')->toArray();
+            if (!empty($assignedSchoolIds)) {
+                $sql->whereIn('school_id', $assignedSchoolIds);
+            }
 
             if (!empty($search)) {
                 $sql->whereHas('school', function ($q) use ($search) {
@@ -79,13 +86,16 @@ class SchoolAuditController extends Controller
     {
         ResponseService::noPermissionThenRedirect('school-audit-create');
         
-        $schools = School::where('status', 1)->get();
+        // Only show schools assigned to the logged-in user
+        $assignedSchoolIds = StaffSupportSchool::where('user_id', Auth::id())->pluck('school_id')->toArray();
+        if (!empty($assignedSchoolIds)) {
+            $schools = School::where('status', 1)->whereIn('id', $assignedSchoolIds)->get();
+        } else {
+            $schools = School::where('status', 1)->get();
+        }
         $categories = \App\Models\AuditCategory::where('status', 1)->with('questions')->get();
-        $users = \App\Models\User::whereHas('roles', function($q) {
-            $q->where('name', '!=', 'Student');
-        })->get();
 
-        return view('school_audits.create', compact('schools', 'categories', 'users'));
+        return view('school_audits.create', compact('schools', 'categories'));
     }
 
     public function store(Request $request)
@@ -95,7 +105,6 @@ class SchoolAuditController extends Controller
         $request->validate([
             'name' => 'required|string',
             'school_id' => 'required|exists:schools,id',
-            'auditor_id' => 'required|exists:users,id',
             'audit_date' => 'required|date',
             'due_date' => 'required|date|after_or_equal:audit_date',
             'frequency' => 'required|in:One-Time,Monthly,Quarterly,Half Yearly,Yearly',
@@ -110,7 +119,7 @@ class SchoolAuditController extends Controller
             $audit = SchoolAudit::create([
                 'name' => $request->name,
                 'school_id' => $request->school_id,
-                'auditor_id' => $request->auditor_id,
+                'auditor_id' => Auth::id(),
                 'audit_date' => date('Y-m-d', strtotime($request->audit_date)),
                 'due_date' => date('Y-m-d', strtotime($request->due_date)),
                 'frequency' => $request->frequency,

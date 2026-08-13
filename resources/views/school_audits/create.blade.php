@@ -33,15 +33,6 @@
                                         @endforeach
                                     </select>
                                 </div>
-                                <div class="col-sm-12 col-md-4">
-                                    <label>{{ __('Auditor') }} <span class="text-danger">*</span></label>
-                                    <select name="auditor_id" id="auditor_id" class="form-control" required>
-                                        <option value="">{{ __('Select Auditor') }}</option>
-                                        @foreach($users as $user)
-                                            <option value="{{ $user->id }}">{{ $user->first_name }} {{ $user->last_name }}</option>
-                                        @endforeach
-                                    </select>
-                                </div>
                             </div>
                             <div class="row form-group">
                                 <div class="col-sm-12 col-md-4">
