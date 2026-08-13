@@ -852,7 +852,7 @@ class FeesController extends Controller
                 }
             }
 
-            if (!isset($request->paid_status) || (string)$request->paid_status !== '0') {
+            if (isset($request->paid_status) && ((string)$request->paid_status === '1' || (string)$request->paid_status === '2')) {
                 if ($request->month) {
                     $sql->where(function ($query) use ($request, $fees) {
                         $query->whereHas('fees_paid', function ($q) use ($request, $fees) {
