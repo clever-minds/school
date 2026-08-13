@@ -6,6 +6,7 @@ use App\Models\TeacherInterviewApplication;
 use App\Models\TeacherInterview;
 use App\Models\TeacherInterviewFeedback;
 use App\Models\TeacherInterviewFeedbackQuestion;
+use App\Models\StaffSupportSchool;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -23,6 +24,12 @@ class TeacherInterviewController extends Controller
 
         if (Auth::user()->school_id) {
             $query->where('school_id', Auth::user()->school_id);
+        } else {
+            // Filter by assigned schools for support staff
+            $assignedSchoolIds = StaffSupportSchool::where('user_id', Auth::id())->pluck('school_id')->toArray();
+            if (!empty($assignedSchoolIds)) {
+                $query->whereIn('school_id', $assignedSchoolIds);
+            }
         }
 
         if ($request->filled('status')) {
