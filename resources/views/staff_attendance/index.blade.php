@@ -21,7 +21,7 @@
                         <div class="row" id="toolbar">
                             <div class="form-group col-sm-12 col-md-4">
                                 <label>{{ __('date') }}</label>
-                                {!! Form::text('date', date('Y-m-d'), ['required', 'placeholder' => __('date'), 'class' => 'datepicker-popup form-control','id'=>'date','autocomplete'=>'off']) !!}
+                                {!! Form::text('date', date('d-m-Y'), ['required', 'placeholder' => __('date'), 'class' => 'datepicker-popup form-control','id'=>'date','autocomplete'=>'off']) !!}
                             </div>
                         </div>
 

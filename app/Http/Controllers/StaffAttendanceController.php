@@ -45,7 +45,8 @@ class StaffAttendanceController extends Controller
 
         $sql = $this->staffAttendance->builder()->with('user:id,first_name,last_name,email,mobile')
             ->when($request->date, function ($q) use ($request) {
-                $q->whereDate('date', $request->date);
+                $date = date('Y-m-d', strtotime($request->date));
+                $q->whereDate('date', $date);
             })
             ->when($request->staff_id, function ($q) use ($request) {
                 $q->where('user_id', $request->staff_id);
