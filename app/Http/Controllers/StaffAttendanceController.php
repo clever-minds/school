@@ -399,4 +399,28 @@ class StaffAttendanceController extends Controller
             return ResponseService::errorResponse();
         }
     }
+
+    public function qr()
+    {
+        ResponseService::noPermissionThenRedirect('staff-attendance-qr');
+        return view('staff_attendance.qr');
+    }
+
+    public function generateQr(Request $request)
+    {
+        ResponseService::noPermissionThenSendJson('staff-attendance-qr');
+        
+        $user = Auth::user();
+        $school_id = $user->school_id;
+        $timestamp = Carbon::now()->timestamp;
+
+        // User requested: "only abhi titme stamp ke accroding qr genrate karwana he"
+        // We will output a simple unencrypted JSON with timestamp for now.
+        $payload = [
+            'school_id' => $school_id,
+            'timestamp' => $timestamp
+        ];
+
+        return response()->json(['error' => false, 'token' => json_encode($payload)]);
+    }
 }
