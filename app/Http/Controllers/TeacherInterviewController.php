@@ -90,8 +90,12 @@ class TeacherInterviewController extends Controller
 
     public function updateStatus(Request $request, $id)
     {
-        if (!Auth::user()->can('teacher-interview-manage')) {
-            abort(403);
+        // Only Super Admin or users with 'teacher-interview-update-status' permission can update status
+        $isSuperAdmin = Auth::user()->hasRole('Super Admin');
+        $hasPermission = Auth::user()->can('teacher-interview-update-status');
+
+        if (!$isSuperAdmin && !$hasPermission) {
+            abort(403, 'You are not authorized to update the interview status.');
         }
 
         $request->validate([

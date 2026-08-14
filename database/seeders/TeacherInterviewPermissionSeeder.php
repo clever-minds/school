@@ -19,6 +19,7 @@ class TeacherInterviewPermissionSeeder extends Seeder
             'teacher-interview-create',
             'teacher-interview-edit',
             'teacher-interview-delete',
+            'teacher-interview-update-status',
             'teacher-interview-question-list',
             'teacher-interview-question-create',
             'teacher-interview-question-edit',

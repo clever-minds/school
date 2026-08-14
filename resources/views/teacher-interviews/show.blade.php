@@ -46,6 +46,7 @@
                             <div class="alert alert-success">{{ session('success') }}</div>
                         @endif
 
+                        @if(Auth::user()->hasRole('Super Admin') || Auth::user()->can('teacher-interview-update-status'))
                         <form action="{{ route('teacher-interviews.update-status', $application->id) }}" method="POST">
                             @csrf
                             <div class="form-group">
@@ -85,6 +86,36 @@
 
                             <button type="submit" class="btn btn-primary theme-btn">{{ __('Update Status') }}</button>
                         </form>
+                        @else
+                        {{-- Read-only status for unauthorized users --}}
+                        <div class="form-group">
+                            <label>{{ __('Current Status') }}</label>
+                            <div class="mt-1">
+                                @php
+                                    $statusColors = [
+                                        'Pending'            => 'warning',
+                                        'Shortlisted'        => 'info',
+                                        'Interview Scheduled'=> 'primary',
+                                        'Hired'              => 'success',
+                                        'Rejected'           => 'danger',
+                                    ];
+                                    $badgeColor = $statusColors[$application->status] ?? 'secondary';
+                                @endphp
+                                <span class="badge badge-{{ $badgeColor }} p-2" style="font-size: 0.9rem;">
+                                    {{ __($application->status) }}
+                                </span>
+                            </div>
+                        </div>
+                        @if($application->remarks)
+                        <div class="form-group mt-2">
+                            <label>{{ __('Remarks') }}</label>
+                            <p class="text-muted">{{ $application->remarks }}</p>
+                        </div>
+                        @endif
+                        <div class="alert alert-warning mt-3" role="alert">
+                            <i class="fa fa-lock mr-1"></i> {{ __('You do not have permission to update the status. Please contact Super Admin.') }}
+                        </div>
+                        @endif
                     </div>
                 </div>
             </div>
