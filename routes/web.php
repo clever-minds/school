@@ -417,7 +417,9 @@ Route::post('/admin/impersonation-exit',
         Route::resource('audit-questions', \App\Http\Controllers\AuditQuestionController::class);
         Route::resource('audit-option-groups', \App\Http\Controllers\AuditOptionGroupController::class);
         Route::resource('school-audits', \App\Http\Controllers\SchoolAuditController::class);
+        Route::get('school-audits-compare', [\App\Http\Controllers\SchoolAuditController::class, 'compare'])->name('school-audits.compare');
         Route::get('school-audits/{id}/pdf', [\App\Http\Controllers\SchoolAuditController::class, 'downloadPdf'])->name('school-audits.download-pdf');
+        Route::get('school-audits/{id}/email', [\App\Http\Controllers\SchoolAuditController::class, 'emailPdf'])->name('school-audits.email-pdf');
 
         // End super admin routes
         // =================================================================

@@ -13,6 +13,9 @@
             <div>
                 @if($audit->status == 1)
                     <a href="{{ route('school-audits.download-pdf', $audit->id) }}" class="btn btn-success btn-sm mr-2"><i class="fa fa-download"></i> {{ __('Download PDF') }}</a>
+                    @if($audit->school && $audit->school->support_email)
+                        <a href="{{ route('school-audits.email-pdf', $audit->id) }}" class="btn btn-info btn-sm mr-2"><i class="fa fa-envelope"></i> {{ __('Email PDF to School') }}</a>
+                    @endif
                 @endif
                 <a href="{{ route('school-audits.index') }}" class="btn btn-theme btn-sm">{{ __('Back') }}</a>
             </div>
@@ -45,6 +48,18 @@
                                 <h5><strong>{{ __('Audit Date') }}:</strong> {{ date('d M, Y', strtotime($audit->audit_date)) }}</h5>
                             </div>
                         </div>
+                        @if($audit->status == 1)
+                        <div class="row mb-4">
+                            <div class="col-md-4">
+                                <div class="card text-white bg-primary">
+                                    <div class="card-body text-center p-3">
+                                        <h4 class="card-title text-white mb-2">{{ __('Overall Score') }}</h4>
+                                        <h2 class="mb-0">{{ number_format($audit->percentage_score, 2) }}%</h2>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        @endif
                         <div class="row mb-4">
                             <div class="col-md-12">
                                 <h5><strong>{{ __('General Remarks') }}:</strong></h5>

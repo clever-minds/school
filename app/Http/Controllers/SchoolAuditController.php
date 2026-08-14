@@ -36,12 +36,21 @@ class SchoolAuditController extends Controller
                 $sql->whereIn('school_id', $assignedSchoolIds);
             }
 
+            $archiveStatus = request('archive_status', 'active');
+            if ($archiveStatus == 'archived') {
+                $sql->whereNotNull('archived_at');
+            } else {
+                $sql->whereNull('archived_at');
+            }
+
             if (!empty($search)) {
-                $sql->whereHas('school', function ($q) use ($search) {
-                    $q->where('name', 'like', "%$search%");
-                })->orWhereHas('auditor', function ($q) use ($search) {
-                    $q->where('first_name', 'like', "%$search%")
-                      ->orWhere('last_name', 'like', "%$search%");
+                $sql->where(function($q) use ($search) {
+                    $q->whereHas('school', function ($q) use ($search) {
+                        $q->where('name', 'like', "%$search%");
+                    })->orWhereHas('auditor', function ($q) use ($search) {
+                        $q->where('first_name', 'like', "%$search%")
+                          ->orWhere('last_name', 'like', "%$search%");
+                    });
                 });
             }
 
@@ -211,6 +220,15 @@ class SchoolAuditController extends Controller
                     if ($auditAnswer->answer == 'Yes') {
                         $earnedScore++;
                     }
+                } elseif (in_array($auditAnswer->answer, ['Excellent', 'Good', 'Average', 'Unsatisfactory'])) {
+                    $totalScorable++;
+                    if ($auditAnswer->answer == 'Excellent') {
+                        $earnedScore += 1;
+                    } elseif ($auditAnswer->answer == 'Good') {
+                        $earnedScore += 0.75;
+                    } elseif ($auditAnswer->answer == 'Average') {
+                        $earnedScore += 0.50;
+                    }
                 }
             }
 
@@ -221,6 +239,22 @@ class SchoolAuditController extends Controller
                 'submission_date' => now(),
                 'percentage_score' => $percentage
             ]);
+
+            // Notify Super Admin
+            try {
+                $superAdminRoles = \Spatie\Permission\Models\Role::where('name', 'Super Admin')->first();
+                if ($superAdminRoles) {
+                    $superAdmins = \App\Models\User::role('Super Admin')->pluck('id')->toArray();
+                    if (!empty($superAdmins)) {
+                        $title = __('Audit Submitted');
+                        $body = __('An audit for school') . ' ' . ($audit->school ? $audit->school->name : '') . ' ' . __('has been submitted by') . ' ' . Auth::user()->first_name . '.';
+                        $type = 'School Audit';
+                        send_notification($superAdmins, $title, $body, $type);
+                    }
+                }
+            } catch (\Exception $ex) {
+                \Illuminate\Support\Facades\Log::error("Notification Error: " . $ex->getMessage());
+            }
 
             DB::commit();
             return redirect()->route('school-audits.index')->with('success', trans('data_update_successfully'));
@@ -255,5 +289,60 @@ class SchoolAuditController extends Controller
         
         $fileName = 'school_audit_' . ($audit->school ? str_replace(' ', '_', strtolower($audit->school->name)) : 'report') . '.pdf';
         return $pdf->download($fileName);
+    }
+
+    public function emailPdf($id)
+    {
+        ResponseService::noPermissionThenRedirect('school-audit-list');
+
+        $audit = SchoolAudit::with(['school', 'auditor', 'answers.question'])->findOrFail($id);
+
+        if (!$audit->school || !$audit->school->support_email) {
+            return redirect()->back()->with('error', __('School support email is not configured.'));
+        }
+
+        try {
+            $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView('school_audits.pdf', compact('audit'));
+            
+            $fileName = 'school_audit_' . str_replace(' ', '_', strtolower($audit->school->name)) . '.pdf';
+            
+            // Temporary save the PDF
+            $path = storage_path('app/public/' . $fileName);
+            $pdf->save($path);
+
+            \Illuminate\Support\Facades\Mail::to($audit->school->support_email)
+                ->send(new \App\Mail\AuditReportMail($audit, $path));
+
+            // Delete temporary PDF
+            if (file_exists($path)) {
+                unlink($path);
+            }
+
+            return redirect()->back()->with('success', __('Audit report emailed successfully to school.'));
+        } catch (\Exception $e) {
+            \Illuminate\Support\Facades\Log::error("Email Error: " . $e->getMessage());
+            return redirect()->back()->with('error', __('Failed to send email.'));
+        }
+    }
+
+    public function compare(Request $request)
+    {
+        ResponseService::noPermissionThenRedirect('school-audit-list');
+
+        $schools = School::where('status', 1)->get();
+        $audits = [];
+        $audit1 = null;
+        $audit2 = null;
+
+        if ($request->school_id) {
+            $audits = SchoolAudit::where('school_id', $request->school_id)->where('status', 1)->orderBy('audit_date', 'desc')->get();
+        }
+
+        if ($request->audit1_id && $request->audit2_id) {
+            $audit1 = SchoolAudit::with(['school', 'answers.question'])->find($request->audit1_id);
+            $audit2 = SchoolAudit::with(['school', 'answers.question'])->find($request->audit2_id);
+        }
+
+        return view('school_audits.compare', compact('schools', 'audits', 'audit1', 'audit2'));
     }
 }

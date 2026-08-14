@@ -19,10 +19,21 @@
                         <h4 class="card-title">
                             {{ __('list') . ' ' . __('School Audits') }}
                             @can('school-audit-create')
+                            <a href="{{ route('school-audits.compare') }}" class="btn btn-info btn-sm float-right ml-2"><i class="fa fa-exchange-alt"></i> {{ __('Compare Audits') }}</a>
                             <a href="{{ route('school-audits.create') }}" class="btn btn-theme btn-sm float-right">{{ __('create') . ' ' . __('School Audit') }}</a>
                             @endcan
                         </h4>
-                        <div class="row">
+
+                        <ul class="nav nav-tabs mt-4" id="auditTab" role="tablist">
+                            <li class="nav-item">
+                                <a class="nav-link active" id="active-tab" data-toggle="tab" href="#active" role="tab" aria-controls="active" aria-selected="true" onclick="changeArchiveStatus('active')">{{ __('Active Audits') }}</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" id="archived-tab" data-toggle="tab" href="#archived" role="tab" aria-controls="archived" aria-selected="false" onclick="changeArchiveStatus('archived')">{{ __('Archived Audits') }}</a>
+                            </li>
+                        </ul>
+
+                        <div class="row mt-3">
                             <div class="col-12">
                                 <table aria-describedby="mydesc" class='table' id='table_list'
                                        data-toggle="table" data-url="{{ route('school-audits.index') }}"
@@ -58,13 +69,21 @@
 
 @section('script')
 <script>
+    let currentArchiveStatus = 'active';
+
+    function changeArchiveStatus(status) {
+        currentArchiveStatus = status;
+        $('#table_list').bootstrapTable('refresh');
+    }
+
     function queryParams(p) {
         return {
             limit: p.limit,
             sort: p.sort,
             order: p.order,
             offset: p.offset,
-            search: p.search
+            search: p.search,
+            archive_status: currentArchiveStatus
         };
     }
     
