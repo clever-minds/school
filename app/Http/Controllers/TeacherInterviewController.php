@@ -13,46 +13,89 @@ use Illuminate\Support\Facades\Auth;
 
 class TeacherInterviewController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $request = request();
         if (!Auth::user()->can('teacher-interview-list')) {
             abort(403);
         }
 
-        $query = TeacherInterviewApplication::query();
-
-        if (Auth::user()->hasRole('Super Admin')) {
-            // Super Admin can see all
-        } elseif (Auth::user()->hasRole('School Admin')) {
-            $query->where('school_id', Auth::user()->school_id);
-        } else {
-            // Other users (interviewers) see only their assigned applications
-            $query->whereHas('interview', function($q) {
-                $q->where('interviewer_id', Auth::id());
-            });
-        }
-
-        if ($request->filled('status')) {
-            $query->where('status', $request->status);
-        }
-
-        if ($request->filled('search')) {
+        if ($request->wantsJson()) {
+            $offset = $request->offset ?? 0;
+            $limit = $request->limit ?? 10;
+            $sort = $request->sort ?? 'id';
+            $order = $request->order ?? 'DESC';
             $search = $request->search;
-            $query->where(function($q) use ($search) {
-                $q->where('name', 'like', "%{$search}%")
-                  ->orWhere('email', 'like', "%{$search}%")
-                  ->orWhere('phone', 'like', "%{$search}%");
-            });
+
+            $query = TeacherInterviewApplication::with('school');
+
+            if (Auth::user()->hasRole('Super Admin')) {
+                // Super Admin can see all
+            } elseif (Auth::user()->hasRole('School Admin')) {
+                $query->where('school_id', Auth::user()->school_id);
+            } else {
+                // Other users (interviewers) see only their assigned applications
+                $query->whereHas('interview', function($q) {
+                    $q->where('interviewer_id', Auth::id());
+                });
+            }
+
+            if (!empty($search)) {
+                $query->where(function($q) use ($search) {
+                    $q->where('name', 'like', "%{$search}%")
+                      ->orWhere('email', 'like', "%{$search}%")
+                      ->orWhere('phone', 'like', "%{$search}%");
+                });
+            }
+
+            $total = $query->count();
+            $query->orderBy($sort, $order)->skip($offset)->take($limit);
+            $applications = $query->get();
+
+            $bulkData = [];
+            $bulkData['total'] = $total;
+            $rows = [];
+            $no = 1;
+
+            foreach ($applications as $application) {
+                $operate = '<a href="' . route('teacher-interviews.show', $application->id) . '" class="btn btn-sm btn-info btn-rounded btn-icon" title="' . __('View Details') . '"><i class="fa fa-eye"></i></a>&nbsp;';
+                
+                if (Auth::user()->can('teacher-interview-edit') || Auth::user()->hasRole('Super Admin') || Auth::user()->hasRole('School Admin')) {
+                    $operate .= '<button type="button" class="btn btn-sm btn-warning btn-rounded btn-icon assign-btn" data-id="' . $application->id . '" data-school="' . $application->school_id . '" title="' . __('Assign Interviewer') . '"><i class="fa fa-user-plus"></i></button>&nbsp;';
+                }
+
+                if ($application->resume_path) {
+                    $operate .= '<a href="' . asset('storage/' . $application->resume_path) . '" target="_blank" class="btn btn-sm btn-primary btn-rounded btn-icon" title="' . __('Download Resume') . '"><i class="fa fa-download"></i></a>';
+                }
+
+                if ($application->status == 'Pending') {
+                    $statusBadge = '<span class="badge badge-warning">' . $application->status . '</span>';
+                } elseif ($application->status == 'Rejected') {
+                    $statusBadge = '<span class="badge badge-danger">' . $application->status . '</span>';
+                } elseif ($application->status == 'Hired') {
+                    $statusBadge = '<span class="badge badge-success">' . $application->status . '</span>';
+                } else {
+                    $statusBadge = '<span class="badge badge-info">' . $application->status . '</span>';
+                }
+
+                $tempRow = $application->toArray();
+                $tempRow['no'] = $no++;
+                $tempRow['school_name'] = $application->school->name ?? '-';
+                $tempRow['applied_on'] = $application->created_at->format('d M, Y');
+                $tempRow['status_badge'] = $statusBadge;
+                $tempRow['operate'] = $operate;
+                $rows[] = $tempRow;
+            }
+
+            $bulkData['rows'] = $rows;
+            return response()->json($bulkData);
         }
 
-        $applications = $query->latest()->paginate(15);
         $staffMembers = User::where('school_id', Auth::user()->school_id)
             ->whereHas('roles', function ($q) {
                 $q->whereNotIn('name', ['Student', 'Parent', 'Guardian']);
             })->get();
 
-        return view('teacher-interviews.index', compact('applications', 'staffMembers'));
+        return view('teacher-interviews.index', compact('staffMembers'));
     }
 
     public function myInterviews()

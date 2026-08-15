@@ -20,75 +20,33 @@
                             {{ __('Applications List') }}
                         </h4>
 
-                        <form action="{{ route('teacher-interviews.index') }}" method="GET" class="mb-3">
-                            <div class="row">
-                                <div class="col-md-4">
-                                    <div class="input-group">
-                                        <input type="text" name="search" class="form-control" placeholder="{{ __('Search by Name, Email, or Phone...') }}" value="{{ request()->search }}">
-                                        <div class="input-group-append">
-                                            <button class="btn btn-sm btn-primary" type="submit">{{ __('Search') }}</button>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </form>
-                        
-                        <div class="table-responsive">
-                            <table class="table" id="table_list">
-                                <thead>
+                        <div class="row mt-3">
+                            <div class="col-12">
+                                <table aria-describedby="mydesc" class='table' id='table_list'
+                                       data-toggle="table" data-url="{{ route('teacher-interviews.index') }}"
+                                       data-click-to-select="true" data-side-pagination="server"
+                                       data-pagination="true" data-page-list="[5, 10, 20, 50, 100, 200]"
+                                       data-search="true" data-toolbar="#toolbar" data-show-columns="true"
+                                       data-show-refresh="true" data-fixed-columns="true" data-fixed-number="2"
+                                       data-fixed-right-number="1" data-trim-on-search="false" data-mobile-responsive="true"
+                                       data-sort-name="id" data-sort-order="desc" data-maintain-selected="true"
+                                       data-export-data-type='all' data-export-options='{ "fileName": "teacher-interviews-list-<?= date('d-m-y') ?>" }'
+                                       data-query-params="queryParams" data-escape="true">
+                                    <thead>
                                     <tr>
-                                        <th>{{ __('No.') }}</th>
-                                        <th>{{ __('School') }}</th>
-                                        <th>{{ __('Name') }}</th>
-                                        <th>{{ __('Email') }}</th>
-                                        <th>{{ __('Phone') }}</th>
-                                        <th>{{ __('Applied On') }}</th>
-                                        <th>{{ __('Status') }}</th>
-                                        <th>{{ __('Action') }}</th>
+                                        <th scope="col" data-field="id" data-sortable="true" data-visible="false"> {{ __('id') }} </th>
+                                        <th scope="col" data-field="no"> {{ __('no.') }} </th>
+                                        <th scope="col" data-field="school_name" data-sortable="false">{{ __('School') }} </th>
+                                        <th scope="col" data-field="name" data-sortable="true">{{ __('Name') }} </th>
+                                        <th scope="col" data-field="email" data-sortable="true">{{ __('Email') }} </th>
+                                        <th scope="col" data-field="phone" data-sortable="true">{{ __('Phone') }} </th>
+                                        <th scope="col" data-field="applied_on" data-sortable="true">{{ __('Applied On') }} </th>
+                                        <th scope="col" data-field="status_badge" data-escape="false">{{ __('Status') }} </th>
+                                        <th data-events="teacherInterviewEvents" data-width="150" scope="col" data-field="operate" data-escape="false">{{ __('action') }}</th>
                                     </tr>
-                                </thead>
-                                <tbody>
-                                    @foreach($applications as $key => $application)
-                                        <tr>
-                                            <td>{{ ($applications->firstItem() ?? 1) + $key }}</td>
-                                            <td>{{ $application->school->name ?? '-' }}</td>
-                                            <td>{{ $application->name }}</td>
-                                            <td>{{ $application->email }}</td>
-                                            <td>{{ $application->phone }}</td>
-                                            <td>{{ $application->created_at->format('d M, Y') }}</td>
-                                            <td>
-                                                @if($application->status == 'Pending')
-                                                    <span class="badge badge-warning">{{ $application->status }}</span>
-                                                @elseif($application->status == 'Rejected')
-                                                    <span class="badge badge-danger">{{ $application->status }}</span>
-                                                @elseif($application->status == 'Hired')
-                                                    <span class="badge badge-success">{{ $application->status }}</span>
-                                                @else
-                                                    <span class="badge badge-info">{{ $application->status }}</span>
-                                                @endif
-                                            </td>
-                                            <td>
-                                                <a href="{{ route('teacher-interviews.show', $application->id) }}" class="btn btn-sm btn-info btn-rounded btn-icon" title="{{ __('View Details') }}">
-                                                    <i class="fa fa-eye"></i>
-                                                </a>
-                                                @if(Auth::user()->can('teacher-interview-edit') || Auth::user()->hasRole('Super Admin') || Auth::user()->hasRole('School Admin'))
-                                                    <button type="button" class="btn btn-sm btn-warning btn-rounded btn-icon assign-btn" data-id="{{ $application->id }}" data-school="{{ $application->school_id }}" title="{{ __('Assign Interviewer') }}">
-                                                        <i class="fa fa-user-plus"></i>
-                                                    </button>
-                                                @endif
-                                                @if($application->resume_path)
-                                                    <a href="{{ asset('storage/' . $application->resume_path) }}" target="_blank" class="btn btn-sm btn-primary btn-rounded btn-icon" title="{{ __('Download Resume') }}">
-                                                        <i class="fa fa-download"></i>
-                                                    </a>
-                                                @endif
-                                            </td>
-                                        </tr>
-                                    @endforeach
-                                </tbody>
-                            </table>
-                        </div>
-                        <div class="mt-3">
-                            {{ $applications->withQueryString()->links() }}
+                                    </thead>
+                                </table>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -128,27 +86,36 @@
 
 @section('script')
 <script>
-    $(document).ready(function() {
-        $('.assign-btn').click(function() {
-            var id = $(this).data('id');
-            var school_id = $(this).data('school');
+    function queryParams(p) {
+        return {
+            limit: p.limit,
+            sort: p.sort,
+            order: p.order,
+            offset: p.offset,
+            search: p.search
+        };
+    }
+    
+    window.teacherInterviewEvents = {
+        'click .assign-btn': function (e, value, row, index) {
+            let applicationId = row.id;
+            let schoolId = row.school_id;
             
-            var formAction = "{{ url('teacher-interviews') }}/" + id + "/assign";
+            var formAction = "{{ url('teacher-interviews') }}/" + applicationId + "/assign";
             $('#assignForm').attr('action', formAction);
             
-            // Fetch staff
-            var fetchUrl = "{{ url('get-staff-by-school') }}/" + (school_id ? school_id : 0);
+            let fetchUrl = "{{ url('get-staff-by-school') }}/" + (schoolId ? schoolId : 0);
             $.get(fetchUrl, function(data) {
-                var options = '<option value="">{{ __("Select Interviewer") }}</option>';
+                let options = '<option value="">{{ __("Select Interviewer") }}</option>';
                 data.forEach(function(staff) {
-                    options += '<option value="'+staff.id+'">'+staff.first_name+' '+staff.last_name+'</option>';
+                    options += `<option value="${staff.id}">${staff.first_name} ${staff.last_name}</option>`;
                 });
                 $('#interviewer_id').html(options);
                 $('#assignModal').modal('show');
             }).fail(function() {
                 alert('{{ __("Failed to fetch staff members.") }}');
             });
-        });
-    });
+        }
+    };
 </script>
 @endsection

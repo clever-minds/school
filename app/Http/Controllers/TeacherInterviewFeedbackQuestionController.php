@@ -16,15 +16,57 @@ class TeacherInterviewFeedbackQuestionController extends Controller
             abort(403, 'Unauthorized action.');
         }
 
-        $query = TeacherInterviewFeedbackQuestion::with('category');
-        if (request()->has('search') && request()->search != '') {
-            $search = request()->search;
-            $query->where('feedback_question', 'like', "%{$search}%")
-                  ->orWhereHas('category', function($q) use ($search) {
-                      $q->where('name', 'like', "%{$search}%");
-                  });
+        if (request()->wantsJson()) {
+            $offset = request('offset', 0);
+            $limit = request('limit', 10);
+            $sort = request('sort', 'id');
+            $order = request('order', 'DESC');
+            $search = request('search');
+
+            $query = TeacherInterviewFeedbackQuestion::with('category');
+
+            if (!empty($search)) {
+                $query->where(function($q) use ($search) {
+                    $q->where('feedback_question', 'like', "%{$search}%")
+                      ->orWhereHas('category', function($q2) use ($search) {
+                          $q2->where('name', 'like', "%{$search}%");
+                      });
+                });
+            }
+
+            $total = $query->count();
+            $query->orderBy($sort, $order)->skip($offset)->take($limit);
+            $questions = $query->get();
+
+            $bulkData = [];
+            $bulkData['total'] = $total;
+            $rows = [];
+            $no = 1;
+
+            foreach ($questions as $question) {
+                $operate = '<button class="btn btn-sm btn-info btn-rounded btn-icon edit-btn" data-id="' . $question->id . '" title="' . __('Edit') . '"><i class="fa fa-edit"></i></button>&nbsp;';
+                
+                $operate .= '<form action="' . route('teacher-interview-feedback-questions.destroy', $question->id) . '" method="POST" style="display:inline;" onsubmit="return confirm(\'' . __('Are you sure you want to delete this question?') . '\');">';
+                $operate .= csrf_field();
+                $operate .= method_field('DELETE');
+                $operate .= '<button type="submit" class="btn btn-sm btn-danger btn-rounded btn-icon" title="' . __('Delete') . '"><i class="fa fa-trash"></i></button>';
+                $operate .= '</form>';
+
+                $statusBadge = $question->status == 'active' ? '<span class="badge badge-success">' . __('Active') . '</span>' : '<span class="badge badge-danger">' . __('Inactive') . '</span>';
+
+                $tempRow = $question->toArray();
+                $tempRow['no'] = $no++;
+                $tempRow['category_name'] = $question->category->name ?? '-';
+                $tempRow['status_badge'] = $statusBadge;
+                $tempRow['operate'] = $operate;
+                $rows[] = $tempRow;
+            }
+
+            $bulkData['rows'] = $rows;
+            return response()->json($bulkData);
         }
-        $questions = $query->orderBy('id', 'desc')->paginate(15);
+
+        $questions = TeacherInterviewFeedbackQuestion::orderBy('id', 'desc')->get();
         $categories = TeacherInterviewCategory::where('status', 1)->get();
         return view('teacher-interview-feedback-questions.index', compact('questions', 'categories'));
     }
