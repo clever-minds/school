@@ -108,7 +108,7 @@
                                 <tbody>
                                     @foreach($questions as $key => $question)
                                         <tr>
-                                            <td>{{ $questions->firstItem() + $key }}</td>
+                                            <td>{{ ($questions->firstItem() ?? 1) + $key }}</td>
                                             <td>{{ $question->feedback_question }}</td>
                                             <td>{{ $question->category->name ?? '-' }}</td>
                                             <td>

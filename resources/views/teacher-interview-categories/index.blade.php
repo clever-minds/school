@@ -81,7 +81,7 @@
                                 <tbody>
                                     @foreach($categories as $key => $category)
                                         <tr>
-                                            <td>{{ $categories->firstItem() + $key }}</td>
+                                            <td>{{ ($categories->firstItem() ?? 1) + $key }}</td>
                                             <td>{{ $category->name }}</td>
                                             <td>{{ $category->description ?? '-' }}</td>
                                             <td>
