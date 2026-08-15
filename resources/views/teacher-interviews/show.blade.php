@@ -24,8 +24,7 @@
                             <li><strong>{{ __('Email') }}:</strong> {{ $application->email }}</li>
                             <li><strong>{{ __('Phone') }}:</strong> {{ $application->phone }}</li>
                             <li><strong>{{ __('Applied On') }}:</strong> {{ $application->created_at->format('d M, Y h:i A') }}</li>
-                            <li>
-                                <strong>{{ __('Resume') }}:</strong> 
+                            <li><strong>{{ __('Resume') }}:</strong> 
                                 @if($application->resume_path)
                                     <a href="{{ asset('storage/' . $application->resume_path) }}" target="_blank">{{ __('View / Download') }}</a>
                                 @else
