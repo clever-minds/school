@@ -139,18 +139,23 @@
                                 $isFeedbackSubmitted = count($feedbacks) > 0;
                             @endphp
                             <div class="table-responsive">
-                                <table class="table">
+                                <table class="table table-bordered">
                                     <thead>
                                         <tr>
-                                            <th>{{ __('Category') }}</th>
-                                            <th>{{ __('Question') }}</th>
-                                            <th>{{ __('Feedback / Remarks') }}</th>
+                                            <th width="5%">{{ __('#') }}</th>
+                                            <th width="45%">{{ __('Question') }}</th>
+                                            <th width="50%">{{ __('Feedback / Remarks') }}</th>
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        @foreach($feedbackQuestions as $question)
+                                        @php $index = 0; @endphp
+                                        @foreach($feedbackQuestions->groupBy(function($q) { return $q->category ? $q->category->name : 'General'; }) as $category => $questions)
+                                            <tr class="table-secondary">
+                                                <td colspan="3"><strong>{{ $category }}</strong></td>
+                                            </tr>
+                                            @foreach($questions as $question)
                                             <tr>
-                                                <td>{{ $question->category->name ?? '-' }}</td>
+                                                <td>{{ ++$index }}</td>
                                                 <td class="text-wrap" style="min-width: 200px;">{{ $question->feedback_question }}</td>
                                                 <td>
                                                     @php
@@ -260,6 +265,7 @@
                                                     @endif
                                                 </td>
                                             </tr>
+                                            @endforeach
                                         @endforeach
                                     </tbody>
                                 </table>
