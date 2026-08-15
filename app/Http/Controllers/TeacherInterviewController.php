@@ -145,8 +145,8 @@ class TeacherInterviewController extends Controller
 
     public function assignInterviewer(Request $request, $id)
     {
-        if (!Auth::user()->can('teacher-interview-list')) {
-            abort(403);
+        if (!Auth::user()->can('teacher-interview-edit') && !Auth::user()->hasRole('Super Admin') && !Auth::user()->hasRole('School Admin')) {
+            abort(403, 'Unauthorized action.');
         }
 
         $request->validate([

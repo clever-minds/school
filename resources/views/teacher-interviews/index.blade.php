@@ -58,9 +58,11 @@
                                                 <a href="{{ route('teacher-interviews.show', $application->id) }}" class="btn btn-sm btn-info btn-rounded btn-icon" title="{{ __('View Details') }}">
                                                     <i class="fa fa-eye"></i>
                                                 </a>
-                                                <button type="button" class="btn btn-sm btn-warning btn-rounded btn-icon assign-btn" data-id="{{ $application->id }}" data-school="{{ $application->school_id }}" title="{{ __('Assign Interviewer') }}">
-                                                    <i class="fa fa-user-plus"></i>
-                                                </button>
+                                                @if(Auth::user()->can('teacher-interview-edit') || Auth::user()->hasRole('Super Admin') || Auth::user()->hasRole('School Admin'))
+                                                    <button type="button" class="btn btn-sm btn-warning btn-rounded btn-icon assign-btn" data-id="{{ $application->id }}" data-school="{{ $application->school_id }}" title="{{ __('Assign Interviewer') }}">
+                                                        <i class="fa fa-user-plus"></i>
+                                                    </button>
+                                                @endif
                                                 @if($application->resume_path)
                                                     <a href="{{ asset('storage/' . $application->resume_path) }}" target="_blank" class="btn btn-sm btn-primary btn-rounded btn-icon" title="{{ __('Download Resume') }}">
                                                         <i class="fa fa-download"></i>
