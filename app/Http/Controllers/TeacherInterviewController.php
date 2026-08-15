@@ -13,18 +13,18 @@ use Illuminate\Support\Facades\Auth;
 
 class TeacherInterviewController extends Controller
 {
-    public function index(Request $request)
+    public function index()
     {
         if (!Auth::user()->can('teacher-interview-list')) {
             abort(403);
         }
 
-        if ($request->wantsJson()) {
-            $offset = $request->offset ?? 0;
-            $limit = $request->limit ?? 10;
-            $sort = $request->sort ?? 'id';
-            $order = $request->order ?? 'DESC';
-            $search = $request->search;
+        if (request()->wantsJson()) {
+            $offset = request()->offset ?? 0;
+            $limit = request()->limit ?? 10;
+            $sort = request()->sort ?? 'id';
+            $order = request()->order ?? 'DESC';
+            $search = request()->search;
 
             $query = TeacherInterviewApplication::with('school');
 
