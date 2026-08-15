@@ -157,7 +157,7 @@
                                                         $currentAnswer = isset($feedbacks[$question->id]) ? $feedbacks[$question->id]->interviewer_feedback : '';
                                                     @endphp
                                                     
-                                                    @if($question->type == 'rating')
+                                                    @if($question->type == 'Rating' || $question->type == 'rating')
                                                         <div class="d-flex align-items-center flex-wrap">
                                                             @if($question->optionGroup)
                                                                 @foreach($question->optionGroup->option_values as $opt)
@@ -179,7 +179,7 @@
                                                                 @endfor
                                                             @endif
                                                         </div>
-                                                    @elseif($question->type == 'boolean')
+                                                    @elseif($question->type == 'Yes/No' || $question->type == 'boolean')
                                                         <div class="d-flex align-items-center flex-wrap">
                                                             <div class="form-check form-check-inline mt-0 mb-2 mr-3">
                                                                 <label class="form-check-label" for="q_{{ $question->id }}_yes">

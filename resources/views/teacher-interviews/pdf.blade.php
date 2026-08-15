@@ -186,7 +186,7 @@
                 <tr>
                     <td>{{ $question->feedback_question }}</td>
                     <td>
-                        @if($question->type == 'rating' && $question->optionGroup)
+                        @if(($question->type == 'Rating' || $question->type == 'rating') && $question->optionGroup)
                             @foreach($question->optionGroup->option_values as $opt)
                                 @php $isSelected = ($currentAnswer == $opt['label']); @endphp
                                 <span class="checkbox-item">
@@ -195,7 +195,7 @@
                                     {{ $opt['label'] }}
                                 </span>
                             @endforeach
-                        @elseif($question->type == 'boolean')
+                        @elseif($question->type == 'Yes/No' || $question->type == 'boolean')
                             @php $isYes = ($currentAnswer == 'Yes');
                             $isNo = ($currentAnswer == 'No'); @endphp
                             <span class="checkbox-item">
