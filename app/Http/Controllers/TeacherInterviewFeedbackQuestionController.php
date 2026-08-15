@@ -10,15 +10,15 @@ use Illuminate\Support\Facades\Auth;
 
 class TeacherInterviewFeedbackQuestionController extends Controller
 {
-    public function index(Request $request)
+    public function index()
     {
         if (!Auth::user()->can('teacher-interview-question-list')) {
             abort(403, 'Unauthorized action.');
         }
 
         $query = TeacherInterviewFeedbackQuestion::with('category');
-        if ($request->has('search') && $request->search != '') {
-            $search = $request->search;
+        if (request()->has('search') && request()->search != '') {
+            $search = request()->search;
             $query->where('feedback_question', 'like', "%{$search}%")
                   ->orWhereHas('category', function($q) use ($search) {
                       $q->where('name', 'like', "%{$search}%");

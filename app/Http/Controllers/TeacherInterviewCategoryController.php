@@ -8,15 +8,15 @@ use Illuminate\Support\Facades\Auth;
 
 class TeacherInterviewCategoryController extends Controller
 {
-    public function index(Request $request)
+    public function index()
     {
         if (!Auth::user()->can('teacher-interview-question-list')) {
             abort(403, 'Unauthorized action.');
         }
 
         $query = TeacherInterviewCategory::query();
-        if ($request->has('search') && $request->search != '') {
-            $search = $request->search;
+        if (request()->has('search') && request()->search != '') {
+            $search = request()->search;
             $query->where('name', 'like', "%{$search}%")
                   ->orWhere('description', 'like', "%{$search}%");
         }
