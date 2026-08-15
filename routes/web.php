@@ -153,6 +153,8 @@ Route::group(['middleware' => ['auth']], function () {
     // Teacher Interview Feedback Questions
     Route::resource('teacher-interview-categories', \App\Http\Controllers\TeacherInterviewCategoryController::class)->except(['create', 'show', 'edit']);
     Route::resource('teacher-interview-feedback-questions', \App\Http\Controllers\TeacherInterviewFeedbackQuestionController::class)->parameters(['teacher-interview-feedback-questions' => 'question'])->except(['create', 'show', 'edit']);
+
+    Route::get('get-staff-by-school/{school_id}', [\App\Http\Controllers\UserController::class, 'getStaffBySchool'])->name('staff.by.school');
 });
 
 Route::group(['prefix' => 'school'], static function () {

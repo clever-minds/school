@@ -58,6 +58,9 @@
                                                 <a href="{{ route('teacher-interviews.show', $application->id) }}" class="btn btn-sm btn-info btn-rounded btn-icon" title="{{ __('View Details') }}">
                                                     <i class="fa fa-eye"></i>
                                                 </a>
+                                                <button type="button" class="btn btn-sm btn-warning btn-rounded btn-icon assign-btn" data-id="{{ $application->id }}" data-school="{{ $application->school_id }}" title="{{ __('Assign Interviewer') }}">
+                                                    <i class="fa fa-user-plus"></i>
+                                                </button>
                                                 @if($application->resume_path)
                                                     <a href="{{ asset('storage/' . $application->resume_path) }}" target="_blank" class="btn btn-sm btn-primary btn-rounded btn-icon" title="{{ __('Download Resume') }}">
                                                         <i class="fa fa-download"></i>
@@ -77,4 +80,60 @@
             </div>
         </div>
     </div>
+
+    <!-- Assign Interviewer Modal -->
+    <div class="modal fade" id="assignModal" tabindex="-1" role="dialog" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">{{ __('Assign Interviewer') }}</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <form id="assignForm" method="POST" action="">
+                    @csrf
+                    <div class="modal-body">
+                        <div class="form-group">
+                            <label>{{ __('Select Interviewer') }} <span class="text-danger">*</span></label>
+                            <select name="interviewer_id" id="interviewer_id" class="form-control" required>
+                                <option value="">{{ __('Select Interviewer') }}</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">{{ __('Close') }}</button>
+                        <button type="submit" class="btn btn-primary theme-btn">{{ __('Assign') }}</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+@endsection
+
+@section('script')
+<script>
+    $(document).ready(function() {
+        $('.assign-btn').click(function() {
+            var id = $(this).data('id');
+            var school_id = $(this).data('school');
+            
+            var formAction = "{{ url('teacher-interviews') }}/" + id + "/assign";
+            $('#assignForm').attr('action', formAction);
+            
+            // Fetch staff
+            var fetchUrl = "{{ url('get-staff-by-school') }}/" + (school_id ? school_id : 0);
+            $.get(fetchUrl, function(data) {
+                var options = '<option value="">{{ __("Select Interviewer") }}</option>';
+                data.forEach(function(staff) {
+                    options += '<option value="'+staff.id+'">'+staff.first_name+' '+staff.last_name+'</option>';
+                });
+                $('#interviewer_id').html(options);
+                $('#assignModal').modal('show');
+            }).fail(function() {
+                alert('{{ __("Failed to fetch staff members.") }}');
+            });
+        });
+    });
+</script>
 @endsection

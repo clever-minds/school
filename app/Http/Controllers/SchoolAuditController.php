@@ -128,7 +128,7 @@ class SchoolAuditController extends Controller
             $audit = SchoolAudit::create([
                 'name' => $request->name,
                 'school_id' => $request->school_id,
-                'auditor_id' => Auth::id(),
+                'auditor_id' => $request->auditor_id ?? Auth::id(),
                 'audit_date' => date('Y-m-d', strtotime($request->audit_date)),
                 'due_date' => date('Y-m-d', strtotime($request->due_date)),
                 'frequency' => $request->frequency,

@@ -33,6 +33,12 @@
                                         @endforeach
                                     </select>
                                 </div>
+                                <div class="col-sm-12 col-md-4">
+                                    <label>{{ __('Assign Auditor') }} <span class="text-danger">*</span></label>
+                                    <select name="auditor_id" id="auditor_id" class="form-control" required>
+                                        <option value="">{{ __('Select School First') }}</option>
+                                    </select>
+                                </div>
                             </div>
                             <div class="row form-group">
                                 <div class="col-sm-12 col-md-4">
@@ -121,6 +127,24 @@
 @section('script')
     <script>
         $(document).ready(function() {
+            $('#school_id').change(function() {
+                var school_id = $(this).val();
+                if (school_id) {
+                    var fetchUrl = "{{ url('get-staff-by-school') }}/" + school_id;
+                    $.get(fetchUrl, function(data) {
+                        var options = '<option value="">{{ __("Select Auditor") }}</option>';
+                        data.forEach(function(staff) {
+                            options += '<option value="'+staff.id+'">'+staff.first_name+' '+staff.last_name+'</option>';
+                        });
+                        $('#auditor_id').html(options);
+                    }).fail(function() {
+                        alert('{{ __("Failed to fetch staff members.") }}');
+                    });
+                } else {
+                    $('#auditor_id').html('<option value="">{{ __("Select School First") }}</option>');
+                }
+            });
+
             $('#selectAll').change(function() {
                 $('.category-checkbox').prop('checked', $(this).prop('checked'));
             });

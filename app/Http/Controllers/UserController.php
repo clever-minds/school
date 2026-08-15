@@ -122,4 +122,26 @@ class UserController extends Controller
             ResponseService::errorResponse();
         }
     }
+
+    public function getStaffBySchool($school_id)
+    {
+        try {
+            $users = $this->user->builder()
+                ->where(function($q) use ($school_id) {
+                    $q->where('school_id', $school_id)
+                      ->orWhereHas('support_school', function($q2) use ($school_id) {
+                          $q2->where('school_id', $school_id);
+                      });
+                })
+                ->whereHas('roles', function ($q) {
+                    $q->whereNotIn('name', ['Student', 'Parent', 'Guardian']);
+                })
+                ->select('id', 'first_name', 'last_name')
+                ->get();
+
+            return response()->json($users);
+        } catch (Throwable $e) {
+            return response()->json(['error' => $e->getMessage()], 500);
+        }
+    }
 }
