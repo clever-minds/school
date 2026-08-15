@@ -157,7 +157,7 @@
                                                         $currentAnswer = isset($feedbacks[$question->id]) ? $feedbacks[$question->id]->interviewer_feedback : '';
                                                     @endphp
                                                     
-                                                    @if($question->type == 'Rating' || $question->type == 'rating')
+                                                    @if(in_array($question->type, ['Rating', 'rating']) || empty($question->type))
                                                         <div class="d-flex align-items-center flex-wrap">
                                                             @if($question->optionGroup)
                                                                 @foreach($question->optionGroup->option_values as $opt)
@@ -179,7 +179,7 @@
                                                                 @endfor
                                                             @endif
                                                         </div>
-                                                    @elseif($question->type == 'Yes/No' || $question->type == 'boolean')
+                                                    @elseif(in_array($question->type, ['Yes/No', 'boolean']))
                                                         <div class="d-flex align-items-center flex-wrap">
                                                             <div class="form-check form-check-inline mt-0 mb-2 mr-3">
                                                                 <label class="form-check-label" for="q_{{ $question->id }}_yes">
@@ -193,7 +193,68 @@
                                                                     {{ __('No') }}
                                                                 </label>
                                                             </div>
+                                                            <div class="form-check form-check-inline mt-0 mb-2">
+                                                                <label class="form-check-label" for="q_{{ $question->id }}_na">
+                                                                    <input class="form-check-input" type="radio" name="feedbacks[{{ $question->id }}]" id="q_{{ $question->id }}_na" value="N/A" {{ $currentAnswer == 'N/A' ? 'checked' : '' }} {{ $isFeedbackSubmitted ? 'disabled' : '' }}>
+                                                                    {{ __('N/A') }}
+                                                                </label>
+                                                            </div>
                                                         </div>
+                                                    @elseif($question->type == 'Custom')
+                                                        @php
+                                                            $options = $question->custom_options ? array_map('trim', explode(',', $question->custom_options)) : [];
+                                                        @endphp
+                                                        <div class="d-flex align-items-center flex-wrap">
+                                                            @foreach($options as $opt)
+                                                                @if($opt)
+                                                                    <div class="form-check form-check-inline mt-0 mb-2 mr-3">
+                                                                        <label class="form-check-label">
+                                                                            <input class="form-check-input" type="radio" name="feedbacks[{{ $question->id }}]" value="{{ $opt }}" {{ $currentAnswer == $opt ? 'checked' : '' }} {{ $isFeedbackSubmitted ? 'disabled' : '' }}>
+                                                                            {{ $opt }}
+                                                                        </label>
+                                                                    </div>
+                                                                @endif
+                                                            @endforeach
+                                                        </div>
+                                                    @elseif($question->type == 'Conditional')
+                                                        @php
+                                                            $conditionalOptions = $question->custom_options ? array_map('trim', explode(',', $question->custom_options)) : ['Excellent', 'Good', 'Average', 'Unsatisfactory'];
+                                                            $targetVisibleOptions = array_merge(['Yes'], $conditionalOptions);
+                                                        @endphp
+                                                        <div class="d-flex align-items-center mb-2">
+                                                            <div class="form-check form-check-inline mt-0 mb-2 mr-3">
+                                                                <label class="form-check-label">
+                                                                    <input class="form-check-input conditional-trigger" type="radio" name="feedbacks[{{ $question->id }}]" value="Yes" {{ in_array($currentAnswer, $targetVisibleOptions) ? 'checked' : '' }} {{ $isFeedbackSubmitted ? 'disabled' : '' }} onclick="toggleConditionalRating(this, {{ $question->id }})">
+                                                                    {{ __('Yes') }}
+                                                                </label>
+                                                            </div>
+                                                            <div class="form-check form-check-inline mt-0 mb-2 mr-3">
+                                                                <label class="form-check-label">
+                                                                    <input class="form-check-input conditional-trigger" type="radio" name="feedbacks[{{ $question->id }}]" value="No" {{ $currentAnswer == 'No' ? 'checked' : '' }} {{ $isFeedbackSubmitted ? 'disabled' : '' }} onclick="toggleConditionalRating(this, {{ $question->id }})">
+                                                                    {{ __('No') }}
+                                                                </label>
+                                                            </div>
+                                                        </div>
+                                                        <div class="align-items-center flex-wrap conditional-target-{{ $question->id }}" style="display: {{ in_array($currentAnswer, $targetVisibleOptions) ? 'flex' : 'none' }}; margin-left: 20px; border-left: 2px solid #ccc; padding-left: 10px;">
+                                                            @foreach($conditionalOptions as $opt)
+                                                                @if($opt)
+                                                                    <div class="form-check form-check-inline mt-0 mb-2 mr-3">
+                                                                        <label class="form-check-label">
+                                                                            <input class="form-check-input" type="radio" name="feedbacks[{{ $question->id }}]" value="{{ $opt }}" {{ $currentAnswer == $opt ? 'checked' : '' }} {{ $isFeedbackSubmitted ? 'disabled' : '' }}>
+                                                                            {{ $opt }}
+                                                                        </label>
+                                                                    </div>
+                                                                @endif
+                                                            @endforeach
+                                                        </div>
+                                                    @elseif($question->type == 'Text')
+                                                        <input type="text" name="feedbacks[{{ $question->id }}]" class="form-control" value="{{ $currentAnswer }}" {{ $isFeedbackSubmitted ? 'readonly' : '' }}>
+                                                    @elseif($question->type == 'Paragraph')
+                                                        <textarea name="feedbacks[{{ $question->id }}]" class="form-control" rows="2" {{ $isFeedbackSubmitted ? 'readonly' : '' }}>{{ $currentAnswer }}</textarea>
+                                                    @elseif($question->type == 'Number')
+                                                        <input type="number" name="feedbacks[{{ $question->id }}]" class="form-control" value="{{ $currentAnswer }}" {{ $isFeedbackSubmitted ? 'readonly' : '' }}>
+                                                    @elseif($question->type == 'Date')
+                                                        <input type="date" name="feedbacks[{{ $question->id }}]" class="form-control" value="{{ $currentAnswer }}" {{ $isFeedbackSubmitted ? 'readonly' : '' }}>
                                                     @else
                                                         <textarea name="feedbacks[{{ $question->id }}]" class="form-control" rows="2" placeholder="{{ __('Enter your feedback here...') }}" {{ $isFeedbackSubmitted ? 'readonly' : '' }}>{{ $currentAnswer }}</textarea>
                                                     @endif
@@ -229,5 +290,15 @@
             inputs.forEach(input => input.removeAttribute('required'));
         }
     });
+
+    function toggleConditionalRating(el, questionId) {
+        if (el.value === 'Yes') {
+            $('.conditional-target-' + questionId).css('display', 'flex');
+        } else if (el.value === 'No') {
+            $('.conditional-target-' + questionId).css('display', 'none');
+            // Uncheck the sub-options if No is selected
+            $('.conditional-target-' + questionId + ' input[type="radio"]').prop('checked', false);
+        }
+    }
 </script>
 @endsection

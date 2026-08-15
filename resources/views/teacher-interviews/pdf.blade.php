@@ -186,7 +186,7 @@
                 <tr>
                     <td>{{ $question->feedback_question }}</td>
                     <td>
-                        @if(($question->type == 'Rating' || $question->type == 'rating') && $question->optionGroup)
+                        @if((in_array($question->type, ['Rating', 'rating']) || empty($question->type)) && $question->optionGroup)
                             @foreach($question->optionGroup->option_values as $opt)
                                 @php $isSelected = ($currentAnswer == $opt['label']); @endphp
                                 <span class="checkbox-item">
