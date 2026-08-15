@@ -22,14 +22,15 @@ class TeacherInterviewController extends Controller
 
         $query = TeacherInterviewApplication::query();
 
-        if (Auth::user()->school_id) {
+        if (Auth::user()->hasRole('Super Admin')) {
+            // Super Admin can see all
+        } elseif (Auth::user()->hasRole('School Admin')) {
             $query->where('school_id', Auth::user()->school_id);
         } else {
-            // Filter by assigned schools for support staff
-            $assignedSchoolIds = StaffSupportSchool::where('user_id', Auth::id())->pluck('school_id')->toArray();
-            if (!empty($assignedSchoolIds)) {
-                $query->whereIn('school_id', $assignedSchoolIds);
-            }
+            // Other users (interviewers) see only their assigned applications
+            $query->whereHas('interview', function($q) {
+                $q->where('interviewer_id', Auth::id());
+            });
         }
 
         if ($request->filled('status')) {

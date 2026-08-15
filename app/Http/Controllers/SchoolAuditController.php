@@ -30,10 +30,13 @@ class SchoolAuditController extends Controller
 
             $sql = SchoolAudit::with('school', 'auditor');
 
-            // Filter by assigned schools for non-super-admin users
-            $assignedSchoolIds = StaffSupportSchool::where('user_id', Auth::id())->pluck('school_id')->toArray();
-            if (!empty($assignedSchoolIds)) {
-                $sql->whereIn('school_id', $assignedSchoolIds);
+            if (Auth::user()->hasRole('Super Admin')) {
+                // Super Admin can see all
+            } elseif (Auth::user()->hasRole('School Admin')) {
+                $sql->where('school_id', Auth::user()->school_id);
+            } else {
+                // Other users (auditors) see only their assigned audits
+                $sql->where('auditor_id', Auth::id());
             }
 
             $archiveStatus = request('archive_status', 'active');
