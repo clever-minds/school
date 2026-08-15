@@ -54,6 +54,19 @@
                             {{ __('Categories List') }}
                         </h4>
                         
+                        <form action="{{ route('teacher-interview-categories.index') }}" method="GET" class="mb-3">
+                            <div class="row">
+                                <div class="col-md-4">
+                                    <div class="input-group">
+                                        <input type="text" name="search" class="form-control" placeholder="{{ __('Search...') }}" value="{{ request()->search }}">
+                                        <div class="input-group-append">
+                                            <button class="btn btn-sm btn-primary" type="submit">{{ __('Search') }}</button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </form>
+
                         <div class="table-responsive">
                             <table class="table" id="table_list">
                                 <thead>
@@ -68,7 +81,7 @@
                                 <tbody>
                                     @foreach($categories as $key => $category)
                                         <tr>
-                                            <td>{{ $key + 1 }}</td>
+                                            <td>{{ $categories->firstItem() + $key }}</td>
                                             <td>{{ $category->name }}</td>
                                             <td>{{ $category->description ?? '-' }}</td>
                                             <td>
@@ -134,6 +147,9 @@
                                     @endforeach
                                 </tbody>
                             </table>
+                        </div>
+                        <div class="mt-3">
+                            {{ $categories->withQueryString()->links() }}
                         </div>
                     </div>
                 </div>

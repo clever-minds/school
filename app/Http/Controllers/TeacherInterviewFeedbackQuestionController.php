@@ -10,13 +10,21 @@ use Illuminate\Support\Facades\Auth;
 
 class TeacherInterviewFeedbackQuestionController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
         if (!Auth::user()->can('teacher-interview-question-list')) {
             abort(403, 'Unauthorized action.');
         }
 
-        $questions = TeacherInterviewFeedbackQuestion::with('category')->orderBy('id', 'desc')->get();
+        $query = TeacherInterviewFeedbackQuestion::with('category');
+        if ($request->has('search') && $request->search != '') {
+            $search = $request->search;
+            $query->where('feedback_question', 'like', "%{$search}%")
+                  ->orWhereHas('category', function($q) use ($search) {
+                      $q->where('name', 'like', "%{$search}%");
+                  });
+        }
+        $questions = $query->orderBy('id', 'desc')->paginate(15);
         $categories = TeacherInterviewCategory::where('status', 1)->get();
         return view('teacher-interview-feedback-questions.index', compact('questions', 'categories'));
     }

@@ -8,12 +8,20 @@ use Illuminate\Support\Facades\Auth;
 
 class TeacherInterviewCategoryController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
         if (!Auth::user()->can('teacher-interview-question-list')) {
             abort(403, 'Unauthorized action.');
         }
-        $categories = TeacherInterviewCategory::orderBy('id', 'desc')->get();
+
+        $query = TeacherInterviewCategory::query();
+        if ($request->has('search') && $request->search != '') {
+            $search = $request->search;
+            $query->where('name', 'like', "%{$search}%")
+                  ->orWhere('description', 'like', "%{$search}%");
+        }
+        $categories = $query->orderBy('id', 'desc')->paginate(15);
+
         return view('teacher-interview-categories.index', compact('categories'));
     }
 
