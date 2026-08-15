@@ -37,6 +37,15 @@ class TeacherInterviewController extends Controller
             $query->where('status', $request->status);
         }
 
+        if ($request->filled('search')) {
+            $search = $request->search;
+            $query->where(function($q) use ($search) {
+                $q->where('name', 'like', "%{$search}%")
+                  ->orWhere('email', 'like', "%{$search}%")
+                  ->orWhere('phone', 'like', "%{$search}%");
+            });
+        }
+
         $applications = $query->latest()->paginate(15);
         $staffMembers = User::where('school_id', Auth::user()->school_id)
             ->whereHas('roles', function ($q) {

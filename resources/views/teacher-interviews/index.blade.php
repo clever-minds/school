@@ -19,6 +19,19 @@
                         <h4 class="card-title">
                             {{ __('Applications List') }}
                         </h4>
+
+                        <form action="{{ route('teacher-interviews.index') }}" method="GET" class="mb-3">
+                            <div class="row">
+                                <div class="col-md-4">
+                                    <div class="input-group">
+                                        <input type="text" name="search" class="form-control" placeholder="{{ __('Search by Name, Email, or Phone...') }}" value="{{ request()->search }}">
+                                        <div class="input-group-append">
+                                            <button class="btn btn-sm btn-primary" type="submit">{{ __('Search') }}</button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </form>
                         
                         <div class="table-responsive">
                             <table class="table" id="table_list">
@@ -37,7 +50,7 @@
                                 <tbody>
                                     @foreach($applications as $key => $application)
                                         <tr>
-                                            <td>{{ $applications->firstItem() + $key }}</td>
+                                            <td>{{ ($applications->firstItem() ?? 1) + $key }}</td>
                                             <td>{{ $application->school->name ?? '-' }}</td>
                                             <td>{{ $application->name }}</td>
                                             <td>{{ $application->email }}</td>
@@ -75,7 +88,7 @@
                             </table>
                         </div>
                         <div class="mt-3">
-                            {{ $applications->links() }}
+                            {{ $applications->withQueryString()->links() }}
                         </div>
                     </div>
                 </div>
