@@ -16,6 +16,8 @@
                     @if($audit->school && $audit->school->support_email)
                         <a href="{{ route('school-audits.email-pdf', $audit->id) }}" class="btn btn-info btn-sm mr-2"><i class="fa fa-envelope"></i> {{ __('Email PDF to School') }}</a>
                     @endif
+                @elseif($audit->status == 0 && (Auth::user()->can('school-audit-edit') || $audit->auditor_id == Auth::id()))
+                    <a href="{{ route('school-audits.edit', $audit->id) }}" class="btn btn-primary btn-sm mr-2"><i class="fa fa-edit"></i> {{ __('Conduct Audit') }}</a>
                 @endif
                 <a href="{{ route('school-audits.index') }}" class="btn btn-theme btn-sm">{{ __('Back') }}</a>
             </div>
