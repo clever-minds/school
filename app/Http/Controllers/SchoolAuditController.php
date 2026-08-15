@@ -68,10 +68,10 @@ class SchoolAuditController extends Controller
             $no = 1;
             foreach ($res as $row) {
                 $operate = '';
-                if (Auth::user()->can('school-audit-list')) {
+                if (Auth::user()->can('school-audit-list') || $row->auditor_id == Auth::id()) {
                     $operate .= '<a href="' . route('school-audits.show', $row->id) . '" class="btn btn-xs btn-gradient-info btn-rounded btn-icon" title="View"><i class="fa fa-eye"></i></a>&nbsp;&nbsp;';
                 }
-                if ($row->status == 0 && Auth::user()->can('school-audit-edit')) {
+                if ($row->status == 0 && (Auth::user()->can('school-audit-edit') || $row->auditor_id == Auth::id())) {
                     $operate .= '<a href="' . route('school-audits.edit', $row->id) . '" class="btn btn-xs btn-gradient-primary btn-rounded btn-icon" title="Conduct Audit"><i class="fa fa-edit"></i></a>&nbsp;&nbsp;';
                 }
                 if (Auth::user()->can('school-audit-delete')) {
@@ -164,18 +164,22 @@ class SchoolAuditController extends Controller
 
     public function show($id)
     {
-        ResponseService::noPermissionThenRedirect('school-audit-list');
-
         $audit = SchoolAudit::with(['school', 'auditor', 'answers.question'])->findOrFail($id);
+
+        if (!Auth::user()->can('school-audit-list') && $audit->auditor_id != Auth::id()) {
+            ResponseService::noPermissionThenRedirect('school-audit-list');
+        }
 
         return view('school_audits.show', compact('audit'));
     }
 
     public function edit($id)
     {
-        ResponseService::noPermissionThenRedirect('school-audit-edit');
-
         $audit = SchoolAudit::with(['school', 'auditor', 'answers.question'])->findOrFail($id);
+
+        if (!Auth::user()->can('school-audit-edit') && $audit->auditor_id != Auth::id()) {
+            ResponseService::noPermissionThenRedirect('school-audit-edit');
+        }
 
         if ($audit->status == 1) {
             return redirect()->route('school-audits.show', $id)->with('error', __('Audit is already completed and cannot be modified.'));
@@ -186,7 +190,11 @@ class SchoolAuditController extends Controller
 
     public function update(Request $request, $id)
     {
-        ResponseService::noPermissionThenRedirect('school-audit-edit');
+        $audit = SchoolAudit::findOrFail($id);
+
+        if (!Auth::user()->can('school-audit-edit') && $audit->auditor_id != Auth::id()) {
+            ResponseService::noPermissionThenRedirect('school-audit-edit');
+        }
 
         $request->validate([
             'answers' => 'required|array',
