@@ -171,10 +171,11 @@
                 $currentCategory = null;
             @endphp
             @foreach($feedbackQuestions as $question)
-                @if($currentCategory !== $question->category)
-                    @php $currentCategory = $question->category; @endphp
+                @php $catName = $question->category ? $question->category->name : 'General'; @endphp
+                @if($currentCategory !== $catName)
+                    @php $currentCategory = $catName; @endphp
                     <tr>
-                        <td colspan="3" class="category-header">{{ $currentCategory ?? 'General' }}</td>
+                        <td colspan="3" class="category-header">{{ $currentCategory }}</td>
                     </tr>
                 @endif
 

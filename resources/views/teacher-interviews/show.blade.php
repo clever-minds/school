@@ -150,7 +150,7 @@
                                     <tbody>
                                         @foreach($feedbackQuestions as $question)
                                             <tr>
-                                                <td>{{ $question->category ?? '-' }}</td>
+                                                <td>{{ $question->category->name ?? '-' }}</td>
                                                 <td class="text-wrap" style="min-width: 200px;">{{ $question->feedback_question }}</td>
                                                 <td>
                                                     @php
