@@ -288,11 +288,10 @@ class TeacherInterviewController extends Controller
             $imagePath = $request->file('image')->store('staff', 'public');
         }
 
-        // Create User Account for Teacher
-        $user = \App\Models\User::create([
+        // Create or Update User Account for Teacher
+        $userData = [
             'first_name' => $request->first_name,
             'last_name' => $request->last_name,
-            'email' => $application->email,
             'password' => \Illuminate\Support\Facades\Hash::make($request->password),
             'school_id' => $application->school_id,
             'gender' => $request->gender,
@@ -300,17 +299,28 @@ class TeacherInterviewController extends Controller
             'dob' => date('Y-m-d', strtotime($request->dob)),
             'current_address' => $request->current_address,
             'permanent_address' => $request->permanent_address,
-            'image' => $imagePath,
             'status' => 1
-        ]);
+        ];
 
-        // Create Staff Record
-        \App\Models\Staff::create([
-            'user_id' => $user->id,
-            'qualification' => $request->qualification,
-            'salary' => 0, // Admin can set this later
-            'joining_date' => date('Y-m-d')
-        ]);
+        if ($imagePath) {
+            $userData['image'] = $imagePath;
+        }
+
+        $user = \App\Models\User::updateOrCreate(
+            ['email' => $application->email],
+            $userData
+        );
+
+        // Create or Update Staff Record
+        \App\Models\Staff::updateOrCreate(
+            ['user_id' => $user->id],
+            [
+                'qualification' => $request->qualification,
+                // Only set these defaults if the record doesn't already have them set properly
+                'salary' => \App\Models\Staff::where('user_id', $user->id)->value('salary') ?? 0,
+                'joining_date' => \App\Models\Staff::where('user_id', $user->id)->value('joining_date') ?? date('Y-m-d')
+            ]
+        );
 
         // Assign Teacher role
         $role = \Spatie\Permission\Models\Role::where('name', 'Teacher')->where('school_id', $application->school_id)->first();
