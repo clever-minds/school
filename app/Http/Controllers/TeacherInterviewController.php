@@ -369,15 +369,16 @@ class TeacherInterviewController extends Controller
     {
         // Only Super Admin, HR, or users with 'teacher-interview-update-status' permission can update status
         $isSuperAdmin = Auth::user()->hasRole('Super Admin');
+        $isSchoolAdmin = Auth::user()->hasRole('School Admin');
         $isHR = Auth::user()->hasRole('HR');
         $hasPermission = Auth::user()->can('teacher-interview-update-status');
 
-        if (!$isSuperAdmin && !$isHR && !$hasPermission) {
+        if (!$isSuperAdmin && !$isSchoolAdmin && !$isHR && !$hasPermission) {
             abort(403, 'You are not authorized to update the interview status.');
         }
 
         // Restrict HR from setting advanced statuses
-        if ($isHR && !$isSuperAdmin && !$hasPermission) {
+        if ($isHR && !$isSuperAdmin && !$isSchoolAdmin && !$hasPermission) {
             $allowedHRStatuses = ['Pending', 'Shortlisted', 'Interview Scheduled', 'Demo Scheduled'];
             // If current status is already advanced, allow them to keep it, but not change to another advanced one unless it's in the allowed list
             $application = TeacherInterviewApplication::findOrFail($id);
