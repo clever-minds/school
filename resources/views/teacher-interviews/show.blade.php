@@ -42,13 +42,16 @@
                         <h4 class="card-title">{{ __('Update Status') }}</h4>
                         
                         @php
-                            $isHR = Auth::user()->hasRole('HR');
-                            $isSchoolAdmin = Auth::user()->hasRole('School Admin');
-                            $isSuperAdmin = Auth::user()->hasRole('Super Admin');
+                            $userRoles = Auth::user()->roles->pluck('name')->toArray();
+                            $isHR = in_array('HR', $userRoles) || in_array('hr', array_map('strtolower', $userRoles));
+                            $isSchoolAdmin = in_array('School Admin', $userRoles);
+                            $isSuperAdmin = in_array('Super Admin', $userRoles);
                             $hasPerm = Auth::user()->can('teacher-interview-update-status');
                             $allowedForHR = in_array($application->status, ['Pending', 'Shortlisted', 'Interview Scheduled', 'Demo Scheduled']);
                             $canEdit = $isSuperAdmin || $hasPerm || $isSchoolAdmin || ($isHR && $allowedForHR);
                         @endphp
+                        
+                        <!-- DEBUG: Roles: {{ implode(', ', $userRoles) }} | hasPerm: {{ $hasPerm ? 'Yes' : 'No' }} | canEdit: {{ $canEdit ? 'Yes' : 'No' }} -->
                         
                         @if($canEdit)
                         
