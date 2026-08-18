@@ -123,7 +123,7 @@ class UserController extends Controller
         }
     }
 
-    public function getStaffBySchool($school_id, \Illuminate\Http\Request $request)
+    public function getStaffBySchool(\Illuminate\Http\Request $request, $school_id)
     {
         try {
             $roleFilter = $request->query('role');
