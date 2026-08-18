@@ -81,30 +81,41 @@
                                 </div>
                             </div>
 
-                            <div id="demo-details" style="{{ $application->status == 'Demo Scheduled' ? '' : 'display: none;' }}">
+                            <div id="demo-details" style="display: {{ $application->status == 'Demo Scheduled' ? 'block' : 'none' }}; margin-top: 15px;">
                                 <div class="form-group">
                                     <label>{{ __('Subject') }} <span class="text-danger">*</span></label>
-                                    <input type="text" name="demo_subject" class="form-control" value="{{ $application->demoClass->subject ?? '' }}">
+                                    <input type="text" name="demo_subject" class="form-control" value="{{ old('demo_subject', $application->demoClass->subject ?? '') }}" {{ $application->status == 'Demo Scheduled' ? 'required' : '' }}>
                                 </div>
                                 <div class="form-group">
                                     <label>{{ __('Class Name') }} <span class="text-danger">*</span></label>
-                                    <input type="text" name="demo_class_name" class="form-control" value="{{ $application->demoClass->class_name ?? '' }}">
+                                    <input type="text" name="demo_class_name" class="form-control" value="{{ old('demo_class_name', $application->demoClass->class_name ?? '') }}" {{ $application->status == 'Demo Scheduled' ? 'required' : '' }}>
                                 </div>
                                 <div class="form-group">
                                     <label>{{ __('Demo Date') }} <span class="text-danger">*</span></label>
-                                    <input type="date" name="demo_date" class="form-control" value="{{ $application->demoClass->date ?? '' }}">
+                                    <input type="date" name="demo_date" class="form-control" value="{{ old('demo_date', isset($application->demoClass->date) ? \Carbon\Carbon::parse($application->demoClass->date)->format('Y-m-d') : '') }}" {{ $application->status == 'Demo Scheduled' ? 'required' : '' }}>
                                 </div>
                                 <div class="form-group">
-                                    <label>{{ __('Demo Time') }} <span class="text-danger">*</span></label>
-                                    <input type="time" name="demo_time" class="form-control" value="{{ $application->demoClass->time ?? '' }}">
+                                    <label>{{ __('Time') }} <span class="text-danger">*</span></label>
+                                    <input type="time" name="demo_time" class="form-control" value="{{ old('demo_time', isset($application->demoClass->time) ? \Carbon\Carbon::parse($application->demoClass->time)->format('H:i') : '') }}" {{ $application->status == 'Demo Scheduled' ? 'required' : '' }}>
                                 </div>
                                 <div class="form-group">
-                                    <label>{{ __('Venue / Location') }} <span class="text-danger">*</span></label>
-                                    <input type="text" name="demo_location" class="form-control" value="{{ $application->demoClass->location ?? '' }}">
+                                    <label>{{ __('Venue/Location') }} <span class="text-danger">*</span></label>
+                                    <input type="text" name="demo_location" class="form-control" value="{{ old('demo_location', $application->demoClass->location ?? '') }}" {{ $application->status == 'Demo Scheduled' ? 'required' : '' }}>
                                 </div>
                                 <div class="form-group">
-                                    <label>{{ __('Instructions for Candidate') }}</label>
-                                    <textarea name="demo_instructions" class="form-control" rows="3">{{ $application->demoClass->instructions ?? '' }}</textarea>
+                                    <label>{{ __('Instructions') }}</label>
+                                    <textarea name="demo_instructions" class="form-control" rows="3">{{ old('demo_instructions', $application->demoClass->instructions ?? '') }}</textarea>
+                                </div>
+                            </div>
+
+                            <div id="demo-completed-details" style="display: {{ $application->status == 'Demo Completed' ? 'block' : 'none' }}; margin-top: 15px;">
+                                <div class="form-group">
+                                    <label>{{ __('Demo Overall Rating (out of 5)') }} <span class="text-danger">*</span></label>
+                                    <input type="number" step="0.1" min="0" max="5" name="demo_overall_rating" class="form-control" value="{{ old('demo_overall_rating', $application->demoClass->overall_rating ?? '') }}" {{ $application->status == 'Demo Completed' ? 'required' : '' }}>
+                                </div>
+                                <div class="form-group">
+                                    <label>{{ __('Demo Remarks') }}</label>
+                                    <textarea name="demo_remarks" class="form-control" rows="3">{{ old('demo_remarks', $application->demoClass->remarks ?? '') }}</textarea>
                                 </div>
                             </div>
 
@@ -322,21 +333,37 @@
         var demoDiv = document.getElementById('demo-details');
         var demoInputs = demoDiv.querySelectorAll('input');
 
+        var demoCompletedDiv = document.getElementById('demo-completed-details');
+        var demoCompletedInputs = demoCompletedDiv.querySelectorAll('input');
+
         if (this.value === 'Interview Scheduled') {
             detailsDiv.style.display = 'block';
             inputs.forEach(input => input.setAttribute('required', 'required'));
             demoDiv.style.display = 'none';
             demoInputs.forEach(input => input.removeAttribute('required'));
+            demoCompletedDiv.style.display = 'none';
+            demoCompletedInputs.forEach(input => input.removeAttribute('required'));
         } else if (this.value === 'Demo Scheduled') {
             demoDiv.style.display = 'block';
             demoInputs.forEach(input => input.setAttribute('required', 'required'));
             detailsDiv.style.display = 'none';
             inputs.forEach(input => input.removeAttribute('required'));
+            demoCompletedDiv.style.display = 'none';
+            demoCompletedInputs.forEach(input => input.removeAttribute('required'));
+        } else if (this.value === 'Demo Completed') {
+            demoCompletedDiv.style.display = 'block';
+            demoCompletedInputs.forEach(input => input.setAttribute('required', 'required'));
+            detailsDiv.style.display = 'none';
+            inputs.forEach(input => input.removeAttribute('required'));
+            demoDiv.style.display = 'none';
+            demoInputs.forEach(input => input.removeAttribute('required'));
         } else {
             detailsDiv.style.display = 'none';
             inputs.forEach(input => input.removeAttribute('required'));
             demoDiv.style.display = 'none';
             demoInputs.forEach(input => input.removeAttribute('required'));
+            demoCompletedDiv.style.display = 'none';
+            demoCompletedInputs.forEach(input => input.removeAttribute('required'));
         }
     });
 
