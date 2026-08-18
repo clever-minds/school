@@ -154,9 +154,9 @@ class TeacherInterviewController extends Controller
         $request->validate([
             'status' => 'required|string|in:Pending,Shortlisted,Interview Scheduled,Hired,Rejected',
             'remarks' => 'nullable|string',
-            'interview_date' => 'required_if:status,Interview Scheduled|date',
-            'time' => 'required_if:status,Interview Scheduled',
-            'location' => 'required_if:status,Interview Scheduled|string',
+            'interview_date' => 'nullable|required_if:status,Interview Scheduled|date',
+            'time' => 'nullable|required_if:status,Interview Scheduled',
+            'location' => 'nullable|required_if:status,Interview Scheduled|string',
             'instructions' => 'nullable|string'
         ]);
 
