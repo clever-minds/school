@@ -306,7 +306,9 @@ class TeacherInterviewController extends Controller
             $userData['image'] = $imagePath;
         }
 
-        $user = \App\Models\User::updateOrCreate(
+        $userData['deleted_at'] = null; // restore if soft-deleted
+
+        $user = \App\Models\User::withTrashed()->updateOrCreate(
             ['email' => $application->email],
             $userData
         );
