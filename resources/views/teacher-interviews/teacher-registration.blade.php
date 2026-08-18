@@ -14,10 +14,17 @@
 <body>
 <div class="container">
     <div class="row justify-content-center">
-        <div class="col-md-6">
+        <div class="col-lg-10 col-md-12">
             <div class="reg-card">
                 <div class="header">
-                    <h2>{{ __('Account Setup') }}</h2>
+                    @php
+                        $systemSettings = app(\App\Services\CachingService::class)->getSystemSettings();
+                    @endphp
+                    @if(!empty($systemSettings['horizontal_logo']))
+                        <img src="{{ $systemSettings['horizontal_logo'] }}" alt="Logo" style="max-height: 60px; margin-bottom: 20px;">
+                    @else
+                        <h2>{{ __('Account Setup') }}</h2>
+                    @endif
                     <h5 class="text-muted">{{ __('Create Your Teacher Portal Account') }}</h5>
                 </div>
 
@@ -34,76 +41,69 @@
                     </div>
                 @endif
 
-                <p>Welcome, <strong>{{ $application->name }}</strong>! Please set a password for your account to complete the registration.</p>
+                <p>Welcome, <strong>{{ $application->name }}</strong>! Please complete your profile and set a password to finish registration.</p>
 
                 <form action="{{ route('career.teacher-registration.submit', $token) }}" method="POST" class="mt-4" enctype="multipart/form-data">
                     @csrf
                     
                     <div class="row">
-                        <div class="col-md-6 mb-3">
+                        <div class="col-md-4 mb-3">
                             <label class="form-label">{{ __('First Name') }} <span class="text-danger">*</span></label>
                             <input type="text" name="first_name" class="form-control" value="{{ explode(' ', $application->name)[0] }}" required>
                         </div>
-                        <div class="col-md-6 mb-3">
+                        <div class="col-md-4 mb-3">
                             <label class="form-label">{{ __('Last Name') }} <span class="text-danger">*</span></label>
                             <input type="text" name="last_name" class="form-control" value="{{ count(explode(' ', $application->name)) > 1 ? explode(' ', $application->name)[1] : '' }}" required>
                         </div>
-                    </div>
-
-                    <div class="row">
-                        <div class="col-md-6 mb-3">
+                        <div class="col-md-4 mb-3">
                             <label class="form-label">{{ __('Email Address') }}</label>
                             <input type="email" class="form-control" value="{{ $application->email }}" disabled>
                         </div>
-                        <div class="col-md-6 mb-3">
-                            <label class="form-label">{{ __('Mobile') }} <span class="text-danger">*</span></label>
-                            <input type="text" name="mobile" class="form-control" value="{{ $application->phone }}" required>
-                        </div>
                     </div>
 
                     <div class="row">
-                        <div class="col-md-6 mb-3">
+                        <div class="col-md-4 mb-3">
+                            <label class="form-label">{{ __('Mobile') }} <span class="text-danger">*</span></label>
+                            <input type="text" name="mobile" class="form-control" value="{{ $application->phone }}" required>
+                        </div>
+                        <div class="col-md-4 mb-3">
                             <label class="form-label">{{ __('Gender') }} <span class="text-danger">*</span></label>
                             <select name="gender" class="form-control" required>
                                 <option value="male">{{ __('Male') }}</option>
                                 <option value="female">{{ __('Female') }}</option>
                             </select>
                         </div>
-                        <div class="col-md-6 mb-3">
+                        <div class="col-md-4 mb-3">
                             <label class="form-label">{{ __('Date of Birth') }} <span class="text-danger">*</span></label>
                             <input type="date" name="dob" class="form-control" required>
                         </div>
                     </div>
 
-                    <div class="mb-3">
-                        <label class="form-label">{{ __('Qualification') }} <span class="text-danger">*</span></label>
-                        <textarea name="qualification" class="form-control" rows="2" required></textarea>
+                    <div class="row">
+                        <div class="col-md-4 mb-3">
+                            <label class="form-label">{{ __('Qualification') }} <span class="text-danger">*</span></label>
+                            <textarea name="qualification" class="form-control" rows="2" required></textarea>
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <label class="form-label">{{ __('Current Address') }} <span class="text-danger">*</span></label>
+                            <textarea name="current_address" class="form-control" rows="2" required></textarea>
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <label class="form-label">{{ __('Permanent Address') }} <span class="text-danger">*</span></label>
+                            <textarea name="permanent_address" class="form-control" rows="2" required></textarea>
+                        </div>
                     </div>
-
-                    <div class="mb-3">
-                        <label class="form-label">{{ __('Current Address') }} <span class="text-danger">*</span></label>
-                        <textarea name="current_address" class="form-control" rows="2" required></textarea>
-                    </div>
-
-                    <div class="mb-3">
-                        <label class="form-label">{{ __('Permanent Address') }} <span class="text-danger">*</span></label>
-                        <textarea name="permanent_address" class="form-control" rows="2" required></textarea>
-                    </div>
-
-                    <div class="mb-3">
-                        <label class="form-label">{{ __('Profile Image') }}</label>
-                        <input type="file" name="image" class="form-control" accept="image/png,image/jpeg,image/jpg">
-                    </div>
-                    
-                    <hr class="my-4">
-                    <h5 class="mb-3">{{ __('Set Password') }}</h5>
 
                     <div class="row">
-                        <div class="col-md-6 mb-3">
+                        <div class="col-md-4 mb-3">
+                            <label class="form-label">{{ __('Profile Image') }}</label>
+                            <input type="file" name="image" class="form-control" accept="image/png,image/jpeg,image/jpg">
+                        </div>
+                        <div class="col-md-4 mb-3">
                             <label class="form-label">{{ __('Password') }} <span class="text-danger">*</span></label>
                             <input type="password" name="password" class="form-control" required minlength="8">
                         </div>
-                        <div class="col-md-6 mb-3">
+                        <div class="col-md-4 mb-3">
                             <label class="form-label">{{ __('Confirm Password') }} <span class="text-danger">*</span></label>
                             <input type="password" name="password_confirmation" class="form-control" required minlength="8">
                         </div>
