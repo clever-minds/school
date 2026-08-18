@@ -131,27 +131,27 @@
                             <div id="hired-details-container" style="display: {{ $application->status == 'Hired' ? 'block' : 'none' }};">
                                 <div class="form-group mt-3">
                                     <label>{{ __('Designation') }} <span class="text-danger">*</span></label>
-                                    <input type="text" name="designation" class="form-control" value="{{ old('designation') }}">
+                                    <input type="text" name="designation" class="form-control" value="{{ old('designation', $offer->designation ?? '') }}">
                                 </div>
                                 <div class="form-group mt-3">
                                     <label>{{ __('Department') }}</label>
-                                    <input type="text" name="department" class="form-control" value="{{ old('department') }}">
+                                    <input type="text" name="department" class="form-control" value="{{ old('department', $offer->department ?? '') }}">
                                 </div>
                                 <div class="form-group mt-3">
                                     <label>{{ __('Salary (Per Month)') }} <span class="text-danger">*</span></label>
-                                    <input type="number" name="salary" class="form-control" value="{{ old('salary') }}">
+                                    <input type="number" name="salary" class="form-control" value="{{ old('salary', $offer->salary ?? '') }}">
                                 </div>
                                 <div class="form-group mt-3">
                                     <label>{{ __('Joining Date') }} <span class="text-danger">*</span></label>
-                                    <input type="date" name="joining_date" class="form-control" value="{{ old('joining_date') }}">
+                                    <input type="date" name="joining_date" class="form-control" value="{{ old('joining_date', isset($offer->joining_date) ? \Carbon\Carbon::parse($offer->joining_date)->format('Y-m-d') : '') }}">
                                 </div>
                                 <div class="form-group mt-3">
                                     <label>{{ __('Reporting Time') }} <span class="text-danger">*</span></label>
-                                    <input type="time" name="reporting_time" class="form-control" value="{{ old('reporting_time') }}">
+                                    <input type="time" name="reporting_time" class="form-control" value="{{ old('reporting_time', isset($offer->reporting_time) ? \Carbon\Carbon::parse($offer->reporting_time)->format('H:i') : '') }}">
                                 </div>
                                 <div class="form-group mt-3">
                                     <label>{{ __('Job Location') }} <span class="text-danger">*</span></label>
-                                    <input type="text" name="job_location" class="form-control" value="{{ old('job_location', $application->school->name ?? '') }}">
+                                    <input type="text" name="job_location" class="form-control" value="{{ old('job_location', $offer->job_location ?? $application->school->name ?? '') }}">
                                 </div>
                                 <div class="alert alert-info mt-3 mb-0">
                                     <i class="fa fa-info-circle"></i> {{ __('An Offer Letter will be emailed to the candidate upon submission.') }}

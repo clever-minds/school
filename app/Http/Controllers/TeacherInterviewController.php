@@ -137,8 +137,9 @@ class TeacherInterviewController extends Controller
 
         $feedbackQuestions = TeacherInterviewFeedbackQuestion::with('optionGroup')->where('status', 'active')->get();
         $feedbacks = TeacherInterviewFeedback::where('interview_id', $interview->id)->get()->keyBy('question_id');
+        $offer = \App\Models\TeacherOfferLetter::where('application_id', $application->id)->first();
 
-        return view('teacher-interviews.show', compact('application', 'interview', 'feedbackQuestions', 'feedbacks'));
+        return view('teacher-interviews.show', compact('application', 'interview', 'feedbackQuestions', 'feedbacks', 'offer'));
     }
 
     public function showDocumentUploadForm($token)
