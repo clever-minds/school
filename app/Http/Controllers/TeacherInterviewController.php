@@ -230,7 +230,7 @@ class TeacherInterviewController extends Controller
         $application = TeacherInterviewApplication::findOrFail($id);
         $isAssigned = TeacherInterview::where('application_id', $id)->where('interviewer_id', Auth::id())->exists();
 
-        if (!Auth::user()->can('teacher-interview-manage') && !($isAssigned && Auth::user()->can('assigned-teacher-interview'))) {
+        if (!Auth::user()->can('teacher-interview-manage') && !Auth::user()->can('teacher-interview-edit') && !Auth::user()->hasRole('HR Admin') && !($isAssigned && Auth::user()->can('assigned-teacher-interview'))) {
             abort(403);
         }
 
