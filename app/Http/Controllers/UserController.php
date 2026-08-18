@@ -123,9 +123,10 @@ class UserController extends Controller
         }
     }
 
-    public function getStaffBySchool($school_id)
+    public function getStaffBySchool($school_id, \Illuminate\Http\Request $request)
     {
         try {
+            $roleFilter = $request->query('role');
             $users = $this->user->builder()
                 ->where(function($q) use ($school_id) {
                     $q->where('school_id', $school_id)
@@ -133,8 +134,11 @@ class UserController extends Controller
                           $q2->where('school_id', $school_id);
                       });
                 })
-                ->whereHas('roles', function ($q) {
+                ->whereHas('roles', function ($q) use ($roleFilter) {
                     $q->whereNotIn('name', ['Student', 'Parent', 'Guardian']);
+                    if ($roleFilter) {
+                        $q->where('name', 'like', "%{$roleFilter}%");
+                    }
                 })
                 ->select('id', 'first_name', 'last_name')
                 ->get();
