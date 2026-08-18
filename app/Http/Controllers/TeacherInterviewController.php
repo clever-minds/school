@@ -428,7 +428,7 @@ class TeacherInterviewController extends Controller
                     'job_location' => $request->job_location,
                     'token' => $token,
                     'token_expires_at' => \Carbon\Carbon::now()->addDays(7),
-                    'status' => 'Pending'
+                    'status' => 'Sent'
                 ]
             );
 

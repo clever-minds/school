@@ -45,7 +45,7 @@
 
                 <p>If you accept this offer, please click the button below to complete your registration and set up your teacher account.</p>
 
-                @if($offer->status == 'Pending')
+                @if(in_array($offer->status, ['Sent', 'Prepared']))
                     <form action="{{ route('career.offer-letter.action', $token) }}" method="POST" class="d-flex justify-content-center mt-5">
                         @csrf
                         <button type="submit" name="action" value="accept" class="btn btn-success btn-lg me-3 px-5">{{ __('Accept Offer') }}</button>
