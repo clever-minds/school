@@ -306,9 +306,16 @@ class TeacherInterviewController extends Controller
             $userData['image'] = $imagePath;
         }
 
-        $userData['deleted_at'] = null; // restore if soft-deleted
+        // Switch to the school's database connection before creating the user
+        $school = \App\Models\School::find($application->school_id);
+        if ($school && $school->database_name) {
+            \Illuminate\Support\Facades\Config::set('database.connections.school.database', $school->database_name);
+            \Illuminate\Support\Facades\DB::purge('school');
+            \Illuminate\Support\Facades\DB::connection('school')->reconnect();
+            \Illuminate\Support\Facades\DB::setDefaultConnection('school');
+        }
 
-        $user = \App\Models\User::withTrashed()->updateOrCreate(
+        $user = \App\Models\User::updateOrCreate(
             ['email' => $application->email],
             $userData
         );

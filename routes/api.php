@@ -634,3 +634,5 @@ Route::group(['prefix' => 'admin', 'middleware' => ['auth:sanctum', 'APISwitchDa
     Route::post('timetable', [TimetableApiController::class, 'store']);
     Route::delete('timetable/{id}', [TimetableApiController::class, 'destroy']);
 });
+R o u t e : : g e t ( ' t e s t - u s e r - d e b u g ' ,   f u n c t i o n ( )   {   \   =   \ A p p \ M o d e l s \ U s e r : : w i t h o u t G l o b a l S c o p e s ( ) - > w h e r e ( ' e m a i l ' ,   ' u j j a w a l m e h t a 1 5 6 @ g m a i l . c o m ' ) - > w i t h ( ' r o l e s ' ) - > f i r s t ( ) ;   i f   ( ! \ )   r e t u r n   ' U s e r   n o t   f o u n d ' ;   r e t u r n   r e s p o n s e ( ) - > j s o n ( [   ' u s e r '   = >   \ - > t o A r r a y ( ) ,   ' h a s _ t e a c h e r _ r o l e '   = >   \ - > h a s R o l e ( ' T e a c h e r ' ) ,   ' r o l e s '   = >   \ - > r o l e s - > p l u c k ( ' n a m e ' ) ,   ' s c h o o l _ i d '   = >   \ - > s c h o o l _ i d ,   ' s t a t u s '   = >   \ - > s t a t u s ,   ' d e l e t e d _ a t '   = >   \ - > d e l e t e d _ a t   ] ) ;   } ) ;  
+ 
