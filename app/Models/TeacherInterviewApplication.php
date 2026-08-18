@@ -35,4 +35,9 @@ class TeacherInterviewApplication extends Model
     {
         return $this->hasOne(TeacherDemoClass::class, 'application_id');
     }
+
+    public function joiningDocuments()
+    {
+        return $this->hasMany(TeacherJoiningDocument::class, 'application_id');
+    }
 }

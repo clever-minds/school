@@ -169,6 +169,53 @@
             </div>
         </div>
 
+        @if($application->joiningDocuments && $application->joiningDocuments->count() > 0)
+        <div class="row mt-4">
+            <div class="col-md-12 grid-margin stretch-card">
+                <div class="card">
+                    <div class="card-body">
+                        <h4 class="card-title">{{ __('Uploaded Verification Documents') }}</h4>
+                        <div class="table-responsive">
+                            <table class="table table-bordered">
+                                <thead>
+                                    <tr>
+                                        <th>{{ __('Document Type') }}</th>
+                                        <th>{{ __('Status') }}</th>
+                                        <th>{{ __('Action') }}</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach($application->joiningDocuments as $doc)
+                                    <tr>
+                                        <td>{{ $doc->document_type }}</td>
+                                        <td>
+                                            @php
+                                                $badgeClass = 'secondary';
+                                                if ($doc->status == 'Pending') $badgeClass = 'warning';
+                                                elseif ($doc->status == 'Verified') $badgeClass = 'success';
+                                                elseif ($doc->status == 'Rejected') $badgeClass = 'danger';
+                                            @endphp
+                                            <span class="badge badge-{{ $badgeClass }}">{{ __($doc->status) }}</span>
+                                        </td>
+                                        <td>
+                                            <a href="{{ asset('storage/' . $doc->file_path) }}" target="_blank" class="btn btn-sm btn-info btn-rounded btn-icon" title="{{ __('View Document') }}">
+                                                <i class="fa fa-eye"></i>
+                                            </a>
+                                            <a href="{{ asset('storage/' . $doc->file_path) }}" download class="btn btn-sm btn-primary btn-rounded btn-icon" title="{{ __('Download') }}">
+                                                <i class="fa fa-download"></i>
+                                            </a>
+                                        </td>
+                                    </tr>
+                                    @endforeach
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        @endif
+
         @if(count($feedbackQuestions) > 0)
         <div class="row mt-4">
             <div class="col-md-12 grid-margin stretch-card">
