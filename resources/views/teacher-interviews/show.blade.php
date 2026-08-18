@@ -55,6 +55,8 @@
                                     <option value="Shortlisted" {{ $application->status == 'Shortlisted' ? 'selected' : '' }}>{{ __('Shortlisted') }}</option>
                                     <option value="Interview Scheduled" {{ $application->status == 'Interview Scheduled' ? 'selected' : '' }}>{{ __('Interview Scheduled') }}</option>
                                     <option value="Demo Scheduled" {{ $application->status == 'Demo Scheduled' ? 'selected' : '' }}>{{ __('Demo Scheduled') }}</option>
+                                    <option value="Demo Completed" {{ $application->status == 'Demo Completed' ? 'selected' : '' }}>{{ __('Demo Completed') }}</option>
+                                    <option value="Document Verification" {{ $application->status == 'Document Verification' ? 'selected' : '' }}>{{ __('Document Verification') }}</option>
                                     <option value="Hired" {{ $application->status == 'Hired' ? 'selected' : '' }}>{{ __('Hired') }}</option>
                                     <option value="Rejected" {{ $application->status == 'Rejected' ? 'selected' : '' }}>{{ __('Rejected') }}</option>
                                 </select>

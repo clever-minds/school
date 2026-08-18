@@ -152,7 +152,7 @@ class TeacherInterviewController extends Controller
         }
 
         $request->validate([
-            'status' => 'required|string|in:Pending,Shortlisted,Interview Scheduled,Demo Scheduled,Hired,Rejected',
+            'status' => 'required|string|in:Pending,Shortlisted,Interview Scheduled,Demo Scheduled,Demo Completed,Document Verification,Hired,Rejected',
             'remarks' => 'nullable|string',
             'interview_date' => 'nullable|required_if:status,Interview Scheduled|date',
             'time' => 'nullable|required_if:status,Interview Scheduled',
@@ -215,6 +215,18 @@ class TeacherInterviewController extends Controller
                 \Illuminate\Support\Facades\Mail::to($application->email)->send(new \App\Mail\DemoScheduledMail($application, $demoClass));
             } catch (\Exception $e) {
                 \Illuminate\Support\Facades\Log::error("Demo Email failed: " . $e->getMessage());
+            }
+        } elseif ($request->status == 'Demo Completed') {
+            $demoClass = \App\Models\TeacherDemoClass::where('application_id', $id)->first();
+            if ($demoClass) {
+                $demoClass->status = 'Completed';
+                $demoClass->save();
+            }
+        } elseif ($request->status == 'Document Verification') {
+            try {
+                \Illuminate\Support\Facades\Mail::to($application->email)->send(new \App\Mail\DocumentVerificationMail($application));
+            } catch (\Exception $e) {
+                \Illuminate\Support\Facades\Log::error("Document Verification Email failed: " . $e->getMessage());
             }
         }
 
