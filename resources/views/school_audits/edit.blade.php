@@ -165,7 +165,13 @@
                                                             <input type="text" name="answers[{{ $index }}][remarks]" class="form-control" placeholder="{{ __('Remarks...') }}" value="{{ $answer->remarks }}">
                                                         </td>
                                                         <td>
-                                                            <input type="file" name="answers[{{ $index }}][image]" class="form-control-file" accept="image/*">
+                                                            <div class="d-flex align-items-center">
+                                                                <label for="image-upload-{{ $index }}" class="btn btn-icon btn-theme btn-sm mb-0" style="cursor: pointer; padding: 0.25rem 0.5rem;" title="{{ __('Upload Image') }}">
+                                                                    <i class="fa fa-upload"></i>
+                                                                </label>
+                                                                <input type="file" id="image-upload-{{ $index }}" name="answers[{{ $index }}][image]" class="d-none image-upload-input" accept="image/*" onchange="previewFileName(this, {{ $index }})">
+                                                                <span class="ml-2 text-muted small" id="file-name-{{ $index }}"></span>
+                                                            </div>
                                                             @if($answer->image)
                                                                 <a href="{{ asset('storage/'.$answer->image) }}" target="_blank" class="text-info mt-1 d-block"><i class="fa fa-eye"></i> View</a>
                                                             @endif
@@ -203,6 +209,18 @@
                 $('.conditional-target-' + index).css('display', 'flex');
             } else if (el.value === 'No') {
                 $('.conditional-target-' + index).css('display', 'none');
+            }
+        }
+
+        function previewFileName(input, index) {
+            if (input.files && input.files[0]) {
+                var fileName = input.files[0].name;
+                if (fileName.length > 15) {
+                    fileName = fileName.substring(0, 12) + '...';
+                }
+                $('#file-name-' + index).text(fileName);
+            } else {
+                $('#file-name-' + index).text('');
             }
         }
     </script>
