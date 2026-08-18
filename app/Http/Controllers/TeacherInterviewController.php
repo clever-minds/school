@@ -217,11 +217,15 @@ class TeacherInterviewController extends Controller
                 \Illuminate\Support\Facades\Log::error("Demo Email failed: " . $e->getMessage());
             }
         } elseif ($request->status == 'Demo Completed') {
-            $demoClass = \App\Models\TeacherDemoClass::where('application_id', $id)->first();
-            if ($demoClass) {
-                $demoClass->status = 'Completed';
-                $demoClass->save();
-            }
+            $demoClass = \App\Models\TeacherDemoClass::updateOrCreate(
+                ['application_id' => $id],
+                [
+                    'school_id' => $application->school_id,
+                    'status' => 'Completed',
+                    'overall_rating' => $request->demo_overall_rating,
+                    'remarks' => $request->demo_remarks
+                ]
+            );
         } elseif ($request->status == 'Document Verification') {
             try {
                 \Illuminate\Support\Facades\Mail::to($application->email)->send(new \App\Mail\DocumentVerificationMail($application));

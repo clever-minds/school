@@ -41,10 +41,6 @@
                     <div class="card-body">
                         <h4 class="card-title">{{ __('Update Status') }}</h4>
                         
-                        @if(session('success'))
-                            <div class="alert alert-success">{{ session('success') }}</div>
-                        @endif
-
                         @if(Auth::user()->hasRole('Super Admin') || Auth::user()->can('teacher-interview-update-status'))
                         <form action="{{ route('teacher-interviews.update-status', $application->id) }}" method="POST">
                             @csrf
