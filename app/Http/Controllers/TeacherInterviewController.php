@@ -376,6 +376,16 @@ class TeacherInterviewController extends Controller
             abort(403, 'You are not authorized to update the interview status.');
         }
 
+        // Restrict HR from setting advanced statuses
+        if ($isHR && !$isSuperAdmin && !$hasPermission) {
+            $allowedHRStatuses = ['Pending', 'Shortlisted', 'Interview Scheduled', 'Demo Scheduled'];
+            // If current status is already advanced, allow them to keep it, but not change to another advanced one unless it's in the allowed list
+            $application = TeacherInterviewApplication::findOrFail($id);
+            if (!in_array($request->status, $allowedHRStatuses) && $request->status !== $application->status) {
+                abort(403, 'HR is not authorized to set this advanced status.');
+            }
+        }
+
         $request->validate([
             'status' => 'required|string|in:Pending,Shortlisted,Interview Scheduled,Demo Scheduled,Demo Completed,Document Verification,Hired,Rejected',
             'remarks' => 'nullable|string',

@@ -45,7 +45,8 @@
                             $isHR = Auth::user()->hasRole('HR');
                             $isSuperAdmin = Auth::user()->hasRole('Super Admin');
                             $hasPerm = Auth::user()->can('teacher-interview-update-status');
-                            $canEdit = $isSuperAdmin || $hasPerm || $isHR;
+                            $allowedForHR = in_array($application->status, ['Pending', 'Shortlisted', 'Interview Scheduled', 'Demo Scheduled']);
+                            $canEdit = $isSuperAdmin || $hasPerm || ($isHR && $allowedForHR);
                         @endphp
                         
                         @if($canEdit)
@@ -69,10 +70,12 @@
                                     <option value="Shortlisted" {{ $application->status == 'Shortlisted' ? 'selected' : '' }}>{{ __('Shortlisted') }}</option>
                                     <option value="Interview Scheduled" {{ $application->status == 'Interview Scheduled' ? 'selected' : '' }}>{{ __('Interview Scheduled') }}</option>
                                     <option value="Demo Scheduled" {{ $application->status == 'Demo Scheduled' ? 'selected' : '' }}>{{ __('Demo Scheduled') }}</option>
+                                    @if($isSuperAdmin || $hasPerm)
                                     <option value="Demo Completed" {{ $application->status == 'Demo Completed' ? 'selected' : '' }}>{{ __('Demo Completed') }}</option>
                                     <option value="Document Verification" {{ $application->status == 'Document Verification' ? 'selected' : '' }}>{{ __('Document Verification') }}</option>
                                     <option value="Hired" {{ $application->status == 'Hired' ? 'selected' : '' }}>{{ __('Hired') }}</option>
                                     <option value="Rejected" {{ $application->status == 'Rejected' ? 'selected' : '' }}>{{ __('Rejected') }}</option>
+                                    @endif
                                 </select>
                             </div>
 
