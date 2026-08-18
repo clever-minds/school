@@ -93,7 +93,7 @@ class TeacherInterviewController extends Controller
         $staffMembers = User::where('school_id', Auth::user()->school_id)
             ->whereHas('roles', function ($q) {
                 $q->whereNotIn('name', ['Student', 'Parent', 'Guardian']);
-                $q->where('name', 'like', '%HR%');
+                $q->where('name', 'HR');
             })->get();
 
         return view('teacher-interviews.index', compact('staffMembers'));

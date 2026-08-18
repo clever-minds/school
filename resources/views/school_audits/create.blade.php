@@ -130,7 +130,7 @@
             $('#school_id').change(function() {
                 var school_id = $(this).val();
                 if (school_id) {
-                    var fetchUrl = "{{ url('get-staff-by-school') }}/" + school_id + "?role=Audit";
+                    var fetchUrl = "{{ url('get-staff-by-school') }}/" + school_id + "?role=Auditer";
                     $.get(fetchUrl, function(data) {
                         var options = '<option value="">{{ __("Select Auditor") }}</option>';
                         data.forEach(function(staff) {
