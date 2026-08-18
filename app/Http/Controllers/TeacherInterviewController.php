@@ -141,6 +141,54 @@ class TeacherInterviewController extends Controller
         return view('teacher-interviews.show', compact('application', 'interview', 'feedbackQuestions', 'feedbacks'));
     }
 
+    public function showDocumentUploadForm($token)
+    {
+        $application = TeacherInterviewApplication::where('document_upload_token', $token)
+            ->where('document_upload_token_expires_at', '>', now())
+            ->firstOrFail();
+
+        return view('teacher-interviews.document-upload', compact('application', 'token'));
+    }
+
+    public function submitDocuments(Request $request, $token)
+    {
+        $application = TeacherInterviewApplication::where('document_upload_token', $token)
+            ->where('document_upload_token_expires_at', '>', now())
+            ->firstOrFail();
+
+        $request->validate([
+            'identity_proof' => 'required|mimes:pdf,jpg,jpeg,png|max:2048',
+            'degree_certificate' => 'required|mimes:pdf,jpg,jpeg,png|max:2048',
+            'experience_letter' => 'nullable|mimes:pdf,jpg,jpeg,png|max:2048'
+        ]);
+
+        $documents = [
+            'Identity Proof' => 'identity_proof',
+            'Degree Certificate' => 'degree_certificate',
+            'Experience Letter' => 'experience_letter'
+        ];
+
+        foreach ($documents as $type => $inputName) {
+            if ($request->hasFile($inputName)) {
+                $path = $request->file($inputName)->store('teacher_joining_documents', 'public');
+                
+                \App\Models\TeacherJoiningDocument::create([
+                    'application_id' => $application->id,
+                    'document_type' => $type,
+                    'file_path' => $path,
+                    'status' => 'Pending'
+                ]);
+            }
+        }
+
+        // Optional: clear token so they can't upload again
+        $application->document_upload_token = null;
+        $application->document_upload_token_expires_at = null;
+        $application->save();
+
+        return redirect()->back()->with('success', __('Documents uploaded successfully. Our team will verify them shortly.'));
+    }
+
     public function updateStatus(Request $request, $id)
     {
         // Only Super Admin or users with 'teacher-interview-update-status' permission can update status
