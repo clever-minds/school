@@ -41,7 +41,7 @@
                     <div class="card-body">
                         <h4 class="card-title">{{ __('Update Status') }}</h4>
                         
-                        @if(Auth::user()->hasRole('Super Admin') || Auth::user()->can('teacher-interview-update-status'))
+                        @if(Auth::user()->hasRole('Super Admin') || Auth::user()->hasRole('HR') || Auth::user()->can('teacher-interview-update-status'))
                         
                         @if ($errors->any())
                             <div class="alert alert-danger">
