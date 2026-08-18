@@ -209,6 +209,96 @@ class TeacherInterviewController extends Controller
         return redirect()->back()->with('success', __('Document status updated successfully.'));
     }
 
+    public function showOfferLetter($token)
+    {
+        $offer = \App\Models\TeacherOfferLetter::where('token', $token)
+            ->where('token_expires_at', '>', now())
+            ->firstOrFail();
+
+        $application = \App\Models\TeacherInterviewApplication::findOrFail($offer->application_id);
+
+        return view('teacher-interviews.offer-letter', compact('offer', 'application', 'token'));
+    }
+
+    public function actionOfferLetter(Request $request, $token)
+    {
+        $offer = \App\Models\TeacherOfferLetter::where('token', $token)
+            ->where('token_expires_at', '>', now())
+            ->firstOrFail();
+
+        $application = \App\Models\TeacherInterviewApplication::findOrFail($offer->application_id);
+
+        $request->validate([
+            'action' => 'required|in:accept,reject'
+        ]);
+
+        if ($request->action == 'accept') {
+            $offer->status = 'Accepted';
+            $offer->save();
+
+            // Generate registration token
+            $application->registration_token = \Illuminate\Support\Str::uuid()->toString();
+            $application->registration_token_expires_at = now()->addDays(7);
+            $application->save();
+
+            return redirect()->route('career.teacher-registration', $application->registration_token)
+                ->with('success', __('Offer Accepted successfully. Please complete your registration.'));
+        } else {
+            $offer->status = 'Rejected';
+            $offer->token = null;
+            $offer->token_expires_at = null;
+            $offer->save();
+
+            return redirect()->back()->with('error', __('You have rejected the offer.'));
+        }
+    }
+
+    public function showRegistrationForm($token)
+    {
+        $application = \App\Models\TeacherInterviewApplication::where('registration_token', $token)
+            ->where('registration_token_expires_at', '>', now())
+            ->firstOrFail();
+
+        return view('teacher-interviews.teacher-registration', compact('application', 'token'));
+    }
+
+    public function submitRegistrationForm(Request $request, $token)
+    {
+        $application = \App\Models\TeacherInterviewApplication::where('registration_token', $token)
+            ->where('registration_token_expires_at', '>', now())
+            ->firstOrFail();
+
+        $request->validate([
+            'password' => 'required|string|min:8|confirmed',
+        ]);
+
+        // Create User Account for Teacher
+        $user = \App\Models\User::create([
+            'name' => $application->name,
+            'email' => $application->email,
+            'password' => \Illuminate\Support\Facades\Hash::make($request->password),
+            'school_id' => $application->school_id,
+            'gender' => $application->gender ?? 'Male', // Fallback
+            'mobile' => $application->phone
+        ]);
+
+        // Assign Teacher role
+        $role = \Spatie\Permission\Models\Role::where('name', 'Teacher')->where('school_id', $application->school_id)->first();
+        if (!$role) {
+            $role = \Spatie\Permission\Models\Role::where('name', 'Teacher')->whereNull('school_id')->first();
+        }
+        if ($role) {
+            $user->assignRole($role);
+        }
+
+        // Clear token
+        $application->registration_token = null;
+        $application->registration_token_expires_at = null;
+        $application->save();
+
+        return redirect()->route('login')->with('success', __('Registration successful! You can now login to your teacher account.'));
+    }
+
     public function updateStatus(Request $request, $id)
     {
         // Only Super Admin or users with 'teacher-interview-update-status' permission can update status
@@ -235,7 +325,13 @@ class TeacherInterviewController extends Controller
             'demo_overall_rating' => 'nullable|required_if:status,Demo Completed|numeric|min:0|max:5',
             'demo_remarks' => 'nullable|string',
             'document_verification_date' => 'nullable|required_if:status,Document Verification|date',
-            'document_verification_time' => 'nullable|required_if:status,Document Verification'
+            'document_verification_time' => 'nullable|required_if:status,Document Verification',
+            'designation' => 'nullable|required_if:status,Hired|string',
+            'department' => 'nullable|string',
+            'salary' => 'nullable|required_if:status,Hired|numeric',
+            'joining_date' => 'nullable|required_if:status,Hired|date',
+            'reporting_time' => 'nullable|required_if:status,Hired',
+            'job_location' => 'nullable|required_if:status,Hired|string'
         ]);
 
         $application = TeacherInterviewApplication::findOrFail($id);
@@ -317,6 +413,28 @@ class TeacherInterviewController extends Controller
                 \Illuminate\Support\Facades\Mail::to($application->email)->send(new \App\Mail\DocumentVerificationMail($application));
             } catch (\Exception $e) {
                 \Illuminate\Support\Facades\Log::error("Document Verification Email failed: " . $e->getMessage());
+            }
+        } elseif ($request->status == 'Hired') {
+            $token = \Illuminate\Support\Str::uuid()->toString();
+            $offer = \App\Models\TeacherOfferLetter::updateOrCreate(
+                ['application_id' => $id],
+                [
+                    'designation' => $request->designation,
+                    'department' => $request->department,
+                    'salary' => $request->salary,
+                    'joining_date' => $request->joining_date,
+                    'reporting_time' => $request->reporting_time,
+                    'job_location' => $request->job_location,
+                    'token' => $token,
+                    'token_expires_at' => \Carbon\Carbon::now()->addDays(7),
+                    'status' => 'Pending'
+                ]
+            );
+
+            try {
+                \Illuminate\Support\Facades\Mail::to($application->email)->send(new \App\Mail\TeacherOfferLetterMail($application, $offer));
+            } catch (\Exception $e) {
+                \Illuminate\Support\Facades\Log::error("Offer Letter Email failed: " . $e->getMessage());
             }
         }
 

@@ -11,7 +11,8 @@ return new class extends Migration {
     public function up(): void
     {
         Schema::table('teacher_interview_applications', function (Blueprint $table) {
-            //
+            $table->string('registration_token')->nullable();
+            $table->timestamp('registration_token_expires_at')->nullable();
         });
     }
 
@@ -21,7 +22,7 @@ return new class extends Migration {
     public function down(): void
     {
         Schema::table('teacher_interview_applications', function (Blueprint $table) {
-            //
+            $table->dropColumn(['registration_token', 'registration_token_expires_at']);
         });
     }
 };

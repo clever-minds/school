@@ -115,16 +115,74 @@
                                 </div>
                             </div>
 
-                            <div id="document-verification-details" style="display: {{ $application->status == 'Document Verification' ? 'block' : 'none' }}; margin-top: 15px;">
-                                <div class="form-group">
+                            <!-- Document Verification Fields -->
+                            <div id="document-verification-container" style="display: {{ $application->status == 'Document Verification' ? 'block' : 'none' }};">
+                                <div class="form-group mt-3">
                                     <label>{{ __('Verification Date') }} <span class="text-danger">*</span></label>
                                     <input type="date" name="document_verification_date" class="form-control" value="{{ old('document_verification_date', isset($application->document_verification_date) ? \Carbon\Carbon::parse($application->document_verification_date)->format('Y-m-d') : '') }}" {{ $application->status == 'Document Verification' ? 'required' : '' }}>
                                 </div>
-                                <div class="form-group">
+                                <div class="form-group mt-3">
                                     <label>{{ __('Verification Time') }} <span class="text-danger">*</span></label>
                                     <input type="time" name="document_verification_time" class="form-control" value="{{ old('document_verification_time', isset($application->document_verification_time) ? \Carbon\Carbon::parse($application->document_verification_time)->format('H:i') : '') }}" {{ $application->status == 'Document Verification' ? 'required' : '' }}>
                                 </div>
                             </div>
+
+                            <!-- Hired Fields (Offer Letter details) -->
+                            <div id="hired-details-container" style="display: {{ $application->status == 'Hired' ? 'block' : 'none' }};">
+                                <div class="form-group mt-3">
+                                    <label>{{ __('Designation') }} <span class="text-danger">*</span></label>
+                                    <input type="text" name="designation" class="form-control" value="{{ old('designation') }}">
+                                </div>
+                                <div class="form-group mt-3">
+                                    <label>{{ __('Department') }}</label>
+                                    <input type="text" name="department" class="form-control" value="{{ old('department') }}">
+                                </div>
+                                <div class="form-group mt-3">
+                                    <label>{{ __('Salary (Per Month)') }} <span class="text-danger">*</span></label>
+                                    <input type="number" name="salary" class="form-control" value="{{ old('salary') }}">
+                                </div>
+                                <div class="form-group mt-3">
+                                    <label>{{ __('Joining Date') }} <span class="text-danger">*</span></label>
+                                    <input type="date" name="joining_date" class="form-control" value="{{ old('joining_date') }}">
+                                </div>
+                                <div class="form-group mt-3">
+                                    <label>{{ __('Reporting Time') }} <span class="text-danger">*</span></label>
+                                    <input type="time" name="reporting_time" class="form-control" value="{{ old('reporting_time') }}">
+                                </div>
+                                <div class="form-group mt-3">
+                                    <label>{{ __('Job Location') }} <span class="text-danger">*</span></label>
+                                    <input type="text" name="job_location" class="form-control" value="{{ old('job_location', $application->school->name ?? '') }}">
+                                </div>
+                                <div class="alert alert-info mt-3 mb-0">
+                                    <i class="fa fa-info-circle"></i> {{ __('An Offer Letter will be emailed to the candidate upon submission.') }}
+                                </div>
+                            </div>
+
+                            <script>
+                                document.getElementById('status-select').addEventListener('change', function() {
+                                    const status = this.value;
+                                    
+                                    // Toggle Interview Fields
+                                    const interviewFields = document.getElementById('interview-details');
+                                    interviewFields.style.display = (status === 'Interview Scheduled') ? 'block' : 'none';
+                                    
+                                    // Toggle Demo Fields
+                                    const demoFields = document.getElementById('demo-details');
+                                    demoFields.style.display = (status === 'Demo Scheduled') ? 'block' : 'none';
+                                    
+                                    // Toggle Demo Completed Fields
+                                    const demoCompletedFields = document.getElementById('demo-completed-details');
+                                    demoCompletedFields.style.display = (status === 'Demo Completed') ? 'block' : 'none';
+                                    
+                                    // Toggle Document Verification Fields
+                                    const docFields = document.getElementById('document-verification-container');
+                                    docFields.style.display = (status === 'Document Verification') ? 'block' : 'none';
+                                    
+                                    // Toggle Hired Fields
+                                    const hiredFields = document.getElementById('hired-details-container');
+                                    hiredFields.style.display = (status === 'Hired') ? 'block' : 'none';
+                                });
+                            </script>
 
                             <div class="form-group">
                                 <label>{{ __('Remarks (Optional)') }}</label>
