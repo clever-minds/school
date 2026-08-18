@@ -181,9 +181,8 @@ class TeacherInterviewController extends Controller
             }
         }
 
-        // Optional: clear token so they can't upload again
-        $application->document_upload_token = null;
-        $application->document_upload_token_expires_at = null;
+        // We do not clear the token here so that redirect()->back() can still find the application
+        // and display the success message. If they upload again, it will just add new records.
         $application->save();
 
         return redirect()->back()->with('success', __('Documents uploaded successfully. Our team will verify them shortly.'));
