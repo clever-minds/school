@@ -321,6 +321,19 @@ class TeacherInterviewController extends Controller
             $user->assignRole($role);
         }
 
+        // Add to Session Year Tracking so the teacher appears in the school dashboard
+        $sessionYear = app(\App\Services\CachingService::class)->getDefaultSessionYear();
+        if ($sessionYear) {
+            app(\App\Services\SessionYearsTrackingsService::class)->storeSessionYearsTracking(
+                'App\Models\Teacher', 
+                $user->id, 
+                $user->id, // use the teacher's own ID as they are registering themselves
+                $sessionYear->id, 
+                $application->school_id, 
+                null
+            );
+        }
+
         // Clear token
         $application->registration_token = null;
         $application->registration_token_expires_at = null;
