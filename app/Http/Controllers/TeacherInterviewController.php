@@ -188,6 +188,27 @@ class TeacherInterviewController extends Controller
         return redirect()->back()->with('success', __('Documents uploaded successfully. Our team will verify them shortly.'));
     }
 
+    public function updateDocumentStatus(Request $request, $id)
+    {
+        // Add permission check if needed
+        $isSuperAdmin = Auth::user()->hasRole('Super Admin');
+        $hasPermission = Auth::user()->can('teacher-interview-update-status');
+
+        if (!$isSuperAdmin && !$hasPermission) {
+            abort(403, 'You are not authorized to update document status.');
+        }
+
+        $request->validate([
+            'status' => 'required|in:Pending,Verified,Rejected'
+        ]);
+
+        $document = \App\Models\TeacherJoiningDocument::findOrFail($id);
+        $document->status = $request->status;
+        $document->save();
+
+        return redirect()->back()->with('success', __('Document status updated successfully.'));
+    }
+
     public function updateStatus(Request $request, $id)
     {
         // Only Super Admin or users with 'teacher-interview-update-status' permission can update status

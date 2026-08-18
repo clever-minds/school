@@ -189,13 +189,21 @@
                                     <tr>
                                         <td>{{ $doc->document_type }}</td>
                                         <td>
-                                            @php
-                                                $badgeClass = 'secondary';
-                                                if ($doc->status == 'Pending') $badgeClass = 'warning';
-                                                elseif ($doc->status == 'Verified') $badgeClass = 'success';
-                                                elseif ($doc->status == 'Rejected') $badgeClass = 'danger';
-                                            @endphp
-                                            <span class="badge badge-{{ $badgeClass }}">{{ __($doc->status) }}</span>
+                                            <form action="{{ route('teacher-interviews.update-document-status', $doc->id) }}" method="POST" class="d-inline-flex align-items-center">
+                                                @csrf
+                                                <select name="status" class="form-control form-control-sm mr-2" style="width: 120px;" onchange="this.form.submit()">
+                                                    <option value="Pending" {{ $doc->status == 'Pending' ? 'selected' : '' }}>{{ __('Pending') }}</option>
+                                                    <option value="Verified" {{ $doc->status == 'Verified' ? 'selected' : '' }}>{{ __('Verified') }}</option>
+                                                    <option value="Rejected" {{ $doc->status == 'Rejected' ? 'selected' : '' }}>{{ __('Rejected') }}</option>
+                                                </select>
+                                                @php
+                                                    $badgeClass = 'secondary';
+                                                    if ($doc->status == 'Pending') $badgeClass = 'warning';
+                                                    elseif ($doc->status == 'Verified') $badgeClass = 'success';
+                                                    elseif ($doc->status == 'Rejected') $badgeClass = 'danger';
+                                                @endphp
+                                                <span class="badge badge-{{ $badgeClass }} ml-2">{{ __($doc->status) }}</span>
+                                            </form>
                                         </td>
                                         <td>
                                             <a href="{{ asset('storage/' . $doc->file_path) }}" target="_blank" class="btn btn-sm btn-info btn-rounded btn-icon" title="{{ __('View Document') }}">

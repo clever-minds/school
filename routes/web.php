@@ -149,6 +149,7 @@ Route::group(['middleware' => ['auth']], function () {
     Route::post('teacher-interviews/{id}/status', [\App\Http\Controllers\TeacherInterviewController::class, 'updateStatus'])->name('teacher-interviews.update-status');
     Route::post('teacher-interviews/{id}/feedback', [\App\Http\Controllers\TeacherInterviewController::class, 'saveFeedback'])->name('teacher-interviews.save-feedback');
     Route::get('teacher-interviews/{id}/pdf', [\App\Http\Controllers\TeacherInterviewController::class, 'downloadPdf'])->name('teacher-interviews.download-pdf');
+    Route::post('teacher-interviews/document/{id}/status', [\App\Http\Controllers\TeacherInterviewController::class, 'updateDocumentStatus'])->name('teacher-interviews.update-document-status');
 
     // Teacher Interview Feedback Questions
     Route::resource('teacher-interview-categories', \App\Http\Controllers\TeacherInterviewCategoryController::class)->except(['create', 'show', 'edit']);
