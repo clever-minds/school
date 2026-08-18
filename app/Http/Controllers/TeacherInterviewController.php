@@ -326,7 +326,11 @@ class TeacherInterviewController extends Controller
         $application->registration_token_expires_at = null;
         $application->save();
 
-        return redirect()->route('login')->with('success', __('Registration successful! You can now login to your teacher account.'));
+        return view('teacher-interviews.teacher-registration', [
+            'application' => $application,
+            'token' => $token,
+            'success_message' => __('Registration successful! Your teacher account has been created.')
+        ]);
     }
 
     public function updateStatus(Request $request, $id)
