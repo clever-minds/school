@@ -104,7 +104,7 @@
             var formAction = "{{ url('teacher-interviews') }}/" + applicationId + "/assign";
             $('#assignForm').attr('action', formAction);
             
-            let fetchUrl = "{{ url('get-staff-by-school') }}/" + (schoolId ? schoolId : 0);
+            let fetchUrl = "{{ url('get-staff-by-school') }}/" + (schoolId ? schoolId : 0) + "?role=HR";
             $.get(fetchUrl, function(data) {
                 let options = '<option value="">{{ __("Select Interviewer") }}</option>';
                 data.forEach(function(staff) {
