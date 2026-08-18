@@ -16,7 +16,9 @@ class TeacherInterviewApplication extends Model
         'phone',
         'resume_path',
         'status',
-        'remarks'
+        'remarks',
+        'document_verification_date',
+        'document_verification_time'
     ];
 
     public function interview()

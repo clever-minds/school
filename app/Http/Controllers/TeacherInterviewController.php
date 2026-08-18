@@ -163,11 +163,15 @@ class TeacherInterviewController extends Controller
             'demo_date' => 'nullable|required_if:status,Demo Scheduled|date',
             'demo_time' => 'nullable|required_if:status,Demo Scheduled',
             'demo_location' => 'nullable|required_if:status,Demo Scheduled|string',
-            'demo_instructions' => 'nullable|string'
+            'demo_instructions' => 'nullable|string',
+            'demo_overall_rating' => 'nullable|required_if:status,Demo Completed|numeric|min:0|max:5',
+            'demo_remarks' => 'nullable|string',
+            'document_verification_date' => 'nullable|required_if:status,Document Verification|date',
+            'document_verification_time' => 'nullable|required_if:status,Document Verification'
         ]);
 
         $application = TeacherInterviewApplication::findOrFail($id);
-
+        
         if (Auth::user()->school_id && $application->school_id != Auth::user()->school_id) {
             abort(403);
         }
@@ -176,18 +180,30 @@ class TeacherInterviewController extends Controller
         if ($request->has('remarks')) {
             $application->remarks = $request->remarks;
         }
+
+        if ($request->status == 'Document Verification') {
+            $application->document_verification_date = $request->document_verification_date;
+            $application->document_verification_time = $request->document_verification_time;
+            
+            if (empty($application->document_upload_token)) {
+                $application->document_upload_token = \Illuminate\Support\Str::uuid()->toString();
+                // Token expires in 7 days by default
+                $application->document_upload_token_expires_at = \Carbon\Carbon::now()->addDays(7);
+            }
+        }
+
         $application->save();
 
         if ($request->status == 'Interview Scheduled') {
-            $interview = TeacherInterview::updateOrCreate(
+            $interview = \App\Models\TeacherInterview::updateOrCreate(
                 ['application_id' => $id],
                 [
                     'interviewer_id' => Auth::id(),
+                    'status' => 'Scheduled',
                     'interview_date' => $request->interview_date,
                     'time' => $request->time,
                     'location' => $request->location,
-                    'instructions' => $request->instructions,
-                    'status' => 'pending'
+                    'instructions' => $request->instructions
                 ]
             );
 

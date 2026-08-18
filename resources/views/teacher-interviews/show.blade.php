@@ -115,6 +115,17 @@
                                 </div>
                             </div>
 
+                            <div id="document-verification-details" style="display: {{ $application->status == 'Document Verification' ? 'block' : 'none' }}; margin-top: 15px;">
+                                <div class="form-group">
+                                    <label>{{ __('Verification Date') }} <span class="text-danger">*</span></label>
+                                    <input type="date" name="document_verification_date" class="form-control" value="{{ old('document_verification_date', isset($application->document_verification_date) ? \Carbon\Carbon::parse($application->document_verification_date)->format('Y-m-d') : '') }}" {{ $application->status == 'Document Verification' ? 'required' : '' }}>
+                                </div>
+                                <div class="form-group">
+                                    <label>{{ __('Verification Time') }} <span class="text-danger">*</span></label>
+                                    <input type="time" name="document_verification_time" class="form-control" value="{{ old('document_verification_time', isset($application->document_verification_time) ? \Carbon\Carbon::parse($application->document_verification_time)->format('H:i') : '') }}" {{ $application->status == 'Document Verification' ? 'required' : '' }}>
+                                </div>
+                            </div>
+
                             <div class="form-group">
                                 <label>{{ __('Remarks (Optional)') }}</label>
                                 <textarea name="remarks" class="form-control" rows="4" placeholder="{{ __('Add any private remarks here...') }}">{{ $application->remarks }}</textarea>
@@ -332,6 +343,9 @@
         var demoCompletedDiv = document.getElementById('demo-completed-details');
         var demoCompletedInputs = demoCompletedDiv.querySelectorAll('input');
 
+        var docVerDiv = document.getElementById('document-verification-details');
+        var docVerInputs = docVerDiv.querySelectorAll('input');
+
         if (this.value === 'Interview Scheduled') {
             detailsDiv.style.display = 'block';
             inputs.forEach(input => input.setAttribute('required', 'required'));
@@ -339,6 +353,8 @@
             demoInputs.forEach(input => input.removeAttribute('required'));
             demoCompletedDiv.style.display = 'none';
             demoCompletedInputs.forEach(input => input.removeAttribute('required'));
+            docVerDiv.style.display = 'none';
+            docVerInputs.forEach(input => input.removeAttribute('required'));
         } else if (this.value === 'Demo Scheduled') {
             demoDiv.style.display = 'block';
             demoInputs.forEach(input => input.setAttribute('required', 'required'));
@@ -346,6 +362,8 @@
             inputs.forEach(input => input.removeAttribute('required'));
             demoCompletedDiv.style.display = 'none';
             demoCompletedInputs.forEach(input => input.removeAttribute('required'));
+            docVerDiv.style.display = 'none';
+            docVerInputs.forEach(input => input.removeAttribute('required'));
         } else if (this.value === 'Demo Completed') {
             demoCompletedDiv.style.display = 'block';
             demoCompletedInputs.forEach(input => input.setAttribute('required', 'required'));
@@ -353,6 +371,17 @@
             inputs.forEach(input => input.removeAttribute('required'));
             demoDiv.style.display = 'none';
             demoInputs.forEach(input => input.removeAttribute('required'));
+            docVerDiv.style.display = 'none';
+            docVerInputs.forEach(input => input.removeAttribute('required'));
+        } else if (this.value === 'Document Verification') {
+            docVerDiv.style.display = 'block';
+            docVerInputs.forEach(input => input.setAttribute('required', 'required'));
+            detailsDiv.style.display = 'none';
+            inputs.forEach(input => input.removeAttribute('required'));
+            demoDiv.style.display = 'none';
+            demoInputs.forEach(input => input.removeAttribute('required'));
+            demoCompletedDiv.style.display = 'none';
+            demoCompletedInputs.forEach(input => input.removeAttribute('required'));
         } else {
             detailsDiv.style.display = 'none';
             inputs.forEach(input => input.removeAttribute('required'));
@@ -360,6 +389,8 @@
             demoInputs.forEach(input => input.removeAttribute('required'));
             demoCompletedDiv.style.display = 'none';
             demoCompletedInputs.forEach(input => input.removeAttribute('required'));
+            docVerDiv.style.display = 'none';
+            docVerInputs.forEach(input => input.removeAttribute('required'));
         }
     });
 
