@@ -234,9 +234,11 @@ class TeacherInterviewController extends Controller
             
             if (empty($application->document_upload_token)) {
                 $application->document_upload_token = \Illuminate\Support\Str::uuid()->toString();
-                // Token expires in 7 days by default
-                $application->document_upload_token_expires_at = \Carbon\Carbon::now()->addDays(7);
             }
+            
+            // Token expires exactly 1 hour before the cross-verification date and time
+            $verificationDateTime = \Carbon\Carbon::parse($request->document_verification_date . ' ' . $request->document_verification_time);
+            $application->document_upload_token_expires_at = $verificationDateTime->subHour();
         }
 
         $application->save();
