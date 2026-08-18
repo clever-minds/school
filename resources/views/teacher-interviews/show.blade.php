@@ -43,15 +43,14 @@
                         
                         @php
                             $userRoles = Auth::user()->roles->pluck('name')->toArray();
-                            $isHR = in_array('HR', $userRoles) || in_array('hr', array_map('strtolower', $userRoles));
-                            $isSchoolAdmin = in_array('School Admin', $userRoles);
                             $isSuperAdmin = in_array('Super Admin', $userRoles);
                             $hasPerm = Auth::user()->can('teacher-interview-update-status');
-                            $allowedForHR = in_array($application->status, ['Pending', 'Shortlisted', 'Interview Scheduled', 'Demo Scheduled']);
-                            $canEdit = $isSuperAdmin || $hasPerm || $isSchoolAdmin || ($isHR && $allowedForHR);
+                            
+                            $isAdvancedStatus = in_array($application->status, ['Demo Completed', 'Document Verification', 'Hired', 'Rejected']);
+                            
+                            // If they are not Super Admin and the status is advanced, they can't edit
+                            $canEdit = $isSuperAdmin || $hasPerm || !$isAdvancedStatus;
                         @endphp
-                        
-                        <!-- DEBUG: Roles: {{ implode(', ', $userRoles) }} | hasPerm: {{ $hasPerm ? 'Yes' : 'No' }} | canEdit: {{ $canEdit ? 'Yes' : 'No' }} -->
                         
                         @if($canEdit)
                         
@@ -74,7 +73,7 @@
                                     <option value="Shortlisted" {{ $application->status == 'Shortlisted' ? 'selected' : '' }}>{{ __('Shortlisted') }}</option>
                                     <option value="Interview Scheduled" {{ $application->status == 'Interview Scheduled' ? 'selected' : '' }}>{{ __('Interview Scheduled') }}</option>
                                     <option value="Demo Scheduled" {{ $application->status == 'Demo Scheduled' ? 'selected' : '' }}>{{ __('Demo Scheduled') }}</option>
-                                    @if($isSuperAdmin || $isSchoolAdmin || $hasPerm)
+                                    @if($isSuperAdmin)
                                     <option value="Demo Completed" {{ $application->status == 'Demo Completed' ? 'selected' : '' }}>{{ __('Demo Completed') }}</option>
                                     <option value="Document Verification" {{ $application->status == 'Document Verification' ? 'selected' : '' }}>{{ __('Document Verification') }}</option>
                                     <option value="Hired" {{ $application->status == 'Hired' ? 'selected' : '' }}>{{ __('Hired') }}</option>

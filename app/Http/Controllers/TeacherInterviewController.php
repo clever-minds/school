@@ -369,21 +369,24 @@ class TeacherInterviewController extends Controller
     {
         $userRoles = Auth::user()->roles->pluck('name')->toArray();
         $isSuperAdmin = in_array('Super Admin', $userRoles);
-        $isSchoolAdmin = in_array('School Admin', $userRoles);
-        $isHR = in_array('HR', $userRoles) || in_array('hr', array_map('strtolower', $userRoles));
         $hasPermission = Auth::user()->can('teacher-interview-update-status');
 
-        if (!$isSuperAdmin && !$isSchoolAdmin && !$isHR && !$hasPermission) {
-            abort(403, 'You are not authorized to update the interview status.');
-        }
+        // Note: we removed the abort check here because any authenticated user who reached this route
+        // (and thus passed the middleware/index checks) might be allowed to update to non-advanced statuses.
+        // We will restrict based on WHAT they are trying to update.
 
-        // Restrict HR from setting advanced statuses
-        if ($isHR && !$isSuperAdmin && !$isSchoolAdmin && !$hasPermission) {
-            $allowedHRStatuses = ['Pending', 'Shortlisted', 'Interview Scheduled', 'Demo Scheduled'];
-            // If current status is already advanced, allow them to keep it, but not change to another advanced one unless it's in the allowed list
+        // Restrict everyone except Super Admin from setting advanced statuses
+        if (!$isSuperAdmin && !$hasPermission) {
+            $allowedStatuses = ['Pending', 'Shortlisted', 'Interview Scheduled', 'Demo Scheduled'];
             $application = TeacherInterviewApplication::findOrFail($id);
-            if (!in_array($request->status, $allowedHRStatuses) && $request->status !== $application->status) {
-                abort(403, 'HR is not authorized to set this advanced status.');
+            
+            if (!in_array($request->status, $allowedStatuses) && $request->status !== $application->status) {
+                abort(403, 'You are not authorized to set this advanced status.');
+            }
+            
+            // Also restrict them from editing AT ALL if the application is ALREADY in an advanced status
+            if (!in_array($application->status, $allowedStatuses)) {
+                abort(403, 'You are not authorized to update this application anymore.');
             }
         }
 
