@@ -271,17 +271,45 @@ class TeacherInterviewController extends Controller
             ->firstOrFail();
 
         $request->validate([
+            'first_name' => 'required|string|max:255',
+            'last_name' => 'required|string|max:255',
+            'mobile' => 'required|string|max:20',
+            'gender' => 'required|string',
+            'dob' => 'required|date',
+            'current_address' => 'required|string',
+            'permanent_address' => 'required|string',
+            'qualification' => 'required|string',
             'password' => 'required|string|min:8|confirmed',
+            'image' => 'nullable|image|mimes:jpeg,png,jpg,svg,gif,webp'
         ]);
+
+        $imagePath = null;
+        if ($request->hasFile('image')) {
+            $imagePath = $request->file('image')->store('staff', 'public');
+        }
 
         // Create User Account for Teacher
         $user = \App\Models\User::create([
-            'name' => $application->name,
+            'first_name' => $request->first_name,
+            'last_name' => $request->last_name,
             'email' => $application->email,
             'password' => \Illuminate\Support\Facades\Hash::make($request->password),
             'school_id' => $application->school_id,
-            'gender' => $application->gender ?? 'Male', // Fallback
-            'mobile' => $application->phone
+            'gender' => $request->gender,
+            'mobile' => $request->mobile,
+            'dob' => date('Y-m-d', strtotime($request->dob)),
+            'current_address' => $request->current_address,
+            'permanent_address' => $request->permanent_address,
+            'image' => $imagePath,
+            'status' => 1
+        ]);
+
+        // Create Staff Record
+        \App\Models\Staff::create([
+            'user_id' => $user->id,
+            'qualification' => $request->qualification,
+            'salary' => 0, // Admin can set this later
+            'joining_date' => date('Y-m-d')
         ]);
 
         // Assign Teacher role
