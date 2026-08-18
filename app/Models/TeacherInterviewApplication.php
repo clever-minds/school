@@ -28,4 +28,9 @@ class TeacherInterviewApplication extends Model
     {
         return $this->belongsTo(School::class);
     }
+
+    public function demoClass()
+    {
+        return $this->hasOne(TeacherDemoClass::class, 'application_id');
+    }
 }

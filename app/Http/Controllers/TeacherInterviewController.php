@@ -152,12 +152,18 @@ class TeacherInterviewController extends Controller
         }
 
         $request->validate([
-            'status' => 'required|string|in:Pending,Shortlisted,Interview Scheduled,Hired,Rejected',
+            'status' => 'required|string|in:Pending,Shortlisted,Interview Scheduled,Demo Scheduled,Hired,Rejected',
             'remarks' => 'nullable|string',
             'interview_date' => 'nullable|required_if:status,Interview Scheduled|date',
             'time' => 'nullable|required_if:status,Interview Scheduled',
             'location' => 'nullable|required_if:status,Interview Scheduled|string',
-            'instructions' => 'nullable|string'
+            'instructions' => 'nullable|string',
+            'demo_subject' => 'nullable|required_if:status,Demo Scheduled|string',
+            'demo_class_name' => 'nullable|required_if:status,Demo Scheduled|string',
+            'demo_date' => 'nullable|required_if:status,Demo Scheduled|date',
+            'demo_time' => 'nullable|required_if:status,Demo Scheduled',
+            'demo_location' => 'nullable|required_if:status,Demo Scheduled|string',
+            'demo_instructions' => 'nullable|string'
         ]);
 
         $application = TeacherInterviewApplication::findOrFail($id);
@@ -189,6 +195,26 @@ class TeacherInterviewController extends Controller
                 \Illuminate\Support\Facades\Mail::to($application->email)->send(new \App\Mail\InterviewScheduledMail($application, $interview));
             } catch (\Exception $e) {
                 \Illuminate\Support\Facades\Log::error("Interview Email failed: " . $e->getMessage());
+            }
+        } elseif ($request->status == 'Demo Scheduled') {
+            $demoClass = \App\Models\TeacherDemoClass::updateOrCreate(
+                ['application_id' => $id],
+                [
+                    'school_id' => $application->school_id,
+                    'subject' => $request->demo_subject,
+                    'class_name' => $request->demo_class_name,
+                    'date' => $request->demo_date,
+                    'time' => $request->demo_time,
+                    'location' => $request->demo_location,
+                    'instructions' => $request->demo_instructions,
+                    'status' => 'Scheduled'
+                ]
+            );
+
+            try {
+                \Illuminate\Support\Facades\Mail::to($application->email)->send(new \App\Mail\DemoScheduledMail($application, $demoClass));
+            } catch (\Exception $e) {
+                \Illuminate\Support\Facades\Log::error("Demo Email failed: " . $e->getMessage());
             }
         }
 

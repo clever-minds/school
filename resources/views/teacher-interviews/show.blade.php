@@ -54,6 +54,7 @@
                                     <option value="Pending" {{ $application->status == 'Pending' ? 'selected' : '' }}>{{ __('Pending') }}</option>
                                     <option value="Shortlisted" {{ $application->status == 'Shortlisted' ? 'selected' : '' }}>{{ __('Shortlisted') }}</option>
                                     <option value="Interview Scheduled" {{ $application->status == 'Interview Scheduled' ? 'selected' : '' }}>{{ __('Interview Scheduled') }}</option>
+                                    <option value="Demo Scheduled" {{ $application->status == 'Demo Scheduled' ? 'selected' : '' }}>{{ __('Demo Scheduled') }}</option>
                                     <option value="Hired" {{ $application->status == 'Hired' ? 'selected' : '' }}>{{ __('Hired') }}</option>
                                     <option value="Rejected" {{ $application->status == 'Rejected' ? 'selected' : '' }}>{{ __('Rejected') }}</option>
                                 </select>
@@ -78,6 +79,33 @@
                                 </div>
                             </div>
 
+                            <div id="demo-details" style="{{ $application->status == 'Demo Scheduled' ? '' : 'display: none;' }}">
+                                <div class="form-group">
+                                    <label>{{ __('Subject') }} <span class="text-danger">*</span></label>
+                                    <input type="text" name="demo_subject" class="form-control" value="{{ $application->demoClass->subject ?? '' }}">
+                                </div>
+                                <div class="form-group">
+                                    <label>{{ __('Class Name') }} <span class="text-danger">*</span></label>
+                                    <input type="text" name="demo_class_name" class="form-control" value="{{ $application->demoClass->class_name ?? '' }}">
+                                </div>
+                                <div class="form-group">
+                                    <label>{{ __('Demo Date') }} <span class="text-danger">*</span></label>
+                                    <input type="date" name="demo_date" class="form-control" value="{{ $application->demoClass->date ?? '' }}">
+                                </div>
+                                <div class="form-group">
+                                    <label>{{ __('Demo Time') }} <span class="text-danger">*</span></label>
+                                    <input type="time" name="demo_time" class="form-control" value="{{ $application->demoClass->time ?? '' }}">
+                                </div>
+                                <div class="form-group">
+                                    <label>{{ __('Venue / Location') }} <span class="text-danger">*</span></label>
+                                    <input type="text" name="demo_location" class="form-control" value="{{ $application->demoClass->location ?? '' }}">
+                                </div>
+                                <div class="form-group">
+                                    <label>{{ __('Instructions for Candidate') }}</label>
+                                    <textarea name="demo_instructions" class="form-control" rows="3">{{ $application->demoClass->instructions ?? '' }}</textarea>
+                                </div>
+                            </div>
+
                             <div class="form-group">
                                 <label>{{ __('Remarks (Optional)') }}</label>
                                 <textarea name="remarks" class="form-control" rows="4" placeholder="{{ __('Add any private remarks here...') }}">{{ $application->remarks }}</textarea>
@@ -95,6 +123,7 @@
                                         'Pending'            => 'warning',
                                         'Shortlisted'        => 'info',
                                         'Interview Scheduled'=> 'primary',
+                                        'Demo Scheduled'     => 'info',
                                         'Hired'              => 'success',
                                         'Rejected'           => 'danger',
                                     ];
@@ -287,12 +316,25 @@
     document.getElementById('status-select').addEventListener('change', function() {
         var detailsDiv = document.getElementById('interview-details');
         var inputs = detailsDiv.querySelectorAll('input');
+        
+        var demoDiv = document.getElementById('demo-details');
+        var demoInputs = demoDiv.querySelectorAll('input');
+
         if (this.value === 'Interview Scheduled') {
             detailsDiv.style.display = 'block';
             inputs.forEach(input => input.setAttribute('required', 'required'));
+            demoDiv.style.display = 'none';
+            demoInputs.forEach(input => input.removeAttribute('required'));
+        } else if (this.value === 'Demo Scheduled') {
+            demoDiv.style.display = 'block';
+            demoInputs.forEach(input => input.setAttribute('required', 'required'));
+            detailsDiv.style.display = 'none';
+            inputs.forEach(input => input.removeAttribute('required'));
         } else {
             detailsDiv.style.display = 'none';
             inputs.forEach(input => input.removeAttribute('required'));
+            demoDiv.style.display = 'none';
+            demoInputs.forEach(input => input.removeAttribute('required'));
         }
     });
 
