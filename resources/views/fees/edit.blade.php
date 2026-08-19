@@ -310,7 +310,7 @@
                         return false;
                     });
 
-                $('.installment-name, .installment-amount, .installment-due-date,.installment-due-charges,.fees_type,.amount,#due_date,#due_charges_percentage,#due_charges_amount').attr('readonly', true);
+                $('.installment-name, .installment-amount, .installment-due-charges,.fees_type,.amount,#due_charges_percentage,#due_charges_amount').attr('readonly', true);
 
                 $('.fees_type option:not(:selected)').attr('disabled', true);
 

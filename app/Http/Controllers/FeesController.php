@@ -346,6 +346,31 @@ class FeesController extends Controller
             DB::beginTransaction();
             $sessionYear = $this->cache->getDefaultSessionYear();
 
+            $feesDataCheck = $this->fees->builder()->withCount('fees_paid')->findOrFail($id);
+
+            if ($feesDataCheck->fees_paid_count > 0) {
+                // Only update due date
+                $feesData = array(
+                    'due_date' => $request->due_date,
+                );
+                $this->fees->update($id, $feesData);
+
+                if (!empty($request->fees_installments)) {
+                    foreach ($request->fees_installments as $data) {
+                        $data = (object) $data;
+                        if (isset($data->id)) {
+                            $this->feesInstallment->builder()->where('id', $data->id)->update([
+                                'due_date' => date('Y-m-d', strtotime($data->due_date))
+                            ]);
+                        }
+                    }
+                }
+
+                DB::commit();
+                ResponseService::successRedirectResponse(route('fees.index'), 'Data Update Successfully');
+                return;
+            }
+
             // Fees Data Store
             $feesData = array(
                 'name' => $request->name,
