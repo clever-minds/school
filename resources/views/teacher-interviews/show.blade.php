@@ -271,21 +271,53 @@
                                     <tr>
                                         <td>{{ $doc->document_type }}</td>
                                         <td>
-                                            <form action="{{ route('teacher-interviews.update-document-status', $doc->id) }}" method="POST" class="d-inline-flex align-items-center">
-                                                @csrf
-                                                <select name="status" class="form-control form-control-sm mr-2" style="width: 120px;" onchange="this.form.submit()">
-                                                    <option value="Pending" {{ $doc->status == 'Pending' ? 'selected' : '' }}>{{ __('Pending') }}</option>
-                                                    <option value="Verified" {{ $doc->status == 'Verified' ? 'selected' : '' }}>{{ __('Verified') }}</option>
-                                                    <option value="Rejected" {{ $doc->status == 'Rejected' ? 'selected' : '' }}>{{ __('Rejected') }}</option>
-                                                </select>
-                                                @php
-                                                    $badgeClass = 'secondary';
-                                                    if ($doc->status == 'Pending') $badgeClass = 'warning';
-                                                    elseif ($doc->status == 'Verified') $badgeClass = 'success';
-                                                    elseif ($doc->status == 'Rejected') $badgeClass = 'danger';
-                                                @endphp
-                                                <span class="badge badge-{{ $badgeClass }} ml-2">{{ __($doc->status) }}</span>
-                                            </form>
+                                            <button type="button" class="btn btn-sm btn-outline-primary mr-2" data-toggle="modal" data-target="#updateDocModal-{{ $doc->id }}">
+                                                <i class="fa fa-edit"></i> {{ __('Update Status') }}
+                                            </button>
+
+                                            @php
+                                                $badgeClass = 'secondary';
+                                                if ($doc->status == 'Pending') $badgeClass = 'warning';
+                                                elseif ($doc->status == 'Verified') $badgeClass = 'success';
+                                                elseif ($doc->status == 'Rejected') $badgeClass = 'danger';
+                                            @endphp
+                                            <span class="badge badge-{{ $badgeClass }}">{{ __($doc->status) }}</span>
+
+                                            <!-- Modal -->
+                                            <div class="modal fade" id="updateDocModal-{{ $doc->id }}" tabindex="-1" role="dialog" aria-hidden="true">
+                                                <div class="modal-dialog" role="document">
+                                                    <div class="modal-content">
+                                                        <div class="modal-header">
+                                                            <h5 class="modal-title">{{ __('Update Document Status') }} ({{ $doc->document_type }})</h5>
+                                                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                                                <span aria-hidden="true">&times;</span>
+                                                            </button>
+                                                        </div>
+                                                        <form action="{{ route('teacher-interviews.update-document-status', $doc->id) }}" method="POST">
+                                                            @csrf
+                                                            <div class="modal-body">
+                                                                <div class="form-group text-left">
+                                                                    <label>{{ __('Status') }}</label>
+                                                                    <select name="status" class="form-control" required id="doc-status-{{ $doc->id }}" onchange="toggleRemarks(this, {{ $doc->id }})">
+                                                                        <option value="Pending" {{ $doc->status == 'Pending' ? 'selected' : '' }}>{{ __('Pending') }}</option>
+                                                                        <option value="Verified" {{ $doc->status == 'Verified' ? 'selected' : '' }}>{{ __('Verified') }}</option>
+                                                                        <option value="Rejected" {{ $doc->status == 'Rejected' ? 'selected' : '' }}>{{ __('Rejected') }}</option>
+                                                                    </select>
+                                                                </div>
+                                                                <div class="form-group text-left" id="remarks-container-{{ $doc->id }}" style="display: {{ $doc->status == 'Rejected' ? 'block' : 'none' }};">
+                                                                    <label>{{ __('Remarks / Reason') }}</label>
+                                                                    <textarea name="remarks" class="form-control" rows="3">{{ $doc->remarks }}</textarea>
+                                                                    <small class="form-text text-muted">{{ __('Candidate will receive an email with these remarks to re-upload.') }}</small>
+                                                                </div>
+                                                            </div>
+                                                            <div class="modal-footer">
+                                                                <button type="button" class="btn btn-secondary" data-dismiss="modal">{{ __('Close') }}</button>
+                                                                <button type="submit" class="btn btn-theme">{{ __('Update') }}</button>
+                                                            </div>
+                                                        </form>
+                                                    </div>
+                                                </div>
+                                            </div>
                                         </td>
                                         <td>
                                             <a href="{{ asset('storage/' . $doc->file_path) }}" target="_blank" class="btn btn-sm btn-info btn-rounded btn-icon" title="{{ __('View Document') }}">
@@ -538,6 +570,16 @@
             $('.conditional-target-' + questionId).css('display', 'none');
             // Uncheck the sub-options if No is selected
             $('.conditional-target-' + questionId + ' input[type="radio"]').prop('checked', false);
+        }
+    }
+
+    function toggleRemarks(selectElement, id) {
+        if (selectElement.value === 'Rejected') {
+            $('#remarks-container-' + id).show();
+            $('#remarks-container-' + id + ' textarea').prop('required', true);
+        } else {
+            $('#remarks-container-' + id).hide();
+            $('#remarks-container-' + id + ' textarea').prop('required', false);
         }
     }
 </script>

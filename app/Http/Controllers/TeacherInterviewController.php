@@ -196,17 +196,40 @@ class TeacherInterviewController extends Controller
         $isSuperAdmin = Auth::user()->hasRole('Super Admin');
         $hasPermission = Auth::user()->can('teacher-interview-update-status');
 
-        if (!$isSuperAdmin && !$hasPermission) {
+        if (!$isSuperAdmin && (!$hasPermission)) {
             abort(403, 'You are not authorized to update document status.');
         }
 
         $request->validate([
-            'status' => 'required|in:Pending,Verified,Rejected'
+            'status' => 'required|in:Pending,Verified,Rejected',
+            'remarks' => 'nullable|string'
         ]);
 
         $document = \App\Models\TeacherJoiningDocument::findOrFail($id);
         $document->status = $request->status;
+        if ($request->has('remarks')) {
+            $document->remarks = $request->remarks;
+        }
         $document->save();
+
+        if ($document->status == 'Rejected') {
+            $application = \App\Models\TeacherInterviewApplication::findOrFail($document->application_id);
+            
+            // Ensure token is still valid or extend it
+            if (!$application->document_upload_token || $application->document_upload_token_expires_at < now()) {
+                $application->document_upload_token = \Illuminate\Support\Str::uuid()->toString();
+                $application->document_upload_token_expires_at = now()->addDays(3);
+                $application->save();
+            }
+
+            if ($application->email) {
+                try {
+                    \Illuminate\Support\Facades\Mail::to($application->email)->send(new \App\Mail\TeacherDocumentRejectedMail($application, $document->document_type, $document->remarks));
+                } catch (\Exception $e) {
+                    \Illuminate\Support\Facades\Log::error('Mail error (Document Rejected): ' . $e->getMessage());
+                }
+            }
+        }
 
         return redirect()->back()->with('success', __('Document status updated successfully.'));
     }
