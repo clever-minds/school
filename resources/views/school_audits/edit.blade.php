@@ -169,7 +169,13 @@
                                                                 <label for="image-upload-{{ $index }}" class="btn btn-icon btn-theme btn-sm mb-0 mr-2" style="cursor: pointer; padding: 0.25rem 0.5rem;" title="{{ __('Upload Documents') }}">
                                                                     <i class="fa fa-upload"></i>
                                                                 </label>
-                                                                <input type="file" id="image-upload-{{ $index }}" name="answers[{{ $index }}][images][]" class="d-none image-upload-input" accept="image/*,.pdf,.doc,.docx" multiple onchange="previewFileNames(this, {{ $index }})">
+                                                                <input type="file" id="image-upload-{{ $index }}" name="answers[{{ $index }}][images][]" class="d-none image-upload-input" accept="image/*,.pdf,.doc,.docx" multiple onchange="previewFileNames(this, {{ $index }}, 'file')">
+                                                                
+                                                                <label for="camera-upload-{{ $index }}" class="btn btn-icon btn-info btn-sm mb-0 mr-2" style="cursor: pointer; padding: 0.25rem 0.5rem;" title="{{ __('Take Photo') }}">
+                                                                    <i class="fa fa-camera"></i>
+                                                                </label>
+                                                                <input type="file" id="camera-upload-{{ $index }}" name="answers[{{ $index }}][images][]" class="d-none image-upload-input" accept="image/*" capture="environment" multiple onchange="previewFileNames(this, {{ $index }}, 'camera')">
+
                                                                 <span class="text-muted small" id="file-name-{{ $index }}"></span>
                                                             </div>
                                                             @if($answer->image)
@@ -222,11 +228,26 @@
             }
         }
 
-        function previewFileNames(input, index) {
-            if (input.files && input.files.length > 0) {
+        function previewFileNames(input, index, source) {
+            let fileInput = document.getElementById('image-upload-' + index);
+            let cameraInput = document.getElementById('camera-upload-' + index);
+            
+            let allFiles = [];
+            if (fileInput && fileInput.files) {
+                for (let i = 0; i < fileInput.files.length; i++) {
+                    allFiles.push(fileInput.files[i]);
+                }
+            }
+            if (cameraInput && cameraInput.files) {
+                for (let i = 0; i < cameraInput.files.length; i++) {
+                    allFiles.push(cameraInput.files[i]);
+                }
+            }
+
+            if (allFiles.length > 0) {
                 let fileNames = [];
-                for (let i = 0; i < input.files.length; i++) {
-                    let fileName = input.files[i].name;
+                for (let i = 0; i < allFiles.length; i++) {
+                    let fileName = allFiles[i].name;
                     if (fileName.length > 15) {
                         fileName = fileName.substring(0, 12) + '...';
                     }
@@ -234,7 +255,7 @@
                 }
                 let displayText = fileNames.join(', ');
                 if(displayText.length > 30) {
-                    displayText = fileNames.length + ' files selected';
+                    displayText = allFiles.length + ' files selected';
                 }
                 $('#file-name-' + index).text(displayText);
             } else {
