@@ -165,15 +165,25 @@
                                                             <input type="text" name="answers[{{ $index }}][remarks]" class="form-control" placeholder="{{ __('Remarks...') }}" value="{{ $answer->remarks }}">
                                                         </td>
                                                         <td>
-                                                            <div class="d-flex align-items-center">
-                                                                <label for="image-upload-{{ $index }}" class="btn btn-icon btn-theme btn-sm mb-0" style="cursor: pointer; padding: 0.25rem 0.5rem;" title="{{ __('Upload Image') }}">
+                                                            <div class="d-flex align-items-center flex-wrap">
+                                                                <label for="image-upload-{{ $index }}" class="btn btn-icon btn-theme btn-sm mb-0 mr-2" style="cursor: pointer; padding: 0.25rem 0.5rem;" title="{{ __('Upload Documents') }}">
                                                                     <i class="fa fa-upload"></i>
                                                                 </label>
-                                                                <input type="file" id="image-upload-{{ $index }}" name="answers[{{ $index }}][image]" class="d-none image-upload-input" accept="image/*" onchange="previewFileName(this, {{ $index }})">
-                                                                <span class="ml-2 text-muted small" id="file-name-{{ $index }}"></span>
+                                                                <input type="file" id="image-upload-{{ $index }}" name="answers[{{ $index }}][images][]" class="d-none image-upload-input" accept="image/*,.pdf,.doc,.docx" multiple onchange="previewFileNames(this, {{ $index }})">
+                                                                <span class="text-muted small" id="file-name-{{ $index }}"></span>
                                                             </div>
                                                             @if($answer->image)
-                                                                <a href="{{ asset('storage/'.$answer->image) }}" target="_blank" class="text-info mt-1 d-block"><i class="fa fa-eye"></i> View</a>
+                                                                @php
+                                                                    $images = json_decode($answer->image, true);
+                                                                    if(!is_array($images)) {
+                                                                        $images = [$answer->image];
+                                                                    }
+                                                                @endphp
+                                                                <div class="mt-1 d-flex flex-wrap">
+                                                                    @foreach($images as $img)
+                                                                        <a href="{{ asset('storage/'.$img) }}" target="_blank" class="badge badge-info mr-1 mb-1"><i class="fa fa-eye"></i> View</a>
+                                                                    @endforeach
+                                                                </div>
                                                             @endif
                                                         </td>
                                                     </tr>
@@ -212,13 +222,21 @@
             }
         }
 
-        function previewFileName(input, index) {
-            if (input.files && input.files[0]) {
-                var fileName = input.files[0].name;
-                if (fileName.length > 15) {
-                    fileName = fileName.substring(0, 12) + '...';
+        function previewFileNames(input, index) {
+            if (input.files && input.files.length > 0) {
+                let fileNames = [];
+                for (let i = 0; i < input.files.length; i++) {
+                    let fileName = input.files[i].name;
+                    if (fileName.length > 15) {
+                        fileName = fileName.substring(0, 12) + '...';
+                    }
+                    fileNames.push(fileName);
                 }
-                $('#file-name-' + index).text(fileName);
+                let displayText = fileNames.join(', ');
+                if(displayText.length > 30) {
+                    displayText = fileNames.length + ' files selected';
+                }
+                $('#file-name-' + index).text(displayText);
             } else {
                 $('#file-name-' + index).text('');
             }

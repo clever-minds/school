@@ -214,15 +214,23 @@ class SchoolAuditController extends Controller
             foreach ($request->answers as $key => $answerData) {
                 $auditAnswer = SchoolAuditAnswer::findOrFail($answerData['id']);
                 
-                $imagePath = $auditAnswer->image;
-                if ($request->hasFile("answers.{$key}.image")) {
-                    $imagePath = $request->file("answers.{$key}.image")->store('audit_images', 'public');
+                $imagePaths = [];
+                if ($auditAnswer->image) {
+                    $decoded = json_decode($auditAnswer->image, true);
+                    $imagePaths = is_array($decoded) ? $decoded : [$auditAnswer->image];
+                }
+                
+                if ($request->hasFile("answers.{$key}.images")) {
+                    $imagePaths = []; // Override old if new ones uploaded, or append? Let's override for simplicity, or we can just save the new ones.
+                    foreach ($request->file("answers.{$key}.images") as $file) {
+                        $imagePaths[] = $file->store('audit_images', 'public');
+                    }
                 }
 
                 $auditAnswer->update([
                     'answer' => $answerData['answer'],
                     'remarks' => $answerData['remarks'] ?? '',
-                    'image' => $imagePath,
+                    'image' => count($imagePaths) > 0 ? json_encode($imagePaths) : null,
                 ]);
 
                 // Simple scoring logic for Yes/No/Number/Rating if needed, here we just do basic Yes/No for MVP

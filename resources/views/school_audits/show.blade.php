@@ -110,7 +110,22 @@
                                                                 <strong>{{ $answer->answer }}</strong>
                                                             @endif
                                                         </td>
-                                                        <td>{{ $answer->remarks ?? '-' }}</td>
+                                                        <td>
+                                                            {{ $answer->remarks ?? '-' }}
+                                                            @if($answer->image)
+                                                                @php
+                                                                    $images = json_decode($answer->image, true);
+                                                                    if(!is_array($images)) {
+                                                                        $images = [$answer->image];
+                                                                    }
+                                                                @endphp
+                                                                <div class="mt-2 d-flex flex-wrap">
+                                                                    @foreach($images as $img)
+                                                                        <a href="{{ asset('storage/'.$img) }}" target="_blank" class="badge badge-info mr-1 mb-1"><i class="fa fa-eye"></i> {{ __('View') }}</a>
+                                                                    @endforeach
+                                                                </div>
+                                                            @endif
+                                                        </td>
                                                     </tr>
                                                 @endforeach
                                             @endforeach
