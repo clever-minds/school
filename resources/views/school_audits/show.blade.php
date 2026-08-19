@@ -13,7 +13,7 @@
             <div>
                 @if($audit->status == 1)
                     <a href="{{ route('school-audits.download-pdf', $audit->id) }}" class="btn btn-success btn-sm mr-2"><i class="fa fa-download"></i> {{ __('Download PDF') }}</a>
-                    @if($audit->school && $audit->school->support_email)
+                    @if(Auth::user()->hasRole('Super Admin') && $audit->school && $audit->school->support_email)
                         <a href="{{ route('school-audits.email-pdf', $audit->id) }}" class="btn btn-info btn-sm mr-2"><i class="fa fa-envelope"></i> {{ __('Email PDF to School') }}</a>
                     @endif
                 @elseif($audit->status == 0 && (Auth::user()->can('school-audit-edit') || $audit->auditor_id == Auth::id()))
