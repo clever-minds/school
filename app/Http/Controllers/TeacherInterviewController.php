@@ -540,6 +540,19 @@ class TeacherInterviewController extends Controller
             } catch (\Exception $e) {
                 \Illuminate\Support\Facades\Log::error("Offer Letter Email failed: " . $e->getMessage());
             }
+
+            // Send Notification to Principal
+            $principal = \App\Models\User::role('Principal')->where('school_id', $application->school_id)->first();
+            if ($principal) {
+                $title = 'New Staff Hired';
+                $body = "Candidate {$application->first_name} {$application->last_name} has been hired for the position of {$request->designation} at a salary of {$request->salary}.";
+                $type = 'Notification';
+                try {
+                    send_notification([$principal->id], $title, $body, $type, []);
+                } catch (\Exception $e) {
+                    \Illuminate\Support\Facades\Log::error("Principal Notification failed: " . $e->getMessage());
+                }
+            }
         }
 
         return redirect()->back()->with('success', 'Application status updated successfully.');
