@@ -2093,3 +2093,11 @@ window.diaryEvents = {
         // $('.description-data').html(row.message);
     }
 };
+window.studentFeesActionEvents = {
+    'click .view-student-fees': function (e, value, row, index) {
+        #student_id.val(row.user_id);
+        #table_list.bootstrapTable('refresh');
+        #studentFeesModal.modal('show');
+    }
+};
+

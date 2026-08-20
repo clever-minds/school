@@ -160,10 +160,45 @@
                                 </div>
                             </div>
                         </div>
+                        <table aria-describedby="mydesc" class='table' id='student_table_list' data-toggle="table"
+                            data-url="{{ route('students.list') }}" data-click-to-select="true"
+                            data-side-pagination="server" data-pagination="true" data-page-list="[5, 10, 20, 50, 100, 200]"
+                            data-search="true" data-toolbar="#toolbar" data-show-columns="true" data-show-refresh="true"
+                            data-fixed-columns="false" data-trim-on-search="false" data-mobile-responsive="true"
+                            data-sort-name="id" data-sort-order="desc" data-maintain-selected="true"
+                            data-export-data-type='all'
+                            data-show-export="true" data-query-params="studentFeesQueryParams" data-escape="true">
+                            <thead>
+                                <tr>
+                                    <th scope="col" data-field="id" data-sortable="true" data-visible="false" data-align="center">{{ __('id') }}</th>
+                                    <th scope="col" data-field="no" data-sortable="false" data-align="center">{{ __('no.') }}</th>
+                                    <th scope="col" data-field="user.id" data-sortable="false" data-visible="false" data-align="center">{{ __('User Id') }}</th>
+                                    <th scope="col" data-field="user.first_name" data-formatter="studentNameFormatter" data-sortable="false" data-align="center"> {{ __('Student Name') }}</th>
+                                    <th scope="col" data-field="class_section.full_name" data-sortable="false" data-align="center">{{ __('Class') }}</th>
+                                    <th scope="col" data-field="user.email" data-sortable="false" data-align="center">{{ __('Email') }}</th>
+                                    <th scope="col" data-field="operate" data-formatter="studentFeesActionFormatter" data-events="studentFeesActionEvents" data-sortable="false" data-align="center" data-escape="false"> {{ __('Action') }}</th>
+                                </tr>
+                            </thead>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Student Fees Modal -->
+            <div class="modal fade" id="studentFeesModal" tabindex="-1" role="dialog" aria-labelledby="studentFeesModalLabel" aria-hidden="true">
+              <div class="modal-dialog modal-xl" role="document">
+                <div class="modal-content">
+                  <div class="modal-header">
+                    <h5 class="modal-title" id="studentFeesModalLabel">{{ __('Student Fees') }}</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                      <span aria-hidden="true">&times;</span>
+                    </button>
+                  </div>
+                  <div class="modal-body">
                         <table aria-describedby="mydesc" class='table' id='table_list' data-toggle="table"
                             data-url="{{ route('fees.paid.list', 1) }}" data-click-to-select="true"
                             data-side-pagination="server" data-pagination="true" data-page-list="[5, 10, 20, 50, 100, 200]"
-                            data-search="true" data-toolbar="#toolbar" data-show-columns="true" data-show-refresh="true"
+                            data-search="true" data-show-columns="true" data-show-refresh="true"
                             data-fixed-columns="false" data-trim-on-search="false" data-mobile-responsive="true"
                             data-sort-name="id" data-sort-order="desc" data-maintain-selected="true"
                             data-export-data-type='all'
@@ -187,9 +222,11 @@
                                 </tr>
                             </thead>
                         </table>
-                    </div>
+                  </div>
                 </div>
+              </div>
             </div>
+
         </div>
     </div>
 @endsection
@@ -197,7 +234,7 @@
     <script>
     $('#gr_no').on('change', function () {
         $('#student_id').val($(this).val()); // student id set
-        $('#table_list').bootstrapTable('refresh');
+        $('#student_table_list').bootstrapTable('refresh');
     });
         $('#filter_paid_status').change(function (e) { 
             e.preventDefault();
@@ -233,7 +270,7 @@
                     feesDropdown += "<option value='" + value.id + "' data-class-section-id='" + value.class_id + "'>" + value.name + "</option>";
                 })
                 $('#filter_fees_id').html(feesDropdown);
-                $('#table_list').bootstrapTable('refresh');
+                $('#student_table_list').bootstrapTable('refresh');
             }, null, null, true)
         }
 

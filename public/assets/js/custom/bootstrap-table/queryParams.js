@@ -362,6 +362,17 @@ function feesPaidListQueryParams(p) {
     };
 }
 
+function studentFeesQueryParams(p) {
+    return {
+        limit: p.limit,
+        sort: p.sort,
+        order: p.order,
+        offset: p.offset,
+        search: p.search,
+        class_id: $('#filter-class-section-id').val(),
+    };
+}
+
 function optionalFeesPaidListQueryParams(p) {
     return {
         limit: p.limit,

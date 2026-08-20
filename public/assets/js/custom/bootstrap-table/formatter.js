@@ -1089,6 +1089,201 @@ function assignElectiveSubjectsFormatter(value, row) {
                 subject.trim() + 
                 ' <i class="fa fa-times text-danger" style="cursor:pointer" onclick="removeSubject(this, \'' + subject.trim() + '\', \'' + row.user_id + '\', \'' + row.student_subjects[0].class_subject_id + '\')"></i>' +
             '</span>';
+}
+
+function totalAmountFormatter(data) {
+    let field = this.field
+    let amount = 0;
+    data.map(function (row) {
+        amount += parseFloat(row[field]);
+    })
+    return formatMoney(amount);
+}
+
+function feesInstallmentFormatter(value, row) {
+    let html;
+    if (row.installments) {
+        html = "<ol>";
+        row.installments.forEach(function (data) {
+            html += "<li>" + data.name + " (" + data.due_date + ")</li>";
+        })
+        html += "</ol>";
+    }
+    return html;
+}
+
+function totalFeesFormatter(value, row)
+{
+    $('.total_fees_statistics').html(0);
+    $('.total_compulsory_fees').html(0);
+    $('.total_optional_fees').html(0);
+
+    $('.total_fees_collected').html(0);
+    $('.total_compulsory_fees_collected').html(0);
+    $('.total_optional_fees_collected').html(0);
+
+    $('.total_fees_pending').html(0);
+    $('.total_compulsory_fees_pending').html(0);
+    $('.total_optional_fees_pending').html(0);
+
+    // Total Fees
+    if (row.no.total_fees) {
+        $('.total_fees_statistics').html(row.no.total_fees ? row.no.currency_symbol+' '+amountFormatter(row.no.total_fees, null) : 0);
+    }
+
+    if (row.no.total_compulsory_fees) {
+        $('.total_compulsory_fees').html(row.no.total_compulsory_fees ? row.no.currency_symbol+' '+amountFormatter(row.no.total_compulsory_fees, null) : 0);
+    }
+
+    if (row.no.total_optional_fees) {
+        $('.total_optional_fees').html(row.no.total_optional_fees ? row.no.currency_symbol+' '+amountFormatter(row.no.total_optional_fees, null) : 0);
+    }
+    // End Total Fees
+    
+    // Collected Fees
+    if (row.no.total_fees_collected) {
+        $('.total_fees_collected').html(row.no.total_fees_collected ? row.no.currency_symbol+' '+amountFormatter(row.no.total_fees_collected, null) : 0);
+    }
+
+    if (row.no.total_compulsory_fees_collected) {
+        $('.total_compulsory_fees_collected').html(row.no.total_compulsory_fees_collected ? row.no.currency_symbol+' '+amountFormatter(row.no.total_compulsory_fees_collected, null) : 0);
+    }
+
+    if (row.no.total_optional_fees_collected) {
+        $('.total_optional_fees_collected').html(row.no.total_optional_fees_collected ? row.no.currency_symbol+' '+amountFormatter(row.no.total_optional_fees_collected, null) : 0);
+    }
+
+    // Total Pending Fees
+    let total_pending_fees = (row.no.total_fees ? parseInt(row.no.total_fees) : 0) - (row.no.total_fees_collected ? parseInt(row.no.total_fees_collected) : 0);
+
+    let total_compulsory_fees_pending = (row.no.total_compulsory_fees ? parseInt(row.no.total_compulsory_fees) : 0) - (row.no.total_compulsory_fees_collected ? parseInt(row.no.total_compulsory_fees_collected) : 0);
+
+    let total_optional_fees_pending = (row.no.total_optional_fees ? parseInt(row.no.total_optional_fees) : 0) - (row.no.total_optional_fees_collected ? parseInt(row.no.total_optional_fees_collected) : 0);
+
+
+    $('.total_fees_pending').html(row.no.currency_symbol+' '+amountFormatter(total_pending_fees, null));
+    $('.total_compulsory_fees_pending').html(row.no.currency_symbol+' '+amountFormatter(total_compulsory_fees_pending, null));
+    $('.total_optional_fees_pending').html(row.no.currency_symbol+' '+amountFormatter(total_optional_fees_pending, null));
+
+    return row.no.no;
+}
+
+
+function schoolInquiryStatusFormatter(value, row) {
+    let html;
+    // 0 = Pending/In Review , 1 = Accepted , 2 = Rejected , 3 = Resubmitted
+    if (row.status === 0) {
+        html = "<span class='badge badge-warning'>"+window.trans['Pending']+"</span>";
+    } else if (row.status === 1) {
+        html = "<span class='badge badge-success'>"+window.trans['Accepted']+"</span>";
+    } else if (row.status === 2) {
+        html = "<span class='badge badge-danger'>"+window.trans['Rejected']+"</span>";
+    }
+    return html;
+}
+function ClassSectionFormatter(value, row) {
+
+    let list = value.split(",").map((item) => {
+        if(item.length!==0) {
+            return "<li>" + item.trim() + "</li>";
+        }
+    }).join(""); 
+
+    return "<ul>" + list + "</ul>";
+}
+
+function marksSubmissionStatus(value, row) {
+    console.log(row.classSectionWiseStatus); // Debugging line
+    let html = "<div>";
+
+    if (!Array.isArray(row.classSectionWiseStatus)) {
+        console.error("classSectionWiseStatus is not an array:", row.classSectionWiseStatus);
+        return "<span style='color: red;'>Invalid data format</span>";
+    }
+
+    row.classSectionWiseStatus.forEach(function (sectionData) {
+        html += "<div style='margin-bottom: 12px;'>";
+        html += "<div style='margin-bottom:20px;'><strong style='margin-bottom: 12px;'>" + sectionData.class_section_name + "</strong></div>";
+        html += "<ol style='padding-left: 20px;'>";
+
+        sectionData.subject_wise_status.forEach(function (subjectData) {
+            const badgeClass = subjectData.status === "Submitted"
+                ? "badge-success"
+                : "badge-danger";
+
+            html += `<li style='margin-bottom: 8px;'> 
+                         ${subjectData.subject} 
+                         <span class='badge ${badgeClass}' style='padding: 4px 8px; margin-left: 8px;'>
+                             ${subjectData.status}
+                         </span>
+                     </li>`;
+        });
+
+        html += "</ol>";
+        html += "</div>";
+    });
+
+    html += "</div>";
+    return html;
+}
+
+function classSectionSubmissionStatus(value, row)
+{
+    let html = "<ol>";
+
+    row.classSectionWiseStatus.forEach(function (data) {
+        if(data.status == "Submitted") {
+            html += "<li style='margin-bottom: 8px;'>" + 
+                        data.class_section_name + 
+                        " <span class='badge badge-success' style='padding: 4px 8px; margin-left: 8px;'>" + 
+                        data.status + 
+                    "</span></li>";
+        } else {
+            html += "<li style='margin-bottom: 8px;'>" + 
+                        data.class_section_name + 
+                        " <span class='badge badge-danger' style='padding: 4px 8px; margin-left: 8px;'>" + 
+                        data.status + 
+                    "</span></li>";
+        }
+    });
+
+    html += "</ol>";
+
+    return html;
+ 
+}
+
+// Format status column with color-coded badges
+function assignElectiveSubjectStatusFormatter(value, row) {
+    row.status = row.status.toLowerCase();
+    console.log(row.status);
+    let badgeClass = 'badge-';
+    switch(row.status) {
+        case 'complete':
+            badgeClass += 'success';
+            break; 
+        case 'incomplete':
+            badgeClass += 'warning';
+            break;
+        default:
+            badgeClass += 'secondary';
+    }
+    return '<span class="badge ' + badgeClass + '">' + row.status.charAt(0).toUpperCase() + row.status.slice(1) + '</span>';
+}
+
+// Format elective subjects with better visualization
+function assignElectiveSubjectsFormatter(value, row) {
+    if (row.elective_subjects === '-') {
+        return '<span class="text-muted">' + row.elective_subjects + '</span>';
+    }
+    const subjects = row.elective_subjects.split(',');
+    const colors = ['primary', 'success', 'warning', 'info', 'danger'];
+    return subjects.map((subject, index) => {
+        if(subject.trim() !== '') {
+            return '<span class="badge badge-' + colors[index % colors.length] + ' mr-1">' + 
+                subject.trim() + 
+                ' <i class="fa fa-times text-danger" style="cursor:pointer" onclick="removeSubject(this, \'' + subject.trim() + '\', \'' + row.user_id + '\', \'' + row.student_subjects[0].class_subject_id + '\')"></i>' +
+            '</span>';
         }
         return '';
     }).join(' ');
@@ -1101,4 +1296,12 @@ function applicationStatusFormatter(value, row) {
     }else{
         return '<span class="badge badge-danger">'+window.trans['rejected']+'</span>';
     }
+}
+
+function studentNameFormatter(value, row) {
+    return row.user ? row.user.first_name + ' ' + row.user.last_name : '';
+}
+
+function studentFeesActionFormatter(value, row) {
+    return '<button class="btn btn-xs btn-gradient-primary btn-rounded btn-icon view-student-fees" data-student-id="' + row.user_id + '" title="View Fees"><i class="fa fa-money"></i></button>';
 }
