@@ -93,17 +93,6 @@
                                     </select>
                                 </div>
                                 <div class="form-group col-md-4">
-                                    <label class="filter-menu" for="filter_fees_id">{{ __('Fees') }}</label>
-                                    <select name="filter_fees_id" id="filter_fees_id" class="form-control">
-                                        @foreach ($fees as $key => $fee)
-                                            <option value="{{ $fee->id }}" data-class-section-id="{{ $fee->class_id }}" {{ $key == 0 ? 'selected' : '' }}>
-                                                {{ $fee->name }}</option> 
-                                               
-                                        @endforeach
-                                    </select>
-                                </div>
-
-                                <div class="form-group col-md-4">
                                     <label for="filter-class-section-id"
                                         class="filter-menu">{{ __('Class Section') }}</label>
                                         
@@ -115,6 +104,17 @@
                                             <option value="{{ $class->id }}" data-class-section-id="{{ $class->class_id }}">
                                                 {{ $class->full_name }}
                                             </option>
+                                        @endforeach
+                                    </select>
+                                </div>
+                                <div class="form-group col-md-4">
+                                    <label class="filter-menu" for="filter_fees_id">{{ __('Fees') }}</label>
+                                    <select name="filter_fees_id" id="filter_fees_id" class="form-control">
+                                        <option value="">{{ __('all') }}</option>
+                                        @foreach ($fees as $key => $fee)
+                                            <option value="{{ $fee->id }}" data-class-section-id="{{ $fee->class_id }}">
+                                                {{ $fee->name }}</option> 
+                                               
                                         @endforeach
                                     </select>
                                 </div>
@@ -209,16 +209,25 @@
         });
 
         window.onload = setTimeout(() => {
-            $('#session_year_id').trigger('change');
+            fetchFees();
         }, 500);
+        
+        $(document).ready(function() {
+            // custom.js incorrectly hides class section options on load. 
+            // We unbind its listener and restore the options.
+            $('#filter_fees_id').off('change');
+            $('#filter-class-section-id').find('option').show();
+            $('#filter-class-section-id').removeAttr('disabled');
+        });
 
-        $('#session_year_id').on('change', function() {
-            let data = new FormData();
-            data.append('session_year_id', $(this).val());
+        function fetchFees() {
+            let session_year_id = $('#session_year_id').val();
+            let class_id = $('#filter-class-section-id').find('option:selected').data('class-section-id');
             ajaxRequest('GET', baseUrl + '/fees/search', {
-                'session_year_id': $(this).val()
+                'session_year_id': session_year_id,
+                'class_id': class_id
             }, null, function(response) {
-                let feesDropdown = "";
+                let feesDropdown = "<option value=''>{{ __('all') }}</option>";
 
                 response.data.forEach(function(value, index) {
                     feesDropdown += "<option value='" + value.id + "' data-class-section-id='" + value.class_id + "'>" + value.name + "</option>";
@@ -226,6 +235,10 @@
                 $('#filter_fees_id').html(feesDropdown);
                 $('#table_list').bootstrapTable('refresh');
             }, null, null, true)
+        }
+
+        $('#session_year_id, #filter-class-section-id').on('change', function() {
+            fetchFees();
         })
     </script>
 @endsection

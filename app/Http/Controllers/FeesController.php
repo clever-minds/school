@@ -315,25 +315,39 @@ class FeesController extends Controller
         ResponseService::noFeatureThenSendJson('Fees Management');
         ResponseService::noPermissionThenSendJson('fees-edit');
 
-        $request->validate([
+        $feesDataCheck = $this->fees->builder()->withCount('fees_paid')->findOrFail($id);
+
+        $rules = [
             'include_fee_installments' => 'required|boolean',
             'due_date' => 'required|date',
             'due_charges_percentage' => 'required|numeric',
             'due_charges_amount' => 'required|numeric',
-            'compulsory_fees_type' => 'required|array',
-            'compulsory_fees_type.*' => 'required|array',
-            'compulsory_fees_type.*.fees_type_id' => 'required|numeric',
-            'compulsory_fees_type.*.amount' => 'required|numeric',
-            'optional_fees_type.*' => 'required|array',
-            'optional_fees_type.*.fees_type_id' => 'required|numeric',
-            'optional_fees_type.*.amount' => 'required|numeric',
-            'fees_installments' => 'nullable|array',
-            'fees_installments.*.name' => 'required',
-            'fees_installments.*.due_date' => 'required|date',
-            'fees_installments.*.due_charges' => 'required|numeric'
-        ]);
+        ];
 
-        if ($request->include_fee_installments) {
+        if ($feesDataCheck->fees_paid_count == 0) {
+            $rules = array_merge($rules, [
+                'compulsory_fees_type' => 'required|array',
+                'compulsory_fees_type.*' => 'required|array',
+                'compulsory_fees_type.*.fees_type_id' => 'required|numeric',
+                'compulsory_fees_type.*.amount' => 'required|numeric',
+                'optional_fees_type.*' => 'required|array',
+                'optional_fees_type.*.fees_type_id' => 'required|numeric',
+                'optional_fees_type.*.amount' => 'required|numeric',
+                'fees_installments' => 'nullable|array',
+                'fees_installments.*.name' => 'required',
+                'fees_installments.*.due_date' => 'required|date',
+                'fees_installments.*.due_charges' => 'required|numeric'
+            ]);
+        } else {
+            $rules = array_merge($rules, [
+                'fees_installments' => 'nullable|array',
+                'fees_installments.*.due_date' => 'required|date'
+            ]);
+        }
+
+        $request->validate($rules);
+
+        if ($request->include_fee_installments && $feesDataCheck->fees_paid_count == 0) {
             $totalInstallments = collect($request->fees_installments)->sum('amount');
             $totalCompulsoryFees = collect($request->compulsory_fees_type)->sum('amount');
 
@@ -470,8 +484,12 @@ class FeesController extends Controller
     {
         ResponseService::noFeatureThenRedirect('Fees Management');
         try {
-            $data = $this->fees->builder()->where('session_year_id', $request->session_year_id)->get();
-            ResponseService::successResponse("Data Restored Successfully", $data);
+            $builder = $this->fees->builder()->where('session_year_id', $request->session_year_id);
+            if ($request->class_id) {
+                $builder->where('class_id', $request->class_id);
+            }
+            $data = $builder->get();
+            ResponseService::successResponse("Data Fetched Successfully", $data);
         } catch (Throwable $e) {
             ResponseService::logErrorResponse($e);
             ResponseService::errorResponse();
@@ -740,11 +758,72 @@ class FeesController extends Controller
     {
         ResponseService::noFeatureThenRedirect('Fees Management');
         ResponseService::noPermissionThenRedirect('fees-paid');
+        
+        $feesId = request('fees_id');
+        
+        if ($feesId === null || $feesId === '') {
+            $requestSessionYearId = request('session_year_id');
+            $sessionYearId = $requestSessionYearId ? (int) $requestSessionYearId : $this->cache->getDefaultSessionYear()->id;
+            
+            $class_section_id = request('class_section_id');
+            $class_id = request('class_id');
+            
+            if ($class_section_id) {
+                $classSection = \App\Models\ClassSection::find($class_section_id);
+                if ($classSection) {
+                    $class_id = $classSection->class_id;
+                }
+            }
+            
+            $feesIdArray = $this->fees->builder()
+                ->where('session_year_id', $sessionYearId)
+                ->when($class_id, function($q) use ($class_id) {
+                     $q->where('class_id', $class_id);
+                })
+                ->pluck('id')->toArray();
+                
+            $allRows = [];
+            $originalOffset = request('offset', 0);
+            $originalLimit = request('limit', 10);
+            
+            $request->merge(['offset' => 0, 'limit' => 999999]);
+            
+            foreach ($feesIdArray as $fId) {
+                $request->merge(['fees_id' => $fId]);
+                $response = $this->feesPaidList($request);
+                $data = json_decode($response->getContent(), true);
+                if (isset($data['rows']) && is_array($data['rows'])) {
+                    $allRows = array_merge($allRows, $data['rows']);
+                }
+            }
+            
+            $request->merge(['offset' => $originalOffset, 'limit' => $originalLimit, 'fees_id' => '']);
+            
+            $total = count($allRows);
+            $pagedRows = array_slice($allRows, $originalOffset, $originalLimit);
+            
+            // Re-number the rows so 'no' is sequential across pages
+            $no = $originalOffset + 1;
+            foreach ($pagedRows as &$row) {
+                if (isset($row['no']) && is_array($row['no'])) {
+                    $row['no']['no'] = $no;
+                } else {
+                    $row['no'] = $no;
+                }
+                $no++;
+            }
+            
+            return response()->json([
+                'total' => $total,
+                'rows' => array_values($pagedRows)
+            ]);
+        }
+
         $offset = request('offset', 0);
         $limit = request('limit', 10);
         $sort = request('sort', 'id');
         $order = request('order', 'DESC');
-        $feesId = (int) request('fees_id');
+        $feesId = (int) $feesId;
         $requestSessionYearId = (int) request('session_year_id');
         $class_section_id = request('class_section_id');
         $class_id = request('class_id');

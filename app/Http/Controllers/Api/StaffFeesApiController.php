@@ -255,35 +255,49 @@ class StaffFeesApiController extends Controller
     {
         ResponseService::noPermissionThenSendJson('fees-edit');
 
-        $validator = Validator::make($request->all(), [
+        $feesDataCheck = $this->fees->builder()->withCount('fees_paid')->findOrFail($id);
+
+        $rules = [
             'name' => 'required|string',
             'include_fee_installments' => 'required|boolean',
             'due_date' => 'required|date',
             'due_charges_percentage' => 'required|numeric',
             'due_charges_amount' => 'required|numeric',
-            'compulsory_fees_type' => 'required|array',
-            'compulsory_fees_type.*' => 'required|array',
-            'compulsory_fees_type.*.id' => 'nullable|numeric',
-            'compulsory_fees_type.*.fees_type_id' => 'required|numeric',
-            'compulsory_fees_type.*.amount' => 'required|numeric',
-            'optional_fees_type' => 'nullable|array',
-            'optional_fees_type.*.id' => 'nullable|numeric',
-            'optional_fees_type.*.fees_type_id' => 'required_with:optional_fees_type|numeric',
-            'optional_fees_type.*.amount' => 'required_with:optional_fees_type|numeric',
-            'fees_installments' => 'nullable|array',
-            'fees_installments.*.id' => 'nullable|numeric',
-            'fees_installments.*.name' => 'required',
-            'fees_installments.*.due_date' => 'required|date',
-            'fees_installments.*.due_charges' => 'required|numeric',
-            'fees_installments.*.due_charges_type' => 'required|in:fixed,percentage',
-            'fees_installments.*.amount' => 'required|numeric',
-        ]);
+        ];
+
+        if ($feesDataCheck->fees_paid_count == 0) {
+            $rules = array_merge($rules, [
+                'compulsory_fees_type' => 'required|array',
+                'compulsory_fees_type.*' => 'required|array',
+                'compulsory_fees_type.*.id' => 'nullable|numeric',
+                'compulsory_fees_type.*.fees_type_id' => 'required|numeric',
+                'compulsory_fees_type.*.amount' => 'required|numeric',
+                'optional_fees_type' => 'nullable|array',
+                'optional_fees_type.*.id' => 'nullable|numeric',
+                'optional_fees_type.*.fees_type_id' => 'required_with:optional_fees_type|numeric',
+                'optional_fees_type.*.amount' => 'required_with:optional_fees_type|numeric',
+                'fees_installments' => 'nullable|array',
+                'fees_installments.*.id' => 'nullable|numeric',
+                'fees_installments.*.name' => 'required',
+                'fees_installments.*.due_date' => 'required|date',
+                'fees_installments.*.due_charges' => 'required|numeric',
+                'fees_installments.*.due_charges_type' => 'required|in:fixed,percentage',
+                'fees_installments.*.amount' => 'required|numeric',
+            ]);
+        } else {
+            $rules = array_merge($rules, [
+                'fees_installments' => 'nullable|array',
+                'fees_installments.*.due_date' => 'required|date'
+            ]);
+        }
+
+        $validator = Validator::make($request->all(), $rules);
 
         if ($validator->fails()) {
             return ResponseService::errorResponse($validator->errors()->first());
         }
 
-        if ($request->include_fee_installments) {
+        if ($request->include_fee_installments && $feesDataCheck->fees_paid_count == 0) {
             $totalInstallments = collect($request->fees_installments)->sum('amount');
             $totalCompulsoryFees = collect($request->compulsory_fees_type)->sum('amount');
 
