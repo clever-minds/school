@@ -782,6 +782,7 @@ Route::post('/admin/impersonation-exit',
             // Fees Paid
             Route::get('/paid', [FeesController::class, 'feesPaidListIndex'])->name('fees.paid.index');
             Route::get('/paid/list', [FeesController::class, 'feesPaidList'])->name('fees.paid.list');
+            Route::get('/paid/student/{id}', [FeesController::class, 'studentFeesDetails'])->name('fees.paid.student');
 
             Route::get('/pay/compulsory/{feesID}/{studentID}', [FeesController::class, 'payCompulsoryFeesIndex'])->name('fees.compulsory.index');
             Route::post('pay/compulsory', [FeesController::class, 'payCompulsoryFeesStore'])->name('fees.compulsory.store');
