@@ -322,39 +322,22 @@ class FeesController extends Controller
             'due_date' => 'required|date',
             'due_charges_percentage' => 'required|numeric',
             'due_charges_amount' => 'required|numeric',
+            'fees_installments' => 'nullable|array',
         ];
 
         if ($feesDataCheck->fees_paid_count == 0) {
             $rules = array_merge($rules, [
-                'compulsory_fees_type' => 'required|array',
-                'compulsory_fees_type.*' => 'required|array',
-                'compulsory_fees_type.*.fees_type_id' => 'required|numeric',
-                'compulsory_fees_type.*.amount' => 'required|numeric',
-                'optional_fees_type.*' => 'required|array',
-                'optional_fees_type.*.fees_type_id' => 'required|numeric',
-                'optional_fees_type.*.amount' => 'required|numeric',
-                'fees_installments' => 'nullable|array',
                 'fees_installments.*.name' => 'required',
                 'fees_installments.*.due_date' => 'required|date',
                 'fees_installments.*.due_charges' => 'required|numeric'
             ]);
         } else {
             $rules = array_merge($rules, [
-                'fees_installments' => 'nullable|array',
                 'fees_installments.*.due_date' => 'required|date'
             ]);
         }
 
         $request->validate($rules);
-
-        if ($request->include_fee_installments && $feesDataCheck->fees_paid_count == 0) {
-            $totalInstallments = collect($request->fees_installments)->sum('amount');
-            $totalCompulsoryFees = collect($request->compulsory_fees_type)->sum('amount');
-
-            if ((float) $totalInstallments !== (float) $totalCompulsoryFees) {
-                return ResponseService::errorRedirectResponse(route('fees.edit', $id), 'Total amount of Fees Installments is not equal to the total amount of Compulsory Fees');
-            }
-        }
 
         try {
             DB::beginTransaction();
@@ -393,34 +376,6 @@ class FeesController extends Controller
                 'due_charges_amount' => $request->due_charges_amount
             );
             $fees = $this->fees->update($id, $feesData);
-
-            foreach ($request->compulsory_fees_type as $data) {
-                $feeClassType[] = array(
-                    "id" => $data['id'],
-                    "fees_id" => $fees->id,
-                    "class_id" => $fees->class_id,
-                    "fees_type_id" => $data['fees_type_id'],
-                    "amount" => $data['amount'],
-                    "optional" => 0,
-                );
-            }
-
-            if (!empty($request->optional_fees_type)) {
-                foreach ($request->optional_fees_type as $data) {
-                    $feeClassType[] = array(
-                        "id" => $data['id'],
-                        "fees_id" => $fees->id,
-                        "class_id" => $fees->class_id,
-                        "fees_type_id" => $data['fees_type_id'],
-                        "amount" => $data['amount'],
-                        "optional" => 1,
-                    );
-                }
-            }
-
-            if (isset($feeClassType)) {
-                $this->feesClassType->upsert($feeClassType, ['id'], ['fees_type_id', 'amount', 'optional']);
-            }
 
             if (!empty($request->fees_installments)) {
                 $installmentData = array();

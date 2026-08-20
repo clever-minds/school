@@ -304,21 +304,24 @@
                 $('#disable-installment').attr('disabled', true);
             @endif
 
+            // Make fees_type and amount readonly for all edits
+            $('.fees_type, .amount').attr('readonly', true);
+            $('.fees_type option:not(:selected)').attr('disabled', true);
+            $('.remove-fees-type').bind('click', function () { return false; });
+            $('.add-fees-type').prop('disabled', true);
+
             @if($fees->fees_paid_count > 0)
-                    { { --Make readonly to certain fields as fees have already paid--}}
-                    $('.fees-installment-toggle,.fixed_due_charges_type,.percentage_due_charges_type').attr('readonly', true).bind('click', function () {
-                        return false;
-                    });
-
-                $('.installment-name, .installment-amount, .installment-due-charges,.fees_type,.amount,#due_charges_percentage,#due_charges_amount').attr('readonly', true);
-
-                $('.fees_type option:not(:selected)').attr('disabled', true);
-
-
-                $('.remove-fees-type,.remove-installment-fee').bind('click', function () {
+                {{--Make readonly to certain fields as fees have already paid--}}
+                $('.fees-installment-toggle,.fixed_due_charges_type,.percentage_due_charges_type').attr('readonly', true).bind('click', function () {
                     return false;
                 });
-                $('.add-fees-type,.add-installment').prop('disabled', true);
+
+                $('.installment-name, .installment-amount, .installment-due-charges,#due_charges_percentage,#due_charges_amount').attr('readonly', true);
+
+                $('.remove-installment-fee').bind('click', function () {
+                    return false;
+                });
+                $('.add-installment').prop('disabled', true);
             @endif
                 })
         $('#feesForm').on('submit', function (e) {

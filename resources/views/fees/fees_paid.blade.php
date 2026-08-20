@@ -108,6 +108,18 @@
                                     </select>
                                 </div>
                                 <div class="form-group col-md-4">
+                                    <label class="filter-menu" for="filter_fees_id">{{ __('Fees') }}</label>
+                                    <select name="filter_fees_id" id="filter_fees_id" class="form-control">
+                                        <option value="">{{ __('all') }}</option>
+                                        @foreach ($fees as $key => $fee)
+                                            <option value="{{ $fee->id }}" data-class-section-id="{{ $fee->class_id }}">
+                                                {{ $fee->name }}</option> 
+                                               
+                                        @endforeach
+                                    </select>
+                                </div>
+
+                                <div class="form-group col-md-3">
                                     <label class="filter-menu" for="filter_paid_status"> {{ __('status') }} </label>
                                     <select name="filter_paid_status" id="filter_paid_status" class="form-control">
                                         <option value="">{{ __('all') }}</option>
@@ -117,7 +129,7 @@
                                         
                                     </select>
                                 </div>
-                                    <div class="form-group col-md-4">
+                                    <div class="form-group col-md-3">
                                     <label class="filter-menu" for="filter_paid_status"> {{ __('GR Number') }} </label>
                                
                                     <select class="grno-search form-control" id="gr_no"><option>search</option></select>
@@ -148,45 +160,10 @@
                                 </div>
                             </div>
                         </div>
-                        <table aria-describedby="mydesc" class='table' id='student_table_list' data-toggle="table"
-                            data-url="{{ route('students.list') }}" data-click-to-select="true"
-                            data-side-pagination="server" data-pagination="true" data-page-list="[5, 10, 20, 50, 100, 200]"
-                            data-search="true" data-toolbar="#toolbar" data-show-columns="true" data-show-refresh="true"
-                            data-fixed-columns="false" data-trim-on-search="false" data-mobile-responsive="true"
-                            data-sort-name="id" data-sort-order="desc" data-maintain-selected="true"
-                            data-export-data-type='all'
-                            data-show-export="true" data-query-params="studentFeesQueryParams" data-escape="true">
-                            <thead>
-                                <tr>
-                                    <th scope="col" data-field="id" data-sortable="true" data-visible="false" data-align="center">{{ __('id') }}</th>
-                                    <th scope="col" data-field="no" data-sortable="false" data-align="center">{{ __('no.') }}</th>
-                                    <th scope="col" data-field="user.id" data-sortable="false" data-visible="false" data-align="center">{{ __('User Id') }}</th>
-                                    <th scope="col" data-field="user.first_name" data-formatter="studentNameFormatter" data-sortable="false" data-align="center"> {{ __('Student Name') }}</th>
-                                    <th scope="col" data-field="class_section.full_name" data-sortable="false" data-align="center">{{ __('Class') }}</th>
-                                    <th scope="col" data-field="user.email" data-sortable="false" data-align="center">{{ __('Email') }}</th>
-                                    <th scope="col" data-field="operate" data-formatter="studentFeesActionFormatter" data-events="studentFeesActionEvents" data-sortable="false" data-align="center" data-escape="false"> {{ __('Action') }}</th>
-                                </tr>
-                            </thead>
-                        </table>
-                    </div>
-                </div>
-            </div>
-            
-            <!-- Student Fees Modal -->
-            <div class="modal fade" id="studentFeesModal" tabindex="-1" role="dialog" aria-labelledby="studentFeesModalLabel" aria-hidden="true">
-              <div class="modal-dialog modal-xl" role="document">
-                <div class="modal-content">
-                  <div class="modal-header">
-                    <h5 class="modal-title" id="studentFeesModalLabel">{{ __('Student Fees') }}</h5>
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                      <span aria-hidden="true">&times;</span>
-                    </button>
-                  </div>
-                  <div class="modal-body">
                         <table aria-describedby="mydesc" class='table' id='table_list' data-toggle="table"
                             data-url="{{ route('fees.paid.list', 1) }}" data-click-to-select="true"
                             data-side-pagination="server" data-pagination="true" data-page-list="[5, 10, 20, 50, 100, 200]"
-                            data-search="true" data-show-columns="true" data-show-refresh="true"
+                            data-search="true" data-toolbar="#toolbar" data-show-columns="true" data-show-refresh="true"
                             data-fixed-columns="false" data-trim-on-search="false" data-mobile-responsive="true"
                             data-sort-name="id" data-sort-order="desc" data-maintain-selected="true"
                             data-export-data-type='all'
@@ -210,11 +187,9 @@
                                 </tr>
                             </thead>
                         </table>
-                  </div>
+                    </div>
                 </div>
-              </div>
             </div>
-
         </div>
     </div>
 @endsection
@@ -222,7 +197,7 @@
     <script>
     $('#gr_no').on('change', function () {
         $('#student_id').val($(this).val()); // student id set
-        $('#student_table_list').bootstrapTable('refresh');
+        $('#table_list').bootstrapTable('refresh');
     });
         $('#filter_paid_status').change(function (e) { 
             e.preventDefault();
@@ -234,16 +209,36 @@
         });
 
         window.onload = setTimeout(() => {
-            $('#student_table_list').bootstrapTable('refresh');
+            fetchFees();
         }, 500);
         
         $(document).ready(function() {
+            // custom.js incorrectly hides class section options on load. 
+            // We unbind its listener and restore the options.
+            $('#filter_fees_id').off('change');
             $('#filter-class-section-id').find('option').show();
             $('#filter-class-section-id').removeAttr('disabled');
         });
 
+        function fetchFees() {
+            let session_year_id = $('#session_year_id').val();
+            let class_id = $('#filter-class-section-id').find('option:selected').data('class-section-id');
+            ajaxRequest('GET', baseUrl + '/fees/search', {
+                'session_year_id': session_year_id,
+                'class_id': class_id
+            }, null, function(response) {
+                let feesDropdown = "<option value=''>{{ __('all') }}</option>";
+
+                response.data.forEach(function(value, index) {
+                    feesDropdown += "<option value='" + value.id + "' data-class-section-id='" + value.class_id + "'>" + value.name + "</option>";
+                })
+                $('#filter_fees_id').html(feesDropdown);
+                $('#table_list').bootstrapTable('refresh');
+            }, null, null, true)
+        }
+
         $('#session_year_id, #filter-class-section-id').on('change', function() {
-            $('#student_table_list').bootstrapTable('refresh');
+            fetchFees();
         })
     </script>
 @endsection

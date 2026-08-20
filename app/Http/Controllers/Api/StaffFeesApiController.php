@@ -318,35 +318,6 @@ class StaffFeesApiController extends Controller
             );
             $fees = $this->fees->update($id, $feesData);
 
-            $feeClassType = [];
-            foreach ($request->compulsory_fees_type as $data) {
-                $feeClassType[] = array(
-                    "id" => $data['id'] ?? null,
-                    "fees_id" => $fees->id,
-                    "class_id" => $fees->class_id,
-                    "fees_type_id" => $data['fees_type_id'],
-                    "amount" => $data['amount'],
-                    "optional" => 0,
-                );
-            }
-
-            if (!empty($request->optional_fees_type)) {
-                foreach ($request->optional_fees_type as $data) {
-                    $feeClassType[] = array(
-                        "id" => $data['id'] ?? null,
-                        "fees_id" => $fees->id,
-                        "class_id" => $fees->class_id,
-                        "fees_type_id" => $data['fees_type_id'],
-                        "amount" => $data['amount'],
-                        "optional" => 1,
-                    );
-                }
-            }
-
-            if (count($feeClassType) > 0) {
-                $this->feesClassType->upsert($feeClassType, ['id'], ['fees_type_id', 'amount', 'optional']);
-            }
-
             if (!empty($request->fees_installments)) {
                 $installmentData = array();
                 foreach ($request->fees_installments as $data) {
