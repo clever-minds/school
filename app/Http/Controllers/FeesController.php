@@ -778,18 +778,43 @@ class FeesController extends Controller
             $total_compulsory_fees = $classFees->sum('total_compulsory_fees');
             $total_optional_fees = $classFees->sum('total_optional_fees');
             
-            $paid_amount = \App\Models\FeesPaid::where('student_id', $row->id)
+            $feesPaidRecords = \App\Models\FeesPaid::where('student_id', $row->id)
                 ->whereIn('fees_id', $classFees->pluck('id'))
+                ->with(['compulsory_fee'])
                 ->withSum('compulsory_fee', 'amount')
                 ->withSum('optional_fee', 'amount')
-                ->get()
-                ->sum(function($paid) {
-                    return $paid->compulsory_fee_sum_amount + $paid->optional_fee_sum_amount;
-                });
+                ->orderBy('id', 'desc')
+                ->get();
+                
+            $paid_amount = $feesPaidRecords->sum(function($paid) {
+                return $paid->compulsory_fee_sum_amount + $paid->optional_fee_sum_amount;
+            });
+            
+            $latestPaid = $feesPaidRecords->first();
+            $payment_method = '-';
+            $date = '-';
+            if ($latestPaid) {
+                $date = $latestPaid->date;
+                if (isset($latestPaid->compulsory_fee[0]->mode)) {
+                    $payment_method = $latestPaid->compulsory_fee[0]->mode;
+                }
+            }
+            
+            $fees_status = null;
+            if ($paid_amount == 0) {
+                $fees_status = 0;
+            } elseif ($paid_amount >= $total_compulsory_fees) {
+                $fees_status = 1;
+            } else {
+                $fees_status = 2;
+            }
                 
             $tempRow['total_compulsory_fees'] = $total_compulsory_fees;
             $tempRow['total_optional_fees'] = $total_optional_fees;
             $tempRow['paid_amount'] = $paid_amount;
+            $tempRow['payment_method'] = $payment_method;
+            $tempRow['date'] = $date;
+            $tempRow['fees_status'] = $fees_status;
 
             $tempRow['operate'] = '<a href="' . route('fees.paid.student', $row->id) . '" class="btn btn-xs btn-gradient-primary btn-rounded btn-icon" title="View Fees"><i class="fa fa-money"></i></a>';
             

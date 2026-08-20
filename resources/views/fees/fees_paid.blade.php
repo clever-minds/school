@@ -136,6 +136,9 @@
                                     <th scope="col" data-field="total_compulsory_fees" data-sortable="false" data-formatter="amountFormatter" data-align="center">{{ __('Compulsory Fees') }}</th>
                                     <th scope="col" data-field="total_optional_fees" data-sortable="false" data-formatter="amountFormatter" data-align="center">{{ __('Optional Fees') }}</th>
                                     <th scope="col" data-field="paid_amount" data-sortable="false" data-formatter="amountFormatter" data-align="center">{{ __('Paid Amount') }}</th>
+                                    <th scope="col" data-field="payment_method" data-sortable="false" data-align="center"> {{ __('Payment Method') }}</th>
+                                    <th scope="col" data-field="fees_status" data-sortable="false" data-formatter="feesPaidStatusFormatter" data-align="center"> {{ __('Fees Status') }}</th>
+                                    <th scope="col" data-field="date" data-sortable="false" data-align="center">{{ __('Date') }}</th>
                                     <th scope="col" data-field="operate" data-sortable="false" data-align="center" data-escape="false"> {{ __('Action') }}</th>
                                 </tr>
                             </thead>
