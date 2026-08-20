@@ -2095,9 +2095,9 @@ window.diaryEvents = {
 };
 window.studentFeesActionEvents = {
     'click .view-student-fees': function (e, value, row, index) {
-        #student_id.val(row.user_id);
-        #table_list.bootstrapTable('refresh');
-        #studentFeesModal.modal('show');
+        $('#student_id').val(row.user_id);
+        $('#table_list').bootstrapTable('refresh');
+        $('#studentFeesModal').modal('show');
     }
 };
 

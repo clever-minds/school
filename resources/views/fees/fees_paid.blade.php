@@ -108,18 +108,6 @@
                                     </select>
                                 </div>
                                 <div class="form-group col-md-4">
-                                    <label class="filter-menu" for="filter_fees_id">{{ __('Fees') }}</label>
-                                    <select name="filter_fees_id" id="filter_fees_id" class="form-control">
-                                        <option value="">{{ __('all') }}</option>
-                                        @foreach ($fees as $key => $fee)
-                                            <option value="{{ $fee->id }}" data-class-section-id="{{ $fee->class_id }}">
-                                                {{ $fee->name }}</option> 
-                                               
-                                        @endforeach
-                                    </select>
-                                </div>
-
-                                <div class="form-group col-md-3">
                                     <label class="filter-menu" for="filter_paid_status"> {{ __('status') }} </label>
                                     <select name="filter_paid_status" id="filter_paid_status" class="form-control">
                                         <option value="">{{ __('all') }}</option>
@@ -129,7 +117,7 @@
                                         
                                     </select>
                                 </div>
-                                    <div class="form-group col-md-3">
+                                    <div class="form-group col-md-4">
                                     <label class="filter-menu" for="filter_paid_status"> {{ __('GR Number') }} </label>
                                
                                     <select class="grno-search form-control" id="gr_no"><option>search</option></select>
@@ -246,36 +234,16 @@
         });
 
         window.onload = setTimeout(() => {
-            fetchFees();
+            $('#student_table_list').bootstrapTable('refresh');
         }, 500);
         
         $(document).ready(function() {
-            // custom.js incorrectly hides class section options on load. 
-            // We unbind its listener and restore the options.
-            $('#filter_fees_id').off('change');
             $('#filter-class-section-id').find('option').show();
             $('#filter-class-section-id').removeAttr('disabled');
         });
 
-        function fetchFees() {
-            let session_year_id = $('#session_year_id').val();
-            let class_id = $('#filter-class-section-id').find('option:selected').data('class-section-id');
-            ajaxRequest('GET', baseUrl + '/fees/search', {
-                'session_year_id': session_year_id,
-                'class_id': class_id
-            }, null, function(response) {
-                let feesDropdown = "<option value=''>{{ __('all') }}</option>";
-
-                response.data.forEach(function(value, index) {
-                    feesDropdown += "<option value='" + value.id + "' data-class-section-id='" + value.class_id + "'>" + value.name + "</option>";
-                })
-                $('#filter_fees_id').html(feesDropdown);
-                $('#student_table_list').bootstrapTable('refresh');
-            }, null, null, true)
-        }
-
         $('#session_year_id, #filter-class-section-id').on('change', function() {
-            fetchFees();
+            $('#student_table_list').bootstrapTable('refresh');
         })
     </script>
 @endsection
