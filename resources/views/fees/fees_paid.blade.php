@@ -133,6 +133,9 @@
                                     <th scope="col" data-field="student.id" data-sortable="false" data-visible="false" data-align="center">{{ __('Student Id') }}</th>
                                     <th scope="col" data-field="full_name" data-sortable="false" data-align="center"> {{ __('Student Name') }}</th>
                                     <th scope="col" data-field="student.class_section.full_name" data-sortable="false" data-align="center">{{ __('Class') }}</th>
+                                    <th scope="col" data-field="total_compulsory_fees" data-sortable="false" data-formatter="amountFormatter" data-align="center">{{ __('Compulsory Fees') }}</th>
+                                    <th scope="col" data-field="total_optional_fees" data-sortable="false" data-formatter="amountFormatter" data-align="center">{{ __('Optional Fees') }}</th>
+                                    <th scope="col" data-field="paid_amount" data-sortable="false" data-formatter="amountFormatter" data-align="center">{{ __('Paid Amount') }}</th>
                                     <th scope="col" data-field="operate" data-sortable="false" data-align="center" data-escape="false"> {{ __('Action') }}</th>
                                 </tr>
                             </thead>

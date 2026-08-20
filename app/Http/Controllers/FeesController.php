@@ -741,9 +741,6 @@ class FeesController extends Controller
             $sql->whereHas('student.class_section', function ($q) use ($class_id) {
                 $q->where('class_id', $class_id);
             });
-        } else {
-            // If no class section or class is selected, return empty
-            return response()->json(['total' => 0, 'rows' => []]);
         }
 
         if (!empty($student_id)) {
@@ -763,6 +760,9 @@ class FeesController extends Controller
         $sql->orderBy($sort, $order)->skip($offset)->take($limit);
         $res = $sql->get();
 
+        $sessionYearId = $requestSessionYearId ?: $this->cache->getDefaultSessionYear()->id;
+        $feesByClass = \App\Models\Fees::where('session_year_id', $sessionYearId)->get()->groupBy('class_id');
+
         $bulkData = array();
         $bulkData['total'] = $total;
         $rows = array();
@@ -771,6 +771,26 @@ class FeesController extends Controller
         foreach ($res as $row) {
             $tempRow = $row->toArray();
             $tempRow['no'] = $no++;
+            
+            $student_class_id = $row->student->class_section->class_id ?? null;
+            $classFees = $student_class_id && isset($feesByClass[$student_class_id]) ? $feesByClass[$student_class_id] : collect([]);
+            
+            $total_compulsory_fees = $classFees->sum('total_compulsory_fees');
+            $total_optional_fees = $classFees->sum('total_optional_fees');
+            
+            $paid_amount = \App\Models\FeesPaid::where('student_id', $row->id)
+                ->whereIn('fees_id', $classFees->pluck('id'))
+                ->withSum('compulsory_fee', 'amount')
+                ->withSum('optional_fee', 'amount')
+                ->get()
+                ->sum(function($paid) {
+                    return $paid->compulsory_fee_sum_amount + $paid->optional_fee_sum_amount;
+                });
+                
+            $tempRow['total_compulsory_fees'] = $total_compulsory_fees;
+            $tempRow['total_optional_fees'] = $total_optional_fees;
+            $tempRow['paid_amount'] = $paid_amount;
+
             $tempRow['operate'] = '<a href="' . route('fees.paid.student', $row->id) . '" class="btn btn-xs btn-gradient-primary btn-rounded btn-icon" title="View Fees"><i class="fa fa-money"></i></a>';
             
             $rows[] = $tempRow;
