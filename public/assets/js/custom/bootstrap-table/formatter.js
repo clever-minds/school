@@ -1102,20 +1102,10 @@ function applicationStatusFormatter(value, row) {
         return '<span class="badge badge-danger">'+window.trans['rejected']+'</span>';
     }
 }
- f u n c t i o n   s t u d e n t N a m e F o r m a t t e r ( v a l u e ,   r o w )   { 
-         r e t u r n   r o w . u s e r   ?   r o w . u s e r . f i r s t _ n a m e   +   '   '   +   r o w . u s e r . l a s t _ n a m e   :   ' ' ; 
- } 
- 
- f u n c t i o n   s t u d e n t F e e s A c t i o n F o r m a t t e r ( v a l u e ,   r o w )   { 
-         r e t u r n   ' < b u t t o n   c l a s s = \  
- b t n  
- b t n - x s  
- b t n - g r a d i e n t - p r i m a r y  
- b t n - r o u n d e d  
- b t n - i c o n  
- v i e w - s t u d e n t - f e e s \   d a t a - s t u d e n t - i d = \   +   r o w . u s e r _ i d   +   \   t i t l e = \ V i e w  
- F e e s \ > < i   c l a s s = \ f a  
- f a - m o n e y \ > < / i > < / b u t t o n > ' ; 
- } 
-  
- 
+function studentNameFormatter(value, row) {
+    return row.user ? row.user.first_name + ' ' + row.user.last_name : '';
+}
+
+function studentFeesActionFormatter(value, row) {
+    return '<button class="btn btn-xs btn-gradient-primary btn-rounded btn-icon view-student-fees" data-student-id="' + row.user_id + '" title="View Fees"><i class="fa fa-money"></i></button>';
+}
