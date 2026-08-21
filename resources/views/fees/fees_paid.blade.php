@@ -12,7 +12,6 @@
             </h3>
         </div>
         <div class="row">
-            @if(false)
             {{-- Total Fees --}}
             <div class="col-md-4 col-sm-12 grid-margin stretch-card">
                 <div class="card card-statistics">
@@ -76,7 +75,6 @@
                     </div>
                 </div>
             </div>
-            @endif
 
             <div class="col-md-12 grid-margin stretch-card search-container">
                 <div class="card">
