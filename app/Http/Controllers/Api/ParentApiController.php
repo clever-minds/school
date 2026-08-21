@@ -1926,7 +1926,7 @@ class ParentApiController extends Controller
 
             $systemVerticalLogo = $this->systemSetting->builder()->where('name', 'vertical_logo')->first();
             $schoolVerticalLogo = $this->schoolSetting->builder()->where('name', 'vertical_logo')->first();
-            $output = Pdf::loadView('fees.fees_receipt', compact('systemVerticalLogo', 'school', 'feesPaid', 'student', 'schoolVerticalLogo'))->output();
+            $output = Pdf::loadView('fees.fees_receipt', compact('systemVerticalLogo', 'school', 'feesPaid', 'student', 'schoolVerticalLogo'))->setPaper('a5')->output();
 
             $data = [
                 'fees_paid' => $feesPaid,

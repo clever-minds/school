@@ -683,7 +683,7 @@ class PayrollController extends Controller {
             // Total days
             $days = Carbon::now()->year($salary->year)->month($salary->month)->daysInMonth;
 
-            $pdf = PDF::loadView('payroll.slip',compact('schoolSetting','salary','total_leaves','days','allow_leaves'));
+            $pdf = PDF::loadView('payroll.slip',compact('schoolSetting','salary','total_leaves','days','allow_leaves'))->setPaper('a5');
             return $pdf->stream($salary->title.'-'.$salary->staff->user->full_name.'.pdf');
         } catch (\Throwable $th) {
             ResponseService::logErrorResponse($th);

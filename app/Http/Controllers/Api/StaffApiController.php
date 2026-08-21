@@ -177,7 +177,7 @@ class StaffApiController extends Controller
                 $allow_leaves = $leaves->first()->leave_master->leaves;
             }
 
-            $pdf = PDF::loadView('payroll.slip', compact('schoolSetting', 'salary', 'total_leaves', 'days', 'allow_leaves'))->output();
+            $pdf = PDF::loadView('payroll.slip', compact('schoolSetting', 'salary', 'total_leaves', 'days', 'allow_leaves'))->setPaper('a5')->output();
 
             return $response = array(
                 'error' => false,
@@ -1300,7 +1300,7 @@ class StaffApiController extends Controller
             $school = $this->cache->getSchoolSettings();
 
             //            return view('fees.fees_receipt', compact('systemLogo', 'school', 'feesPaid', 'student'));
-            $pdf = Pdf::loadView('fees.fees_receipt', compact('systemVerticalLogo', 'school', 'feesPaid', 'student', 'schoolVerticalLogo'))->output();
+            $pdf = Pdf::loadView('fees.fees_receipt', compact('systemVerticalLogo', 'school', 'feesPaid', 'student', 'schoolVerticalLogo'))->setPaper('a5')->output();
 
             return $response = array(
                 'error' => false,
