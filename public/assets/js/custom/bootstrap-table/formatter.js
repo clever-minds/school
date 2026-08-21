@@ -932,44 +932,41 @@ function totalFeesFormatter(value, row)
     $('.total_optional_fees_pending').html(0);
 
     // Total Fees
-    if (row.no.total_fees) {
-        $('.total_fees_statistics').html(row.no.total_fees ? row.no.currency_symbol+' '+amountFormatter(row.no.total_fees, null) : 0);
+    // Total Fees
+    if (row.no.total_fees !== undefined) {
+        $('.total_fees_statistics').html(row.no.currency_symbol+' '+amountFormatter(row.no.total_fees, null));
     }
 
-    if (row.no.total_compulsory_fees) {
-        $('.total_compulsory_fees').html(row.no.total_compulsory_fees ? row.no.currency_symbol+' '+amountFormatter(row.no.total_compulsory_fees, null) : 0);
+    if (row.no.total_compulsory_fees !== undefined) {
+        $('.total_compulsory_fees').html(row.no.currency_symbol+' '+amountFormatter(row.no.total_compulsory_fees, null));
     }
 
-    if (row.no.total_optional_fees) {
-        $('.total_optional_fees').html(row.no.total_optional_fees ? row.no.currency_symbol+' '+amountFormatter(row.no.total_optional_fees, null) : 0);
+    if (row.no.total_optional_fees !== undefined) {
+        $('.total_optional_fees').html(row.no.currency_symbol+' '+amountFormatter(row.no.total_optional_fees, null));
     }
     // End Total Fees
     
     // Collected Fees
-    if (row.no.total_fees_collected) {
-        $('.total_fees_collected').html(row.no.total_fees_collected ? row.no.currency_symbol+' '+amountFormatter(row.no.total_fees_collected, null) : 0);
+    if (row.no.total_fees_collected !== undefined) {
+        $('.total_fees_collected').html(row.no.currency_symbol+' '+amountFormatter(row.no.total_fees_collected, null));
     }
 
-    if (row.no.total_compulsory_fees_collected) {
-        $('.total_compulsory_fees_collected').html(row.no.total_compulsory_fees_collected ? row.no.currency_symbol+' '+amountFormatter(row.no.total_compulsory_fees_collected, null) : 0);
+    if (row.no.total_compulsory_fees_collected !== undefined) {
+        $('.total_compulsory_fees_collected').html(row.no.currency_symbol+' '+amountFormatter(row.no.total_compulsory_fees_collected, null));
     }
 
-    if (row.no.total_optional_fees_collected) {
-        $('.total_optional_fees_collected').html(row.no.total_optional_fees_collected ? row.no.currency_symbol+' '+amountFormatter(row.no.total_optional_fees_collected, null) : 0);
+    if (row.no.total_optional_fees_collected !== undefined) {
+        $('.total_optional_fees_collected').html(row.no.currency_symbol+' '+amountFormatter(row.no.total_optional_fees_collected, null));
     }
 
     // Total Pending Fees
-    let total_pending_fees = (row.no.total_fees ? parseInt(row.no.total_fees) : 0) - (row.no.total_fees_collected ? parseInt(row.no.total_fees_collected) : 0);
+    if (row.no.total_fees_pending !== undefined) {
+        $('.total_fees_pending').html(row.no.currency_symbol+' '+amountFormatter(row.no.total_fees_pending, null));
+    }
 
-    let total_compulsory_fees_pending = (row.no.total_compulsory_fees ? parseInt(row.no.total_compulsory_fees) : 0) - (row.no.total_compulsory_fees_collected ? parseInt(row.no.total_compulsory_fees_collected) : 0);
-
-    let total_optional_fees_pending = (row.no.total_optional_fees ? parseInt(row.no.total_optional_fees) : 0) - (row.no.total_optional_fees_collected ? parseInt(row.no.total_optional_fees_collected) : 0);
-
-
-    $('.total_fees_pending').html(row.no.currency_symbol+' '+amountFormatter(total_pending_fees, null));
-    $('.total_compulsory_fees_pending').html(row.no.currency_symbol+' '+amountFormatter(total_compulsory_fees_pending, null));
-    $('.total_optional_fees_pending').html(row.no.currency_symbol+' '+amountFormatter(total_optional_fees_pending, null));
-
+    if (row.no.total_compulsory_fees_pending !== undefined) {
+        $('.total_compulsory_fees_pending').html(row.no.currency_symbol+' '+amountFormatter(row.no.total_compulsory_fees_pending, null));
+    }
     return row.no.no;
 }
 

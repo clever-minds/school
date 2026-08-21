@@ -763,6 +763,57 @@ class FeesController extends Controller
         $sessionYearId = $requestSessionYearId ?: $this->cache->getDefaultSessionYear()->id;
         $feesByClass = \App\Models\Fee::where('session_year_id', $sessionYearId)->with('fees_class_type')->get()->groupBy('class_id');
 
+        $settings = $this->cache->getSchoolSettings();
+        $currencySymbol = $settings['currency_symbol'] ?? '';
+
+        $fees_data = [
+            'currency_symbol' => $currencySymbol,
+            'total_fees' => 0,
+            'total_compulsory_fees' => 0,
+            'total_optional_fees' => 0,
+            'total_fees_collected' => 0,
+            'total_compulsory_fees_collected' => 0,
+            'total_optional_fees_collected' => 0,
+        ];
+
+        // Calculate Global Totals for all matched students
+        $allStudents = (clone $sql)->get();
+        $allStudentIds = $allStudents->pluck('id');
+        
+        foreach ($allStudents as $student) {
+            $student_class_id = $student->student->class_section->class_id ?? null;
+            $classFees = $student_class_id && isset($feesByClass[$student_class_id]) ? $feesByClass[$student_class_id] : collect([]);
+            
+            $fees_data['total_compulsory_fees'] += $classFees->sum('total_compulsory_fees');
+            $fees_data['total_optional_fees'] += $classFees->sum('total_optional_fees');
+        }
+        $fees_data['total_fees'] = $fees_data['total_compulsory_fees'] + $fees_data['total_optional_fees'];
+
+        if ($allStudentIds->isNotEmpty()) {
+            $allFeesIds = $feesByClass->flatten()->pluck('id');
+            if ($allFeesIds->isNotEmpty()) {
+                $collectedCompulsory = \App\Models\FeesPaid::whereIn('student_id', $allStudentIds)
+                    ->whereIn('fees_id', $allFeesIds)
+                    ->withSum('compulsory_fee', 'amount')
+                    ->get()
+                    ->sum('compulsory_fee_sum_amount');
+                    
+                $collectedOptional = \App\Models\FeesPaid::whereIn('student_id', $allStudentIds)
+                    ->whereIn('fees_id', $allFeesIds)
+                    ->withSum('optional_fee', 'amount')
+                    ->get()
+                    ->sum('optional_fee_sum_amount');
+                    
+                $fees_data['total_compulsory_fees_collected'] = $collectedCompulsory;
+                $fees_data['total_optional_fees_collected'] = $collectedOptional;
+                $fees_data['total_fees_collected'] = $collectedCompulsory + $collectedOptional;
+            }
+        }
+        
+        $fees_data['total_compulsory_fees_pending'] = $fees_data['total_compulsory_fees'] - $fees_data['total_compulsory_fees_collected'];
+        $fees_data['total_optional_fees_pending'] = $fees_data['total_optional_fees'] - $fees_data['total_optional_fees_collected'];
+        $fees_data['total_fees_pending'] = $fees_data['total_fees'] - $fees_data['total_fees_collected'];
+
         $bulkData = array();
         $bulkData['total'] = $total;
         $rows = array();
@@ -770,8 +821,10 @@ class FeesController extends Controller
 
         foreach ($res as $row) {
             $tempRow = $row->toArray();
-            $tempRow['no'] = $no++;
             
+            $fees_data['no'] = $no++;
+            $tempRow['no'] = $fees_data;
+
             $student_class_id = $row->student->class_section->class_id ?? null;
             $classFees = $student_class_id && isset($feesByClass[$student_class_id]) ? $feesByClass[$student_class_id] : collect([]);
             
