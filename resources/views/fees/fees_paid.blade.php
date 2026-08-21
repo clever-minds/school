@@ -121,7 +121,7 @@
                             <thead>
                                 <tr>
                                     <th scope="col" data-field="id" data-sortable="true" data-visible="false" data-align="center">{{ __('id') }}</th>
-                                    <th scope="col" data-field="no" data-sortable="false" data-align="center">{{ __('no.') }}</th>
+                                    <th scope="col" data-field="no" data-formatter="totalFeesFormatter" data-sortable="false" data-align="center">{{ __('no.') }}</th>
                                     <th scope="col" data-field="student.id" data-sortable="false" data-visible="false" data-align="center">{{ __('Student Id') }}</th>
                                     <th scope="col" data-field="full_name" data-sortable="false" data-align="center"> {{ __('Student Name') }}</th>
                                     <th scope="col" data-field="student.class_section.full_name" data-sortable="false" data-align="center">{{ __('Class') }}</th>
