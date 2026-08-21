@@ -59,19 +59,13 @@
         }
 
         .row {
-            display: flex;
-        }
-
-        .col-md-6 {
-            position: fixed;
             width: 100%;
+            margin-bottom: 20px;
         }
 
         .net-salary {
-            left: 60%;
             border: 1px solid gray;
             border-radius: 8px;
-            width: 40%;
         }
 
         .employee-detail tr th {
@@ -99,10 +93,6 @@
             padding-left: 8px;
         }
 
-        .employee-detail {
-            width: 60%;
-        }
-
         .net-salary-lable {
             font-size: 12px;
             color: grey;
@@ -123,10 +113,9 @@
         }
 
         .salary-detail {
-            position: relative;
-            top: 20%;
             border: 1px solid grey;
             border-radius: 8px;
+            margin-bottom: 20px;
         }
 
         .salary-detail table tr th,
@@ -147,8 +136,6 @@
         }
 
         .total-payable {
-            position: relative;
-            top: 24%;
             border: 1px solid grey;
             border-radius: 8px;
         }
@@ -179,9 +166,7 @@
         }
 
         .row-col {
-            display: table;
             width: 100%;
-            table-layout: fixed;
         }
 
         .col-6 {
@@ -240,8 +225,9 @@
             @endphp
         @endif
         
-        <div class="row">
-            <div class="col-md-6 employee-detail">
+        <table class="row">
+            <tr>
+            <td style="width: 60%; vertical-align: top;" class="employee-detail">
                 {{-- Employee info. --}}
                 <table class="full-width">
                     <tr>
@@ -283,9 +269,9 @@
                     </tr>
 
                 </table>
-            </div>
+            </td>
 
-            <div class="col-md-6 net-salary">
+            <td style="width: 40%; vertical-align: top;" class="net-salary">
                 {{-- Salary --}}
                 <table class="full-width net-salary-div">
                     <tr>
@@ -314,8 +300,9 @@
                         </td>
                     </tr>
                 </table>
-            </div>
-        </div>
+            </td>
+            </tr>
+        </table>
 
         {{-- Salary details --}}
         <div class="row salary-detail">
