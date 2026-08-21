@@ -757,6 +757,7 @@ class FeesController extends Controller
         }
 
         $total = $sql->count();
+        $allStudentsQuery = clone $sql;
         $sql->orderBy($sort, $order)->skip($offset)->take($limit);
         $res = $sql->get();
 
@@ -777,7 +778,7 @@ class FeesController extends Controller
         ];
 
         // Calculate Global Totals for all matched students
-        $allStudents = (clone $sql)->get();
+        $allStudents = $allStudentsQuery->get();
         $allStudentIds = $allStudents->pluck('id');
         $allFeesIds = $feesByClass->flatten()->pluck('id');
 
