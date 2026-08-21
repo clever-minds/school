@@ -761,7 +761,7 @@ class FeesController extends Controller
         $res = $sql->get();
 
         $sessionYearId = $requestSessionYearId ?: $this->cache->getDefaultSessionYear()->id;
-        $feesByClass = \App\Models\Fee::where('session_year_id', $sessionYearId)->get()->groupBy('class_id');
+        $feesByClass = \App\Models\Fee::where('session_year_id', $sessionYearId)->with('fees_class_type')->get()->groupBy('class_id');
 
         $bulkData = array();
         $bulkData['total'] = $total;
