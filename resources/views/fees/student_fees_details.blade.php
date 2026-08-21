@@ -27,7 +27,7 @@
                         </div>
 
                         <div class="table-responsive">
-                            <table class="table table-bordered">
+                            <table class="table">
                                 <thead>
                                     <tr>
                                         <th>{{ __('Fees Name') }}</th>
