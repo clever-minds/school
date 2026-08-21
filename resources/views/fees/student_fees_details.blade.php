@@ -32,8 +32,7 @@
                                     <tr>
                                         <th>{{ __('Fees Name') }}</th>
                                         <th>{{ __('Due Date') }}</th>
-                                        <th>{{ __('Compulsory Fees') }}</th>
-                                        <th>{{ __('Optional Fees') }}</th>
+                                        <th>{{ __('Total Fees') }}</th>
                                         <th>{{ __('Status') }}</th>
                                         <th>{{ __('Action') }}</th>
                                     </tr>
@@ -57,18 +56,11 @@
                                             <td>{{ $fee->name }}</td>
                                             <td>{{ $fee->due_date }}</td>
                                             <td>{{ $fee->total_compulsory_fees }}</td>
-                                            <td>{{ $fee->total_optional_fees }}</td>
                                             <td>{!! $status !!}</td>
                                             <td>
                                                 <a href="{{ route('fees.compulsory.index', [$fee->id, $student->id]) }}" class="btn btn-sm btn-gradient-success mb-1" title="{{ __('Compulsory Fees') }}">
-                                                    <i class="fa fa-dollar"></i> {{ __('Compulsory') }}
+                                                    <i class="fa fa-dollar"></i> {{ __('Pay Fees') }}
                                                 </a>
-                                                
-                                                @if($fee->total_optional_fees > 0)
-                                                    <a href="{{ route('fees.optional.index', [$fee->id, $student->id]) }}" class="btn btn-sm btn-gradient-info mb-1" title="{{ __('Optional Fees') }}">
-                                                        <i class="fa fa-dollar"></i> {{ __('Optional') }}
-                                                    </a>
-                                                @endif
 
                                                 @if($feesPaid)
                                                     <a href="{{ route('fees.paid.receipt.pdf', $feesPaid->id) }}" target="_blank" class="btn btn-sm btn-gradient-primary mb-1" title="{{ __('generate_pdf') }}">
@@ -80,8 +72,9 @@
                                     @endforeach
                                     @if(count($fees) == 0)
                                         <tr>
-                                            <td colspan="6" class="text-center">{{ __('No Fees Assigned') }}</td>
+                                            <td colspan="5" class="text-center">{{ __('No Fees Assigned') }}</td>
                                         </tr>
+
                                     @endif
                                 </tbody>
                             </table>
