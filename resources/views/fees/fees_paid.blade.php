@@ -26,8 +26,6 @@
                             <div class="col-sm-12 col-md-6 border-left text-right">
                                 <p class="text-muted mt-2">{{ __('compulsory_fees') }} : <span
                                         class="total_compulsory_fees">0</span></p>
-                                <p class="text-muted mb-0">{{ __('optional_fees') }} : <span
-                                        class="total_optional_fees">0</span></p>
                             </div>
                         </div>
                     </div>
@@ -47,8 +45,6 @@
                             <div class="col-sm-12 col-md-6 border-left text-right">
                                 <p class="text-muted mt-2">{{ __('compulsory_fees') }} : <span
                                         class="total_compulsory_fees_collected">0</span></p>
-                                <p class="text-muted mb-0">{{ __('optional_fees') }} : <span
-                                        class="total_optional_fees_collected">0</span></p>
                             </div>
                         </div>
                     </div>
@@ -68,8 +64,6 @@
                             <div class="col-sm-12 col-md-6 border-left text-right">
                                 <p class="text-muted mt-2">{{ __('compulsory_fees') }} : <span
                                         class="total_compulsory_fees_pending">0</span></p>
-                                <p class="text-muted mb-0">{{ __('optional_fees') }} : <span
-                                        class="total_optional_fees_pending">0</span></p>
                             </div>
                         </div>
                     </div>
