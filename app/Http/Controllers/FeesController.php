@@ -790,30 +790,30 @@ class FeesController extends Controller
                 return $paid->compulsory_fee_sum_amount + $paid->optional_fee_sum_amount;
             });
             
-            $latestPaid = $feesPaidRecords->first();
-            $payment_method = '-';
-            $date = '-';
-            if ($latestPaid) {
-                $date = $latestPaid->date;
-                if (isset($latestPaid->compulsory_fee[0]->mode)) {
-                    $payment_method = $latestPaid->compulsory_fee[0]->mode;
+            $fees_status = null;
+            
+            $is_overdue = false;
+            $today_date = \Carbon\Carbon::now()->format('Y-m-d');
+            foreach ($classFees as $fee) {
+                if (\Carbon\Carbon::parse($fee->due_date)->lt($today_date)) {
+                    $is_overdue = true;
+                    break;
                 }
             }
-            
-            $fees_status = null;
-            if ($paid_amount == 0) {
-                $fees_status = 0;
-            } elseif ($paid_amount >= $total_compulsory_fees) {
-                $fees_status = 1;
+
+            if ($paid_amount >= $total_compulsory_fees && $total_compulsory_fees > 0) {
+                $fees_status = 1; // Success
+            } elseif ($paid_amount > 0) {
+                $fees_status = 0; // Partial Paid
+            } elseif ($is_overdue) {
+                $fees_status = 2; // Over Due
             } else {
-                $fees_status = 2;
+                $fees_status = null; // Pending
             }
                 
             $tempRow['total_compulsory_fees'] = $total_compulsory_fees;
             $tempRow['total_optional_fees'] = $total_optional_fees;
             $tempRow['paid_amount'] = $paid_amount;
-            $tempRow['payment_method'] = $payment_method;
-            $tempRow['date'] = $date;
             $tempRow['fees_status'] = $fees_status;
 
             $tempRow['operate'] = '<a href="' . route('fees.paid.student', $row->id) . '" class="btn btn-xs btn-gradient-primary btn-rounded btn-icon" title="View Fees"><i class="fa fa-money"></i></a>';
