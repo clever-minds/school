@@ -842,6 +842,7 @@ class FeesController extends Controller
             ->where('session_year_id', $sessionYear->id)
             ->with([
                 'installments',
+                'fees_class_type',
                 'fees_paid' => function ($q) use ($student_id) {
                     $q->where('student_id', $student_id)
                         ->with('compulsory_fee', 'optional_fee');
