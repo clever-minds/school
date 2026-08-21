@@ -779,6 +779,17 @@ class FeesController extends Controller
         // Calculate Global Totals for all matched students
         $allStudents = (clone $sql)->get();
         $allStudentIds = $allStudents->pluck('id');
+        $allFeesIds = $feesByClass->flatten()->pluck('id');
+
+        $feesPaidRecordsByStudent = collect();
+        if ($allStudentIds->isNotEmpty() && $allFeesIds->isNotEmpty()) {
+            $feesPaidRecordsByStudent = \App\Models\FeesPaid::whereIn('student_id', $allStudentIds)
+                ->whereIn('fees_id', $allFeesIds)
+                ->withSum('compulsory_fee', 'amount')
+                ->withSum('optional_fee', 'amount')
+                ->get()
+                ->groupBy('student_id');
+        }
         
         foreach ($allStudents as $student) {
             $student_class_id = $student->student->class_section->class_id ?? null;
@@ -786,29 +797,18 @@ class FeesController extends Controller
             
             $fees_data['total_compulsory_fees'] += $classFees->sum('total_compulsory_fees');
             $fees_data['total_optional_fees'] += $classFees->sum('total_optional_fees');
+
+            $studentFeesPaid = $feesPaidRecordsByStudent->get($student->id, collect());
+            
+            // Filter only payments for fees that belong to the student's CURRENT class
+            $validFeeIds = $classFees->pluck('id')->toArray();
+            $validPayments = $studentFeesPaid->whereIn('fees_id', $validFeeIds);
+
+            $fees_data['total_compulsory_fees_collected'] += $validPayments->sum('compulsory_fee_sum_amount');
+            $fees_data['total_optional_fees_collected'] += $validPayments->sum('optional_fee_sum_amount');
         }
         $fees_data['total_fees'] = $fees_data['total_compulsory_fees'] + $fees_data['total_optional_fees'];
-
-        if ($allStudentIds->isNotEmpty()) {
-            $allFeesIds = $feesByClass->flatten()->pluck('id');
-            if ($allFeesIds->isNotEmpty()) {
-                $collectedCompulsory = \App\Models\FeesPaid::whereIn('student_id', $allStudentIds)
-                    ->whereIn('fees_id', $allFeesIds)
-                    ->withSum('compulsory_fee', 'amount')
-                    ->get()
-                    ->sum('compulsory_fee_sum_amount');
-                    
-                $collectedOptional = \App\Models\FeesPaid::whereIn('student_id', $allStudentIds)
-                    ->whereIn('fees_id', $allFeesIds)
-                    ->withSum('optional_fee', 'amount')
-                    ->get()
-                    ->sum('optional_fee_sum_amount');
-                    
-                $fees_data['total_compulsory_fees_collected'] = $collectedCompulsory;
-                $fees_data['total_optional_fees_collected'] = $collectedOptional;
-                $fees_data['total_fees_collected'] = $collectedCompulsory + $collectedOptional;
-            }
-        }
+        $fees_data['total_fees_collected'] = $fees_data['total_compulsory_fees_collected'] + $fees_data['total_optional_fees_collected'];
         
         $fees_data['total_compulsory_fees_pending'] = $fees_data['total_compulsory_fees'] - $fees_data['total_compulsory_fees_collected'];
         $fees_data['total_optional_fees_pending'] = $fees_data['total_optional_fees'] - $fees_data['total_optional_fees_collected'];
