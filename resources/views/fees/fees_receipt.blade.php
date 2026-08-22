@@ -76,19 +76,15 @@
             }
         @endphp
         @if ($logoBase64)
-            <img src="{{ $logoBase64 }}" style="height:60px; max-width:100%;">
+            <img src="{{ $logoBase64 }}" style="height:40px; max-width:100%; margin-bottom:5px;">
         @endif
 
-      {{--  <div style="font-size:16px; font-weight:bold;">
-            {{ $school['school_name'] ?? '' }}
-        </div>--}}</br></br>
-
-        <div>
+        <div style="font-size:10px; margin-bottom:5px;">
             {{ $school['school_address'] ?? '' }}
         </div>
 
-        <div class="header-line"></div>
-        <h3>FEE RECEIPT</h3>
+        <div class="header-line" style="margin-top:2px; margin-bottom:5px;"></div>
+        <h4 style="margin:0; margin-bottom:10px;">FEE RECEIPT</h4>
     </div>
 
     <!-- Student & Receipt Details -->
