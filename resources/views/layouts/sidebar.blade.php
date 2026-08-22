@@ -27,6 +27,15 @@
                 </a>
             </li>
             @endcan
+
+            @can('consent-form-list')
+            <li class="nav-item">
+                <a class="nav-link" href="{{ route('consent-forms.index') }}">
+                    <i class="fa fa-file-text-o menu-icon"></i>
+                    <span class="menu-title">{{ __('Consent Forms') }}</span>
+                </a>
+            </li>
+            @endcan
         @endif
         {{-- Academics --}}
         @canany(['medium-list','assign-roll-no','section-list','subject-list','class-list','subject-list','promote-student-list','transfer-student-list'])

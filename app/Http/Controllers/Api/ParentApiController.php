@@ -241,6 +241,34 @@ class ParentApiController extends Controller
         }
     }
 
+    public function updateConsentFormDate(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'child_id' => 'required|numeric',
+            'consent_form_date' => 'required|date'
+        ]);
+
+        if ($validator->fails()) {
+            return ResponseService::validationError($validator->errors()->first());
+        }
+
+        try {
+            $child = Auth::user()->guardianRelationChild()->where('id', $request->child_id)->first();
+            
+            if (empty($child)) {
+                return ResponseService::errorResponse("Child's Account is not Active.Contact School Support", NULL, config('constants.RESPONSE_CODE.INACTIVE_CHILD'));
+            }
+
+            $child->consent_form_date = $request->consent_form_date;
+            $child->save();
+
+            return ResponseService::successResponse('Consent form date updated successfully', clone $child);
+        } catch (\Throwable $th) {
+            ResponseService::logErrorResponse($th);
+            return ResponseService::errorResponse('Something went wrong');
+        }
+    }
+
     public function getTimetable(Request $request)
     {
         $validator = Validator::make($request->all(), ['child_id' => 'required|numeric',]);

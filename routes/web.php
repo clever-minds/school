@@ -232,6 +232,11 @@ Route::post('/admin/impersonation-exit',
 
         });
         
+        Route::group(['prefix' => 'consent-forms'], static function () {
+            Route::get('/', [\App\Http\Controllers\ConsentFormController::class, 'index'])->name('consent-forms.index');
+            Route::get('/list', [\App\Http\Controllers\ConsentFormController::class, 'list'])->name('consent-forms.list');
+        });
+
         Route::group(['prefix' => 'schools'], static function () {
             Route::put("/{id}/restore", [SchoolController::class, 'restore'])->name('schools.restore');
             Route::delete("/{id}/deleted", [SchoolController::class, 'trash'])->name('schools.trash');

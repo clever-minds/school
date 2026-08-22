@@ -87,6 +87,7 @@ class MigrateAllTenants extends Command
                 'database/migrations/schools/2026_07_10_105846_add_sender_id_to_notifications_table.php',
                 'database/migrations/schools/2026_07_10_105903_create_notification_classes_table.php',
                 'database/migrations/schools/2026_08_01_130707_add_type_to_staff_attendances_table.php',
+                'database/migrations/schools/2026_08_22_205150_add_consent_form_date_to_students_table.php',
             ];
 
             foreach ($migrations as $path) {
@@ -100,7 +101,19 @@ class MigrateAllTenants extends Command
                     $this->error("❌ Migration failed for {$tenant->name} on $path: {$e->getMessage()}");
                 }
             }
-                $this->info("✅ Migration done for {$tenant->name}");
+
+            try {
+                Artisan::call('db:seed', [
+                    '--database' => 'tenant',
+                    '--class' => 'Database\\Seeders\\ConsentFormPermissionSeeder',
+                    '--force' => true,
+                ]);
+                $this->info("✅ Consent Form seeder done for {$tenant->name}");
+            } catch (\Exception $e) {
+                $this->error("❌ Seeder failed for {$tenant->name}: {$e->getMessage()}");
+            }
+
+            $this->info("✅ Migration done for {$tenant->name}");
         }
 
         $this->info('🎉 All tenant migrations completed successfully!');

@@ -2939,6 +2939,75 @@
                     ]
                 }
             ]
+        },
+        {
+            "name": "Consent Form APIs",
+            "item": [
+                {
+                    "name": "List Consent Forms (Staff)",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{staff_token}}",
+                                "type": "text"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/api/consent-form",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "consent-form"
+                            ]
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Add/Update Consent Form Date (Parent)",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{parent_token}}",
+                                "type": "text"
+                            }
+                        ],
+                        "body": {
+                            "mode": "formdata",
+                            "formdata": [
+                                {
+                                    "key": "child_id",
+                                    "value": "1",
+                                    "type": "text"
+                                },
+                                {
+                                    "key": "consent_form_date",
+                                    "value": "2026-08-22",
+                                    "type": "text"
+                                }
+                            ]
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/api/parent/consent-form",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "parent",
+                                "consent-form"
+                            ]
+                        }
+                    },
+                    "response": []
+                }
+            ]
         }
     ],
     "variable": [

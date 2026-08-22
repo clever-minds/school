@@ -133,6 +133,7 @@ Route::group(['prefix' => 'parent'], static function () {
             Route::group(['middleware' => ['checkChild','APISwitchDatabase']], static function () {
                 Route::get('subjects', [ParentApiController::class, 'subjects']);
                 Route::get('class-subjects', [ParentApiController::class, 'classSubjects']);
+                Route::post('consent-form', [ParentApiController::class, 'updateConsentFormDate']);
                 Route::get('timetable', [ParentApiController::class, 'getTimetable']);
                 Route::get('lessons', [ParentApiController::class, 'getLessons']);
                 Route::get('lesson-topics', [ParentApiController::class, 'getLessonTopics']);
@@ -595,6 +596,13 @@ Route::group(['middleware' => ['APISwitchDatabase',]], static function () {
     Route::post('class-section/teachers', [ApiController::class, 'classSectionTeachers']);
     
     Route::get('student-details', [ApiController::class, 'getStudentDetails']);
+});
+
+/**
+ * CONSENT FORM APIs (Staff / Principal)
+ **/
+Route::group(['prefix' => 'consent-form', 'middleware' => ['auth:sanctum', 'APISwitchDatabase']], static function () {
+    Route::get('/', [\App\Http\Controllers\Api\ConsentFormApiController::class, 'index']);
 });
 
 /**

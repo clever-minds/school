@@ -43,7 +43,6 @@ class Students extends Model {
         'remarks',
         'campus',
 
-
     ];
     protected $appends = ['first_name','last_name','full_name'];
 
