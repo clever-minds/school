@@ -508,6 +508,13 @@
                                 </a>
                             </li>
                         @endcan
+                        @can('staff-attendance-qr')
+                            <li class="nav-item">
+                                <a href="{{ route('staff-attendance.qr') }}" class="nav-link">
+                                    {{ __('QR Generate') }}
+                                </a>
+                            </li>
+                        @endcan
                     </ul>
                 </div>
             </li>

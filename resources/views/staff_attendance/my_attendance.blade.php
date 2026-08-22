@@ -14,28 +14,7 @@
         <div class="row">
             <div class="col-md-12 grid-margin stretch-card">
                 <div class="card">
-                    <div class="card-body text-center">
-                        <h4 class="card-title">{{ __('attendance_action') }}</h4>
-                        <div id="attendance-status-container">
-                            <p id="current-time" class="h4 mb-3"></p>
-                            <div class="d-flex justify-content-center gap-3">
-                                <button id="btn-check-in" class="btn btn-success btn-lg" onclick="handleAttendance('in')">
-                                    <i class="fa fa-sign-in"></i> {{ __('check_in') }}
-                                </button>
-                                <button id="btn-check-out" class="btn btn-danger btn-lg" onclick="handleAttendance('out')">
-                                    <i class="fa fa-sign-out"></i> {{ __('check_out') }}
-                                </button>
-                            </div>
-                            <p id="location-status" class="mt-2 text-muted"></p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="col-md-12 grid-margin stretch-card">
-                <div class="card">
                     <div class="card-body">
-                        <h4 class="card-title">{{ __('attendance_history') }}</h4>
                         <div id="toolbar">
                             <div class="row">
                                 <div class="col">
