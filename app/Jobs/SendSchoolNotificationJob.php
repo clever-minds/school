@@ -69,25 +69,25 @@ class SendSchoolNotificationJob implements ShouldQueue
         // 1. Events
         $events = Event::where('date', $this->date)->get();
         foreach ($events as $event) {
-            $this->sendToAll($school, $userIds, $event, "Upcoming Event: {$event->title}", "Event '{$event->title}' is coming up in {$this->timeframe} on " . Carbon::parse($event->date)->format('d-m-Y') . "." . $note);
+            $this->sendToAll($school, $userIds, $event, "Upcoming Event: {$event->title}", "Event '{$event->title}' is coming up on " . Carbon::parse($event->date)->format('d-m-Y') . "." . $note);
         }
 
         // 2. Holidays
         $holidays = Holiday::where('date', $this->date)->get();
         foreach ($holidays as $holiday) {
-            $this->sendToAll($school, $userIds, $holiday, "Upcoming Holiday: {$holiday->title}", "School will be closed for '{$holiday->title}' in {$this->timeframe} on " . Carbon::parse($holiday->date)->format('d-m-Y') . "." . $note);
+            $this->sendToAll($school, $userIds, $holiday, "Upcoming Holiday: {$holiday->title}", "School will be closed for '{$holiday->title}' on " . Carbon::parse($holiday->date)->format('d-m-Y') . "." . $note);
         }
 
         // 3. Schedules
         $schedules = Schedule::where('date', $this->date)->get();
         foreach ($schedules as $schedule) {
-            $this->sendToAll($school, $userIds, $schedule, "Upcoming Schedule: {$schedule->title}", "Schedule '{$schedule->title}' is set for {$this->timeframe} on " . Carbon::parse($schedule->date)->format('d-m-Y') . "." . $note);
+            $this->sendToAll($school, $userIds, $schedule, "Upcoming Schedule: {$schedule->title}", "Schedule '{$schedule->title}' is set for " . Carbon::parse($schedule->date)->format('d-m-Y') . "." . $note);
         }
 
         // 4. Reminders
         $reminders = Reminder::where('date', $this->date)->get();
         foreach ($reminders as $reminder) {
-            $this->sendToAll($school, $userIds, $reminder, "Reminder: {$reminder->title}", "Reminder for '{$reminder->title}' in {$this->timeframe} on " . Carbon::parse($reminder->date)->format('d-m-Y') . "." . $note);
+            $this->sendToAll($school, $userIds, $reminder, "Reminder: {$reminder->title}", "Reminder for '{$reminder->title}' on " . Carbon::parse($reminder->date)->format('d-m-Y') . "." . $note);
         }
     }
 
