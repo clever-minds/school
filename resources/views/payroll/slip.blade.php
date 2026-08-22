@@ -198,22 +198,22 @@
     <div class="body">
         {{-- Header --}}
         <div style="text-align: center;">
-            <div style="margin-bottom: 5px;">
+            <div style="margin-bottom: 3px;">
                 @if ($schoolSetting['horizontal_logo'] ?? '')
-                    <img class="school-logo" height="50" src="{{ public_path('storage/') . $schoolSetting['horizontal_logo'] }}" alt="">                    
+                    <img class="school-logo" height="40" src="{{ public_path('storage/') . $schoolSetting['horizontal_logo'] }}" alt="">                    
                 @else
-                    <img height="50" src="{{ public_path('assets/horizontal-logo2.svg') }}" alt="">
+                    <img height="40" src="{{ public_path('assets/horizontal-logo2.svg') }}" alt="">
                 @endif
             </div>
-            <div class="school-name" style="font-size: 16px; font-weight: bold; margin-bottom: 3px;">
+            <div class="school-name" style="font-size: 14px; font-weight: bold; margin-bottom: 2px;">
                 {{ $schoolSetting['school_name'] }}
             </div>
-            <div class="school-address" style="font-size: 12px; margin-bottom: 10px;">
+            <div class="school-address" style="font-size: 10px; margin-bottom: 5px;">
                 {{ $schoolSetting['school_address'] }}
             </div>
-            <div style="margin-bottom: 5px;">
-                <span class="salary-month-title" style="font-size: 13px;">Salary Slip For Month</span>
-                <span class="salary-month" style="font-size: 14px; font-weight: bold;">{{ $salary->title }}</span>
+            <div style="margin-bottom: 2px;">
+                <span class="salary-month-title" style="font-size: 12px;">Salary Slip For Month</span>
+                <span class="salary-month" style="font-size: 13px; font-weight: bold;">{{ $salary->title }}</span>
             </div>
         </div>
 
