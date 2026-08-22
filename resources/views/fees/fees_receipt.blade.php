@@ -5,7 +5,7 @@
 <style>
     * {
         font-family: DejaVu Sans, sans-serif;
-        font-size: 12px;
+        font-size: 10px;
     }
 
     body {
@@ -14,7 +14,7 @@
     }
 
     @page {
-        margin: 25px;
+        margin: 15px;
     }
 
     .page-break {
@@ -35,7 +35,7 @@
     }
 
     th, td {
-        padding: 6px;
+        padding: 4px;
         border: 1px solid #000;
     }
 
@@ -193,20 +193,10 @@
         </tbody>
     </table>
 
-    <!-- Signature Section -->
-    <table class="no-border" style="margin-top:50px;">
-        <tr>
-            <td width="50%" class="text-left">
-                <strong>Authorized Signature</strong><br><br><br>
-                ______________________
-            </td>
-
-            <td width="50%" class="text-right">
-                <strong>Receiver Signature</strong><br><br><br>
-                ______________________
-            </td>
-        </tr>
-    </table>
+    <!-- Digital Note Section -->
+    <div style="margin-top:20px; text-align:center; font-size:10px; color:#555;">
+        <em>This is a computer-generated document. No signature is required.</em>
+    </div>
 
 </div>
 
