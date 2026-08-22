@@ -197,33 +197,25 @@
 <body>
     <div class="body">
         {{-- Header --}}
-        <table class="full-width">
-            <tr>
-                <th class="text-left" width="50">
-                    @if ($schoolSetting['horizontal_logo'] ?? '')
-                        <img class="school-logo" height="50" src="{{ public_path('storage/') . $schoolSetting['horizontal_logo'] }}" alt="">                    
-                    @else
-                        <img height="40" src="{{ public_path('assets/horizontal-logo2.svg') }}" alt="">
-                    @endif
-                </th>
-                <th class="text-left school-name-address">
-                    <div class="school-name">
-                        {{ $schoolSetting['school_name'] }}
-                    </div>
-                    <div class="school-address">
-                        {{ $schoolSetting['school_address'] }}
-                    </div>
-                </th>
-                <th class="text-right" width="140">
-                    <div class="salary-month-title">
-                        Salary Slip For The Month
-                    </div>
-                    <div class="salary-month">
-                        {{ $salary->title }}
-                    </div>
-                </th>
-            </tr>
-        </table>
+        <div style="text-align: center;">
+            <div style="margin-bottom: 10px;">
+                @if ($schoolSetting['horizontal_logo'] ?? '')
+                    <img class="school-logo" height="70" src="{{ public_path('storage/') . $schoolSetting['horizontal_logo'] }}" alt="">                    
+                @else
+                    <img height="70" src="{{ public_path('assets/horizontal-logo2.svg') }}" alt="">
+                @endif
+            </div>
+            <div class="school-name" style="font-weight: bold; margin-bottom: 5px;">
+                {{ $schoolSetting['school_name'] }}
+            </div>
+            <div class="school-address" style="margin-bottom: 15px;">
+                {{ $schoolSetting['school_address'] }}
+            </div>
+            <div style="margin-bottom: 10px;">
+                <span class="salary-month-title" style="font-weight: bold;">Salary Slip For Month</span>
+                <span class="salary-month" style="font-weight: bold;">{{ $salary->title }}</span>
+            </div>
+        </div>
 
         <hr class="end-header">
 
