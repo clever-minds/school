@@ -410,17 +410,9 @@ class StaffAttendanceController extends Controller
     {
         ResponseService::noPermissionThenSendJson('staff-attendance-qr');
         
-        $user = Auth::user();
-        $school_id = $user->school_id;
-        $timestamp = Carbon::now()->timestamp;
+        // As requested: same as DateTime.now().millisecondsSinceEpoch ~/ 1000
+        $issuedAt = Carbon::now()->timestamp;
 
-        // User requested: "only abhi titme stamp ke accroding qr genrate karwana he"
-        // We will output a simple unencrypted JSON with timestamp for now.
-        $payload = [
-            'school_id' => $school_id,
-            'timestamp' => $timestamp
-        ];
-
-        return response()->json(['error' => false, 'token' => json_encode($payload)]);
+        return response()->json(['error' => false, 'token' => (string) $issuedAt]);
     }
 }
