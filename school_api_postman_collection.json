@@ -2952,6 +2952,11 @@
                                 "key": "Authorization",
                                 "value": "Bearer {{staff_token}}",
                                 "type": "text"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application/json",
+                                "type": "text"
                             }
                         ],
                         "url": {
@@ -2975,6 +2980,11 @@
                             {
                                 "key": "Authorization",
                                 "value": "Bearer {{parent_token}}",
+                                "type": "text"
+                            },
+                            {
+                                "key": "Accept",
+                                "value": "application/json",
                                 "type": "text"
                             }
                         ],
