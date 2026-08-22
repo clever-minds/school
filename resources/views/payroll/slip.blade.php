@@ -212,7 +212,7 @@
                 {{ $schoolSetting['school_address'] }}
             </div>
             <div style="margin-bottom: 2px;">
-                <span class="salary-month-title" style="font-size: 12px;">Salary Slip For Month</span>
+                <span class="salary-month-title" style="font-size: 12px;">Salary Slip For Month :- </span>
                 <span class="salary-month" style="font-size: 13px; font-weight: bold;">{{ $salary->title }}</span>
             </div>
         </div>
