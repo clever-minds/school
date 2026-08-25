@@ -35,7 +35,7 @@ class ConsentFormPermissionSeeder extends Seeder
         \Illuminate\Support\Facades\DB::statement("
             UPDATE students
             JOIN users ON students.guardian_id = users.id
-            SET students.consent_form_date = DATE(users.created_at)
+            SET students.consent_form_date = users.created_at
             WHERE students.consent_form_date IS NULL
         ");
     }

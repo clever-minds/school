@@ -18,7 +18,8 @@ class ConsentFormController extends Controller
             return ResponseService::noPermissionThenRedirect('consent-form-list');
         }
 
-        return view('consent_forms.index');
+        $classSections = \App\Models\ClassSection::with('class', 'section')->get();
+        return view('consent_forms.index', compact('classSections'));
     }
 
     /**
@@ -47,6 +48,10 @@ class ConsentFormController extends Controller
             });
         }
 
+        if ($request->has('class_section_id') && !empty($request->class_section_id)) {
+            $sql->where('class_section_id', $request->class_section_id);
+        }
+
         $total = $sql->count();
 
         $sql->orderBy($sort, $order)->skip($offset)->take($limit);
@@ -69,7 +74,7 @@ class ConsentFormController extends Controller
             }
             $tempRow['class_section'] = $class_name;
             
-            $tempRow['consent_form_date'] = $row->consent_form_date ? date('Y-m-d', strtotime($row->consent_form_date)) : '-';
+            $tempRow['consent_form_date'] = $row->consent_form_date ? date('Y-m-d h:i A', strtotime($row->consent_form_date)) : '-';
             $rows[] = $tempRow;
         }
 

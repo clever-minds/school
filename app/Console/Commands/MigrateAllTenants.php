@@ -88,6 +88,7 @@ class MigrateAllTenants extends Command
                 'database/migrations/schools/2026_07_10_105903_create_notification_classes_table.php',
                 'database/migrations/schools/2026_08_01_130707_add_type_to_staff_attendances_table.php',
                 'database/migrations/schools/2026_08_22_205150_add_consent_form_date_to_students_table.php',
+                'database/migrations/schools/2026_08_24_110000_change_consent_form_date_to_datetime_in_students_table.php',
             ];
 
             foreach ($migrations as $path) {
