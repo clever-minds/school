@@ -104,16 +104,7 @@ class MigrateAllTenants extends Command
                 }
             }
 
-            try {
-                Artisan::call('db:seed', [
-                    '--database' => 'tenant',
-                    '--class' => 'Database\\Seeders\\ConsentFormPermissionSeeder',
-                    '--force' => true,
-                ]);
-                $this->info("✅ Consent Form seeder done for {$tenant->name}");
-            } catch (\Exception $e) {
-                $this->error("❌ Seeder failed for {$tenant->name}: {$e->getMessage()}");
-            }
+
 
             $this->info("✅ Migration done for {$tenant->name}");
         }
