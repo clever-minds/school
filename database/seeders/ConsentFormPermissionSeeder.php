@@ -36,7 +36,8 @@ class ConsentFormPermissionSeeder extends Seeder
             UPDATE students
             JOIN users ON students.guardian_id = users.id
             SET students.consent_form_date = users.created_at
-            WHERE students.consent_form_date IS NULL
+            WHERE students.consent_form_date IS NULL 
+            OR TIME(students.consent_form_date) = '00:00:00'
         ");
     }
 }

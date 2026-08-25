@@ -46,6 +46,10 @@ class Students extends Model {
     ];
     protected $appends = ['first_name','last_name','full_name'];
 
+    protected $casts = [
+        'consent_form_date' => 'datetime',
+    ];
+
     public function scopeOwner($query) {
         if (Auth::user()) {
             if (Auth::user()->hasRole('Super Admin')) {

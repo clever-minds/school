@@ -74,7 +74,17 @@ class ConsentFormController extends Controller
             }
             $tempRow['class_section'] = $class_name;
             
-            $tempRow['consent_form_date'] = $row->consent_form_date ? date('Y-m-d h:i A', strtotime($row->consent_form_date)) : '-';
+            if ($row->consent_form_date) {
+                $consentDate = \Carbon\Carbon::parse($row->consent_form_date);
+                if ($consentDate->format('H:i:s') === '00:00:00') {
+                    $createdTime = \Carbon\Carbon::parse($row->created_at)->format('H:i:s');
+                    $consentDate = \Carbon\Carbon::parse($consentDate->format('Y-m-d') . ' ' . $createdTime);
+                }
+                $tempRow['consent_form_date'] = $consentDate->format('Y-m-d h:i A');
+            } else {
+                $tempRow['consent_form_date'] = '-';
+            }
+            
             $rows[] = $tempRow;
         }
 
