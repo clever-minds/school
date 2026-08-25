@@ -80,7 +80,7 @@ class User extends Authenticatable implements MustVerifyEmail {
         'email_verified_at' => 'datetime',
     ];
 
-    protected $appends = ['full_name','school_names','role'];
+    protected $appends = ['full_name','school_names','role','role_id'];
 
     public function student() {
         return $this->hasOne(Students::class, 'user_id', 'id')->withTrashed();
@@ -330,6 +330,16 @@ class User extends Authenticatable implements MustVerifyEmail {
             // return $this->roles()->first();
         }
         return '';
+    }
+
+    public function getRoleIdAttribute()
+    {
+        if ($this->relationLoaded('roles')) {
+            return $this->roles()->first()->id ?? null;
+        }
+        // Fallback if relations are not loaded
+        $role = $this->roles()->first();
+        return $role ? $role->id : null;
     }
 
     /**
