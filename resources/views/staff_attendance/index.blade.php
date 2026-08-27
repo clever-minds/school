@@ -23,6 +23,15 @@
                                 <label>{{ __('date') }}</label>
                                 {!! Form::text('date', date('d-m-Y'), ['required', 'placeholder' => __('date'), 'class' => 'datepicker-popup form-control','id'=>'date','autocomplete'=>'off']) !!}
                             </div>
+                            <div class="form-group col-sm-12 col-md-4">
+                                <label>{{ __('role') }}</label>
+                                <select name="role_id" id="role_id" class="form-control">
+                                    <option value="">{{ __('all') }}</option>
+                                    @foreach($roles as $role)
+                                        <option value="{{ $role->id }}">{{ $role->name }}</option>
+                                    @endforeach
+                                </select>
+                            </div>
                         </div>
 
                         <div class="show_staff_attendance_list">
@@ -66,12 +75,13 @@
                 offset: p.offset,
                 search: p.search,
                 'date': $('#date').val(),
+                'role_id': $('#role_id').val(),
             };
         }
     </script>
 
     <script>
-        $('#date').on('input change', function () {
+        $('#date, #role_id').on('input change', function () {
             $('#table_list').bootstrapTable('refresh');
         });
     </script>

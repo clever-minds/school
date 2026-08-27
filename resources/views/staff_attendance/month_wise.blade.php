@@ -23,7 +23,16 @@
                                 <label class="filter-menu">{{ __('month') }} <span class="text-danger">*</span></label>
                                 {!! Form::selectMonth('month',null,['class' => 'form-control','id' => 'month']) !!}
                             </div>
-                            <div class="col-sm-12 col-md-9 d-flex align-items-center justify-content-end">
+                            <div class="form-group col-sm-12 col-md-3">
+                                <label class="filter-menu">{{ __('role') }}</label>
+                                <select name="role_id" id="role_id" class="form-control">
+                                    <option value="">{{ __('all') }}</option>
+                                    @foreach($roles as $role)
+                                        <option value="{{ $role->id }}">{{ $role->name }}</option>
+                                    @endforeach
+                                </select>
+                            </div>
+                            <div class="col-sm-12 col-md-6 d-flex align-items-center justify-content-end">
                                 <div class="mt-3">
                                     <span class="badge badge-success mr-2 p-2">P : Present</span>
                                     <span class="badge badge-danger mr-2 p-2">A : Absent</span>
@@ -109,13 +118,16 @@
         
         const monthSelect = document.getElementById('month');
 
+        const roleSelect = document.getElementById('role_id');
+
         async function handleSelectChange() {
             var month = $('#month').val();
+            var roleId = $('#role_id').val();
             var table = $('#table_list');
             if(month) {
                 try {
                     table.bootstrapTable('showLoading');
-                    const response = await fetch(`{{ url('staff-attendance/month-wise/list') }}?month=${month}`);
+                    const response = await fetch(`{{ url('staff-attendance/month-wise/list') }}?month=${month}&role_id=${roleId}`);
                     const data = await response.json();
                     
                     // Destroy and recreate table to properly load dynamic columns and data
@@ -155,6 +167,7 @@
         }
 
         monthSelect.addEventListener('change', handleSelectChange);
+        roleSelect.addEventListener('change', handleSelectChange);
 
         function generateDayColumns(month) {
             var currentYear = new Date().getFullYear();

@@ -23,7 +23,8 @@ class StaffAttendanceController extends Controller
     public function index()
     {
         ResponseService::noAnyPermissionThenRedirect(['staff-attendance-list']);
-        return view('staff_attendance.index');
+        $roles = \Spatie\Permission\Models\Role::whereNotIn('name', ['Student', 'Parent', 'Guardian'])->get();
+        return view('staff_attendance.index', compact('roles'));
     }
 
     public function show(Request $request)
@@ -50,6 +51,11 @@ class StaffAttendanceController extends Controller
             })
             ->when($request->staff_id, function ($q) use ($request) {
                 $q->where('user_id', $request->staff_id);
+            })
+            ->when($request->role_id, function ($q) use ($request) {
+                $q->whereHas('user.roles', function ($q) use ($request) {
+                    $q->where('id', $request->role_id);
+                });
             });
 
         // Force self ID if no permission to see all
@@ -224,7 +230,8 @@ class StaffAttendanceController extends Controller
     public function monthWiseIndex()
     {
         ResponseService::noAnyPermissionThenRedirect(['staff-attendance-list']);
-        return view('staff_attendance.month_wise');
+        $roles = \Spatie\Permission\Models\Role::whereNotIn('name', ['Student', 'Parent', 'Guardian'])->get();
+        return view('staff_attendance.month_wise', compact('roles'));
     }
 
     public function monthWiseList(Request $request)
@@ -242,8 +249,11 @@ class StaffAttendanceController extends Controller
         $staffUsers = User::where('school_id', $school_id)
             ->where('status', 1)
             ->has('staff')
-            ->whereHas('roles', function($q) {
+            ->whereHas('roles', function($q) use ($request) {
                 $q->whereNotIn('name', ['Student', 'Parent']);
+                if ($request->role_id) {
+                    $q->where('id', $request->role_id);
+                }
             })->orderBy('first_name', 'ASC')->get();
             
         $total = $staffUsers->count();
