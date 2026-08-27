@@ -27,7 +27,7 @@
                                        data-fixed-right-number="1" data-trim-on-search="false"
                                        data-mobile-responsive="true" data-sort-name="id"
                                        data-query-params="AssignTeacherQueryParams" data-sort-order="desc"
-                                       data-maintain-selected="true" data-export-data-type='all' data-show-export="true"
+                                       data-maintain-selected="true" data-show-export="true" data-export-data-type="all"
                                        data-export-options='{ "fileName": "data-list-<?= date(' d-m-y') ?>" }'>
                                     <thead>
                                     <tr>

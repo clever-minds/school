@@ -129,9 +129,9 @@
                             data-show-columns="true" data-show-refresh="true" data-fixed-columns="true"
                             data-fixed-number="2" data-fixed-right-number="1" data-trim-on-search="false"
                             data-mobile-responsive="true" data-sort-name="id" data-sort-order="desc"
-                            data-maintain-selected="true" data-export-data-type='all'
+                            data-maintain-selected="true"
                             data-export-options='{ "fileName": "fees-report-<?= date('d-m-y') ?>" ,"ignoreColumn": ["operate"]}'
-                            data-show-export="true"
+                            data-show-export="true" data-export-data-type="all"
                             data-query-params="queryParams">
                             <thead>
                                 <tr>

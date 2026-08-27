@@ -45,7 +45,7 @@
                                data-search="true" data-toolbar="#toolbar" data-show-columns="true" data-show-refresh="true"
                                data-fixed-columns="false" data-fixed-number="2" data-fixed-right-number="1" data-trim-on-search="false"
                                data-mobile-responsive="true" data-sort-name="id" data-sort-order="desc" data-maintain-selected="true"
-                               data-query-params="queryParams" data-show-export="true" data-escape="true"
+                               data-query-params="queryParams" data-show-export="true" data-export-data-type="all" data-escape="true"
                                data-export-options='{"fileName": "stream-list-<?= date('d-m-y') ?>","ignoreColumn": ["operate"]}'>
                             <thead>
                             <tr>

@@ -216,9 +216,8 @@
                         data-toolbar="#toolbar"
                         data-sort-name="transaction_date"
                         data-sort-order="desc"
-                        data-export-data-type='all'
                         data-export-options='{ "fileName": "transactions-<?= date('d-m-y') ?>" ,"ignoreColumn":["operate"]}'
-                        data-show-export="true"
+                        data-show-export="true" data-export-data-type="all"
                         data-show-footer="true"
                         data-escape="true"
                         data-detail-view="true"            

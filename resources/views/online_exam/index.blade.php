@@ -168,9 +168,9 @@
                                data-search="true" data-toolbar="#toolbar" data-show-columns="true"
                                data-show-refresh="true" data-fixed-columns="false" data-fixed-right-number="1"
                                data-trim-on-search="false" data-mobile-responsive="true" data-sort-name="id"
-                               data-sort-order="desc" data-maintain-selected="true" data-export-data-type='all'
+                               data-sort-order="desc" data-maintain-selected="true"
                                data-export-options='{ "fileName": "{{__('online').' '.__('exam')}}-<?= date(' d-m-y') ?>" ,"ignoreColumn":["operate"]}'
-                               data-show-export="true" data-query-params="onlineExamQueryParams" data-escape="true" data-escape-title="false">
+                               data-show-export="true" data-export-data-type="all" data-query-params="onlineExamQueryParams" data-escape="true" data-escape-title="false">
                             <thead>
                             <tr>
                                 <th scope="col" data-field="id" data-sortable="true" data-visible="false">{{ __('id') }}</th>

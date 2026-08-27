@@ -47,7 +47,7 @@
                                        data-page-list="[5, 10, 20, 50, 100, 200]" data-search="true"
                                        data-toolbar="#toolbar" data-show-columns="true" data-show-refresh="true" data-fixed-columns="false" data-fixed-number="2" data-fixed-right-number="1"
                                        data-trim-on-search="false" data-mobile-responsive="true" data-sort-name="id"
-                                       data-sort-order="desc" data-maintain-selected="true" data-export-data-type='all' data-show-export="true"
+                                       data-sort-order="desc" data-maintain-selected="true" data-show-export="true" data-export-data-type="all"
                                        data-export-options='{ "fileName": "students-list-<?= date('d-m-y') ?>" ,"ignoreColumn": ["operate"]}' data-query-params="studentDetailsQueryParams"
                                        data-check-on-init="true" data-escape="true" data-response-handler="responseHandler">
                                     <thead>

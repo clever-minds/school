@@ -52,9 +52,9 @@
                                data-show-refresh="true" data-fixed-columns="false" data-fixed-number="2"
                                data-fixed-right-number="1" data-trim-on-search="false"
                                data-mobile-responsive="true" data-sort-name="id"
-                               data-sort-order="desc" data-maintain-selected="true" data-export-data-type='all'
+                               data-sort-order="desc" data-maintain-selected="true"
                                data-export-options='{ "fileName": "{{__('fees')}}-{{__('transactions')}}-<?= date(' d-m-y') ?>" ,"ignoreColumn":["operate"]}'
-                               data-show-export="true" data-query-params="feesPaymentTransactionQueryParams" data-escape="true">
+                               data-show-export="true" data-export-data-type="all" data-query-params="feesPaymentTransactionQueryParams" data-escape="true">
                             <thead>
                             <tr>
                                 <th scope="col" data-field="id" data-sortable="false" data-visible="false">{{__('id')}}</th>

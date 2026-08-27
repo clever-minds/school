@@ -22,9 +22,9 @@
                                data-page-list="[5, 10, 20, 50, 100, 200]" data-search="true" data-show-columns="true"
                                data-show-refresh="true" data-fixed-columns="false" data-trim-on-search="false"
                                data-mobile-responsive="true" data-sort-name="id" data-sort-order="desc"
-                               data-maintain-selected="true" data-export-data-type='all'
+                               data-maintain-selected="true"
                                data-export-options='{ "fileName": "teacher-kyc-list-<?= date('d-m-y') ?>" ,"ignoreColumn":["operate"]}'
-                               data-show-export="true" data-escape="true">
+                               data-show-export="true" data-export-data-type="all" data-escape="true">
                             <thead>
                             <tr>
                                 <th scope="col" data-field="id" data-sortable="true" data-visible="false">{{ __('id') }}</th>

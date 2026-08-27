@@ -40,7 +40,7 @@
                                data-search="true" data-toolbar="#toolbar" data-show-columns="true"
                                data-show-refresh="true" data-trim-on-search="false" data-mobile-responsive="true"
                                data-sort-name="id" data-sort-order="desc" data-maintain-selected="true"
-                               data-show-export="true" data-escape="true" data-query-params="consentFormParams">
+                               data-show-export="true" data-export-data-type="all" data-escape="true" data-query-params="consentFormParams">
                             <thead>
                             <tr>
                                 <th scope="col" data-field="id" data-sortable="true" data-visible="false">{{ __('id') }}</th>

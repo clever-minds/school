@@ -97,9 +97,8 @@
                                    data-search="true" data-toolbar="#toolbar" data-show-columns="true"
                                    data-show-refresh="true" data-trim-on-search="false"
                                    data-mobile-responsive="true" data-sort-name="percentage"
-                                   data-sort-order="desc" data-maintain-selected="true"
-                                   data-export-data-type='all' data-export-options='{ "fileName": "exam-list-<?= date(' d-m-y') ?>" ,"ignoreColumn": ["operate"]}'
-                                   data-show-export="true" data-detail-formatter="examListFormatter" data-query-params="getRankWiseExamResult" data-escape="true">
+                                   data-sort-order="desc" data-maintain-selected="true" data-export-options='{ "fileName": "exam-list-<?= date(' d-m-y') ?>" ,"ignoreColumn": ["operate"]}'
+                                   data-show-export="true" data-export-data-type="all" data-detail-formatter="examListFormatter" data-query-params="getRankWiseExamResult" data-escape="true">
                                 <thead>
                                 <tr>
                                     <th scope="col" data-field="id" data-sortable="true" data-visible="false">{{ __('id') }}</th>

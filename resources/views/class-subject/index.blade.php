@@ -40,9 +40,9 @@
                                data-show-columns="true" data-show-refresh="true" data-fixed-columns="false"
                                data-fixed-number="2" data-fixed-right-number="1" data-trim-on-search="false"
                                data-mobile-responsive="true" data-sort-name="id" data-toolbar="#toolbar" data-sort-order="desc"
-                               data-maintain-selected="true" data-export-data-type='all'
+                               data-maintain-selected="true"
                                data-export-options='{ "fileName": "class-subject-list-<?= date('d-m-y') ?>" ,"ignoreColumn":["operate"]}'
-                               data-show-export="true" data-detail-filter="classSubjectsDetailFilter" data-detail-view="true" data-detail-formatter="classSubjectsDetailFormatter" data-query-params="classQueryParams"
+                               data-show-export="true" data-export-data-type="all" data-detail-filter="classSubjectsDetailFilter" data-detail-view="true" data-detail-formatter="classSubjectsDetailFormatter" data-query-params="classQueryParams"
                                data-escape="true">
                             <thead>
                             <tr>

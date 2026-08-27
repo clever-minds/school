@@ -59,7 +59,7 @@
                             @csrf
                             <div class="row search-container">
                                 <div class="col-12">
-                                    <table aria-describedby="mydesc" class='table' id='table_list' data-toggle="table" data-url="{{ route('students.roll-number.show',1) }}" data-click-to-select="true" data-search="true" data-toolbar="#toolbar" data-show-columns="true" data-show-refresh="true" data-trim-on-search="false" data-mobile-responsive="true" data-maintain-selected="true" data-show-export="true" data-export-data-type='all' data-export-options='{ "fileName": "{{__('students')}} {{__('roll_no')}}-<?= date('d-m-y') ?>","ignoreColumn": ["operate"]}' data-query-params="studentRollNumberQueryParams">
+                                    <table aria-describedby="mydesc" class='table' id='table_list' data-toggle="table" data-url="{{ route('students.roll-number.show',1) }}" data-click-to-select="true" data-search="true" data-toolbar="#toolbar" data-show-columns="true" data-show-refresh="true" data-trim-on-search="false" data-mobile-responsive="true" data-maintain-selected="true" data-show-export="true" data-export-data-type="all" data-export-options='{ "fileName": "{{__('students')}} {{__('roll_no')}}-<?= date('d-m-y') ?>","ignoreColumn": ["operate"]}' data-query-params="studentRollNumberQueryParams">
                                         <thead>
                                         <tr>
                                             <th scope="col" data-field="no">{{ __('no.') }}</th>

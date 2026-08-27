@@ -51,7 +51,7 @@
                                data-sort-order="desc"
                                data-maintain-selected="true"
                                data-export-types="['pdf','json','xml','csv','txt','sql','doc','excel']"
-                               data-show-export="true"
+                               data-show-export="true" data-export-data-type="all"
                                data-export-options='{ "fileName": "activity-logs-<?= date("d-m-y") ?>" ,"ignoreColumn": ["operate"]}'
                                data-query-params="activityLogsQueryParams"
                                data-check-on-init="true"

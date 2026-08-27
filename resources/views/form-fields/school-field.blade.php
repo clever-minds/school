@@ -94,9 +94,8 @@
                                data-search="true" data-toolbar="#toolbar" data-show-columns="true"
                                data-show-refresh="true" data-trim-on-search="false"
                                data-mobile-responsive="true" data-use-row-attr-func="true"
-                               data-reorderable-rows="true" data-maintain-selected="true"
-                               data-export-data-type='all' data-export-options='{ "fileName": "{{__('form-fields')}}-<?= date(' d-m-y') ?>" ,"ignoreColumn":["operate"]}'
-                               data-show-export="true" data-query-params="queryParams" data-escape="true">
+                               data-reorderable-rows="true" data-maintain-selected="true" data-export-options='{ "fileName": "{{__('form-fields')}}-<?= date(' d-m-y') ?>" ,"ignoreColumn":["operate"]}'
+                               data-show-export="true" data-export-data-type="all" data-query-params="queryParams" data-escape="true">
                             <thead>
                             <tr>
                                 <th scope="col" data-field="id" data-sortable="true" data-visible="false">{{ __('id') }}</th>

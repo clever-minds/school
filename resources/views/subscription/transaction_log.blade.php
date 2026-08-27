@@ -38,7 +38,7 @@
                                data-mobile-responsive="true" data-sort-name="id"
                                data-sort-order="desc" data-maintain-selected="true" data-export-types='all'
                                data-export-options='{ "fileName": "{{__('fees')}}-{{__('transactions')}}-<?= date(' d-m-y') ?>" ,"ignoreColumn":["operate"]}'
-                               data-show-export="true" data-query-params="subscriptionTransactionQueryParams" data-escape="true">
+                               data-show-export="true" data-export-data-type="all" data-query-params="subscriptionTransactionQueryParams" data-escape="true">
                             <thead>
                             <tr>
                                 <th scope="col" data-field="id" data-sortable="true" data-visible="false">{{__('id')}}</th>

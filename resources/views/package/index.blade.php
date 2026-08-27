@@ -57,9 +57,8 @@
                                        data-show-columns="true" data-show-refresh="true" data-trim-on-search="false"
                                        data-mobile-responsive="true" data-sort-name="rank" data-use-row-attr-func="true"
                                        data-reorderable-rows="true" data-sort-order="asc" data-maintain-selected="true"
-                                       data-export-data-type='all'
                                        data-export-options='{ "fileName": "{{ __('list') . ' ' . __('package') }}-<?= date('
-                                    d-m-y') ?>" ,"ignoreColumn":["operate"]}' data-show-export="true"
+                                    d-m-y') ?>" ,"ignoreColumn":["operate"]}' data-show-export="true" data-export-data-type="all"
                                        data-query-params="packageQueryParams" data-escape="true">
                                     <thead>
                                     <tr>

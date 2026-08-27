@@ -75,10 +75,10 @@
                                 data-fixed-columns="false" data-fixed-number="2" data-fixed-right-number="1"
                                 data-trim-on-search="false" data-mobile-responsive="true" data-sort-name="id"
                                 data-query-params="AssignmentSubmissionQueryParams" data-sort-order="desc"
-                                data-maintain-selected="true" data-export-data-type='all'
+                                data-maintain-selected="true"
                                 data-check-on-init="true" data-response-handler="responseHandler"
                                 data-export-options='{ "fileName": "assignment-submission-student-list-<?= date('d-m-y') ?>","ignoreColumn": ["operate"]}'
-                                data-show-export="true" data-escape="true">
+                                data-show-export="true" data-export-data-type="all" data-escape="true">
                                 <thead>
                                     <tr>
                                         <th data-field="state" data-checkbox="true"></th>

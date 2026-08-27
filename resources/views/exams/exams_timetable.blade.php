@@ -35,7 +35,7 @@
                                 </select>
                             </div>
                         </div>
-                        <table aria-describedby="mydesc" class='table' id='table_list' data-toggle="table" data-url="{{ route('exams.timetable.show',1) }}" data-click-to-select="true" data-pagination="false" data-search="false" data-toolbar="#toolbar" data-show-columns="true" data-show-refresh="true" data-fixed-columns="false" data-mobile-responsive="true" data-sort-name="id" data-sort-order="desc" data-maintain-selected="true" data-export-data-type='all' data-export-options='{ "fileName": "exam-list-<?= date(' d-m-y') ?>" ,"ignoreColumn": ["operate"]}' data-show-export="true" data-detail-formatter="examListFormatter" data-query-params="examTimetableQueryParams" data-escape="true">
+                        <table aria-describedby="mydesc" class='table' id='table_list' data-toggle="table" data-url="{{ route('exams.timetable.show',1) }}" data-click-to-select="true" data-pagination="false" data-search="false" data-toolbar="#toolbar" data-show-columns="true" data-show-refresh="true" data-fixed-columns="false" data-mobile-responsive="true" data-sort-name="id" data-sort-order="desc" data-maintain-selected="true" data-export-options='{ "fileName": "exam-list-<?= date(' d-m-y') ?>" ,"ignoreColumn": ["operate"]}' data-show-export="true" data-export-data-type="all" data-detail-formatter="examListFormatter" data-query-params="examTimetableQueryParams" data-escape="true">
                             <thead>
                             <tr>
                                 <th scope="col" data-field="id" data-sortable="true" data-visible="false">{{ __('id') }}</th> <th scope="col" data-field="no">{{ __('no.') }}</th>

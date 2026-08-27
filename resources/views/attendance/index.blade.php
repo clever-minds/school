@@ -67,7 +67,7 @@
                                        data-side-pagination="server" data-pagination="false"
                                        data-page-list="[5, 10, 20, 50, 100, 200]" data-search="true" data-show-refresh="true"
                                        data-toolbar="#toolbar" data-show-columns="true" data-trim-on-search="false" data-mobile-responsive="true" data-sort-name="roll_number"
-                                       data-sort-order="asc" data-maintain-selected="true" data-export-data-type='all' data-show-export="true"
+                                       data-sort-order="asc" data-maintain-selected="true" data-show-export="true" data-export-data-type="all"
                                        data-export-options='{ "fileName": "attendance-<?= date('d-m-y') ?>" ,"ignoreColumn": ["operate"]}'
                                        data-query-params="attendanceQueryParams" data-escape="true">
                                     <thead>

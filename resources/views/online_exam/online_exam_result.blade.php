@@ -55,9 +55,9 @@
                                data-toolbar="#toolbar" data-show-columns="false" data-show-refresh="true"
                                data-fixed-columns="false" data-fixed-number="2" data-fixed-right-number="1"
                                data-trim-on-search="false" data-mobile-responsive="true" data-sort-name="id"
-                               data-sort-order="desc" data-maintain-selected="true" data-export-data-type='all'
+                               data-sort-order="desc" data-maintain-selected="true"
                                data-export-options='{ "fileName": "{{__('online').' '.__('exam')}}-<?= date(' d-m-y') ?>" ,"ignoreColumn":["operate"]}'
-                               data-show-export="true" data-query-params="queryParams" data-escape="true">
+                               data-show-export="true" data-export-data-type="all" data-query-params="queryParams" data-escape="true">
                             <thead>
                             <tr>
                                 <th scope="col" data-field="student_id" data-sortable="true" data-visible="false">{{ __('student_id') }}</th>

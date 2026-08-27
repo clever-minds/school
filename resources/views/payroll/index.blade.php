@@ -64,11 +64,10 @@
                                        data-page-list="[5, 10, 20, 50, 100, 200]" data-search="true" data-show-columns="false"
                                        data-show-refresh="true" data-fixed-columns="false" data-fixed-number="2"
                                        data-fixed-right-number="1" data-trim-on-search="false" data-mobile-responsive="true"
-                                       data-sort-name="id" data-sort-order="desc" data-maintain-selected="true"
-                                       data-export-data-type='all' data-query-params="payrollQueryParams"
+                                       data-sort-name="id" data-sort-order="desc" data-maintain-selected="true" data-query-params="payrollQueryParams"
                                        data-toolbar="#toolbar"
                                        data-export-options='{ "fileName": "payroll-list-<?= date('d-m-y') ?>"
-                                    ,"ignoreColumn":["operate"]}' data-show-export="true" data-escape="true" data-response-handler="responseHandler" data-check-on-init="true">
+                                    ,"ignoreColumn":["operate"]}' data-show-export="true" data-export-data-type="all" data-escape="true" data-response-handler="responseHandler" data-check-on-init="true">
                                     <thead>
                                         <tr>
                                             <th data-field="state" data-checkbox="true"></th>

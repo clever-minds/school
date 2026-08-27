@@ -27,9 +27,9 @@
                                    data-show-columns="true" data-show-refresh="true" data-fixed-columns="false"
                                    data-fixed-number="2" data-fixed-right-number="1" data-trim-on-search="false"
                                    data-mobile-responsive="true" data-sort-name="id" data-toolbar="#toolbar" data-sort-order="desc"
-                                   data-maintain-selected="true" data-export-data-type='all'
+                                   data-maintain-selected="true"
                                    data-export-options='{ "fileName": "roles-list-<?= date('d-m-y') ?>" ,"ignoreColumn":["operate"]}'
-                                   data-show-export="true" data-query-params="queryParams" data-escape="true">
+                                   data-show-export="true" data-export-data-type="all" data-query-params="queryParams" data-escape="true">
                                 <thead>
                                 <tr>
                                     <th scope="col" data-field="id" data-sortable="true" data-visible="false">{{ __('id') }}</th>

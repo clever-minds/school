@@ -4,6 +4,14 @@
  * Table Query Params
  */
 function classQueryParams(p) {
+    if (this.pagination !== undefined && !this.pagination) {
+        p.limit = this.totalRows;
+    } else if (typeof $table !== 'undefined' && $table.bootstrapTable) {
+        var _options = $table.bootstrapTable('getOptions');
+        if (_options && _options.pagination !== undefined && !_options.pagination) {
+            p.limit = _options.totalRows;
+        }
+    }
     let tableListType = $('.table-list-type.active').data('id');
     return {
         limit: p.limit,
@@ -18,6 +26,14 @@ function classQueryParams(p) {
 }
 
 function NotificationUserqueryParams(p) {
+    if (this.pagination !== undefined && !this.pagination) {
+        p.limit = this.totalRows;
+    } else if (typeof $table !== 'undefined' && $table.bootstrapTable) {
+        var _options = $table.bootstrapTable('getOptions');
+        if (_options && _options.pagination !== undefined && !_options.pagination) {
+            p.limit = _options.totalRows;
+        }
+    }
     
     return {
         limit: p.limit,
@@ -32,6 +48,14 @@ function NotificationUserqueryParams(p) {
 }
 
 function diaryStudentQueryParams(p) {
+    if (this.pagination !== undefined && !this.pagination) {
+        p.limit = this.totalRows;
+    } else if (typeof $table !== 'undefined' && $table.bootstrapTable) {
+        var _options = $table.bootstrapTable('getOptions');
+        if (_options && _options.pagination !== undefined && !_options.pagination) {
+            p.limit = _options.totalRows;
+        }
+    }
     return {
         limit: p.limit,
         sort: p.sort,
@@ -44,6 +68,14 @@ function diaryStudentQueryParams(p) {
 }
 
 function feesQueryParams(p) {
+    if (this.pagination !== undefined && !this.pagination) {
+        p.limit = this.totalRows;
+    } else if (typeof $table !== 'undefined' && $table.bootstrapTable) {
+        var _options = $table.bootstrapTable('getOptions');
+        if (_options && _options.pagination !== undefined && !_options.pagination) {
+            p.limit = _options.totalRows;
+        }
+    }
     let tableListType = $('.table-list-type.active').data('id');
     return {
         limit: p.limit,
@@ -59,6 +91,14 @@ function feesQueryParams(p) {
 
 
 function PayrollSettingsqueryParams(p) {
+    if (this.pagination !== undefined && !this.pagination) {
+        p.limit = this.totalRows;
+    } else if (typeof $table !== 'undefined' && $table.bootstrapTable) {
+        var _options = $table.bootstrapTable('getOptions');
+        if (_options && _options.pagination !== undefined && !_options.pagination) {
+            p.limit = _options.totalRows;
+        }
+    }
     let tableListType = $('.table-list-type.active').data('id');
     return {
         limit: p.limit,
@@ -72,6 +112,14 @@ function PayrollSettingsqueryParams(p) {
 }
 
 function leaveDetailQueryParams(p) {
+    if (this.pagination !== undefined && !this.pagination) {
+        p.limit = this.totalRows;
+    } else if (typeof $table !== 'undefined' && $table.bootstrapTable) {
+        var _options = $table.bootstrapTable('getOptions');
+        if (_options && _options.pagination !== undefined && !_options.pagination) {
+            p.limit = _options.totalRows;
+        }
+    }
     return {
         limit: p.limit,
         sort: p.sort,
@@ -85,6 +133,14 @@ function leaveDetailQueryParams(p) {
 }
 
 function schoolQueryParams(p) {
+    if (this.pagination !== undefined && !this.pagination) {
+        p.limit = this.totalRows;
+    } else if (typeof $table !== 'undefined' && $table.bootstrapTable) {
+        var _options = $table.bootstrapTable('getOptions');
+        if (_options && _options.pagination !== undefined && !_options.pagination) {
+            p.limit = _options.totalRows;
+        }
+    }
     let tableListType = $('.table-list-type.active').data('id');
     return {
         limit: p.limit,
@@ -98,6 +154,14 @@ function schoolQueryParams(p) {
 }
 
 function ExamClassQueryParams(p) {
+    if (this.pagination !== undefined && !this.pagination) {
+        p.limit = this.totalRows;
+    } else if (typeof $table !== 'undefined' && $table.bootstrapTable) {
+        var _options = $table.bootstrapTable('getOptions');
+        if (_options && _options.pagination !== undefined && !_options.pagination) {
+            p.limit = _options.totalRows;
+        }
+    }
     return {
         limit: p.limit,
         sort: p.sort,
@@ -110,6 +174,14 @@ function ExamClassQueryParams(p) {
 }
 
 function timetableQueryParams(p) {
+    if (this.pagination !== undefined && !this.pagination) {
+        p.limit = this.totalRows;
+    } else if (typeof $table !== 'undefined' && $table.bootstrapTable) {
+        var _options = $table.bootstrapTable('getOptions');
+        if (_options && _options.pagination !== undefined && !_options.pagination) {
+            p.limit = _options.totalRows;
+        }
+    }
     return {
         limit: p.limit,
         sort: p.sort,
@@ -121,6 +193,14 @@ function timetableQueryParams(p) {
 }
 
 function getExamResult(p) {
+    if (this.pagination !== undefined && !this.pagination) {
+        p.limit = this.totalRows;
+    } else if (typeof $table !== 'undefined' && $table.bootstrapTable) {
+        var _options = $table.bootstrapTable('getOptions');
+        if (_options && _options.pagination !== undefined && !_options.pagination) {
+            p.limit = _options.totalRows;
+        }
+    }
     return {
         limit: p.limit,
         sort: p.sort,
@@ -134,6 +214,14 @@ function getExamResult(p) {
 }
 
 function getYearlyExamResult(p) {
+    if (this.pagination !== undefined && !this.pagination) {
+        p.limit = this.totalRows;
+    } else if (typeof $table !== 'undefined' && $table.bootstrapTable) {
+        var _options = $table.bootstrapTable('getOptions');
+        if (_options && _options.pagination !== undefined && !_options.pagination) {
+            p.limit = _options.totalRows;
+        }
+    }
     return {
         limit: p.limit,
         sort: p.sort,
@@ -147,6 +235,14 @@ function getYearlyExamResult(p) {
 }
 
 function getSubjectWiseExamResult(p) {
+    if (this.pagination !== undefined && !this.pagination) {
+        p.limit = this.totalRows;
+    } else if (typeof $table !== 'undefined' && $table.bootstrapTable) {
+        var _options = $table.bootstrapTable('getOptions');
+        if (_options && _options.pagination !== undefined && !_options.pagination) {
+            p.limit = _options.totalRows;
+        }
+    }
     return {
         limit: p.limit,
         sort: p.sort,
@@ -160,6 +256,14 @@ function getSubjectWiseExamResult(p) {
 }
 
 function getRankWiseExamResult(p) {
+    if (this.pagination !== undefined && !this.pagination) {
+        p.limit = this.totalRows;
+    } else if (typeof $table !== 'undefined' && $table.bootstrapTable) {
+        var _options = $table.bootstrapTable('getOptions');
+        if (_options && _options.pagination !== undefined && !_options.pagination) {
+            p.limit = _options.totalRows;
+        }
+    }
     return {
         limit: p.limit,
         sort: p.sort,
@@ -174,6 +278,14 @@ function getRankWiseExamResult(p) {
 }
 
 function SubjectQueryParams(p) {
+    if (this.pagination !== undefined && !this.pagination) {
+        p.limit = this.totalRows;
+    } else if (typeof $table !== 'undefined' && $table.bootstrapTable) {
+        var _options = $table.bootstrapTable('getOptions');
+        if (_options && _options.pagination !== undefined && !_options.pagination) {
+            p.limit = _options.totalRows;
+        }
+    }
     let tableListType = $('.table-list-type.active').data('id');
     return {
         limit: p.limit,
@@ -188,6 +300,14 @@ function SubjectQueryParams(p) {
 
 
 function ExpenseQueryParams(p) {
+    if (this.pagination !== undefined && !this.pagination) {
+        p.limit = this.totalRows;
+    } else if (typeof $table !== 'undefined' && $table.bootstrapTable) {
+        var _options = $table.bootstrapTable('getOptions');
+        if (_options && _options.pagination !== undefined && !_options.pagination) {
+            p.limit = _options.totalRows;
+        }
+    }
     return {
         limit: p.limit,
         sort: p.sort,
@@ -201,6 +321,14 @@ function ExpenseQueryParams(p) {
 }
 
 function payrollQueryParams(p) {
+    if (this.pagination !== undefined && !this.pagination) {
+        p.limit = this.totalRows;
+    } else if (typeof $table !== 'undefined' && $table.bootstrapTable) {
+        var _options = $table.bootstrapTable('getOptions');
+        if (_options && _options.pagination !== undefined && !_options.pagination) {
+            p.limit = _options.totalRows;
+        }
+    }
     return {
         limit: p.limit,
         sort: p.sort,
@@ -213,6 +341,14 @@ function payrollQueryParams(p) {
 }
 
 function payrollListQueryParams(p) {
+    if (this.pagination !== undefined && !this.pagination) {
+        p.limit = this.totalRows;
+    } else if (typeof $table !== 'undefined' && $table.bootstrapTable) {
+        var _options = $table.bootstrapTable('getOptions');
+        if (_options && _options.pagination !== undefined && !_options.pagination) {
+            p.limit = _options.totalRows;
+        }
+    }
     return {
         limit: p.limit,
         sort: p.sort,
@@ -224,6 +360,14 @@ function payrollListQueryParams(p) {
 }
 
 function leaveQueryParams(p) {
+    if (this.pagination !== undefined && !this.pagination) {
+        p.limit = this.totalRows;
+    } else if (typeof $table !== 'undefined' && $table.bootstrapTable) {
+        var _options = $table.bootstrapTable('getOptions');
+        if (_options && _options.pagination !== undefined && !_options.pagination) {
+            p.limit = _options.totalRows;
+        }
+    }
     return {
         limit: p.limit,
         sort: p.sort,
@@ -238,6 +382,14 @@ function leaveQueryParams(p) {
 }
 
 function AssignTeacherQueryParams(p) {
+    if (this.pagination !== undefined && !this.pagination) {
+        p.limit = this.totalRows;
+    } else if (typeof $table !== 'undefined' && $table.bootstrapTable) {
+        var _options = $table.bootstrapTable('getOptions');
+        if (_options && _options.pagination !== undefined && !_options.pagination) {
+            p.limit = _options.totalRows;
+        }
+    }
     return {
         limit: p.limit,
         sort: p.sort,
@@ -250,6 +402,14 @@ function AssignTeacherQueryParams(p) {
 
 
 function webSettingsQueryParams(p) {
+    if (this.pagination !== undefined && !this.pagination) {
+        p.limit = this.totalRows;
+    } else if (typeof $table !== 'undefined' && $table.bootstrapTable) {
+        var _options = $table.bootstrapTable('getOptions');
+        if (_options && _options.pagination !== undefined && !_options.pagination) {
+            p.limit = _options.totalRows;
+        }
+    }
     return {
         limit: p.limit,
         sort: p.sort,
@@ -260,6 +420,14 @@ function webSettingsQueryParams(p) {
 }
 
 function StudentDetailQueryParams(p) {
+    if (this.pagination !== undefined && !this.pagination) {
+        p.limit = this.totalRows;
+    } else if (typeof $table !== 'undefined' && $table.bootstrapTable) {
+        var _options = $table.bootstrapTable('getOptions');
+        if (_options && _options.pagination !== undefined && !_options.pagination) {
+            p.limit = _options.totalRows;
+        }
+    }
     return {
         limit: p.limit,
         sort: p.sort,
@@ -273,6 +441,14 @@ function StudentDetailQueryParams(p) {
 
 
 function AssignmentSubmissionQueryParams(p) {
+    if (this.pagination !== undefined && !this.pagination) {
+        p.limit = this.totalRows;
+    } else if (typeof $table !== 'undefined' && $table.bootstrapTable) {
+        var _options = $table.bootstrapTable('getOptions');
+        if (_options && _options.pagination !== undefined && !_options.pagination) {
+            p.limit = _options.totalRows;
+        }
+    }
     return {
         limit: p.limit,
         sort: p.sort,
@@ -286,6 +462,14 @@ function AssignmentSubmissionQueryParams(p) {
 }
 
 function CreateAssignmentSubmissionQueryParams(p) {
+    if (this.pagination !== undefined && !this.pagination) {
+        p.limit = this.totalRows;
+    } else if (typeof $table !== 'undefined' && $table.bootstrapTable) {
+        var _options = $table.bootstrapTable('getOptions');
+        if (_options && _options.pagination !== undefined && !_options.pagination) {
+            p.limit = _options.totalRows;
+        }
+    }
     return {
         limit: p.limit,
         sort: p.sort,
@@ -300,6 +484,14 @@ function CreateAssignmentSubmissionQueryParams(p) {
 }
 
 function CreateLessonQueryParams(p) {
+    if (this.pagination !== undefined && !this.pagination) {
+        p.limit = this.totalRows;
+    } else if (typeof $table !== 'undefined' && $table.bootstrapTable) {
+        var _options = $table.bootstrapTable('getOptions');
+        if (_options && _options.pagination !== undefined && !_options.pagination) {
+            p.limit = _options.totalRows;
+        }
+    }
     return {
         limit: p.limit,
         sort: p.sort,
@@ -315,6 +507,14 @@ function CreateLessonQueryParams(p) {
 }
 
 function CreateTopicQueryParams(p) {
+    if (this.pagination !== undefined && !this.pagination) {
+        p.limit = this.totalRows;
+    } else if (typeof $table !== 'undefined' && $table.bootstrapTable) {
+        var _options = $table.bootstrapTable('getOptions');
+        if (_options && _options.pagination !== undefined && !_options.pagination) {
+            p.limit = _options.totalRows;
+        }
+    }
     return {
         limit: p.limit,
         sort: p.sort,
@@ -330,6 +530,14 @@ function CreateTopicQueryParams(p) {
 }
 
 function uploadMarksqueryParams(p) {
+    if (this.pagination !== undefined && !this.pagination) {
+        p.limit = this.totalRows;
+    } else if (typeof $table !== 'undefined' && $table.bootstrapTable) {
+        var _options = $table.bootstrapTable('getOptions');
+        if (_options && _options.pagination !== undefined && !_options.pagination) {
+            p.limit = _options.totalRows;
+        }
+    }
     return {
         limit: p.limit,
         sort: p.sort,
@@ -343,6 +551,14 @@ function uploadMarksqueryParams(p) {
 }
 
 function feesPaidListQueryParams(p) {
+    if (this.pagination !== undefined && !this.pagination) {
+        p.limit = this.totalRows;
+    } else if (typeof $table !== 'undefined' && $table.bootstrapTable) {
+        var _options = $table.bootstrapTable('getOptions');
+        if (_options && _options.pagination !== undefined && !_options.pagination) {
+            p.limit = _options.totalRows;
+        }
+    }
     return {
         limit: p.limit,
         sort: p.sort,
@@ -356,6 +572,14 @@ function feesPaidListQueryParams(p) {
 }
 
 function optionalFeesPaidListQueryParams(p) {
+    if (this.pagination !== undefined && !this.pagination) {
+        p.limit = this.totalRows;
+    } else if (typeof $table !== 'undefined' && $table.bootstrapTable) {
+        var _options = $table.bootstrapTable('getOptions');
+        if (_options && _options.pagination !== undefined && !_options.pagination) {
+            p.limit = _options.totalRows;
+        }
+    }
     return {
         limit: p.limit,
         sort: p.sort,
@@ -371,6 +595,14 @@ function optionalFeesPaidListQueryParams(p) {
 }
 
 function feesPaymentTransactionQueryParams(p) {
+    if (this.pagination !== undefined && !this.pagination) {
+        p.limit = this.totalRows;
+    } else if (typeof $table !== 'undefined' && $table.bootstrapTable) {
+        var _options = $table.bootstrapTable('getOptions');
+        if (_options && _options.pagination !== undefined && !_options.pagination) {
+            p.limit = _options.totalRows;
+        }
+    }
     return {
         limit: p.limit,
         sort: p.sort,
@@ -384,6 +616,14 @@ function feesPaymentTransactionQueryParams(p) {
 }
 
 function subscriptionTransactionQueryParams(p) {
+    if (this.pagination !== undefined && !this.pagination) {
+        p.limit = this.totalRows;
+    } else if (typeof $table !== 'undefined' && $table.bootstrapTable) {
+        var _options = $table.bootstrapTable('getOptions');
+        if (_options && _options.pagination !== undefined && !_options.pagination) {
+            p.limit = _options.totalRows;
+        }
+    }
     let tableListType = $('.table-list-type.active').data('id');
     
     return {
@@ -397,6 +637,14 @@ function subscriptionTransactionQueryParams(p) {
 }
 
 function studentRollNumberQueryParams(p) {
+    if (this.pagination !== undefined && !this.pagination) {
+        p.limit = this.totalRows;
+    } else if (typeof $table !== 'undefined' && $table.bootstrapTable) {
+        var _options = $table.bootstrapTable('getOptions');
+        if (_options && _options.pagination !== undefined && !_options.pagination) {
+            p.limit = _options.totalRows;
+        }
+    }
     return {
         limit: p.limit,
         sort: p.sort,
@@ -410,6 +658,14 @@ function studentRollNumberQueryParams(p) {
 }
 
 function onlineExamQueryParams(p) {
+    if (this.pagination !== undefined && !this.pagination) {
+        p.limit = this.totalRows;
+    } else if (typeof $table !== 'undefined' && $table.bootstrapTable) {
+        var _options = $table.bootstrapTable('getOptions');
+        if (_options && _options.pagination !== undefined && !_options.pagination) {
+            p.limit = _options.totalRows;
+        }
+    }
     let tableListType = $('.table-list-type.active').data('id');
     return {
         limit: p.limit,
@@ -427,6 +683,14 @@ function onlineExamQueryParams(p) {
 
 
 function onlineExamQuestionsQueryParams(p) {
+    if (this.pagination !== undefined && !this.pagination) {
+        p.limit = this.totalRows;
+    } else if (typeof $table !== 'undefined' && $table.bootstrapTable) {
+        var _options = $table.bootstrapTable('getOptions');
+        if (_options && _options.pagination !== undefined && !_options.pagination) {
+            p.limit = _options.totalRows;
+        }
+    }
     return {
         limit: p.limit,
         sort: p.sort,
@@ -441,6 +705,14 @@ function onlineExamQuestionsQueryParams(p) {
 }
 
 function studentDetailsQueryParams(p) {
+    if (this.pagination !== undefined && !this.pagination) {
+        p.limit = this.totalRows;
+    } else if (typeof $table !== 'undefined' && $table.bootstrapTable) {
+        var _options = $table.bootstrapTable('getOptions');
+        if (_options && _options.pagination !== undefined && !_options.pagination) {
+            p.limit = _options.totalRows;
+        }
+    }
     let tableListType = $('.table-list-type.active').data('id');
     // var options = $table.bootstrapTable('getOptions');
     // if (!options.pagination) {
@@ -475,6 +747,14 @@ function studentDetailsQueryParams(p) {
 }
 
 function attendanceQueryParams(p) {
+    if (this.pagination !== undefined && !this.pagination) {
+        p.limit = this.totalRows;
+    } else if (typeof $table !== 'undefined' && $table.bootstrapTable) {
+        var _options = $table.bootstrapTable('getOptions');
+        if (_options && _options.pagination !== undefined && !_options.pagination) {
+            p.limit = _options.totalRows;
+        }
+    }
     return {
         limit: p.limit,
         sort: p.sort,
@@ -487,6 +767,14 @@ function attendanceQueryParams(p) {
 }
 
 function holidayQueryParams(p) {
+    if (this.pagination !== undefined && !this.pagination) {
+        p.limit = this.totalRows;
+    } else if (typeof $table !== 'undefined' && $table.bootstrapTable) {
+        var _options = $table.bootstrapTable('getOptions');
+        if (_options && _options.pagination !== undefined && !_options.pagination) {
+            p.limit = _options.totalRows;
+        }
+    }
     return {
         limit: p.limit,
         sort: p.sort,
@@ -499,6 +787,14 @@ function holidayQueryParams(p) {
 }
 
 function galleryQueryParams(p) {
+    if (this.pagination !== undefined && !this.pagination) {
+        p.limit = this.totalRows;
+    } else if (typeof $table !== 'undefined' && $table.bootstrapTable) {
+        var _options = $table.bootstrapTable('getOptions');
+        if (_options && _options.pagination !== undefined && !_options.pagination) {
+            p.limit = _options.totalRows;
+        }
+    }
     return {
         limit: p.limit,
         sort: p.sort,
@@ -510,6 +806,14 @@ function galleryQueryParams(p) {
 }
 
 function userStatusQueryParams(p) {
+    if (this.pagination !== undefined && !this.pagination) {
+        p.limit = this.totalRows;
+    } else if (typeof $table !== 'undefined' && $table.bootstrapTable) {
+        var _options = $table.bootstrapTable('getOptions');
+        if (_options && _options.pagination !== undefined && !_options.pagination) {
+            p.limit = _options.totalRows;
+        }
+    }
     return {
         limit: p.limit,
         sort: p.sort,
@@ -522,6 +826,14 @@ function userStatusQueryParams(p) {
 }
 
 function queryParams(p) {
+    if (this.pagination !== undefined && !this.pagination) {
+        p.limit = this.totalRows;
+    } else if (typeof $table !== 'undefined' && $table.bootstrapTable) {
+        var _options = $table.bootstrapTable('getOptions');
+        if (_options && _options.pagination !== undefined && !_options.pagination) {
+            p.limit = _options.totalRows;
+        }
+    }
     let tableListType = $('.table-list-type.active').data('id');
     if (tableListType === 1) {
         $('.btn-update-rank').hide();
@@ -539,6 +851,14 @@ function queryParams(p) {
 }
 
 function diaryQueryParams(p) {
+    if (this.pagination !== undefined && !this.pagination) {
+        p.limit = this.totalRows;
+    } else if (typeof $table !== 'undefined' && $table.bootstrapTable) {
+        var _options = $table.bootstrapTable('getOptions');
+        if (_options && _options.pagination !== undefined && !_options.pagination) {
+            p.limit = _options.totalRows;
+        }
+    }
     let tableListType = $('.table-list-type.active').data('id');
     if (tableListType === 1) {
         $('.btn-update-rank').hide();
@@ -560,6 +880,14 @@ function diaryQueryParams(p) {
 
 
 function packageQueryParams(p) {
+    if (this.pagination !== undefined && !this.pagination) {
+        p.limit = this.totalRows;
+    } else if (typeof $table !== 'undefined' && $table.bootstrapTable) {
+        var _options = $table.bootstrapTable('getOptions');
+        if (_options && _options.pagination !== undefined && !_options.pagination) {
+            p.limit = _options.totalRows;
+        }
+    }
     let tableListType = $('.table-list-type.active').data('id');
     if (tableListType === 'Trashed') {
         $('.btn-update-rank').hide();
@@ -578,6 +906,14 @@ function packageQueryParams(p) {
 }
 
 function promoteStudentQueryParams(p) {
+    if (this.pagination !== undefined && !this.pagination) {
+        p.limit = this.totalRows;
+    } else if (typeof $table !== 'undefined' && $table.bootstrapTable) {
+        var _options = $table.bootstrapTable('getOptions');
+        if (_options && _options.pagination !== undefined && !_options.pagination) {
+            p.limit = _options.totalRows;
+        }
+    }
     return {
         limit: p.limit,
         sort: p.sort,
@@ -590,6 +926,14 @@ function promoteStudentQueryParams(p) {
 }
 
 function examQueryParams(p) {
+    if (this.pagination !== undefined && !this.pagination) {
+        p.limit = this.totalRows;
+    } else if (typeof $table !== 'undefined' && $table.bootstrapTable) {
+        var _options = $table.bootstrapTable('getOptions');
+        if (_options && _options.pagination !== undefined && !_options.pagination) {
+            p.limit = _options.totalRows;
+        }
+    }
     let tableListType = $('.table-list-type.active').data('id');
     return {
         limit: p.limit,
@@ -604,6 +948,14 @@ function examQueryParams(p) {
 }
 
 function subscriptionQueryParams(p) {
+    if (this.pagination !== undefined && !this.pagination) {
+        p.limit = this.totalRows;
+    } else if (typeof $table !== 'undefined' && $table.bootstrapTable) {
+        var _options = $table.bootstrapTable('getOptions');
+        if (_options && _options.pagination !== undefined && !_options.pagination) {
+            p.limit = _options.totalRows;
+        }
+    }
     return {
         limit: p.limit,
         sort: p.sort,
@@ -614,6 +966,14 @@ function subscriptionQueryParams(p) {
 }
 
 function subscriptionReportQueryParams(p) {
+    if (this.pagination !== undefined && !this.pagination) {
+        p.limit = this.totalRows;
+    } else if (typeof $table !== 'undefined' && $table.bootstrapTable) {
+        var _options = $table.bootstrapTable('getOptions');
+        if (_options && _options.pagination !== undefined && !_options.pagination) {
+            p.limit = _options.totalRows;
+        }
+    }
     return {
         limit: p.limit,
         sort: p.sort,
@@ -625,6 +985,14 @@ function subscriptionReportQueryParams(p) {
 }
 
 function examTimetableQueryParams(p) {
+    if (this.pagination !== undefined && !this.pagination) {
+        p.limit = this.totalRows;
+    } else if (typeof $table !== 'undefined' && $table.bootstrapTable) {
+        var _options = $table.bootstrapTable('getOptions');
+        if (_options && _options.pagination !== undefined && !_options.pagination) {
+            p.limit = _options.totalRows;
+        }
+    }
     return {
         limit: p.limit,
         sort: p.sort,
@@ -636,6 +1004,14 @@ function examTimetableQueryParams(p) {
 }
 
 function announcementQueryParams(p) {
+    if (this.pagination !== undefined && !this.pagination) {
+        p.limit = this.totalRows;
+    } else if (typeof $table !== 'undefined' && $table.bootstrapTable) {
+        var _options = $table.bootstrapTable('getOptions');
+        if (_options && _options.pagination !== undefined && !_options.pagination) {
+            p.limit = _options.totalRows;
+        }
+    }
     let tableListType = $('.table-list-type.active').data('id');
     return {
         limit: p.limit,
@@ -685,6 +1061,14 @@ $('.table-list-type').on('click', function (e) {
 // })
 
 function transferStudentQueryParams(p) {
+    if (this.pagination !== undefined && !this.pagination) {
+        p.limit = this.totalRows;
+    } else if (typeof $table !== 'undefined' && $table.bootstrapTable) {
+        var _options = $table.bootstrapTable('getOptions');
+        if (_options && _options.pagination !== undefined && !_options.pagination) {
+            p.limit = _options.totalRows;
+        }
+    }
     return {
         limit: p.limit,
         sort: p.sort,
@@ -696,6 +1080,14 @@ function transferStudentQueryParams(p) {
 }
 
 function activeDeactiveQueryParams(p) {
+    if (this.pagination !== undefined && !this.pagination) {
+        p.limit = this.totalRows;
+    } else if (typeof $table !== 'undefined' && $table.bootstrapTable) {
+        var _options = $table.bootstrapTable('getOptions');
+        if (_options && _options.pagination !== undefined && !_options.pagination) {
+            p.limit = _options.totalRows;
+        }
+    }
     let tableListType = $('.table-list-type.active').data('id');
     return {
         limit: p.limit,
@@ -709,6 +1101,14 @@ function activeDeactiveQueryParams(p) {
 }
 
 function studentsQueryParams(p) {
+    if (this.pagination !== undefined && !this.pagination) {
+        p.limit = this.totalRows;
+    } else if (typeof $table !== 'undefined' && $table.bootstrapTable) {
+        var _options = $table.bootstrapTable('getOptions');
+        if (_options && _options.pagination !== undefined && !_options.pagination) {
+            p.limit = _options.totalRows;
+        }
+    }
     return {
         limit: p.limit,
         sort: p.sort,
@@ -721,6 +1121,14 @@ function studentsQueryParams(p) {
 }
 
 function diaryStudentQueryParams(p) {
+    if (this.pagination !== undefined && !this.pagination) {
+        p.limit = this.totalRows;
+    } else if (typeof $table !== 'undefined' && $table.bootstrapTable) {
+        var _options = $table.bootstrapTable('getOptions');
+        if (_options && _options.pagination !== undefined && !_options.pagination) {
+            p.limit = _options.totalRows;
+        }
+    }
     return {
         limit: p.limit,
         sort: p.sort,
@@ -734,6 +1142,14 @@ function diaryStudentQueryParams(p) {
 
 
 function schoolInquiryQueryParams(p) {
+    if (this.pagination !== undefined && !this.pagination) {
+        p.limit = this.totalRows;
+    } else if (typeof $table !== 'undefined' && $table.bootstrapTable) {
+        var _options = $table.bootstrapTable('getOptions');
+        if (_options && _options.pagination !== undefined && !_options.pagination) {
+            p.limit = _options.totalRows;
+        }
+    }
     return {
         limit: p.limit,
         sort: p.sort,
@@ -746,6 +1162,14 @@ function schoolInquiryQueryParams(p) {
 }
 
 function guardianQueryParams(p) {
+    if (this.pagination !== undefined && !this.pagination) {
+        p.limit = this.totalRows;
+    } else if (typeof $table !== 'undefined' && $table.bootstrapTable) {
+        var _options = $table.bootstrapTable('getOptions');
+        if (_options && _options.pagination !== undefined && !_options.pagination) {
+            p.limit = _options.totalRows;
+        }
+    }
     return {
         limit: p.limit,
         sort: p.sort,
@@ -758,6 +1182,14 @@ function guardianQueryParams(p) {
 }
 
 function FormFieldQueryParams(p) {
+    if (this.pagination !== undefined && !this.pagination) {
+        p.limit = this.totalRows;
+    } else if (typeof $table !== 'undefined' && $table.bootstrapTable) {
+        var _options = $table.bootstrapTable('getOptions');
+        if (_options && _options.pagination !== undefined && !_options.pagination) {
+            p.limit = _options.totalRows;
+        }
+    }
     let tableListType = $('.table-list-type.active').data('id');
     return {
         limit: p.limit,
@@ -771,6 +1203,14 @@ function FormFieldQueryParams(p) {
 }
 
 function certificateTemplateQueryParams(p) {
+    if (this.pagination !== undefined && !this.pagination) {
+        p.limit = this.totalRows;
+    } else if (typeof $table !== 'undefined' && $table.bootstrapTable) {
+        var _options = $table.bootstrapTable('getOptions');
+        if (_options && _options.pagination !== undefined && !_options.pagination) {
+            p.limit = _options.totalRows;
+        }
+    }
     return {
         limit: p.limit,
         sort: p.sort,
@@ -781,6 +1221,14 @@ function certificateTemplateQueryParams(p) {
 }
 
 function contactInquiryQueryParams(p) {
+    if (this.pagination !== undefined && !this.pagination) {
+        p.limit = this.totalRows;
+    } else if (typeof $table !== 'undefined' && $table.bootstrapTable) {
+        var _options = $table.bootstrapTable('getOptions');
+        if (_options && _options.pagination !== undefined && !_options.pagination) {
+            p.limit = _options.totalRows;
+        }
+    }
     let tableListType = $('.table-list-type.active').data('id');
     return {
         limit: p.limit,
@@ -793,6 +1241,14 @@ function contactInquiryQueryParams(p) {
 }
 
 function studentReportsQueryParams(p) {
+    if (this.pagination !== undefined && !this.pagination) {
+        p.limit = this.totalRows;
+    } else if (typeof $table !== 'undefined' && $table.bootstrapTable) {
+        var _options = $table.bootstrapTable('getOptions');
+        if (_options && _options.pagination !== undefined && !_options.pagination) {
+            p.limit = _options.totalRows;
+        }
+    }
     let tableListType = $('.table-list-type.active').data('id');
   
     var options = $table.bootstrapTable('getOptions');
@@ -816,6 +1272,14 @@ function studentReportsQueryParams(p) {
 }
 
 function assignElectiveSubjectQueryParams(p) {
+    if (this.pagination !== undefined && !this.pagination) {
+        p.limit = this.totalRows;
+    } else if (typeof $table !== 'undefined' && $table.bootstrapTable) {
+        var _options = $table.bootstrapTable('getOptions');
+        if (_options && _options.pagination !== undefined && !_options.pagination) {
+            p.limit = _options.totalRows;
+        }
+    }
     return {
         limit: p.limit,
         sort: p.sort,

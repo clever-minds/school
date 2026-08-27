@@ -101,10 +101,10 @@
                                 data-page-list="[5, 10, 20, 50, 100, 200]" data-search="true" data-toolbar="#toolbar"
                                 data-show-columns="true" data-show-refresh="true" data-trim-on-search="false"
                                 data-mobile-responsive="true" data-sort-name="id" data-sort-order="desc"
-                                data-maintain-selected="true" data-export-data-type='all'
+                                data-maintain-selected="true"
                                 data-export-options='{ "fileName": "exam-list-<?= date(' d-m-y') ?>" ,"ignoreColumn":
                                 ["operate"]}'
-                                data-show-export="true" data-detail-formatter="examListFormatter"
+                                data-show-export="true" data-export-data-type="all" data-detail-formatter="examListFormatter"
                                 data-query-params="getSubjectWiseExamResult" data-escape="true">
                                 <thead>
                                     <tr>
