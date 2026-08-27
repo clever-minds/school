@@ -162,10 +162,21 @@
             const columns = [];
 
             for (let day = 1; day <= daysInMonth; day++) {
+                let date = new Date(currentYear, month - 1, day);
+                let isSunday = date.getDay() === 0;
+                
                 columns.push({
                     field: `day_${day}`,
                     title: `${day}`,
-                    formatter: attendanceFormatter
+                    formatter: attendanceFormatter,
+                    cellStyle: function(value, row, index) {
+                        if (isSunday) {
+                            return {
+                                css: { "background-color": "#ffe6e6" }
+                            };
+                        }
+                        return {};
+                    }
                 });
             }
 
