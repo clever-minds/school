@@ -72,9 +72,9 @@
                                 <th scope="col" data-field="changes" data-escape="false">{{ __('Changes') }}</th>
                                 <th scope="col" data-field="created_at">{{ __('Date & Time') }}</th>
 
-                                @canany(['activity-log-edit','activity-log-delete'])
+                                @if(Auth::user()->hasRole('Super Admin') || Auth::user()->canany(['activity-log-edit','activity-log-delete']))
                                     <th data-events="activityLogEvents" data-formatter="actionFormatter" class="align-button text-center" scope="col" data-field="operate" data-escape="false">{{ __('action') }}</th>
-                                @endcanany
+                                @endif
                             </tr>
                             </thead>
                         </table>
