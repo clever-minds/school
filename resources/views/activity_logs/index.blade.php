@@ -103,7 +103,13 @@
 
     function actionFormatter(value, row, index) {
         let html = '';
-        if (row.action === 'Delete') {
+        
+        let canRestore = false;
+        @if(Auth::user()->hasRole('Super Admin') || Auth::user()->can('activity-log-edit'))
+            canRestore = true;
+        @endif
+
+        if (canRestore && row.action === 'Delete') {
             html += `<a href="#" class="btn btn-sm btn-gradient-warning restore" title="Restore Data">
                         <i class="fa fa-undo"></i> Restore
                      </a>`;
