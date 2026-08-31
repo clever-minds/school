@@ -33,18 +33,17 @@ class LoggingEloquentBuilder extends Builder
     {
         $models = $this->get();
         
-        // As per requirement, hard deletes (forceDelete) are disabled globally.
-        // We will log the attempt but not execute the actual delete.
+        $result = parent::forceDelete();
+
         foreach ($models as $model) {
             $changes = [
                 'old' => $model->getOriginal(),
-                'new' => ['status' => 'Blocked by system policy. Record kept safe.'],
+                'new' => [],
             ];
-            self::logActivity($model, 'Force Delete Attempt', $changes);
+            self::logActivity($model, 'Force Delete', $changes);
         }
 
-        // Return 0 rows affected
-        return 0;
+        return $result;
     }
 
     public function update(array $values)
