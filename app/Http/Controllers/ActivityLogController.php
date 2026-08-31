@@ -232,5 +232,72 @@ public function fetchLogs(Request $request)
     }
 }
 
+    public function restore(Request $request)
+    {
+        $request->validate([
+            'id' => 'required|integer',
+            'database_name' => 'required|string',
+        ]);
+
+        try {
+            // Dynamically connect to selected database
+            \Config::set('database.connections.dynamic', [
+                'driver' => 'mysql',
+                'host' => env('DB_HOST', '127.0.0.1'),
+                'port' => env('DB_PORT', '3306'),
+                'database' => $request->database_name,
+                'username' => env('DB_USERNAME', 'root'),
+                'password' => env('DB_PASSWORD', ''),
+                'charset' => 'utf8mb4',
+                'collation' => 'utf8mb4_unicode_ci',
+            ]);
+
+            DB::purge('dynamic');
+            DB::reconnect('dynamic');
+
+            // Fetch the log record
+            $log = DB::connection('dynamic')->table('activity_logs')->where('id', $request->id)->first();
+
+            if (!$log) {
+                return response()->json(['status' => false, 'message' => 'Log record not found.']);
+            }
+
+            if ($log->action !== 'Delete') {
+                return response()->json(['status' => false, 'message' => 'Only deleted records can be restored.']);
+            }
+
+            $modelClass = '\\App\\Models\\' . $log->model_name;
+
+            if (!class_exists($modelClass)) {
+                return response()->json(['status' => false, 'message' => 'Model class does not exist: ' . $modelClass]);
+            }
+
+            // Temporarily set the connection for the model instance to 'dynamic' so it queries the right DB
+            $modelInstance = new $modelClass;
+            $modelInstance->setConnection('dynamic');
+
+            // Check if model uses SoftDeletes
+            if (!in_array('Illuminate\Database\Eloquent\SoftDeletes', class_uses_recursive(get_class($modelInstance)))) {
+                return response()->json(['status' => false, 'message' => 'Model does not support soft deletes.']);
+            }
+
+            $record = $modelInstance->withTrashed()->find($log->record_id);
+
+            if (!$record) {
+                return response()->json(['status' => false, 'message' => 'Record not found in the database.']);
+            }
+
+            if (!$record->trashed()) {
+                return response()->json(['status' => false, 'message' => 'Record is not currently deleted.']);
+            }
+
+            $record->restore();
+
+            return response()->json(['status' => true, 'message' => 'Record restored successfully!']);
+
+        } catch (\Exception $e) {
+            return response()->json(['status' => false, 'message' => 'Error: ' . $e->getMessage()]);
+        }
+    }
 
 }

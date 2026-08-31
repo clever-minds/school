@@ -409,6 +409,7 @@ Route::post('/admin/impersonation-exit',
 
         Route::get('/activity-logs', [ActivityLogController::class, 'index'])->name('activity.logs');
         Route::get('activity-logs/fetch', [ActivityLogController::class, 'fetchLogs'])->name('activity.logs.fetch');
+        Route::post('activity-logs/restore', [ActivityLogController::class, 'restore'])->name('activity.logs.restore');
 
         Route::get('system-update', [SystemUpdateController::class, 'index'])->name('system-update.index');
         Route::post('system-update', [SystemUpdateController::class, 'update'])->name('system-update.update');

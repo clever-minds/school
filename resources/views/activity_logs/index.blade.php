@@ -73,7 +73,7 @@
                                 <th scope="col" data-field="created_at">{{ __('Date & Time') }}</th>
 
                                 @canany(['activity-log-edit','activity-log-delete'])
-                                    <th data-events="activityLogEvents" class="align-button text-center" scope="col" data-field="operate" data-escape="false">{{ __('action') }}</th>
+                                    <th data-events="activityLogEvents" data-formatter="actionFormatter" class="align-button text-center" scope="col" data-field="operate" data-escape="false">{{ __('action') }}</th>
                                 @endcanany
                             </tr>
                             </thead>
@@ -101,12 +101,61 @@
         };
     }
 
- 
+    function actionFormatter(value, row, index) {
+        let html = '';
+        if (row.action === 'Delete') {
+            html += `<a href="#" class="btn btn-sm btn-gradient-warning restore" title="Restore Data">
+                        <i class="fa fa-undo"></i> Restore
+                     </a>`;
+        }
+        return html;
+    }
 
-    // (Optional) handle row actions if required
     window.activityLogEvents = {
         'click .view': function (e, value, row, index) {
             alert('View Log ID: ' + row.id);
+        },
+        'click .restore': function (e, value, row, index) {
+            e.preventDefault();
+            let dbName = $('#filter_database').val();
+            if (!dbName) {
+                showErrorToast('Please select a database first.');
+                return;
+            }
+            
+            Swal.fire({
+                title: 'Are you sure?',
+                text: "You want to restore this deleted record?",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#3085d6',
+                cancelButtonColor: '#d33',
+                confirmButtonText: 'Yes, Restore!'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    $.ajax({
+                        url: "{{ url('/activity-logs/restore') }}",
+                        type: "POST",
+                        data: {
+                            id: row.id,
+                            database_name: dbName,
+                            _token: "{{ csrf_token() }}"
+                        },
+                        success: function (response) {
+                            if (response.status) {
+                                showSuccessToast(response.message);
+                                $('#table_list').bootstrapTable('refresh');
+                            } else {
+                                showErrorToast(response.message);
+                            }
+                        },
+                        error: function (xhr) {
+                            let msg = xhr.responseJSON ? xhr.responseJSON.message : "Error restoring record";
+                            showErrorToast(msg);
+                        }
+                    });
+                }
+            });
         }
     };
 
