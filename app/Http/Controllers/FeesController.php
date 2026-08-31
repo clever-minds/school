@@ -1179,12 +1179,12 @@ class FeesController extends Controller
             //                });
             //            }
 
-            $feesPaid = $this->feesPaid->builder()->where([
+            $feesPaid = $this->feesPaid->builder()->withTrashed()->where([
                 'fees_id' => $request->fees_id,
                 'student_id' => $request->student_id
             ])->first();
 
-            if (!empty($feesPaid) && $feesPaid->is_fully_paid) {
+            if (!empty($feesPaid) && !$feesPaid->trashed() && $feesPaid->is_fully_paid) {
                 ResponseService::errorResponse("Compulsory Fees already Paid");
             }
 
@@ -1213,10 +1213,20 @@ class FeesController extends Controller
                     'amount' => $amount,
                 ]);
             } else {
-                $feesPaidResult = $this->feesPaid->update($feesPaid->id, [
-                    'amount' => $amount + $feesPaid->amount,
-                    'is_fully_paid' => ($amount + $feesPaid->amount) >= $fees->total_compulsory_fees
-                ]);
+                if ($feesPaid->trashed()) {
+                    $feesPaid->restore();
+                    $feesPaidResult = $this->feesPaid->update($feesPaid->id, [
+                        'amount' => $amount,
+                        'is_fully_paid' => $amount >= $fees->total_compulsory_fees,
+                        'is_used_installment' => $request->installment_mode,
+                        'date' => date('Y-m-d', strtotime($request->date)),
+                    ]);
+                } else {
+                    $feesPaidResult = $this->feesPaid->update($feesPaid->id, [
+                        'amount' => $amount + $feesPaid->amount,
+                        'is_fully_paid' => ($amount + $feesPaid->amount) >= $fees->total_compulsory_fees
+                    ]);
+                }
             }
             if ($request->installment_mode == 1) {
                 if (!empty($request->installment_fees)) {
