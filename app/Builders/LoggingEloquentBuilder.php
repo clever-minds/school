@@ -33,17 +33,32 @@ class LoggingEloquentBuilder extends Builder
     {
         $models = $this->get();
         
-        $result = parent::forceDelete();
+        // As per requirement, hard deletes (forceDelete) are disabled globally.
+        // We will perform a soft delete instead if the model supports it.
+        if (in_array('Illuminate\Database\Eloquent\SoftDeletes', class_uses_recursive(get_class($this->getModel())))) {
+            $result = parent::delete(); // Perform soft delete instead of hard delete
+            
+            foreach ($models as $model) {
+                $changes = [
+                    'old' => $model->getOriginal(),
+                    'new' => ['status' => 'Soft deleted instead of hard delete (system policy)'],
+                ];
+                self::logActivity($model, 'Delete', $changes);
+            }
+            
+            return $result;
+        }
 
+        // If the model does not support soft deletes, block the deletion.
         foreach ($models as $model) {
             $changes = [
                 'old' => $model->getOriginal(),
-                'new' => [],
+                'new' => ['status' => 'Blocked by system policy. No soft delete available.'],
             ];
-            self::logActivity($model, 'Force Delete', $changes);
+            self::logActivity($model, 'Force Delete Attempt', $changes);
         }
 
-        return $result;
+        return 0;
     }
 
     public function update(array $values)
