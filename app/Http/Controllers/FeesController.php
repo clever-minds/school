@@ -553,7 +553,7 @@ class FeesController extends Controller
             $feesPaidId = $installmentFeeTransaction->fees_paid_id;
             $feesTransactionAmount = $installmentFeeTransaction->amount;
 
-            $this->compulsoryFee->permanentlyDeleteById($compulsoryFeesPaidID); // Permanently Delete Fees Transaction Data
+            $this->compulsoryFee->deleteById($compulsoryFeesPaidID); // Soft Delete Fees Transaction Data
 
             // Check Fees Transactions Entry
             $feesPaidDataQuery = $this->feesPaid->builder()->where('id', $feesPaidId);
@@ -564,10 +564,10 @@ class FeesController extends Controller
                 if ($finalAmount > 0) {
                     $this->feesPaid->update($feesPaidId, ['amount' => $finalAmount, 'is_fully_paid' => 0]); // Update Fees Paid Data with Final Amount
                 } else {
-                    $this->feesPaid->permanentlyDeleteById($feesPaidId);
+                    $this->feesPaid->deleteById($feesPaidId);
                 }
             } else {
-                $this->feesPaid->permanentlyDeleteById($feesPaidId);
+                $this->feesPaid->deleteById($feesPaidId);
             }
 
             $sessionYear = $this->cache->getDefaultSessionYear();
