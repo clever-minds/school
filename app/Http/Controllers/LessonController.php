@@ -183,7 +183,7 @@ class LessonController extends Controller {
             }
         
             // Send notification to all students in the class section
-            $user = $this->student->builder()->with('user')->where('class_section_id', $request->class_section_id)->pluck('user_id')->toArray();
+            $user = $this->student->builder()->with('user')->whereIn('class_section_id', $section_ids)->pluck('user_id')->toArray();
             $subjectName = $this->subject->builder()->where('id', $request->subject_id)->first();
             DB::commit();
             send_notification($user, 'Lesson Alert !!!', 'New Lesson added for ' . $subjectName->name, 'lesson');
@@ -471,8 +471,8 @@ class LessonController extends Controller {
                 }
             }
 
-            $user = $this->student->builder()->with('user')->where('class_section_id', $request->class_section_id)->pluck('user_id')->toArray();
-            $subjectTeacher = $this->subjectTeacher->builder()->with('subject')->whereIn('class_section_id', $request->class_section_id)->where('subject_id', $request->class_subject_id)->first();
+            $user = $this->student->builder()->with('user')->whereIn('class_section_id', $classSectionIds)->pluck('user_id')->toArray();
+            $subjectTeacher = $this->subjectTeacher->builder()->with('subject')->whereIn('class_section_id', $classSectionIds)->where('subject_id', $request->class_subject_id)->first();
             $title = "Lesson Alert !!!";
             $body = 'Lesson Updated for ' . $subjectTeacher->subject->name;
             $type = "lesson";

@@ -868,7 +868,7 @@ class TeacherApiController extends Controller
                 $user = $this->student->builder()->select('user_id')->whereIn('class_section_id', $section_ids)->get()->pluck('user_id')->toArray();
             }
           
-            $subjectName = $this->subject->builder()->select('name')->where('id', $request->class_subject_id)->pluck('name')->first();
+            $subjectName = $this->subject->builder()->select('name')->where('id', $classSubject->subject_id)->pluck('name')->first();
             $title = "Lesson Alert !!!";
             $body = 'New Lesson Added for ' . $subjectName;
             $type = "lesson";
