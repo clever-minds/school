@@ -65,6 +65,9 @@
                                 <th scope="col" data-field="user_name">{{ __('User Name') }}</th>
                                 <th scope="col" data-field="model_name">{{ __('Model') }}</th>
                                 <th scope="col" data-field="action">{{ __('Action') }}</th>
+                                <th scope="col" data-field="request_url">{{ __('URL') }}</th>
+                                <th scope="col" data-field="ip_address">{{ __('IP Address') }}</th>
+                                <th scope="col" data-field="location">{{ __('Location') }}</th>
                                 <th scope="col" data-field="record_id">{{ __('Record ID') }}</th>
                                 <th scope="col" data-field="changes" data-escape="false">{{ __('Changes') }}</th>
                                 <th scope="col" data-field="created_at">{{ __('Date & Time') }}</th>

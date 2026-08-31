@@ -229,13 +229,12 @@
                                         <tr class="without_installment_enter_amount">
                                             <td class="text-left"></td>
                                             <th colspan="2" class="text-left"><label>{{__("enter_amount")}} <span class="text-danger">*</span></label></th>
-                                            <td class="text-right"><span id="total_amount_text">
+                                            <td class="text-right">
                                                 @if ($student->fees_paid)
                                                     <input type="number" name="enter_amount" min="1" class="form-control" max="{{ ($total_compulsory_fees - $student->fees_paid->compulsory_fee_sum_amount + $due_charges) }}" id="enter_amount" value="{{ ($total_compulsory_fees - $student->fees_paid->compulsory_fee_sum_amount + $due_charges) }}" placeholder="{{ __('enter_amount') }}">
                                                 @else
                                                     <input type="number" name="enter_amount" min="1" class="form-control" max="{{ $total_compulsory_fees + $due_charges }}" id="enter_amount" value="{{ $total_compulsory_fees + $due_charges }}" placeholder="{{ __('enter_amount') }}">
                                                 @endif
-                                                
                                             </td>
                                         </tr>
                                         @endif

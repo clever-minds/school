@@ -150,6 +150,7 @@ public function fetchLogs(Request $request)
                 'a.action',
                 'a.record_id',
                 'a.changes',
+                'a.ip_address',
                 'a.created_at'
             );
 
@@ -160,6 +161,7 @@ public function fetchLogs(Request $request)
                   ->orWhere('a.action', 'like', "%$search%")
                   ->orWhere('a.record_id', 'like', "%$search%")
                   ->orWhere('a.changes', 'like', "%$search%")
+                  ->orWhere('a.ip_address', 'like', "%$search%")
                   ->orWhere(DB::raw("CONCAT(u.first_name, ' ', u.last_name)"), 'like', "%$search%");
             });
         }
@@ -175,6 +177,31 @@ public function fetchLogs(Request $request)
 
         // ✅ Format response data
         $rows = $logs->map(function ($log) {
+            $ip = $log->ip_address;
+            $location = 'Unknown';
+            if ($ip && $ip !== '127.0.0.1' && $ip !== '::1') {
+                $location = \Illuminate\Support\Facades\Cache::rememberForever('ip_location_' . $ip, function () use ($ip) {
+                    try {
+                        $response = \Illuminate\Support\Facades\Http::timeout(3)->get("http://ip-api.com/json/{$ip}");
+                        if ($response->successful() && $response['status'] === 'success') {
+                            return ($response['city'] ?? '') . ', ' . ($response['country'] ?? '');
+                        }
+                    } catch (\Exception $e) {
+                        return 'Unknown';
+                    }
+                    return 'Unknown';
+                });
+            } else if ($ip === '127.0.0.1' || $ip === '::1') {
+                $location = 'Localhost';
+            }
+
+            $changesArray = json_decode($log->changes, true) ?: [];
+            $requestUrl = $changesArray['request_url'] ?? 'N/A';
+            if (isset($changesArray['request_url'])) {
+                unset($changesArray['request_url']);
+            }
+            $changesJson = !empty($changesArray) ? json_encode($changesArray, JSON_PRETTY_PRINT) : $log->changes;
+
             return [
                 'id' => $log->id,
                 'user_id' => $log->user_id,
@@ -182,7 +209,10 @@ public function fetchLogs(Request $request)
                 'model_name' => $log->model_name,
                 'action' => ucfirst($log->action),
                 'record_id' => $log->record_id,
-                'changes' => $log->changes,
+                'changes' => $changesJson,
+                'request_url' => $requestUrl,
+                'ip_address' => $ip,
+                'location' => $location,
                 'created_at' => \Carbon\Carbon::parse($log->created_at)->format('d M Y, h:i A'),
             ];
         });

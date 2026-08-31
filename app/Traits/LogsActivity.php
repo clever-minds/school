@@ -37,26 +37,28 @@ trait LogsActivity
 
             self::storeActivity($model, 'Create', $changes);
         });
+    }
 
-        static::deleted(function ($model) {
-            $changes = [
-                'old' => $model->getOriginal(),
-                'new' => [],
-            ];
-
-            self::storeActivity($model, 'Delete', $changes);
-        });
-
+    public function newEloquentBuilder($query)
+    {
+        return new \App\Builders\LoggingEloquentBuilder($query);
     }
 
     protected static function storeActivity($model, $action, $changes = null)
     {
+        if (is_array($changes)) {
+            $changes['request_url'] = Request::fullUrl();
+            $changesJson = json_encode($changes, JSON_PRETTY_PRINT);
+        } else {
+            $changesJson = json_encode(['request_url' => Request::fullUrl()]);
+        }
+
         ActivityLog::create([
             'user_id'    => Auth::id(),
             'model_name' => class_basename($model),
             'action'     => $action,
             'record_id'  => $model->id ?? null,
-            'changes'    => $changes ? json_encode($changes, JSON_PRETTY_PRINT) : null,
+            'changes'    => $changesJson,
             'ip_address' => Request::ip(),
             'user_agent' => Request::header('User-Agent'),
         ]);
