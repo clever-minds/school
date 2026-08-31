@@ -201,6 +201,9 @@ class InstallationSeeder extends Seeder {
             'student-pickup-edit',
             'student-pickup-delete',
             'staff-kyc-upload',
+            'activity-log-list',
+            'activity-log-edit',
+            'activity-log-delete',
 
         ];
         $role->syncPermissions($superAdminHasAccessTo);

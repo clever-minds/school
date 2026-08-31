@@ -422,7 +422,8 @@ class SchoolDataService {
             ['name' => 'manage-expense-show'],
             ...self::permission('reminder'),
             ...self::permission('school-policy'),
-            ...self::permission('student-pickup')
+            ...self::permission('student-pickup'),
+            ...self::permission('activity-log')
 
         ];
         $permissions = array_map(static function ($data) {
