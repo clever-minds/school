@@ -56,7 +56,7 @@ class CompulsoryFee extends Model
     }
 
     public function fees_paid() {
-        return $this->belongsTo(FeesPaid::class, 'fees_paid_id')->withTrashed();
+        return $this->belongsTo(FeesPaid::class, 'fees_paid_id');
     }
 
     public function student(){

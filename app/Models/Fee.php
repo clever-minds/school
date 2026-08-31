@@ -47,7 +47,7 @@ class Fee extends Model {
     //    }
 
     public function fees_paid() {
-        return $this->hasMany(FeesPaid::class, 'fees_id')->withTrashed();
+        return $this->hasMany(FeesPaid::class, 'fees_id');
     }
 
     public function class() {
