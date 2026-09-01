@@ -1168,6 +1168,8 @@ class FeesController extends Controller
         ]);
 
 
+        \Log::info("PayCompulsoryFeesStore called. Remark from request: " . ($request->remark ?? 'NULL or EMPTY'));
+
         try {
             DB::beginTransaction();
             $fees = $this->fees->findById($request->fees_id, ['*'], ['fees_class_type.fees_type:id,name', 'installments:id,name,due_date,due_charges,fees_id']);
