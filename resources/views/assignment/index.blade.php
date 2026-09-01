@@ -212,11 +212,11 @@
                                 <th scope="col" data-field="file" data-sortable="false" data-formatter="fileFormatter">{{ __('files') }}</th>
                                 <th scope="col" data-field="class_section_with_medium" data-formatter="ClassSectionFormatter" data-sortable="false">{{ __('Class Section') }}</th>
                                 <th scope="col" data-field="class_subject.subject.name_with_type" data-sortable="false"> {{ __('subject') }}</th>
-                                <th scope="col" data-field="due_date"  data-sortable="false">{{ __('due_date') }}</th>
-                                <th scope="col" data-field="points" data-sortable="false">{{ __('points') }}
+                                <th scope="col" data-field="due_date"  data-sortable="false" data-formatter="homeworkHiddenFormatter">{{ __('due_date') }}</th>
+                                <th scope="col" data-field="points" data-sortable="false" data-formatter="homeworkHiddenFormatter">{{ __('points') }}
                                 </th>
-                                <th scope="col" data-field="resubmission" data-formatter="yesAndNoStatusFormatter" data-sortable="false">{{ __('resubmission') }}</th>
-                                <th scope="col" class="text-wrap" data-field="extra_days_for_resubmission" data-sortable="false">{{ __('resubmit_days') }}</th>
+                                <th scope="col" data-field="resubmission" data-formatter="homeworkHiddenYesAndNoStatusFormatter" data-sortable="false">{{ __('resubmission') }}</th>
+                                <th scope="col" class="text-wrap" data-field="extra_days_for_resubmission" data-sortable="false" data-formatter="homeworkHiddenFormatter">{{ __('resubmit_days') }}</th>
                                 <th scope="col" data-field="created_by_teacher" data-sortable="false" data-visible="false">{{ __('created_by_teacher') }}</th>
                                 <th scope="col" data-field="edited_by_teacher" data-sortable="false" data-visible="false">{{ __('edited_by_teacher') }}</th>
                                 <th scope="col" data-field="session_year_id" data-sortable="false" data-visible="false">{{ __('session_year_id') }}</th>
@@ -361,5 +361,64 @@
             if (!value) return '';
             return value.charAt(0).toUpperCase() + value.slice(1);
         }
+
+        function homeworkHiddenFormatter(value, row, index) {
+            if (row.type === 'homework') return '-';
+            return value !== null && value !== undefined ? value : '-';
+        }
+
+        function homeworkHiddenYesAndNoStatusFormatter(value, row, index) {
+            if (row.type === 'homework') return '-';
+            if (typeof yesAndNoStatusFormatter === 'function') {
+                return yesAndNoStatusFormatter(value, row, index);
+            }
+            return value ? 'Yes' : 'No';
+        }
+
+        function toggleHomeworkFields(type, formSelector) {
+            let fields = ['due_date', 'points', 'resubmission_allowed', 'extra_days_for_resubmission'];
+            if (formSelector.includes('edit')) {
+                fields = ['edit_due_date', 'edit_points', 'edit_resubmission_allowed', 'edit_extra_days_for_resubmission'];
+            }
+            
+            let elements = fields.map(id => $('#' + id));
+            
+            if (type === 'homework') {
+                elements.forEach(el => {
+                    el.closest('.form-group').hide();
+                    if (el.is(':checkbox')) {
+                        el.prop('checked', false).trigger('change');
+                    } else {
+                        el.prop('required', false);
+                    }
+                });
+            } else {
+                elements.forEach(el => {
+                    if (el.attr('id').includes('extra_days_for_resubmission')) {
+                        // don't show it automatically, let the checkbox handle it
+                    } else {
+                        el.closest('.form-group').show();
+                    }
+                    if (el.attr('id').includes('due_date')) {
+                        el.prop('required', true);
+                    }
+                });
+            }
+        }
+
+        $('#type').on('change', function() {
+            toggleHomeworkFields($(this).val(), '#create-form');
+        });
+
+        $('#edit_type_ass').on('change', function() {
+            toggleHomeworkFields($(this).val(), '#edit-form');
+        });
+
+        // Trigger on load for both
+        $(document).ready(function() {
+            if ($('#type').val()) {
+                toggleHomeworkFields($('#type').val(), '#create-form');
+            }
+        });
     </script>
 @endsection
