@@ -157,7 +157,27 @@ class ClassSectionController extends Controller {
             $tempRow = $row->toArray();
             $tempRow['no'] = $no++;
             $tempRow['class_teachers_list'] = $row->class_teachers->pluck('teacher.full_name');
-            $tempRow['subject_teachers_list'] = $row->subject_teachers->pluck('subject_with_name');
+            $subjectTeachersMap = [];
+            foreach ($row->subject_teachers as $st) {
+                $subjectName = '';
+                if ($st->relationLoaded('subject') && !empty($st->subject)) {
+                    $subjectName .= $st->subject->name;
+                    if (!empty($st->subject->type)) {
+                        $subjectName .= ' (' . $st->subject->type . ')';
+                    }
+                }
+                if (!isset($subjectTeachersMap[$subjectName])) {
+                    $subjectTeachersMap[$subjectName] = [];
+                }
+                if ($st->relationLoaded('teacher') && $st->teacher) {
+                    $subjectTeachersMap[$subjectName][] = $st->teacher->full_name;
+                }
+            }
+
+            $tempRow['subject_teachers_list'] = [];
+            foreach ($subjectTeachersMap as $subjectName => $teachers) {
+                $tempRow['subject_teachers_list'][] = $subjectName . ' - ' . implode(', ', $teachers);
+            }
 
             $tempRow['current_sem_subject_teachers_list'] = array();
             if ($row->class->include_semesters) {
@@ -166,19 +186,39 @@ class ClassSectionController extends Controller {
                 foreach ($semesters as $semesterData) {
                     $tempRow['subject_teachers'] = array();
                     $teacherWithSubjectName = array();
+                    $currentSemMap = [];
 
                     foreach ($row->subject_teachers as $teacherData) {
-                        if ($semesterData->current) {
-                            if ($teacherData->class_subject->semester_id == $semesterData->id) {
-                                $tempRow['current_sem_subject_teachers_list'][] = $teacherData->subject_with_name;
+                        $subjectName = '';
+                        if ($teacherData->relationLoaded('subject') && !empty($teacherData->subject)) {
+                            $subjectName .= $teacherData->subject->name;
+                            if (!empty($teacherData->subject->type)) {
+                                $subjectName .= ' (' . $teacherData->subject->type . ')';
                             }
                         }
 
-                        if ($teacherData->class_subject->semester_id == $semesterData->id) {
+                        if ($semesterData->current) {
+                            if ($teacherData->class_subject && $teacherData->class_subject->semester_id == $semesterData->id) {
+                                if (!isset($currentSemMap[$subjectName])) {
+                                    $currentSemMap[$subjectName] = [];
+                                }
+                                if ($teacherData->relationLoaded('teacher') && $teacherData->teacher) {
+                                    $currentSemMap[$subjectName][] = $teacherData->teacher->full_name;
+                                }
+                            }
+                        }
+
+                        if ($teacherData->class_subject && $teacherData->class_subject->semester_id == $semesterData->id) {
                             $teacherWithSubjectName[] = array(
-                                'teacher_name' => $teacherData->teacher->full_name,
+                                'teacher_name' => $teacherData->teacher ? $teacherData->teacher->full_name : '',
                                 'subject_name' => $teacherData->subject_with_name,
                             );
+                        }
+                    }
+
+                    if ($semesterData->current) {
+                        foreach ($currentSemMap as $subjectName => $teachers) {
+                            $tempRow['current_sem_subject_teachers_list'][] = $subjectName . ' - ' . implode(', ', $teachers);
                         }
                     }
 
