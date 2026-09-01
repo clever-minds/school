@@ -66,7 +66,7 @@
                                                             <span class="form-control" readonly>{{ $classSubject->subject->name_with_type }}</span>
                                                         </div>
                                                         <div class="form-group col-sm-12 col-md-6 ">
-                                                            <select multiple name="subject_teachers[{{ $key }}][teacher_user_id][]]" data-class-section="{{$classSection->id}}" class="form-control select2-dropdown select2-hidden-accessible subject_teacher_id" style="width:100%;" tabindex="-1" aria-hidden="true" data-placeholder="{{__("Search Teacher Name")}}">
+                                                            <select multiple name="subject_teachers[{{ $key }}][teacher_user_id][]" data-class-section="{{$classSection->id}}" class="form-control select2-dropdown select2-hidden-accessible subject_teacher_id" style="width:100%;" tabindex="-1" aria-hidden="true" data-placeholder="{{__("Search Teacher Name")}}">
                                                                 @foreach ($teachers as $teacher)
                                                                     <option value="{{ $teacher->id }}" {{ $classSubject->subjectTeachers->contains('teacher_id',$teacher->id) ? "selected" : "" }} {{ $classSubject->subjectTeachers->contains('teacher_id',$teacher->id) ? "data-exists = true" : "data-exists = false" }} data-subjectId= {{ $classSubject->subject_id }}>{{$teacher->full_name}}</option>
                                                                 @endforeach
@@ -95,7 +95,7 @@
                                                 <span class="form-control" readonly>{{ $classSubject->subject->name.' - '.$classSubject->subject->type }}</span>
                                             </div>
                                             <div class="form-group col-sm-12 col-md-6 ">
-                                                <select multiple name="subject_teachers[{{ $key }}][teacher_user_id][]]" data-class-section="{{$classSection->id}}" class="form-control select2-dropdown select2-hidden-accessible subject_teacher_id" style="width:100%;" tabindex="-1" aria-hidden="true" data-placeholder="{{__("Search Teacher Name")}}">
+                                                <select multiple name="subject_teachers[{{ $key }}][teacher_user_id][]" data-class-section="{{$classSection->id}}" class="form-control select2-dropdown select2-hidden-accessible subject_teacher_id" style="width:100%;" tabindex="-1" aria-hidden="true" data-placeholder="{{__("Search Teacher Name")}}">
                                                     @foreach ($teachers as $teacher)
                                                         <option value="{{ $teacher->id }}" {{ $classSubject->subjectTeachers->contains('teacher_id',$teacher->id) ? "selected" : "" }} {{ $classSubject->subjectTeachers->contains('teacher_id',$teacher->id) ? "data-exists = true" : "data-exists = false" }} data-subjectId= {{ $classSubject->subject_id }}>{{$teacher->full_name}}</option>
                                                     @endforeach

@@ -225,6 +225,9 @@ class ClassSectionController extends Controller {
             $isClassSemester = $this->classSection->findById($id, ['*'], ['class'])->class->include_semesters;
 
             if (!empty($request->class_teacher_id)) {
+                // Delete removed class teachers
+                $this->classTeachers->builder()->where('class_section_id', $id)->whereNotIn('teacher_id', $request->class_teacher_id)->delete();
+
                 // Loop on the Class Teacher and add Data as Multi Dimensional Array in classTeachersData Array
                 foreach ($request->class_teacher_id as $teacherId) {
                     $classTeachersData[] = array(
@@ -236,16 +239,19 @@ class ClassSectionController extends Controller {
                 }
                 // Update or Insert Data in Class Teachers on the basis of Class Section ID And TeacherID
                 $this->classTeachers->upsert($classTeachersData, ['class_section_id', 'teacher_id'], ['created_at', 'updated_at']);
-
+            } else {
+                $this->classTeachers->builder()->where('class_section_id', $id)->delete();
             }
 
 
             if (!empty($request->subject_teachers)) {
+                $validCombinations = [];
                 // Loop on the Subject Teacher and do nested loop on teacher id and add Data in subjectTeachersData Array
                 foreach ($request->subject_teachers as $subjectTeachers) {
                     $subjectTeachers = (object)$subjectTeachers;
                     if (!empty($subjectTeachers->teacher_user_id)) {
                         foreach ($subjectTeachers->teacher_user_id as $teacherId) {
+                            $validCombinations[] = $subjectTeachers->class_subject_id . '-' . $teacherId;
                             $subjectTeachersData[] = array(
                                 "class_section_id" => $id,
                                 "teacher_id"       => $teacherId,
@@ -255,6 +261,14 @@ class ClassSectionController extends Controller {
 
                             $this->user->findById($teacherId)->givePermissionTo(['exam-upload-marks', 'exam-result']);
                         }
+                    }
+                }
+
+                // Delete removed subject teachers
+                $existingSubjectTeachers = $this->subjectTeachers->builder()->where('class_section_id', $id)->get();
+                foreach ($existingSubjectTeachers as $ex) {
+                    if (!in_array($ex->class_subject_id . '-' . $ex->teacher_id, $validCombinations)) {
+                        $ex->delete();
                     }
                 }
 
