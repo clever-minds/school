@@ -326,6 +326,7 @@ Route::get('/schools', [StaffApiController::class, 'getAllSchools']);
         Route::post('delete-announcement', [StaffApiController::class, 'deleteAnnouncement']);
         
         Route::get('student/attendance', [StaffApiController::class, 'studentAttendance']);
+        Route::post('student/attendance', [StaffApiController::class, 'submitStudentAttendance']);
 
         Route::get('roles', [StaffApiController::class, 'getRoles']);
         Route::get('role-permissions/{id}', [StaffApiController::class, 'getRolePermissions']);

@@ -823,6 +823,91 @@ class StaffApiController extends Controller
         }
     }
 
+    public function submitStudentAttendance(Request $request)
+    {
+        ResponseService::noFeatureThenSendJson('Attendance Management');
+        ResponseService::noAnyPermissionThenSendJson([
+            'attendance-create',
+            'attendance-edit'
+        ]);
+        $validator = Validator::make($request->all(), [
+            'class_section_id'        => 'required',
+            'date'                    => 'required|date',
+            'holiday'                 => 'in:0,1',
+        ]);
+        if ($validator->fails()) {
+            ResponseService::validationError();
+        }
+        try {
+            DB::beginTransaction();
+            $sessionYear = $this->cache->getDefaultSessionYear();
+            $date = date('Y-m-d', strtotime($request->date));
+            $student_ids = array();
+
+            if ($request->holiday) {
+                $users = $this->student->builder()->where('class_section_id',$request->class_section_id)->get();
+                foreach ($users as $key => $user) {
+                    $attendanceData = [
+                        'class_section_id' => $request->class_section_id,
+                        'student_id'       => $user->user_id,
+                        'session_year_id'  => $sessionYear->id,
+                        'type'             => 3,
+                        'date'             => date('Y-m-d', strtotime($request->date)),
+                    ];
+
+                    $attendance = $this->attendance->builder()->where('class_section_id', $request->class_section_id)->where('student_id', $user->user_id)->whereDate('date', $date)->first();
+                    if ($attendance) {
+                        $this->attendance->update($attendance->id, $attendanceData);
+                    } else {
+                        $this->attendance->create($attendanceData);
+                    }
+                }
+            } else {
+                for ($i = 0, $iMax = count($request->attendance); $i < $iMax; $i++) {
+
+                    $attendanceData = [
+                        'class_section_id' => $request->class_section_id,
+                        'student_id'       => $request->attendance[$i]['student_id'],
+                        'session_year_id'  => $sessionYear->id,
+                        'type'             => $request->attendance[$i]['type'],
+                        'date'             => date('Y-m-d', strtotime($request->date)),
+                    ];
+    
+                    if ($request->attendance[$i]['type'] == 0) {
+                        $student_ids[] = $request->attendance[$i]['student_id'];
+                    }
+    
+                    $attendance = $this->attendance->builder()->where('class_section_id', $request->class_section_id)->where('student_id', $request->attendance[$i]['student_id'])->whereDate('date', $date)->first();
+                    if ($attendance) {
+                        $this->attendance->update($attendance->id, $attendanceData);
+                    } else {
+                        $this->attendance->create($attendanceData);
+                    }
+                }
+            }
+            DB::commit();
+
+            if (!empty($student_ids)) {
+                $customData = [
+                    'class_section_id' => $request->class_section_id,
+                    'date' => date('Y-m-d', strtotime($request->date))
+                ];
+                send_notification($student_ids, 'Attendance', 'You are marked as absent today', 'attendance', $customData);
+            }
+            
+            ResponseService::successResponse("Data Stored Successfully");
+        } catch (\Throwable $e) {
+            if (Str::contains($e->getMessage(), ['does not exist','file_get_contents'])) {
+                DB::commit();
+                ResponseService::warningResponse("Data Stored successfully. But App push notification not send.");
+            } else {
+                DB::rollBack();
+                ResponseService::logErrorResponse($e);
+                ResponseService::errorResponse();
+            }
+        }
+    }
+
     public function getRoles()
     {
         ResponseService::noFeatureThenSendJson('Announcement Management');

@@ -3018,6 +3018,123 @@
                     "response": []
                 }
             ]
+        },
+        {
+            "name": "Student Attendance",
+            "item": [
+                {
+                    "name": "Get Student Attendance (Staff)",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{token}}"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/api/staff/student/attendance?class_section_id=1&date={{$isoTimestamp}}",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "staff",
+                                "student",
+                                "attendance"
+                            ],
+                            "query": [
+                                {
+                                    "key": "class_section_id",
+                                    "value": "1"
+                                },
+                                {
+                                    "key": "date",
+                                    "value": "{{$isoTimestamp}}"
+                                }
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Mark Student Attendance (Staff)",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{token}}"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"class_section_id\": 1,\n    \"date\": \"2026-09-01\",\n    \"attendance\": [\n        {\n            \"student_id\": 1,\n            \"type\": 1\n        }\n    ]\n}"
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/api/staff/student/attendance",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "staff",
+                                "student",
+                                "attendance"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Attendance History (Staff)",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{token}}"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/api/staff/attendance-history",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "staff",
+                                "attendance-history"
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Attendance Report (Staff)",
+                    "request": {
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Authorization",
+                                "value": "Bearer {{token}}"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/api/staff/attendance-report",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "api",
+                                "staff",
+                                "attendance-report"
+                            ]
+                        }
+                    }
+                }
+            ]
         }
     ],
     "variable": [
