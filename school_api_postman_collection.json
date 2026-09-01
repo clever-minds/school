@@ -3087,7 +3087,12 @@
                             ]
                         }
                     }
-                },
+                }
+            ]
+        },
+        {
+            "name": "Staff Self Attendance",
+            "item": [
                 {
                     "name": "Attendance History (Staff)",
                     "request": {
