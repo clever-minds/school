@@ -9,7 +9,7 @@ use Illuminate\Support\Facades\Log;
 use Carbon\Carbon;
 use Google\Client;
 
-function send_notification_all($notificationModel, $userIds, $type, $customData = [])
+function send_notification_all($notificationModel, $userIds, $type, $customData = [], $saveToDb = true)
 {
     // ✅ Wrap context in array
     Log::info('Custom Data Received', ['customData' => $customData]);
@@ -35,15 +35,19 @@ function send_notification_all($notificationModel, $userIds, $type, $customData 
     /* ===============================
      | 1️⃣ CREATE MASTER NOTIFICATION
      ===============================*/
-    $notification = Notification::create([
-        'school_id'       => $schoolId,
-        'title'           => $notificationModel->title,
-        'message'         => $notificationModel->message,
-        'send_to'         => 'multiple',
-        'event_date'      => $customData['event_date'] ?? null,
-        'image'           => $customData['image'] ?? null,
-        'session_year_id' => $sessionYear?->id,
-    ]);
+    if ($saveToDb) {
+        $notification = Notification::create([
+            'school_id'       => $schoolId,
+            'title'           => $notificationModel->title,
+            'message'         => $notificationModel->message,
+            'send_to'         => 'multiple',
+            'event_date'      => $customData['event_date'] ?? null,
+            'image'           => $customData['image'] ?? null,
+            'session_year_id' => $sessionYear?->id,
+        ]);
+    } else {
+        $notification = $notificationModel;
+    }
 
     /* ===============================
      | 2️⃣ DUPLICATE PREVENT
@@ -88,13 +92,15 @@ function send_notification_all($notificationModel, $userIds, $type, $customData 
         /* ===============================
          | 3️⃣ SAVE notification_users
          ===============================*/
-        NotificationUser::create([
-            'notification_id' => $notification->id,
-            'user_id'         => $receiver->id,
-            'user_role'       => $userRole,
-            'student_id'      => $studentId,
-            'sent_at'         => now(),
-        ]);
+        if ($saveToDb) {
+            NotificationUser::create([
+                'notification_id' => $notification->id,
+                'user_id'         => $receiver->id,
+                'user_role'       => $userRole,
+                'student_id'      => $studentId,
+                'sent_at'         => now(),
+            ]);
+        }
 
         /* ===============================
          | 4️⃣ PUSH (FCM)

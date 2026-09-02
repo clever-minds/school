@@ -85,7 +85,8 @@ $customData=[];
                                 $notification,
                                 $row->user_id,
                                 $type,
-                                $customData
+                                $customData,
+                                false
                             );
                         }
                     }
