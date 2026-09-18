@@ -843,13 +843,17 @@ class WebhookController extends Controller
 
     private function handleRazorpaySuccess($paymentTransaction, $webhookData, $metadata)
     {
-        if ($paymentTransaction->payment_status === "succeed") {
-            Log::info("Transaction already processed successfully");
-            return response()->json(['status' => 'success', 'message' => 'Transaction already processed']);
-        }
-
         DB::beginTransaction();
         try {
+            // Lock the transaction to prevent race conditions from concurrent webhooks
+            $paymentTransaction = PaymentTransaction::lockForUpdate()->find($paymentTransaction->id);
+
+            if ($paymentTransaction->payment_status === "succeed") {
+                DB::rollBack();
+                Log::info("Transaction already processed successfully");
+                return response()->json(['status' => 'success', 'message' => 'Transaction already processed']);
+            }
+
             // Update payment transaction status
             $paymentTransaction->payment_status = "succeed";
             $paymentTransaction->save();
