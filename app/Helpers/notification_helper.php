@@ -118,6 +118,11 @@ function send_notification($userIds, $title, $body, $type, $customData = [])
         }
 
         $projectId   = $cache->getSystemSettings('firebase_project_id');
+        $file = $cache->getSystemSettings('firebase_service_file');
+        $file = explode("storage/", $file ?? '');
+        $file = end($file);
+        $path = base_path('public/storage/' . $file);
+
         $payload = [
             "message" => [
                 "token" => $receiver->fcm_id,
@@ -156,7 +161,7 @@ function send_notification($userIds, $title, $body, $type, $customData = [])
             ]
         ];
 
-        \App\Jobs\SendFcmPushJob::dispatch($projectId, $payload);
+        \App\Jobs\SendFcmPushJob::dispatch($projectId, $payload, $path);
     }
 
     return true;

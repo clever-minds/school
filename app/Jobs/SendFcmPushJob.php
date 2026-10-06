@@ -17,16 +17,18 @@ class SendFcmPushJob implements ShouldQueue
 
     public $projectId;
     public $payload;
+    public $path;
 
     /**
      * Create a new job instance.
      *
      * @return void
      */
-    public function __construct($projectId, $payload)
+    public function __construct($projectId, $payload, $path)
     {
         $this->projectId = $projectId;
         $this->payload = $payload;
+        $this->path = $path;
     }
 
     /**
@@ -37,14 +39,8 @@ class SendFcmPushJob implements ShouldQueue
     public function handle()
     {
         try {
-            $cache = app(CachingService::class);
-            $file = $cache->getSystemSettings('firebase_service_file');
-            $file = explode("storage/", $file ?? '');
-            $file = end($file);
-            $path = base_path('public/storage/' . $file);
-
             $client = new Client();
-            $client->setAuthConfig($path);
+            $client->setAuthConfig($this->path);
             $client->setScopes(['https://www.googleapis.com/auth/firebase.messaging']);
             
             $tokenData = $client->fetchAccessTokenWithAssertion();
