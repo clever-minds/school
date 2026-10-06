@@ -108,8 +108,6 @@ function send_notification_all($notificationModel, $userIds, $type, $customData 
         if (!$receiver->fcm_id) continue;
 
         $projectId   = $cache->getSystemSettings('firebase_project_id');
-        $accessToken = getAccessToken_all();
-
         $payload = [
             "message" => [
                 "token" => $receiver->fcm_id,
@@ -123,23 +121,29 @@ function send_notification_all($notificationModel, $userIds, $type, $customData 
                     "student_id"      => (string)$studentId,
                     "send_to"         => $userRole,
                 ],
+                "android" => [
+                    "priority" => "high",
+                    "notification" => [
+                        "sound" => "default",
+                        "click_action" => "FLUTTER_NOTIFICATION_CLICK"
+                    ]
+                ],
+                "apns" => [
+                    "headers" => [
+                        "apns-priority" => "10"
+                    ],
+                    "payload" => [
+                        "aps" => [
+                            "sound" => "default",
+                            "mutable-content" => 1,
+                            "content-available" => 1
+                        ]
+                    ]
+                ]
             ],
         ];
 
-        $ch = curl_init();
-        curl_setopt_array($ch, [
-            CURLOPT_URL => "https://fcm.googleapis.com/v1/projects/{$projectId}/messages:send",
-            CURLOPT_POST => true,
-            CURLOPT_HTTPHEADER => [
-                'Authorization: Bearer ' . $accessToken,
-                'Content-Type: application/json',
-            ],
-            CURLOPT_RETURNTRANSFER => true,
-            CURLOPT_POSTFIELDS => json_encode($payload),
-        ]);
-
-        curl_exec($ch);
-        curl_close($ch);
+        \App\Jobs\SendFcmPushJob::dispatch($projectId, $payload);
     }
 
     return true;

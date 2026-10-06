@@ -118,8 +118,6 @@ function send_notification($userIds, $title, $body, $type, $customData = [])
         }
 
         $projectId   = $cache->getSystemSettings('firebase_project_id');
-        $accessToken = getAccessToken();
-
         $payload = [
             "message" => [
                 "token" => $receiver->fcm_id,
@@ -158,21 +156,7 @@ function send_notification($userIds, $title, $body, $type, $customData = [])
             ]
         ];
 
-        $ch = curl_init();
-        curl_setopt_array($ch, [
-            CURLOPT_URL => "https://fcm.googleapis.com/v1/projects/{$projectId}/messages:send",
-            CURLOPT_POST => true,
-            CURLOPT_HTTPHEADER => [
-                'Authorization: Bearer ' . $accessToken,
-                'Content-Type: application/json',
-            ],
-            CURLOPT_RETURNTRANSFER => true,
-            CURLOPT_SSL_VERIFYPEER => false,
-            CURLOPT_POSTFIELDS => json_encode($payload),
-        ]);
-
-        curl_exec($ch);
-        curl_close($ch);
+        \App\Jobs\SendFcmPushJob::dispatch($projectId, $payload);
     }
 
     return true;
