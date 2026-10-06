@@ -90,6 +90,7 @@ class MigrateAllTenants extends Command
                 'database/migrations/schools/2026_08_22_205150_add_consent_form_date_to_students_table.php',
                 'database/migrations/schools/2026_08_24_110000_change_consent_form_date_to_datetime_in_students_table.php',
                 'database/migrations/schools/2026_08_25_105625_change_consent_form_date_to_datetime_in_students_table.php',
+                'database/migrations/schools/2026_10_06_100000_change_description_to_longtext_in_multiple_tables.php',
             ];
 
             foreach ($migrations as $path) {
