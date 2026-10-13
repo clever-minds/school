@@ -19,6 +19,29 @@ $(document).ready(function () {
     })
 })
 
+// Configure bootstrap-table default export options so input and select fields export actual values
+if (window.jQuery && $.fn.bootstrapTable && $.fn.bootstrapTable.defaults) {
+    $.extend(true, $.fn.bootstrapTable.defaults, {
+        exportOptions: {
+            onCellHtmlData: function (cell, rowIndex, colIndex, htmlData) {
+                if (cell.is('th')) {
+                    return cell.find('.th-inner').text() || cell.text();
+                }
+                var $input = cell.find('input:not([type="hidden"])');
+                if ($input.length > 0) {
+                    var val = $input.val();
+                    return (val !== undefined && val !== null && val !== '') ? String(val) : '0';
+                }
+                var $select = cell.find('select');
+                if ($select.length > 0) {
+                    return $select.find('option:selected').text();
+                }
+                return htmlData;
+            }
+        }
+    });
+}
+
 //Setup CSRF Token default in AJAX Request
 $.ajaxSetup({
     headers: {
