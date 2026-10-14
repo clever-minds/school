@@ -54,10 +54,6 @@
                                     <span class="badge badge-warning mr-2 p-2">H : Half Day</span>
                                     <span class="badge badge-info p-2">W : Work From Home</span>
                                 </div>
-                                <div id="punch-legend" class="mt-2 d-none">
-                                    <span class="badge badge-success mr-2 p-2"><i class="fa fa-sign-in mr-1"></i> In : Punch In</span>
-                                    <span class="badge badge-danger p-2"><i class="fa fa-sign-out mr-1"></i> Out : Punch Out</span>
-                                </div>
                             </div>
                         </div>
 
@@ -160,12 +156,18 @@
 
     /* Reduce padding for table cells */
     .show_attendance_student_list .table td, 
-    .show_attendance_student_list .table th,
-    .show_attendance_punch_list .table td, 
-    .show_attendance_punch_list .table th {
+    .show_attendance_student_list .table th {
         padding: 4px 5px !important;
         vertical-align: middle;
         text-align: center;
+    }
+
+    .show_attendance_punch_list .table td, 
+    .show_attendance_punch_list .table th {
+        padding: 5px 8px !important;
+        vertical-align: middle;
+        text-align: center;
+        white-space: nowrap !important;
     }
 
     .show_attendance_student_list .table td:first-child,
@@ -225,11 +227,11 @@
         font-family: "ubuntu-regular", sans-serif !important;
         font-size: 13px !important;
         font-weight: 400 !important;
-        line-height: 1.4 !important;
-        white-space: nowrap;
-        padding: 2px 4px;
-        display: inline-block;
-        text-align: left;
+        line-height: normal !important;
+        white-space: nowrap !important;
+        display: inline-flex !important;
+        align-items: center !important;
+        justify-content: center !important;
     }
 
     .punch-cell .punch-in-text {
@@ -237,6 +239,7 @@
         font-size: 13px !important;
         font-weight: 400 !important;
         color: #28a745 !important;
+        white-space: nowrap !important;
     }
 
     .punch-cell .punch-out-text {
@@ -244,6 +247,13 @@
         font-size: 13px !important;
         font-weight: 400 !important;
         color: #dc3545 !important;
+        white-space: nowrap !important;
+    }
+
+    .punch-cell .punch-separator {
+        color: #adb5bd !important;
+        margin: 0 4px !important;
+        font-weight: 300 !important;
     }
 </style>
 @endsection
@@ -451,13 +461,15 @@
                             return {
                                 css: { 
                                     "background-color": "#ffe6e6",
-                                    "min-width": "95px"
+                                    "min-width": "180px",
+                                    "white-space": "nowrap"
                                 }
                             };
                         }
                         return {
                             css: {
-                                "min-width": "95px"
+                                "min-width": "180px",
+                                "white-space": "nowrap"
                             }
                         };
                     }
@@ -512,11 +524,12 @@
                 return '';
             }
 
-            // If both punch in and punch out exist, show both
+            // If both punch in and punch out exist, show both on the SAME line
             if (punchIn && punchOut) {
                 return `
-                    <div class="punch-cell">
-                        <span class="punch-in-text text-success">In: ${punchIn}</span><br>
+                    <div class="punch-cell text-nowrap">
+                        <span class="punch-in-text text-success">In: ${punchIn}</span>
+                        <span class="punch-separator">|</span>
                         <span class="punch-out-text text-danger">Out: ${punchOut}</span>
                     </div>
                 `;
@@ -525,7 +538,7 @@
             // If only punch in exists, show punch in only
             if (punchIn) {
                 return `
-                    <div class="punch-cell">
+                    <div class="punch-cell text-nowrap">
                         <span class="punch-in-text text-success">In: ${punchIn}</span>
                     </div>
                 `;
@@ -534,7 +547,7 @@
             // If only punch out exists, show punch out only
             if (punchOut) {
                 return `
-                    <div class="punch-cell">
+                    <div class="punch-cell text-nowrap">
                         <span class="punch-out-text text-danger">Out: ${punchOut}</span>
                     </div>
                 `;
@@ -548,10 +561,8 @@
             var target = $(e.target).attr("href");
             if (target === '#pane-punch') {
                 $('#status-legend').addClass('d-none');
-                $('#punch-legend').removeClass('d-none');
                 $('#punch_table_list').bootstrapTable('resetView');
             } else {
-                $('#punch-legend').addClass('d-none');
                 $('#status-legend').removeClass('d-none');
                 $('#table_list').bootstrapTable('resetView');
             }
@@ -758,7 +769,6 @@
             if (urlParams.get('tab') === 'punch' || urlParams.get('type') === 'punch') {
                 $('#tab-punch').tab('show');
                 $('#status-legend').addClass('d-none');
-                $('#punch-legend').removeClass('d-none');
             }
 
             if ($('#month').val()) {
