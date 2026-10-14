@@ -21,12 +21,12 @@
                             </h4>
                             <ul class="nav nav-pills attendance-pills mt-2 mt-sm-0" id="attendanceViewTabs" role="tablist">
                                 <li class="nav-item">
-                                    <a class="nav-link active font-weight-bold" id="tab-status" data-toggle="pill" href="#pane-status" role="tab" aria-selected="true">
+                                    <a class="nav-link active" id="tab-status" data-toggle="pill" href="#pane-status" role="tab" aria-selected="true" style="font-weight: 400 !important;">
                                         <i class="fa fa-calendar-check-o mr-1"></i> {{ __('Attendance Status') }}
                                     </a>
                                 </li>
                                 <li class="nav-item">
-                                    <a class="nav-link font-weight-bold" id="tab-punch" data-toggle="pill" href="#pane-punch" role="tab" aria-selected="false">
+                                    <a class="nav-link" id="tab-punch" data-toggle="pill" href="#pane-punch" role="tab" aria-selected="false" style="font-weight: 400 !important;">
                                         <i class="fa fa-clock-o mr-1"></i> {{ __('Punch In / Out Time') }}
                                     </a>
                                 </li>
@@ -81,6 +81,7 @@
                                            data-trim-on-search="false"
                                            data-mobile-responsive="true" data-sort-name="id" data-sort-order="desc"
                                            data-maintain-selected="true" data-export-data-type='all' data-show-export="true"
+                                           data-export-types='["excel", "csv"]'
                                            data-export-options='{ "fileName": "view-attendance-list-<?= date('d-m-y') ?>" ,"ignoreColumn": ["action"]}'
                                            data-escape="false">
                                         <thead>
@@ -113,6 +114,7 @@
                                            data-trim-on-search="false"
                                            data-mobile-responsive="true" data-sort-name="id" data-sort-order="desc"
                                            data-maintain-selected="true" data-export-data-type='all' data-show-export="true"
+                                           data-export-types='["excel", "csv"]'
                                            data-export-options='{ "fileName": "punch-attendance-list-<?= date('d-m-y') ?>" }'
                                            data-escape="false">
                                         <thead>
@@ -132,25 +134,29 @@
     </div>
 @endsection
 
-@section('style')
+@section('css')
 <style>
     /* Nav Pills styling */
     .attendance-pills .nav-link {
         border-radius: 20px;
         padding: 6px 18px;
-        color: #495057;
-        background-color: #f1f3f5;
+        color: #007bff;
+        background-color: #ffffff;
+        border: 1px solid #007bff;
         margin-left: 8px;
         font-size: 13px;
+        font-weight: 400 !important;
         transition: all 0.2s ease-in-out;
     }
     .attendance-pills .nav-link:hover {
-        background-color: #e2e6ea;
-        color: #212529;
+        background-color: #f0f7ff;
+        color: #0056b3;
     }
     .attendance-pills .nav-link.active {
         background-color: #007bff !important;
         color: #ffffff !important;
+        font-weight: 400 !important;
+        border-color: #007bff !important;
         box-shadow: 0 2px 6px rgba(0, 123, 255, 0.35);
     }
 
@@ -251,11 +257,13 @@
         font-family: "ubuntu-regular", sans-serif !important;
         font-size: 11.5px !important;
         font-weight: 500 !important;
-        line-height: normal !important;
+        line-height: 1.35 !important;
         white-space: nowrap !important;
         display: inline-flex !important;
+        flex-direction: column !important;
         align-items: center !important;
         justify-content: center !important;
+        padding: 1px 0 !important;
     }
 
     .punch-cell .punch-in-text {
@@ -264,6 +272,7 @@
         font-weight: 500 !important;
         color: #0f5132 !important;
         white-space: nowrap !important;
+        display: block !important;
     }
 
     .punch-cell .punch-out-text {
@@ -272,12 +281,7 @@
         font-weight: 500 !important;
         color: #842029 !important;
         white-space: nowrap !important;
-    }
-
-    .punch-cell .punch-separator {
-        color: #495057 !important;
-        margin: 0 4px !important;
-        font-weight: 400 !important;
+        display: block !important;
     }
 </style>
 @endsection
@@ -394,7 +398,7 @@
                         maintainSelected: true,
                         exportDataType: 'all',
                         showExport: true,
-                        exportTypes: ['excel', 'csv', 'pdf'],
+                        exportTypes: ['excel', 'csv'],
                         exportOptions: {
                             fileName: 'staff-attendance-status-' + month + '-' + currentYear,
                             ignoreColumn: ['action'],
@@ -435,7 +439,7 @@
                         maintainSelected: true,
                         exportDataType: 'all',
                         showExport: true,
-                        exportTypes: ['excel', 'csv', 'pdf'],
+                        exportTypes: ['excel', 'csv'],
                         exportOptions: {
                             fileName: 'staff-punch-attendance-' + month + '-' + currentYear,
                             onCellHtmlData: function (cell, rowIndex, colIndex, htmlData) {
@@ -529,14 +533,14 @@
                             return {
                                 css: { 
                                     "background-color": "#ffe6e6",
-                                    "min-width": "155px",
+                                    "min-width": "100px",
                                     "white-space": "nowrap"
                                 }
                             };
                         }
                         return {
                             css: {
-                                "min-width": "155px",
+                                "min-width": "100px",
                                 "white-space": "nowrap"
                             }
                         };
@@ -592,13 +596,12 @@
                 return '';
             }
 
-            // If both punch in and punch out exist, show both on the SAME line
+            // If both punch in and punch out exist, show ek ke niche ek
             if (punchIn && punchOut) {
                 return `
-                    <div class="punch-cell text-nowrap">
-                        <span class="punch-in-text text-success">In: ${punchIn}</span>
-                        <span class="punch-separator">|</span>
-                        <span class="punch-out-text text-danger">Out: ${punchOut}</span>
+                    <div class="punch-cell">
+                        <span class="punch-in-text">In: ${punchIn}</span>
+                        <span class="punch-out-text">Out: ${punchOut}</span>
                     </div>
                 `;
             }
@@ -606,8 +609,8 @@
             // If only punch in exists, show punch in only
             if (punchIn) {
                 return `
-                    <div class="punch-cell text-nowrap">
-                        <span class="punch-in-text text-success">In: ${punchIn}</span>
+                    <div class="punch-cell">
+                        <span class="punch-in-text">In: ${punchIn}</span>
                     </div>
                 `;
             }
@@ -615,8 +618,8 @@
             // If only punch out exists, show punch out only
             if (punchOut) {
                 return `
-                    <div class="punch-cell text-nowrap">
-                        <span class="punch-out-text text-danger">Out: ${punchOut}</span>
+                    <div class="punch-cell">
+                        <span class="punch-out-text">Out: ${punchOut}</span>
                     </div>
                 `;
             }
