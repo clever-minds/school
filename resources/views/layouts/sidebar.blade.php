@@ -516,11 +516,6 @@
                                     {{ __('Month-wise Attendance') }}
                                 </a>
                             </li>
-                            <li class="nav-item">
-                                <a href="{{ route('staff-attendance.month') }}?tab=punch" class="nav-link">
-                                    {{ __('Month-wise Punch Time') }}
-                                </a>
-                            </li>
                         @endcan
                         @can('staff-attendance-qr')
                             <li class="nav-item">
