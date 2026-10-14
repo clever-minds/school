@@ -249,8 +249,8 @@
     /* Punch cell formatting matching Month dropdown font */
     .punch-cell {
         font-family: "ubuntu-regular", sans-serif !important;
-        font-size: 13px !important;
-        font-weight: 400 !important;
+        font-size: 11.5px !important;
+        font-weight: 500 !important;
         line-height: normal !important;
         white-space: nowrap !important;
         display: inline-flex !important;
@@ -260,24 +260,24 @@
 
     .punch-cell .punch-in-text {
         font-family: "ubuntu-regular", sans-serif !important;
-        font-size: 13px !important;
-        font-weight: 400 !important;
-        color: #28a745 !important;
+        font-size: 11.5px !important;
+        font-weight: 500 !important;
+        color: #0f5132 !important;
         white-space: nowrap !important;
     }
 
     .punch-cell .punch-out-text {
         font-family: "ubuntu-regular", sans-serif !important;
-        font-size: 13px !important;
-        font-weight: 400 !important;
-        color: #dc3545 !important;
+        font-size: 11.5px !important;
+        font-weight: 500 !important;
+        color: #842029 !important;
         white-space: nowrap !important;
     }
 
     .punch-cell .punch-separator {
-        color: #adb5bd !important;
+        color: #495057 !important;
         margin: 0 4px !important;
-        font-weight: 300 !important;
+        font-weight: 400 !important;
     }
 </style>
 @endsection
@@ -529,14 +529,14 @@
                             return {
                                 css: { 
                                     "background-color": "#ffe6e6",
-                                    "min-width": "180px",
+                                    "min-width": "155px",
                                     "white-space": "nowrap"
                                 }
                             };
                         }
                         return {
                             css: {
-                                "min-width": "180px",
+                                "min-width": "155px",
                                 "white-space": "nowrap"
                             }
                         };
