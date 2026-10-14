@@ -220,12 +220,30 @@
         background-color: #f8f9fa !important;
     }
 
-    /* Punch cell formatting */
+    /* Punch cell formatting matching Month dropdown font */
     .punch-cell {
-        font-size: 11px;
-        line-height: 1.35;
+        font-family: "ubuntu-regular", sans-serif !important;
+        font-size: 13px !important;
+        font-weight: 400 !important;
+        line-height: 1.4 !important;
         white-space: nowrap;
-        padding: 2px 0;
+        padding: 2px 4px;
+        display: inline-block;
+        text-align: left;
+    }
+
+    .punch-cell .punch-in-text {
+        font-family: "ubuntu-regular", sans-serif !important;
+        font-size: 13px !important;
+        font-weight: 400 !important;
+        color: #28a745 !important;
+    }
+
+    .punch-cell .punch-out-text {
+        font-family: "ubuntu-regular", sans-serif !important;
+        font-size: 13px !important;
+        font-weight: 400 !important;
+        color: #dc3545 !important;
     }
 </style>
 @endsection
@@ -433,13 +451,13 @@
                             return {
                                 css: { 
                                     "background-color": "#ffe6e6",
-                                    "min-width": "85px"
+                                    "min-width": "95px"
                                 }
                             };
                         }
                         return {
                             css: {
-                                "min-width": "85px"
+                                "min-width": "95px"
                             }
                         };
                     }
@@ -498,8 +516,8 @@
             if (punchIn && punchOut) {
                 return `
                     <div class="punch-cell">
-                        <span class="text-success font-weight-bold punch-in-text">In: ${punchIn}</span><br>
-                        <span class="text-danger font-weight-bold punch-out-text">Out: ${punchOut}</span>
+                        <span class="punch-in-text text-success">In: ${punchIn}</span><br>
+                        <span class="punch-out-text text-danger">Out: ${punchOut}</span>
                     </div>
                 `;
             }
@@ -508,7 +526,7 @@
             if (punchIn) {
                 return `
                     <div class="punch-cell">
-                        <span class="text-success font-weight-bold punch-in-text">In: ${punchIn}</span>
+                        <span class="punch-in-text text-success">In: ${punchIn}</span>
                     </div>
                 `;
             }
@@ -517,7 +535,7 @@
             if (punchOut) {
                 return `
                     <div class="punch-cell">
-                        <span class="text-danger font-weight-bold punch-out-text">Out: ${punchOut}</span>
+                        <span class="punch-out-text text-danger">Out: ${punchOut}</span>
                     </div>
                 `;
             }
