@@ -242,7 +242,8 @@ class StaffAttendanceController extends Controller
         }
 
         $month = $request->month;
-        $date = Carbon::create(null, $month, 1);
+        $year = $request->year ?? Carbon::now()->year;
+        $date = Carbon::create($year, $month, 1);
         $school_id = $user->school_id;
 
         // Fetch all staff for this school
@@ -287,8 +288,13 @@ class StaffAttendanceController extends Controller
                     } else {
                         $staffAttendance["day_$day"] = 'A';
                     }
+
+                    $staffAttendance["punch_in_$day"] = $attendance->check_in ? Carbon::parse($attendance->check_in)->format('h:i A') : null;
+                    $staffAttendance["punch_out_$day"] = $attendance->check_out ? Carbon::parse($attendance->check_out)->format('h:i A') : null;
                 } else {
                     $staffAttendance["day_$day"] = null;
+                    $staffAttendance["punch_in_$day"] = null;
+                    $staffAttendance["punch_out_$day"] = null;
                 }
             }
             $rows[] = $staffAttendance;
