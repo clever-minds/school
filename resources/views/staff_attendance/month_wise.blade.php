@@ -162,94 +162,11 @@
 
     /* Reduce padding for table cells */
     .show_attendance_student_list .table td, 
-    .show_attendance_student_list .table th {
-        padding: 4px 5px !important;
-        vertical-align: middle;
-        text-align: center;
-    }
-
+    .show_attendance_student_list .table th,
     .show_attendance_punch_list .table td, 
     .show_attendance_punch_list .table th {
-        padding: 5px 8px !important;
+        padding: 4px 5px !important;
         vertical-align: middle;
-        text-align: center;
-        white-space: nowrap !important;
-    }
-
-    .show_attendance_student_list .table td:first-child,
-    .show_attendance_student_list .table th:first-child,
-    .show_attendance_punch_list .table td:first-child,
-    .show_attendance_punch_list .table th:first-child {
-        text-align: left;
-    }
-
-    .show_attendance_student_list .fixed-table-container,
-    .show_attendance_punch_list .fixed-table-container {
-        position: relative;
-    }
-
-    .show_attendance_student_list #table_list,
-    .show_attendance_punch_list #punch_table_list {
-        border-collapse: separate !important;
-        border-spacing: 0 !important;
-    }
-
-    /* Status Table: Column 1 - Staff Name */
-    .show_attendance_student_list #table_list th:nth-child(1),
-    .show_attendance_student_list #table_list td:nth-child(1) {
-        position: sticky !important;
-        left: 0px !important;
-        z-index: 5 !important;
-        background-color: #ffffff !important;
-        min-width: 160px !important;
-        max-width: 220px !important;
-    }
-
-    /* Status Table: Column 2 - Action */
-    .show_attendance_student_list #table_list th:nth-child(2),
-    .show_attendance_student_list #table_list td:nth-child(2) {
-        position: sticky !important;
-        left: 160px !important;
-        z-index: 5 !important;
-        background-color: #ffffff !important;
-        min-width: 95px !important;
-        max-width: 100px !important;
-        box-shadow: 4px 0 6px -2px rgba(0, 0, 0, 0.15) !important;
-        border-right: 1px solid #ebedf2 !important;
-    }
-
-    /* Headers for Status Table */
-    .show_attendance_student_list #table_list thead th:nth-child(1),
-    .show_attendance_student_list #table_list thead th:nth-child(2) {
-        z-index: 7 !important;
-        background-color: #f8f9fa !important;
-    }
-
-    .show_attendance_student_list #table_list tbody tr:hover > td:nth-child(1),
-    .show_attendance_student_list #table_list tbody tr:hover > td:nth-child(2) {
-        background-color: #f2edf3 !important;
-    }
-
-    /* Punch Table: Column 1 - Staff Name */
-    .show_attendance_punch_list #punch_table_list th:nth-child(1),
-    .show_attendance_punch_list #punch_table_list td:nth-child(1) {
-        position: sticky !important;
-        left: 0px !important;
-        z-index: 5 !important;
-        background-color: #ffffff !important;
-        min-width: 160px !important;
-        max-width: 220px !important;
-        box-shadow: 4px 0 6px -2px rgba(0, 0, 0, 0.15) !important;
-        border-right: 1px solid #ebedf2 !important;
-    }
-
-    .show_attendance_punch_list #punch_table_list thead th:nth-child(1) {
-        z-index: 7 !important;
-        background-color: #f8f9fa !important;
-    }
-
-    .show_attendance_punch_list #punch_table_list tbody tr:hover > td:nth-child(1) {
-        background-color: #f2edf3 !important;
     }
 
     /* Punch cell formatting matching Month dropdown font */
@@ -263,7 +180,6 @@
         flex-direction: column !important;
         align-items: center !important;
         justify-content: center !important;
-        padding: 1px 0 !important;
     }
 
     .punch-cell .punch-in-text {
@@ -312,50 +228,6 @@
         const monthSelect = document.getElementById('month');
         const roleSelect = document.getElementById('role_id');
 
-        function alignStickyColumns() {
-            setTimeout(function() {
-                let $statusTable = $('#table_list');
-                if ($statusTable.length) {
-                    let $th1 = $statusTable.find('thead th:nth-child(1)');
-                    let w1 = $th1.outerWidth() || 160;
-
-                    $statusTable.find('tr > *:nth-child(1)').css({
-                        'position': 'sticky',
-                        'left': '0px',
-                        'z-index': '5',
-                        'background-color': '#ffffff'
-                    });
-
-                    $statusTable.find('tr > *:nth-child(2)').css({
-                        'position': 'sticky',
-                        'left': w1 + 'px',
-                        'z-index': '5',
-                        'background-color': '#ffffff'
-                    });
-
-                    $statusTable.find('thead th:nth-child(1), thead th:nth-child(2)').css({
-                        'z-index': '7',
-                        'background-color': '#f8f9fa'
-                    });
-                }
-
-                let $punchTable = $('#punch_table_list');
-                if ($punchTable.length) {
-                    $punchTable.find('tr > *:nth-child(1)').css({
-                        'position': 'sticky',
-                        'left': '0px',
-                        'z-index': '5',
-                        'background-color': '#ffffff'
-                    });
-
-                    $punchTable.find('thead th:nth-child(1)').css({
-                        'z-index': '7',
-                        'background-color': '#f8f9fa'
-                    });
-                }
-            }, 50);
-        }
-
         async function handleSelectChange() {
             var month = $('#month').val();
             var roleId = $('#role_id').val();
@@ -392,6 +264,8 @@
                         toolbar: '#toolbar',
                         showColumns: false,
                         showRefresh: false,
+                        fixedColumns: true,
+                        fixedNumber: 1,
                         mobileResponsive: true,
                         sortName: 'id',
                         sortOrder: 'desc',
@@ -433,6 +307,8 @@
                         toolbar: '#punch_toolbar',
                         showColumns: false,
                         showRefresh: false,
+                        fixedColumns: true,
+                        fixedNumber: 1,
                         mobileResponsive: true,
                         sortName: 'id',
                         sortOrder: 'desc',
@@ -462,17 +338,6 @@
                         escape: false
                     });
 
-                    table.on('post-body.bs.table post-header.bs.table', function() {
-                        alignStickyColumns();
-                    });
-                    punchTable.on('post-body.bs.table post-header.bs.table', function() {
-                        alignStickyColumns();
-                    });
-
-                    alignStickyColumns();
-                    setTimeout(alignStickyColumns, 150);
-                    setTimeout(alignStickyColumns, 400);
-
                 } catch (error) {
                     console.error('Error fetching attendance data:', error);
                     table.bootstrapTable('hideLoading');
@@ -490,22 +355,10 @@
             const columns = [];
 
             for (let day = 1; day <= daysInMonth; day++) {
-                let date = new Date(currentYear, month - 1, day);
-                let isSunday = date.getDay() === 0;
-                
                 columns.push({
                     field: `day_${day}`,
                     title: `${day}`,
-                    align: 'center',
-                    formatter: attendanceFormatter,
-                    cellStyle: function(value, row, index) {
-                        if (isSunday) {
-                            return {
-                                css: { "background-color": "#ffe6e6" }
-                            };
-                        }
-                        return {};
-                    }
+                    formatter: attendanceFormatter
                 });
             }
 
@@ -518,32 +371,12 @@
             const columns = [];
 
             for (let day = 1; day <= daysInMonth; day++) {
-                let date = new Date(currentYear, month - 1, day);
-                let isSunday = date.getDay() === 0;
-                
                 columns.push({
                     field: `punch_day_${day}`,
                     title: `${day}`,
                     align: 'center',
                     formatter: function(value, row, index) {
                         return punchAttendanceFormatter(row, day);
-                    },
-                    cellStyle: function(value, row, index) {
-                        if (isSunday) {
-                            return {
-                                css: { 
-                                    "background-color": "#ffe6e6",
-                                    "min-width": "100px",
-                                    "white-space": "nowrap"
-                                }
-                            };
-                        }
-                        return {
-                            css: {
-                                "min-width": "100px",
-                                "white-space": "nowrap"
-                            }
-                        };
                     }
                 });
             }
@@ -637,7 +470,6 @@
                 $('#status-legend').removeClass('d-none');
                 $('#table_list').bootstrapTable('resetView');
             }
-            alignStickyColumns();
         });
 
         $(document).on('change', '.update-attendance', function() {
