@@ -101,26 +101,53 @@ class DashboardController extends Controller
 
         // School Admin Dashboard
         if (Auth::user()->hasRole('School Admin') || Auth::user()->school_id) {
+            $defaultSessionYear = $this->cache->getDefaultSessionYear();
+
             // Counters
-            $teacher = $this->user->builder()->role("Teacher")->withTrashed()->count();
-            $student = $this->student->builder()->whereHas('user', function ($q) {
-                $q->withTrashed();
-            })->withTrashed()->count();
-            $parent = $this->student->builder()->where('application_status', 1)->groupBy('guardian_id')->get()->count();
+            $teacher = $this->user->builder()->role("Teacher")->where('status', 1)->count();
+
+            $studentQuery = $this->student->builder()
+                ->where(function ($q) {
+                    $q->where('application_type', 'offline')
+                        ->orWhere(function ($query) {
+                            $query->where('application_status', 1)->where('application_type', 'online');
+                        });
+                })
+                ->when($defaultSessionYear, function ($q) use ($defaultSessionYear) {
+                    $q->where('session_year_id', $defaultSessionYear->id);
+                })
+                ->whereHas('user', function ($q) {
+                    $q->where('status', 1);
+                });
+
+            $student = (clone $studentQuery)->count();
+
+            $parent = $this->student->builder()
+                ->where(function ($q) {
+                    $q->where('application_type', 'offline')
+                        ->orWhere(function ($query) {
+                            $query->where('application_status', 1)->where('application_type', 'online');
+                        });
+                })
+                ->when($defaultSessionYear, function ($q) use ($defaultSessionYear) {
+                    $q->where('session_year_id', $defaultSessionYear->id);
+                })
+                ->whereHas('user', function ($q) {
+                    $q->where('status', 1);
+                })
+                ->groupBy('guardian_id')->get()->count();
 
             if ($student > 0) {
-                $boys_count = $this->student->builder()
+                $boys_count = (clone $studentQuery)
                     ->whereHas('user', function ($q) {
-                        $q->where('gender', 'male')->withTrashed();
+                        $q->where('gender', 'male')->where('status', 1);
                     })
-                    ->withTrashed()
                     ->count();
 
-                $girls_count = $this->student->builder()
+                $girls_count = (clone $studentQuery)
                     ->whereHas('user', function ($q) {
-                        $q->where('gender', 'female')->withTrashed();
+                        $q->where('gender', 'female')->where('status', 1);
                     })
-                    ->withTrashed()
                     ->count();
                 $boys = round((($boys_count * 100) / $student), 2);
                 $girls = round(($girls_count * 100) / $student, 2);
