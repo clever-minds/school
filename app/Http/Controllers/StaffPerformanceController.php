@@ -13,7 +13,6 @@ use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\Validator;
 use Spatie\Permission\Models\Role;
 use Throwable;
@@ -24,54 +23,25 @@ class StaffPerformanceController extends Controller
     {
         ResponseService::noAnyPermissionThenRedirect(['staff-performance-list', 'staff-performance-create', 'payroll-list', 'payroll-create', 'payroll-edit']);
 
-        $schoolId = Auth::user()->school_id;
+        $sessionYears = SessionYear::builder()->orderBy('start_date', 'DESC')->get();
+        $defaultSessionYear = app(CachingService::class)->getDefaultSessionYear();
 
-        $roles = Role::whereNotIn('name', ['Student', 'Parent', 'Guardian'])
-            ->where(function ($q) use ($schoolId) {
-                if ($schoolId) {
-                    $q->whereNull('school_id')->orWhere('school_id', $schoolId);
+        $roles = Role::whereNotIn('name', ['Student', 'Parent', 'Guardian', 'School Admin', 'Super Admin', 'Principal'])
+            ->where(function ($q) {
+                $q->whereNull('school_id');
+                if (Auth::user() && Auth::user()->school_id) {
+                    $q->orWhere('school_id', Auth::user()->school_id);
                 }
             })
-            ->orderBy('name', 'ASC')
             ->get()
             ->unique('name');
-
-        $sessionYears = SessionYear::owner()->orderBy('id', 'DESC')->get();
-        $defaultSessionYear = app(CachingService::class)->getDefaultSessionYear();
-        if (!$defaultSessionYear && $sessionYears->count()) {
-            $defaultSessionYear = $sessionYears->first();
-        }
-
-        if ($sessionYears->isEmpty()) {
-            $fallbackSy = new SessionYear([
-                'id' => 0,
-                'name' => date('Y') . '-' . (date('Y') + 1),
-                'start_date' => date('Y') . '-04-01',
-                'end_date' => (date('Y') + 1) . '-03-31',
-                'default' => 1
-            ]);
-            $sessionYears = collect([$fallbackSy]);
-            $defaultSessionYear = $fallbackSy;
-        }
 
         $months = sessionYearWiseMonth();
         $currentMonth = Carbon::now()->month;
         $currentYear = Carbon::now()->year;
-
-        if ($defaultSessionYear) {
-            $startMonth = (int)date('n', strtotime($defaultSessionYear->start_date));
-            $startYear = (int)date('Y', strtotime($defaultSessionYear->start_date));
-            $endYear = (int)date('Y', strtotime($defaultSessionYear->end_date));
-            if ($currentMonth >= $startMonth) {
-                $currentYear = $startYear;
-            } else {
-                $currentYear = $endYear;
-            }
-        }
-
         $criteriaList = StaffPerformanceEvaluation::getDefaultCriteria();
 
-        return view('staff_performance.index', compact('roles', 'sessionYears', 'defaultSessionYear', 'months', 'currentMonth', 'currentYear', 'criteriaList'));
+        return view('staff_performance.index', compact('sessionYears', 'defaultSessionYear', 'roles', 'months', 'currentMonth', 'currentYear', 'criteriaList'));
     }
 
     public function list(Request $request)
@@ -85,72 +55,78 @@ class StaffPerformanceController extends Controller
         $sessionYearId = $request->input('session_year_id');
         $roleId = $request->input('role_id');
         $search = $request->input('search');
-        $schoolId = Auth::user()->school_id;
 
         $offset = $request->input('offset', 0);
         $limit = $request->input('limit', 10);
         $sort = $request->input('sort', 'name');
         $order = $request->input('order', 'ASC');
 
-        $query = Staff::with(['user.roles', 'staffSalary.payrollSetting'])
+        $query = Staff::select('staffs.*')
             ->join('users', 'staffs.user_id', '=', 'users.id')
-            ->select('staffs.*')
+            ->with(['user.roles', 'staffSalary.payrollSetting'])
             ->whereNull('users.deleted_at');
 
-        if ($schoolId) {
-            $query->where('users.school_id', $schoolId);
+        if (Auth::user() && Auth::user()->school_id) {
+            $query->where('users.school_id', Auth::user()->school_id);
         }
 
+        // Exclude Principal, Admins, Students, Parents, Guardians from performance list
+        $query->whereDoesntHave('user.roles', function ($q) {
+            $q->whereIn('roles.name', ['Principal', 'School Admin', 'Super Admin', 'Student', 'Parent', 'Guardian']);
+        });
+
         if ($roleId) {
-            $selectedRole = is_numeric($roleId) ? Role::find($roleId) : Role::where('name', $roleId)->first();
-            $roleName = $selectedRole ? $selectedRole->name : $roleId;
-            $query->whereHas('user.roles', function ($q) use ($roleId, $roleName) {
-                $q->where(function ($sub) use ($roleId, $roleName) {
-                    if (is_numeric($roleId)) {
-                        $sub->where('roles.id', $roleId);
-                    }
-                    if ($roleName) {
-                        $sub->orWhere('roles.name', $roleName);
+            $selectedRole = Role::find($roleId);
+            $query->whereHas('user.roles', function ($q) use ($roleId, $selectedRole) {
+                $q->where(function ($sub) use ($roleId, $selectedRole) {
+                    $sub->where('roles.id', $roleId);
+                    if ($selectedRole) {
+                        $sub->orWhere('roles.name', $selectedRole->name);
                     }
                 });
-            });
-        } else {
-            $query->whereHas('user.roles', function ($q) {
-                $q->whereNotIn('roles.name', ['Student', 'Parent', 'Guardian']);
             });
         }
 
         if ($search) {
-            $query->where(function ($sub) use ($search) {
-                $sub->where('users.first_name', 'like', "%{$search}%")
+            $query->where(function ($q) use ($search) {
+                $q->where('users.first_name', 'like', "%{$search}%")
                     ->orWhere('users.last_name', 'like', "%{$search}%")
                     ->orWhere('users.email', 'like', "%{$search}%")
-                    ->orWhereRaw("concat(users.first_name, ' ', users.last_name) like ?", ["%{$search}%"]);
+                    ->orWhereRaw("concat(users.first_name, ' ', users.last_name) LIKE '%" . $search . "%'");
             });
         }
 
-        $total = $query->count();
+        if ($sessionYearId) {
+            $selectedSessionYear = SessionYear::find($sessionYearId);
+            if ($selectedSessionYear && $selectedSessionYear->end_date) {
+                $query->where(function ($q) use ($selectedSessionYear, $sessionYearId) {
+                    $q->where(function ($sub) use ($selectedSessionYear) {
+                        $sub->whereNull('staffs.joining_date')
+                            ->orWhereDate('staffs.joining_date', '<=', $selectedSessionYear->end_date);
+                    })->where(function ($sub) use ($sessionYearId) {
+                        $sub->whereNull('staffs.leave_session_year_id')
+                            ->orWhere('staffs.leave_session_year_id', '>=', $sessionYearId);
+                    });
+                });
+            }
+        }
+
+        $total = (clone $query)->count('staffs.id');
 
         if ($sort === 'name' || $sort === 'first_name') {
             $query->orderBy('users.first_name', $order)->orderBy('users.last_name', $order);
-        } elseif ($sort === 'id') {
-            $query->orderBy('staffs.id', $order);
         } else {
             $query->orderBy('staffs.id', $order);
         }
 
         $staffMembers = $query->skip($offset)->take($limit)->get();
-        $staffIds = $staffMembers->pluck('id')->toArray();
+        $staffIds = $staffMembers->pluck('id')->filter()->toArray();
 
-        $evalQuery = StaffPerformanceEvaluation::whereIn('staff_id', $staffIds)
+        $evaluations = StaffPerformanceEvaluation::whereIn('staff_id', $staffIds)
             ->where('month', $month)
-            ->where('year', $year);
-
-        if ($schoolId) {
-            $evalQuery->where('school_id', $schoolId);
-        }
-
-        $evaluations = $evalQuery->get()->keyBy('staff_id');
+            ->where('year', $year)
+            ->get()
+            ->keyBy('staff_id');
 
         $rows = [];
         $no = $offset + 1;
@@ -199,8 +175,7 @@ class StaffPerformanceController extends Controller
 
             $operate = '<button type="button" class="btn btn-sm btn-theme evaluate-staff-btn" '
                 . 'data-staff-id="' . $staff->id . '" '
-                . 'data-staff-name="' . htmlspecialchars($user->full_name) . '" '
-                . 'data-session-year-id="' . $sessionYearId . '" '
+                . 'data-staff-name="' . htmlspecialchars($user->full_name, ENT_QUOTES, 'UTF-8') . '" '
                 . 'data-month="' . $month . '" '
                 . 'data-year="' . $year . '" '
                 . 'data-base-incentive="' . $baseIncentive . '" '
@@ -287,7 +262,6 @@ class StaffPerformanceController extends Controller
 
         $validator = Validator::make($request->all(), [
             'staff_id' => 'required|exists:staffs,id',
-            'session_year_id' => 'nullable|integer',
             'month' => 'required|integer|between:1,12',
             'year' => 'required|integer',
             'criteria' => 'required|array',
@@ -325,20 +299,6 @@ class StaffPerformanceController extends Controller
 
             $scorePercentage = ($positivePoints / 10) * 100;
 
-            $attributes = [
-                'criteria' => $criteriaPayload,
-                'positive_points' => $positivePoints,
-                'negative_points' => $negativePoints,
-                'total_points' => 10,
-                'score_percentage' => $scorePercentage,
-                'evaluated_by' => Auth::id(),
-                'remarks' => $request->remarks ?? null,
-            ];
-
-            if ($request->filled('session_year_id') && Schema::hasColumn('staff_performance_evaluations', 'session_year_id')) {
-                $attributes['session_year_id'] = $request->session_year_id;
-            }
-
             StaffPerformanceEvaluation::updateOrCreate(
                 [
                     'school_id' => Auth::user()->school_id,
@@ -346,7 +306,15 @@ class StaffPerformanceController extends Controller
                     'month' => $request->month,
                     'year' => $request->year,
                 ],
-                $attributes
+                [
+                    'criteria' => $criteriaPayload,
+                    'positive_points' => $positivePoints,
+                    'negative_points' => $negativePoints,
+                    'total_points' => 10,
+                    'score_percentage' => $scorePercentage,
+                    'evaluated_by' => Auth::id(),
+                    'remarks' => $request->remarks ?? null,
+                ]
             );
 
             DB::commit();
