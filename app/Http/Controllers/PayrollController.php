@@ -128,8 +128,12 @@ class PayrollController extends Controller {
                 $staffSalary = $this->staffSalary->builder()->with('payrollSetting')->where('staff_id',$user_id)->get();
                 if (count($staffSalary)) {
                     $evaluation = \App\Models\StaffPerformanceEvaluation::where('staff_id', $user_id)
-                        ->where('month', $request->month)
-                        ->where('year', $request->year)
+                        ->where(function ($q) use ($request) {
+                            $q->where('month', (int)$request->month)->orWhere('month', $request->month);
+                        })
+                        ->where(function ($q) use ($request) {
+                            $q->where('year', (int)$request->year)->orWhere('year', $request->year);
+                        })
                         ->first();
 
                     foreach ($staffSalary as $key => $payroll) {
@@ -151,12 +155,6 @@ class PayrollController extends Controller {
                                 $deducted = $baseAmount - $earned;
                                 $finalAmount = $earned;
                                 $finalPercentage = null;
-
-                                $evaluation->update([
-                                    'base_incentive' => $baseAmount,
-                                    'earned_incentive' => $earned,
-                                    'deducted_incentive' => $deducted,
-                                ]);
                             } else {
                                 $finalAmount = $baseAmount;
                             }
@@ -481,26 +479,58 @@ class PayrollController extends Controller {
                     } else {
                         $tempRow['salary_deduction'] = number_format(0, 2);
                     }
+                    // Sync performance evaluation if present
+                    $evaluation = $allEvaluations->get($row->id);
+                    if ($evaluation && count($expense->staff_payroll)) {
+                        foreach ($expense->staff_payroll as $staff_payroll) {
+                            $ps = $staff_payroll->payroll_setting;
+                            $isPerf = $ps && (
+                                $ps->type == 'performance' ||
+                                ($ps->type == 'allowance' && stripos($ps->name, 'performance') !== false)
+                            );
+                            if ($isPerf) {
+                                $baseIncentive = 0;
+                                $staffSalaryItem = $row->staffSalary->where('payroll_setting_id', $staff_payroll->payroll_setting_id)->first();
+                                if ($staffSalaryItem) {
+                                    if ($staffSalaryItem->amount) {
+                                        $baseIncentive = (float)$staffSalaryItem->amount;
+                                    } elseif ($staffSalaryItem->percentage) {
+                                        $baseIncentive = ((float)$staffSalaryItem->percentage / 100) * (float)$expense->basic_salary;
+                                    }
+                                }
+                                if (!$baseIncentive) {
+                                    $baseIncentive = (float)$staff_payroll->amount;
+                                }
+
+                                $earned = ($evaluation->positive_points / 10) * $baseIncentive;
+                                $deducted = $baseIncentive - $earned;
+
+                                if (abs((float)$staff_payroll->amount - $baseIncentive) < 0.01 && $deducted > 0) {
+                                    $staff_payroll->amount = $earned;
+                                    $staff_payroll->save();
+
+                                    $expense->amount = (float)$expense->amount - $deducted;
+                                    $expense->save();
+                                }
+                            }
+                        }
+                    }
+
                     $tempRow['net_salary'] = $expense->amount;
                     $tempRow['operate'] = $operate;
                     // Calculate allowances & deductions
                     if (count($expense->staff_payroll)) {
                         $allowance = $deduction = 0;
                         foreach ($expense->staff_payroll as $key => $staff_payroll) {
+                            if (!$staff_payroll->payroll_setting) continue;
                             if ($staff_payroll->payroll_setting->type == 'allowance' || $staff_payroll->payroll_setting->type == 'performance') {
-                                if ($staff_payroll->amount) {
+                                if ($staff_payroll->amount !== null) {
                                     $allowance += $staff_payroll->amount;
                                 } else {
                                     $allowance += ($expense->basic_salary * $staff_payroll->percentage) / 100;
                                 }
-                            } else if($staff_payroll->payroll_setting->type == 'deduction') {
-                                if ($staff_payroll->amount) {
-                                    $allowance += $staff_payroll->amount;
-                                } else {
-                                    $allowance += ($expense->basic_salary * $staff_payroll->percentage) / 100;
-                                }
-                            } else if($staff_payroll->payroll_setting->type == 'deduction') {
-                                if ($staff_payroll->amount) {
+                            } else if ($staff_payroll->payroll_setting->type == 'deduction') {
+                                if ($staff_payroll->amount !== null) {
                                     $deduction += $staff_payroll->amount;
                                 } else {
                                     $deduction += ($expense->basic_salary * $staff_payroll->percentage) / 100;
@@ -520,6 +550,14 @@ class PayrollController extends Controller {
 
                         $tempRow['allowances'] = number_format($allowance ,2);
                         $tempRow['deductions'] = number_format($deduction ,2);
+
+                        if ($hasPerformanceSetting) {
+                            if ($evaluation) {
+                                $tempRow['allowances'] = number_format($allowance, 2) . '<br><small class="text-success" title="Earned Incentive (' . $evaluation->positive_points . '/10 points, -' . $evaluation->negative_points . ' negative)">Perf: ₹' . number_format($performanceIncentiveEarned, 2) . ' (' . $evaluation->positive_points . '/10)</small>';
+                            } else {
+                                $tempRow['allowances'] = number_format($allowance, 2) . '<br><small class="text-warning" title="Evaluation Pending (Base: ₹' . number_format($performanceIncentiveEarned, 2) . ')">Perf: ₹' . number_format($performanceIncentiveEarned, 2) . ' (Pending)</small>';
+                            }
+                        }
                     } else {
                         $allowance = 0;
                         $deduction = 0;
@@ -798,10 +836,54 @@ class PayrollController extends Controller {
             // Total days
             $days = Carbon::now()->year($salary->year)->month($salary->month)->daysInMonth;
 
-            $performanceEvaluation = \App\Models\StaffPerformanceEvaluation::where('staff_id', $salary->staff_id)
-                ->where('month', $salary->month)
-                ->where('year', $salary->year)
+            $performanceEvaluation = \App\Models\StaffPerformanceEvaluation::where(function($q) use ($salary) {
+                    $q->where('staff_id', $salary->staff_id)
+                      ->orWhere('staff_id', $salary->staff->user_id ?? 0);
+                })
+                ->where(function($q) use ($salary) {
+                    $q->where('month', (int)$salary->month)->orWhere('month', $salary->month);
+                })
+                ->where(function($q) use ($salary) {
+                    $q->where('year', (int)$salary->year)->orWhere('year', $salary->year);
+                })
                 ->first();
+
+            if ($performanceEvaluation && count($salary->staff_payroll)) {
+                foreach ($salary->staff_payroll as $payroll) {
+                    $setting = $payroll->payroll_setting;
+                    $isPerf = $setting && (
+                        $setting->type === 'performance' ||
+                        ($setting->type === 'allowance' && stripos($setting->name, 'performance') !== false)
+                    );
+                    if ($isPerf) {
+                        $baseIncentive = 0;
+                        $staffSalarySetting = \App\Models\StaffSalary::where('staff_id', $salary->staff_id)
+                            ->where('payroll_setting_id', $payroll->payroll_setting_id)
+                            ->first();
+                        if ($staffSalarySetting) {
+                            if ($staffSalarySetting->amount) {
+                                $baseIncentive = (float)$staffSalarySetting->amount;
+                            } elseif ($staffSalarySetting->percentage) {
+                                $baseIncentive = ((float)$staffSalarySetting->percentage / 100) * (float)$salary->basic_salary;
+                            }
+                        }
+                        if (!$baseIncentive) {
+                            $baseIncentive = (float)$payroll->amount;
+                        }
+
+                        $earned = ($performanceEvaluation->positive_points / 10) * $baseIncentive;
+                        $deducted = $baseIncentive - $earned;
+
+                        if (abs((float)$payroll->amount - $baseIncentive) < 0.01 && $deducted > 0) {
+                            $payroll->amount = $earned;
+                            $payroll->save();
+
+                            $salary->amount = (float)$salary->amount - $deducted;
+                            $salary->save();
+                        }
+                    }
+                }
+            }
 
             $pdf = PDF::loadView('payroll.slip',compact('schoolSetting','salary','total_leaves','days','allow_leaves', 'performanceEvaluation'))->setPaper('a5');
             return $pdf->stream($salary->title.'-'.$salary->staff->user->full_name.'.pdf');

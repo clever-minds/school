@@ -2,9 +2,12 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Expense;
 use App\Models\SessionYear;
 use App\Models\Staff;
+use App\Models\StaffPayroll;
 use App\Models\StaffPerformanceEvaluation;
+use App\Models\StaffSalary;
 use App\Models\User;
 use App\Services\BootstrapTableService;
 use App\Services\CachingService;
@@ -312,7 +315,7 @@ class StaffPerformanceController extends Controller
 
             $scorePercentage = ($positivePoints / 10) * 100;
 
-            StaffPerformanceEvaluation::updateOrCreate(
+            $evaluation = StaffPerformanceEvaluation::updateOrCreate(
                 [
                     'school_id' => Auth::user()->school_id,
                     'staff_id' => $request->staff_id,
@@ -329,6 +332,57 @@ class StaffPerformanceController extends Controller
                     'remarks' => $request->remarks ?? null,
                 ]
             );
+
+            // Sync with existing Expense (payroll) and StaffPayroll if already generated
+            $expense = Expense::where('staff_id', $request->staff_id)
+                ->where(function ($q) use ($request) {
+                    $q->where('month', (int)$request->month)->orWhere('month', $request->month);
+                })
+                ->where(function ($q) use ($request) {
+                    $q->where('year', (int)$request->year)->orWhere('year', $request->year);
+                })
+                ->first();
+
+            if ($expense && count($expense->staff_payroll)) {
+                foreach ($expense->staff_payroll as $sp) {
+                    $setting = $sp->payroll_setting;
+                    $isPerf = $setting && (
+                        $setting->type === 'performance' ||
+                        ($setting->type === 'allowance' && stripos($setting->name, 'performance') !== false)
+                    );
+
+                    if ($isPerf) {
+                        $baseIncentive = 0;
+                        $staffSalaryItem = StaffSalary::where('staff_id', $expense->staff_id)
+                            ->where('payroll_setting_id', $sp->payroll_setting_id)
+                            ->first();
+
+                        if ($staffSalaryItem) {
+                            if ($staffSalaryItem->amount) {
+                                $baseIncentive = (float)$staffSalaryItem->amount;
+                            } elseif ($staffSalaryItem->percentage) {
+                                $baseIncentive = ((float)$staffSalaryItem->percentage / 100) * (float)$expense->basic_salary;
+                            }
+                        }
+
+                        if (!$baseIncentive) {
+                            $baseIncentive = (float)$sp->amount;
+                        }
+
+                        $earnedIncentive = ($positivePoints / 10) * $baseIncentive;
+                        $oldAmount = (float)$sp->amount;
+
+                        $sp->amount = $earnedIncentive;
+                        $sp->save();
+
+                        $diff = $oldAmount - $earnedIncentive;
+                        if ($diff != 0) {
+                            $expense->amount = (float)$expense->amount - $diff;
+                            $expense->save();
+                        }
+                    }
+                }
+            }
 
             DB::commit();
             return ResponseService::successResponse('Performance Evaluation Saved Successfully');

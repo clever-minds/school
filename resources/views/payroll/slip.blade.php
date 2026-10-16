@@ -362,32 +362,46 @@
                                 );
                             @endphp
                             @if ($isPerf)
+                                @php
+                                    $baseIncentive = 0;
+                                    $staffSalarySetting = \App\Models\StaffSalary::where('staff_id', $salary->staff_id)
+                                        ->where('payroll_setting_id', $payroll->payroll_setting_id)
+                                        ->first();
+                                    if ($staffSalarySetting) {
+                                        if ($staffSalarySetting->amount) {
+                                            $baseIncentive = (float)$staffSalarySetting->amount;
+                                        } elseif ($staffSalarySetting->percentage) {
+                                            $baseIncentive = ((float)$staffSalarySetting->percentage / 100) * (float)$salary->basic_salary;
+                                        }
+                                    }
+                                    if (!$baseIncentive) {
+                                        $baseIncentive = $payroll->amount ? (float)$payroll->amount : (((float)$salary->basic_salary * (float)$payroll->percentage) / 100);
+                                    }
+
+                                    if ($performanceEvaluation ?? null) {
+                                        $earnedIncentive = ($performanceEvaluation->positive_points / 10) * $baseIncentive;
+                                        $deductedIncentive = $baseIncentive - $earnedIncentive;
+                                    } else {
+                                        $earnedIncentive = $payroll->amount ? (float)$payroll->amount : $baseIncentive;
+                                        $deductedIncentive = 0;
+                                    }
+                                    $allowance += $earnedIncentive;
+                                @endphp
                                 <div class="row-col">
                                     <div class="col-6">
                                         <span class="text-left">
                                             {{ $payroll->payroll_setting->name }}
                                             @if ($performanceEvaluation ?? null)
-                                                <small style="color: #28a745; font-size: 9px;">({{ $performanceEvaluation->positive_points }}/10 pts)</small>
+                                                <small style="color: #28a745; font-size: 9px; font-weight: bold;">({{ $performanceEvaluation->positive_points }}/10 pts)</small>
                                                 @if ($performanceEvaluation->negative_points > 0)
-                                                    <br><span style="font-size: 8.5px; color: gray;">Base: {{ number_format($performanceEvaluation->base_incentive, 2) }} ({{ $performanceEvaluation->negative_points }} neg: -{{ number_format($performanceEvaluation->deducted_incentive, 2) }})</span>
+                                                    <br><span style="font-size: 8.5px; color: gray;">Base: {{ number_format($baseIncentive, 2) }} ({{ $performanceEvaluation->negative_points }} neg: -{{ number_format($deductedIncentive, 2) }})</span>
                                                 @endif
                                             @endif
                                         </span>
                                     </div>
                                     <div class="col-6 text-right">
                                         <span class="text-right">
-                                            @if ($payroll->amount)
-                                                {{ number_format($payroll->amount, 2) }}
-                                                @php
-                                                    $allowance += $payroll->amount;
-                                                @endphp
-                                            @else
-                                            @php
-                                                $allowance += ($salary->basic_salary * $payroll->percentage) / 100;
-                                            @endphp
-                                                {{ number_format(($salary->basic_salary * $payroll->percentage) / 100, 2) }}
-                                            @endif
-                                            
+                                            {{ number_format($earnedIncentive, 2) }}
                                         </span>
                                     </div>
                                 </div>
