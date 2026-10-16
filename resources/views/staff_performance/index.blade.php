@@ -25,23 +25,35 @@
 
                         <div class="row" id="toolbar">
                             <div class="form-group col-sm-12 col-md-3">
+                                <label class="font-weight-bold">{{ __('session_year') }} <span class="text-danger">*</span></label>
+                                <select name="session_year_id" id="filter_session_year_id" class="form-control">
+                                    @foreach($sessionYears as $sy)
+                                        <option value="{{ $sy->id }}"
+                                            data-start-date="{{ $sy->start_date }}"
+                                            data-end-date="{{ $sy->end_date }}"
+                                            data-start-year="{{ date('Y', strtotime($sy->start_date)) }}"
+                                            data-end-year="{{ date('Y', strtotime($sy->end_date)) }}"
+                                            data-start-month="{{ (int)date('n', strtotime($sy->start_date)) }}"
+                                            {{ (isset($defaultSessionYear) && $defaultSessionYear->id == $sy->id) || $sy->default == 1 ? 'selected' : '' }}>
+                                            {{ $sy->name }}
+                                        </option>
+                                    @endforeach
+                                </select>
+                            </div>
+                            <div class="form-group col-sm-12 col-md-3">
                                 <label class="font-weight-bold">{{ __('month') }} <span class="text-danger">*</span></label>
                                 <select name="month" id="filter_month" class="form-control">
-                                    @for($m = 1; $m <= 12; $m++)
+                                    @foreach($months as $m => $mName)
                                         <option value="{{ $m }}" {{ $m == $currentMonth ? 'selected' : '' }}>
-                                            {{ date('F', mktime(0, 0, 0, $m, 1)) }}
+                                            {{ $mName }}
                                         </option>
-                                    @endfor
+                                    @endforeach
                                 </select>
                             </div>
                             <div class="form-group col-sm-12 col-md-3">
                                 <label class="font-weight-bold">{{ __('year') }} <span class="text-danger">*</span></label>
                                 <select name="year" id="filter_year" class="form-control">
-                                    @for($y = $currentYear - 2; $y <= $currentYear + 1; $y++)
-                                        <option value="{{ $y }}" {{ $y == $currentYear ? 'selected' : '' }}>
-                                            {{ $y }}
-                                        </option>
-                                    @endfor
+                                    <option value="{{ $currentYear }}">{{ $currentYear }}</option>
                                 </select>
                             </div>
                             <div class="form-group col-sm-12 col-md-3">
@@ -103,6 +115,7 @@
                 <form id="evaluationForm" method="POST" action="{{ route('staff-performance.store') }}">
                     @csrf
                     <input type="hidden" name="staff_id" id="modal_staff_id">
+                    <input type="hidden" name="session_year_id" id="modal_session_year_id">
                     <input type="hidden" name="month" id="modal_month">
                     <input type="hidden" name="year" id="modal_year">
                     <input type="hidden" id="modal_base_incentive">
@@ -185,6 +198,34 @@
 
 @section('js')
 <script>
+    function syncYearDropdown(preferSelected) {
+        let selectedSy = $('#filter_session_year_id option:selected');
+        let startYear = parseInt(selectedSy.data('start-year')) || new Date().getFullYear();
+        let endYear = parseInt(selectedSy.data('end-year')) || startYear;
+        let startMonth = parseInt(selectedSy.data('start-month')) || 1;
+        let currentMonth = parseInt($('#filter_month').val()) || (new Date().getMonth() + 1);
+
+        let expectedYear = (currentMonth >= startMonth) ? startYear : endYear;
+
+        let yearSelect = $('#filter_year');
+        let currentVal = parseInt(yearSelect.val());
+        yearSelect.empty();
+
+        let minYear = Math.min(startYear, endYear);
+        let maxYear = Math.max(startYear, endYear);
+
+        for (let y = minYear; y <= maxYear; y++) {
+            yearSelect.append(new Option(y, y));
+        }
+
+        let targetYear = expectedYear;
+        if (preferSelected && currentVal && yearSelect.find('option[value="' + currentVal + '"]').length) {
+            targetYear = currentVal;
+        }
+
+        yearSelect.val(targetYear);
+    }
+
     function performanceQueryParams(p) {
         return {
             limit: p.limit,
@@ -192,6 +233,7 @@
             order: p.order,
             offset: p.offset,
             search: p.search,
+            session_year_id: $('#filter_session_year_id').val(),
             month: $('#filter_month').val(),
             year: $('#filter_year').val(),
             role_id: $('#filter_role').val(),
@@ -199,7 +241,19 @@
     }
 
     $(document).ready(function() {
-        $('#filter_month, #filter_year, #filter_role').on('change', function() {
+        syncYearDropdown(false);
+
+        $('#filter_session_year_id').on('change', function() {
+            syncYearDropdown(false);
+            $('#performance_table').bootstrapTable('refresh');
+        });
+
+        $('#filter_month').on('change', function() {
+            syncYearDropdown(false);
+            $('#performance_table').bootstrapTable('refresh');
+        });
+
+        $('#filter_year, #filter_role').on('change', function() {
             $('#performance_table').bootstrapTable('refresh');
         });
 
@@ -243,11 +297,13 @@
         $(document).on('click', '.evaluate-staff-btn', function() {
             let staffId = $(this).data('staff-id');
             let staffName = $(this).data('staff-name');
+            let sessionYearId = $(this).data('session-year-id') || $('#filter_session_year_id').val();
             let month = $(this).data('month');
             let year = $(this).data('year');
             let baseIncentive = parseFloat($(this).data('base-incentive')) || 0;
 
             $('#modal_staff_id').val(staffId);
+            $('#modal_session_year_id').val(sessionYearId);
             $('#modal_month').val(month);
             $('#modal_year').val(year);
             $('#modal_base_incentive').val(baseIncentive);

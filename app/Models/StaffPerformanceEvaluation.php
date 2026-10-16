@@ -15,6 +15,7 @@ class StaffPerformanceEvaluation extends Model
     protected $fillable = [
         'school_id',
         'staff_id',
+        'session_year_id',
         'month',
         'year',
         'criteria',
@@ -55,6 +56,11 @@ class StaffPerformanceEvaluation extends Model
     public function evaluator()
     {
         return $this->belongsTo(User::class, 'evaluated_by');
+    }
+
+    public function session_year()
+    {
+        return $this->belongsTo(SessionYear::class);
     }
 
     /**
