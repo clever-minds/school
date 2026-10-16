@@ -23,7 +23,7 @@ class StaffPerformanceController extends Controller
     {
         ResponseService::noAnyPermissionThenRedirect(['staff-performance-list', 'staff-performance-create', 'payroll-list', 'payroll-create', 'payroll-edit']);
 
-        $sessionYears = SessionYear::builder()->orderBy('start_date', 'DESC')->get();
+        $sessionYears = SessionYear::Owner()->orderBy('start_date', 'DESC')->get();
         $defaultSessionYear = app(CachingService::class)->getDefaultSessionYear();
 
         $roles = Role::whereNotIn('name', ['Student', 'Parent', 'Guardian', 'School Admin', 'Super Admin', 'Principal'])
