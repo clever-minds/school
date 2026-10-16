@@ -525,15 +525,15 @@ class PayrollController extends Controller {
                 $paid_leaves = $leaveMaster ? (float)($leaveMaster->leaves ?? 0) : 0;
             }
 
-            // School Sheet Exact Formulas
+            // School Sheet Formulas
             // 1. Total Gross Salary = Basic Sa + Perfo + Other Allowances
             $total_gross = round($salary + $performanceIncentiveEarned + $otherAllowances, 2);
 
-            // 2. Per Day Salary Rate = Total / 30
-            $per_day = round($total_gross / 30, 2);
+            // 2. Per Day Salary Rate = Basic Salary / Days in Month
+            $per_day = round($salary / $daysInMonth, 2);
 
-            // 3. Working Days = 30
-            $working_days = 30;
+            // 3. Working Days = Days in Month
+            $working_days = $daysInMonth;
 
             // 4. Absent Days (each half day = 0.5)
             $absent_days = round((float)$total_leave, 1);
@@ -892,7 +892,7 @@ class PayrollController extends Controller {
 
             // Sync salary total amount with earned allowances, leave deductions and deductions
             $unpaidLeaves = max(0, (float)$total_leaves - (float)($salary->paid_leaves ?? 0));
-            $lwpAmount = round(((float)$salary->basic_salary / 30) * $unpaidLeaves, 2);
+            $lwpAmount = round(((float)$salary->basic_salary / ($days ?: 30)) * $unpaidLeaves, 2);
 
             $totalAllowance = 0;
             $totalDeduction = 0;

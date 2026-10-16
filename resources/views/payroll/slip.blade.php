@@ -226,7 +226,7 @@
             if ($totalLeavesTaken > $paidLeavesAllowed) {
                 $lwp = round($totalLeavesTaken - $paidLeavesAllowed, 2);
             }
-            $lwp_amount = round(((float)$salary->basic_salary / 30) * $lwp, 2);
+            $lwp_amount = round(((float)$salary->basic_salary / ($days ?: 30)) * $lwp, 2);
             $allowance = 0;
             $deduction = 0;
         @endphp
