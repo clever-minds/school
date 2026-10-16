@@ -59,9 +59,9 @@ class PayrollController extends Controller {
         $sessionYear = date('Y', strtotime($sessionYear->start_date));
         // Get months starting from session year
         $months = sessionYearWiseMonth();
-        
+        $schoolSetting = $this->schoolSetting->getAppCache();
 
-        return view('payroll.index', compact('sessionYear', 'months'));
+        return view('payroll.index', compact('sessionYear', 'months', 'schoolSetting'));
     }
 
     public function create() {
@@ -219,7 +219,7 @@ class PayrollController extends Controller {
             });
         })->first();
 
-        $sql = $this->staff->builder()->with(['user','staffSalary.payrollSetting', 'expense.staff_payroll.payroll_setting'])->whereHas('user', function ($q) {
+        $sql = $this->staff->builder()->with(['user.roles','staffSalary.payrollSetting', 'expense.staff_payroll.payroll_setting'])->whereHas('user', function ($q) {
             $q->whereNull('deleted_at')->Owner();
         })->when($search, function ($query) use ($search) {
             $query->where(function ($query) use ($search) {
@@ -297,14 +297,14 @@ class PayrollController extends Controller {
 
         foreach ($res as $row) {
             $tempRow = $row->toArray();
-            $tempRow['no'] = $no++;
-            $salary_deduction = 0;
-            $salary = $row->salary;
+            $tempRow['no'] = 'NO.' . $no++;
+            $salary = (float)$row->salary;
             
             $userAttendances = $allAttendances->has($row->user->id) ? $allAttendances[$row->user->id] : collect();
             $userLeaves = $allLeaves->has($row->user->id) ? $allLeaves[$row->user->id]->keyBy('date') : collect();
             
             $total_present = 0;
+            $total_late = 0;
 
             $attendance_map = [];
             // Process Attendance records (Only P, W and H give present marks)
@@ -312,20 +312,41 @@ class PayrollController extends Controller {
                 $dateStr = Carbon::parse($att->date)->format('Y-m-d');
                 
                 $effectiveStatus = $att->status;
-                if ($att->type !== 'Work From Home' && $att->type !== 'Leave') {
-                    if ($att->check_in && $att->check_out) {
-                        $effectiveStatus = \App\Models\StaffAttendance::calculateStatusOnCheckOut($att->check_in, $att->check_out);
-                    } elseif ($att->check_in && empty($att->check_out)) {
-                        $effectiveStatus = 3; // Missing punch out counted as Half Day
-                    }
+                if ($att->type === 'Work From Home') {
+                    $effectiveStatus = 1;
+                } elseif ($att->type === 'Leave') {
+                    $effectiveStatus = 4;
+                } elseif ($att->status == 3) {
+                    $effectiveStatus = 3; // Explicit Half Day (Preserved)
+                } elseif ($att->status == 4) {
+                    $effectiveStatus = 4; // Explicit Absent
+                } elseif ($att->check_in && $att->check_out) {
+                    $effectiveStatus = \App\Models\StaffAttendance::calculateStatusOnCheckOut($att->check_in, $att->check_out);
+                } elseif ($att->check_in && empty($att->check_out)) {
+                    $effectiveStatus = 3; // Missing punch out counted as Half Day
                 }
 
                 $attendance_map[$dateStr] = $effectiveStatus;
 
                 if ($effectiveStatus == 1) { // 1 = Present / WFH
                     $total_present += 1;
-                } elseif ($effectiveStatus == 3) { // 3 = Half Day
+                } elseif ($effectiveStatus == 3) { // 3 = Half Day (0.5 present, 0.5 absent)
                     $total_present += 0.5;
+                } elseif ($effectiveStatus == 2) { // 2 = Late
+                    $total_present += 1;
+                    $total_late += 1;
+                }
+            }
+
+            // Check approved leave records for days not explicitly in attendance map
+            foreach ($userLeaves as $dateStr => $leaveDetail) {
+                if (!isset($attendance_map[$dateStr])) {
+                    if (stripos($leaveDetail->type ?? '', 'Half') !== false) {
+                        $attendance_map[$dateStr] = 3;
+                        $total_present += 0.5;
+                    } else {
+                        $attendance_map[$dateStr] = 4;
+                    }
                 }
             }
 
@@ -384,229 +405,197 @@ class PayrollController extends Controller {
                 }
             }
 
-            // Unmarked working days are treated as leaves/absent
+            // Total absent days (each half day = 0.5)
             $total_leave = max(0, $total_working_days - $total_present) + $sandwiched_days;
 
-            $tempRow['total_leaves'] = $total_leave;
-            $tempRow['salary_deduction'] = number_format($salary_deduction, 2);
-            $allowanceAmount = [];
-            $deductionAmount = [];
+            // Designation from User Roles
+            $designation = '';
+            if ($row->user && $row->user->roles) {
+                $designation = $row->user->roles->pluck('name')->implode(', ');
+            }
+            if (empty($designation)) {
+                $designation = $row->qualification ?? '-';
+            }
+
+            // Performance Incentive and other settings
             $performanceIncentiveEarned = 0;
             $performanceIncentiveDeducted = 0;
+            $baseIncentiveTotal = 0;
             $hasPerformanceSetting = false;
+            $otherAllowances = 0;
+            $deductionSettingsAmount = 0;
+
+            $evaluation = $allEvaluations->get($row->id);
 
             foreach ($row->staffSalary as $salaryItem) {
                 $payrollSetting = $salaryItem->payrollSetting;
-        
                 if (!$payrollSetting) {
                     continue;
                 }
 
                 $isPerformance = ($payrollSetting->type === 'performance') || 
                                  ($payrollSetting->type === 'allowance' && stripos($payrollSetting->name, 'performance') !== false);
-        
+
                 if ($isPerformance) {
                     $hasPerformanceSetting = true;
                     $baseIncentive = 0;
-                    if (isset($salaryItem->percentage)) {
-                        $baseIncentive = ($salaryItem->percentage / 100) * $salary;
+                    if (isset($salaryItem->percentage) && $salaryItem->percentage > 0) {
+                        $baseIncentive = ((float)$salaryItem->percentage / 100) * $salary;
                     } elseif (isset($salaryItem->amount)) {
-                        $baseIncentive = $salaryItem->amount;
+                        $baseIncentive = (float)$salaryItem->amount;
                     }
+                    $baseIncentiveTotal += $baseIncentive;
 
-                    $evaluation = $allEvaluations->get($row->id);
                     if ($evaluation) {
-                        // Formula: Each negative feedback point deducts 1 point (1/10th) from the base incentive
-                        $earned = ($evaluation->positive_points / 10) * $baseIncentive;
+                        // Formula: positive_points / 10 * base
+                        $earned = round(($evaluation->positive_points / 10) * $baseIncentive, 2);
                         $deducted = $baseIncentive - $earned;
                         $performanceIncentiveEarned += $earned;
                         $performanceIncentiveDeducted += $deducted;
                     } else {
-                        // If not yet evaluated for the month, full base incentive is given
                         $performanceIncentiveEarned += $baseIncentive;
                     }
-                    $allowanceAmount[] = $performanceIncentiveEarned;
                 } elseif ($payrollSetting->type === 'allowance') {
-               
-                    if (isset($salaryItem->percentage)) {
-                        $allowanceAmount[] = ($salaryItem->percentage / 100) * $salary;
+                    if (isset($salaryItem->percentage) && $salaryItem->percentage > 0) {
+                        $otherAllowances += ((float)$salaryItem->percentage / 100) * $salary;
                     } elseif (isset($salaryItem->amount)) {
-                        $allowanceAmount[] = $salaryItem->amount;
+                        $otherAllowances += (float)$salaryItem->amount;
                     }
-                  
                 } elseif ($payrollSetting->type === 'deduction') {
-                 
-                    if (isset($salaryItem->percentage)) {
-                        $deductionAmount[] = ($salaryItem->percentage / 100) * $salary;
+                    if (isset($salaryItem->percentage) && $salaryItem->percentage > 0) {
+                        $deductionSettingsAmount += ((float)$salaryItem->percentage / 100) * $salary;
                     } elseif (isset($salaryItem->amount)) {
-                        $deductionAmount[] = $salaryItem->amount;
+                        $deductionSettingsAmount += (float)$salaryItem->amount;
                     }
-                 
-                }
-            }
-            $totalAllowanceAmount = array_sum($allowanceAmount);
-            $totalDeductionAmount = array_sum($deductionAmount);
-
-            $tempRow['allowances'] = isset($totalAllowanceAmount) ? number_format($totalAllowanceAmount,2) : 0;
-            $tempRow['deductions'] = isset($totalDeductionAmount) ? number_format($totalDeductionAmount,2) : 0;
-
-            if ($hasPerformanceSetting) {
-                $evaluation = $allEvaluations->get($row->id);
-                if ($evaluation) {
-                    $tempRow['allowances'] = number_format($totalAllowanceAmount, 2) . '<br><small class="text-success" title="Earned Incentive (' . $evaluation->positive_points . '/10 points, -' . $evaluation->negative_points . ' negative)">Perf: ₹' . number_format($performanceIncentiveEarned, 2) . ' (' . $evaluation->positive_points . '/10)</small>';
-                } else {
-                    $tempRow['allowances'] = number_format($totalAllowanceAmount, 2) . '<br><small class="text-warning" title="Evaluation Pending (Base: ₹' . number_format($performanceIncentiveEarned, 2) . ')">Perf: ₹' . number_format($performanceIncentiveEarned, 2) . ' (Pending)</small>';
                 }
             }
 
+            // Check if Payroll already generated (Expense record exists)
+            $expense = null;
             if (isset($row->expense)) {
-                // TODO : this line can be converted into filter searching instead of searching from query
                 $expense = $row->expense()->where('month', $month)->where('year', $year)->first();
-                if ($expense) {
-                    $operate = BootstrapTableService::button('fa fa-file-o', url('payroll/slip/'.$expense->id), ['btn-gradient-info'], ['title' => trans("slip"),'target' => '_blank']);
-                    $status = 1;
-                    $tempRow['salary'] = $expense->basic_salary;
-                    $salary = $expense->getRawOriginal('basic_salary');
-
-                    $tempRow['status'] = $status;
-                    $tempRow['paid_leaves'] = $expense->paid_leaves !== null ? $expense->paid_leaves : '-';
-                    $paid_leaves = $expense->paid_leaves ?? 0;
-                    if ($paid_leaves < $total_leave) {
-                        $unpaid_leave = $total_leave - $paid_leaves;
-                        $per_day_salary = $salary / 30;
-                        $salary_deduction = $unpaid_leave * $per_day_salary;
-                        $tempRow['salary_deduction'] = number_format($salary_deduction,2);
-                    } else {
-                        $tempRow['salary_deduction'] = number_format(0, 2);
-                    }
-                    // Sync performance evaluation if present
-                    $evaluation = $allEvaluations->get($row->id);
-                    if ($evaluation && count($expense->staff_payroll)) {
-                        foreach ($expense->staff_payroll as $staff_payroll) {
-                            $ps = $staff_payroll->payroll_setting;
-                            $isPerf = $ps && (
-                                $ps->type == 'performance' ||
-                                ($ps->type == 'allowance' && stripos($ps->name, 'performance') !== false)
-                            );
-                            if ($isPerf) {
-                                $baseIncentive = 0;
-                                $staffSalaryItem = $row->staffSalary->where('payroll_setting_id', $staff_payroll->payroll_setting_id)->first();
-                                if ($staffSalaryItem) {
-                                    if ($staffSalaryItem->amount) {
-                                        $baseIncentive = (float)$staffSalaryItem->amount;
-                                    } elseif ($staffSalaryItem->percentage) {
-                                        $baseIncentive = ((float)$staffSalaryItem->percentage / 100) * (float)$expense->basic_salary;
-                                    }
-                                }
-                                if (!$baseIncentive) {
-                                    $baseIncentive = (float)$staff_payroll->amount;
-                                }
-
-                                $earned = ($evaluation->positive_points / 10) * $baseIncentive;
-                                $deducted = $baseIncentive - $earned;
-
-                                if (abs((float)$staff_payroll->amount - $baseIncentive) < 0.01 && $deducted > 0) {
-                                    $staff_payroll->amount = $earned;
-                                    $staff_payroll->save();
-
-                                    $expense->amount = (float)$expense->amount - $deducted;
-                                    $expense->save();
-                                }
-                            }
-                        }
-                    }
-
-                    $tempRow['net_salary'] = $expense->amount;
-                    $tempRow['operate'] = $operate;
-                    // Calculate allowances & deductions
-                    if (count($expense->staff_payroll)) {
-                        $allowance = $deduction = 0;
-                        foreach ($expense->staff_payroll as $key => $staff_payroll) {
-                            if (!$staff_payroll->payroll_setting) continue;
-                            if ($staff_payroll->payroll_setting->type == 'allowance' || $staff_payroll->payroll_setting->type == 'performance') {
-                                if ($staff_payroll->amount !== null) {
-                                    $allowance += $staff_payroll->amount;
-                                } else {
-                                    $allowance += ($expense->basic_salary * $staff_payroll->percentage) / 100;
-                                }
-                            } else if ($staff_payroll->payroll_setting->type == 'deduction') {
-                                if ($staff_payroll->amount !== null) {
-                                    $deduction += $staff_payroll->amount;
-                                } else {
-                                    $deduction += ($expense->basic_salary * $staff_payroll->percentage) / 100;
-                                }
-                            }
-                        }
-
-                        if ($expense->amount > ($expense->basic_salary + $allowance - $salary_deduction - $deduction)) {
-                            $allowance += $expense->amount - ($expense->basic_salary + $allowance - $deduction - $salary_deduction);
-                        }
-
-                        $expected = $expense->basic_salary + $allowance - $deduction - $salary_deduction;
-
-                        if ($expense->amount < $expected) {
-                            $deduction += $expected - $expense->amount;
-                        }
-
-                        $tempRow['allowances'] = number_format($allowance ,2);
-                        $tempRow['deductions'] = number_format($deduction ,2);
-
-                        if ($hasPerformanceSetting) {
-                            if ($evaluation) {
-                                $tempRow['allowances'] = number_format($allowance, 2) . '<br><small class="text-success" title="Earned Incentive (' . $evaluation->positive_points . '/10 points, -' . $evaluation->negative_points . ' negative)">Perf: ₹' . number_format($performanceIncentiveEarned, 2) . ' (' . $evaluation->positive_points . '/10)</small>';
-                            } else {
-                                $tempRow['allowances'] = number_format($allowance, 2) . '<br><small class="text-warning" title="Evaluation Pending (Base: ₹' . number_format($performanceIncentiveEarned, 2) . ')">Perf: ₹' . number_format($performanceIncentiveEarned, 2) . ' (Pending)</small>';
-                            }
-                        }
-                    } else {
-                        $allowance = 0;
-                        $deduction = 0;
-                        $extra = 0;
-                        $extra_deduction = 0;
-
-
-                        if ($expense->amount > ($expense->basic_salary + $allowance - $salary_deduction - $deduction)) {
-                            $extra = $expense->amount - ($expense->basic_salary + $allowance - $deduction - $salary_deduction);
-                            $allowance += $extra;
-                        } else {
-                            $extra = 0;
-                        }
-
-                        $expected = $expense->basic_salary + $allowance - $deduction - $salary_deduction;
-
-                        if ($expense->amount < $expected) {
-                            $extra_deduction = $expected - $expense->amount;
-                            $deduction += $extra_deduction;
-                        } else {
-                            $extra_deduction = 0;
-                        }
-
-                        $tempRow['allowances'] = number_format($allowance ,2);
-                        $tempRow['deductions'] = number_format($deduction ,2);
-                    }
-
-                } else {
-                    $salary = $row->salary;
-                    $paid_leaves = 0;
-                    if ($leaveMaster) {
-                        $tempRow['paid_leaves'] = $leaveMaster->leaves;
-                        $paid_leaves = $leaveMaster->leaves ?? 0;
-                    } else {
-                        $tempRow['paid_leaves'] = '-';
-                    }
-
-                    if ($paid_leaves < $total_leave) {
-                        $unpaid_leave = $total_leave - $paid_leaves;
-                        $per_day_salary = $salary / 30;
-                        $salary_deduction = $unpaid_leave * $per_day_salary;
-                        $tempRow['salary_deduction'] = number_format($salary_deduction,2);
-                    } else {
-                        $tempRow['salary_deduction'] = number_format(0, 2);
-                    }
-                    
-                    $tempRow['net_salary'] = $salary - $salary_deduction + $totalAllowanceAmount - $totalDeductionAmount;
-                }
             }
+
+            if ($expense) {
+                $status = 1;
+                $operate = BootstrapTableService::button('fa fa-file-o', url('payroll/slip/'.$expense->id), ['btn-gradient-info'], ['title' => trans("slip"),'target' => '_blank']);
+                $salary = (float)$expense->getRawOriginal('basic_salary');
+                $paid_leaves = $expense->paid_leaves !== null ? (float)$expense->paid_leaves : 0;
+
+                // Sync performance evaluation if present
+                if ($evaluation && count($expense->staff_payroll)) {
+                    foreach ($expense->staff_payroll as $staff_payroll) {
+                        $ps = $staff_payroll->payroll_setting;
+                        $isPerf = $ps && (
+                            $ps->type == 'performance' ||
+                            ($ps->type == 'allowance' && stripos($ps->name, 'performance') !== false)
+                        );
+                        if ($isPerf) {
+                            $baseIncentive = 0;
+                            $staffSalaryItem = $row->staffSalary->where('payroll_setting_id', $staff_payroll->payroll_setting_id)->first();
+                            if ($staffSalaryItem) {
+                                if ($staffSalaryItem->amount) {
+                                    $baseIncentive = (float)$staffSalaryItem->amount;
+                                } elseif ($staffSalaryItem->percentage) {
+                                    $baseIncentive = ((float)$staffSalaryItem->percentage / 100) * (float)$expense->basic_salary;
+                                }
+                            }
+                            if (!$baseIncentive) {
+                                $baseIncentive = (float)$staff_payroll->amount;
+                            }
+
+                            $earned = round(($evaluation->positive_points / 10) * $baseIncentive, 2);
+                            $deducted = $baseIncentive - $earned;
+
+                            if (abs((float)$staff_payroll->amount - $baseIncentive) < 0.01 && $deducted > 0) {
+                                $staff_payroll->amount = $earned;
+                                $staff_payroll->save();
+
+                                $expense->amount = (float)$expense->amount - $deducted;
+                                $expense->save();
+                            }
+                            $performanceIncentiveEarned = $earned;
+                        }
+                    }
+                }
+            } else {
+                $status = 0;
+                $operate = '-';
+                $salary = (float)$row->salary;
+                $paid_leaves = $leaveMaster ? (float)($leaveMaster->leaves ?? 0) : 0;
+            }
+
+            // School Sheet Exact Formulas
+            // 1. Total Gross Salary = Basic Sa + Perfo + Other Allowances
+            $total_gross = round($salary + $performanceIncentiveEarned + $otherAllowances, 2);
+
+            // 2. Per Day Salary Rate = Total / 30
+            $per_day = round($total_gross / 30, 2);
+
+            // 3. Working Days = 30
+            $working_days = 30;
+
+            // 4. Absent Days (each half day = 0.5)
+            $absent_days = round((float)$total_leave, 1);
+
+            // 5. Unpaid Leaves = max(0, Absent - Paid)
+            $unpaid_leave = max(0, round($absent_days - $paid_leaves, 1));
+
+            // 6. Attended Days = Working Days - Unpaid Leaves
+            $attended_days = round(max(0, $working_days - $unpaid_leave), 1);
+
+            // 7. Leave / Salary Deduction = Unpaid Leaves * Per Day
+            $salary_deduction = round($unpaid_leave * $per_day, 2);
+
+            // 8. Other Deductions
+            $other_deductions = round($deductionSettingsAmount, 2);
+            if ($expense) {
+                $expectedNet = round($total_gross - $salary_deduction - $deductionSettingsAmount, 2);
+                if ((float)$expense->amount < $expectedNet) {
+                    $other_deductions = round($deductionSettingsAmount + ($expectedNet - (float)$expense->amount), 2);
+                }
+                $net_salary = round((float)$expense->amount, 2);
+            } else {
+                $net_salary = round(max(0, $total_gross - $salary_deduction - $other_deductions), 2);
+            }
+
+            // Construct Row Data
+            $tempRow['id'] = $row->id;
+            $tempRow['user_full_name'] = $row->user->full_name;
+            $tempRow['user'] = ['full_name' => $row->user->full_name];
+            $tempRow['designation'] = $designation;
+            $tempRow['salary'] = $salary;
+            $tempRow['basic_salary_formatted'] = number_format($salary, 2);
+            $tempRow['perfo'] = $performanceIncentiveEarned;
+            $tempRow['perfo_formatted'] = number_format($performanceIncentiveEarned, 2);
+            if ($hasPerformanceSetting) {
+                if ($evaluation) {
+                    $tempRow['perfo_html'] = '<span class="export-raw">' . number_format($performanceIncentiveEarned, 2) . '</span><br><small class="text-success font-weight-bold">(' . $evaluation->positive_points . '/10 pts)</small>';
+                } else {
+                    $tempRow['perfo_html'] = '<span class="export-raw">' . number_format($performanceIncentiveEarned, 2) . '</span><br><small class="text-warning font-weight-bold">(Pending)</small>';
+                }
+            } else {
+                $tempRow['perfo_html'] = '<span class="export-raw">0.00</span>';
+            }
+            $tempRow['other_allowances'] = number_format($otherAllowances, 2);
+            $tempRow['allowances'] = number_format($performanceIncentiveEarned + $otherAllowances, 2);
+            $tempRow['per_day'] = number_format($per_day, 2);
+            $tempRow['total_gross'] = number_format($total_gross, 2);
+            $tempRow['working_days'] = $working_days;
+            $tempRow['absent_days'] = (float)$absent_days;
+            $tempRow['total_leaves'] = (float)$absent_days;
+            $tempRow['paid_leaves'] = (float)$paid_leaves;
+            $tempRow['pen'] = $total_late > 0 ? $total_late : '-';
+            $tempRow['attended_days'] = (float)$attended_days;
+            $tempRow['salary_deduction'] = number_format($salary_deduction, 2);
+            $tempRow['other_deductions'] = number_format($other_deductions, 2);
+            $tempRow['deductions'] = number_format($other_deductions, 2);
+            $tempRow['net_salary'] = $net_salary;
+            $tempRow['net_salary_formatted'] = number_format($net_salary, 2);
+            $tempRow['signature'] = '';
+            $tempRow['status'] = $status;
+            $tempRow['operate'] = $operate;
+
             $rows[] = $tempRow;
         }
 
@@ -753,12 +742,19 @@ class PayrollController extends Controller {
                 $dateStr = Carbon::parse($att->date)->format('Y-m-d');
                 
                 $effectiveStatus = $att->status;
-                if ($att->type !== 'Work From Home' && $att->type !== 'Leave') {
-                    if ($att->check_in && $att->check_out) {
-                        $effectiveStatus = \App\Models\StaffAttendance::calculateStatusOnCheckOut($att->check_in, $att->check_out);
-                    } elseif ($att->check_in && empty($att->check_out)) {
-                        $effectiveStatus = 3; // Missing punch out -> Half Day
-                    }
+                $effectiveStatus = $att->status;
+                if ($att->type === 'Work From Home') {
+                    $effectiveStatus = 1;
+                } elseif ($att->type === 'Leave') {
+                    $effectiveStatus = 4;
+                } elseif ($att->status == 3) {
+                    $effectiveStatus = 3; // Explicit Half Day (Preserved)
+                } elseif ($att->status == 4) {
+                    $effectiveStatus = 4; // Explicit Absent
+                } elseif ($att->check_in && $att->check_out) {
+                    $effectiveStatus = \App\Models\StaffAttendance::calculateStatusOnCheckOut($att->check_in, $att->check_out);
+                } elseif ($att->check_in && empty($att->check_out)) {
+                    $effectiveStatus = 3; // Missing punch out -> Half Day
                 }
 
                 $attendance_map[$dateStr] = $effectiveStatus;
@@ -767,6 +763,18 @@ class PayrollController extends Controller {
                     $total_present += 1;
                 } elseif ($effectiveStatus == 3) {
                     $total_present += 0.5;
+                }
+            }
+
+            // Check approved leave records for days not explicitly in attendance map
+            foreach ($userLeaves as $dateStr => $leaveDetail) {
+                if (!isset($attendance_map[$dateStr])) {
+                    if (stripos($leaveDetail->type ?? '', 'Half') !== false) {
+                        $attendance_map[$dateStr] = 3;
+                        $total_present += 0.5;
+                    } else {
+                        $attendance_map[$dateStr] = 4;
+                    }
                 }
             }
 
@@ -871,18 +879,35 @@ class PayrollController extends Controller {
                             $baseIncentive = (float)$payroll->amount;
                         }
 
-                        $earned = ($performanceEvaluation->positive_points / 10) * $baseIncentive;
+                        $earned = round(($performanceEvaluation->positive_points / 10) * $baseIncentive, 2);
                         $deducted = $baseIncentive - $earned;
 
-                        if (abs((float)$payroll->amount - $baseIncentive) < 0.01 && $deducted > 0) {
+                        if (abs((float)$payroll->amount - $earned) > 0.01) {
                             $payroll->amount = $earned;
                             $payroll->save();
-
-                            $salary->amount = (float)$salary->amount - $deducted;
-                            $salary->save();
                         }
                     }
                 }
+            }
+
+            // Sync salary total amount with earned allowances, leave deductions and deductions
+            $unpaidLeaves = max(0, (float)$total_leaves - (float)($salary->paid_leaves ?? 0));
+            $lwpAmount = round(((float)$salary->basic_salary / 30) * $unpaidLeaves, 2);
+
+            $totalAllowance = 0;
+            $totalDeduction = 0;
+            foreach ($salary->staff_payroll as $sp) {
+                if (!$sp->payroll_setting) continue;
+                if ($sp->payroll_setting->type === 'allowance' || $sp->payroll_setting->type === 'performance') {
+                    $totalAllowance += (float)$sp->amount;
+                } elseif ($sp->payroll_setting->type === 'deduction') {
+                    $totalDeduction += (float)$sp->amount;
+                }
+            }
+            $calculatedNet = round((float)$salary->basic_salary + $totalAllowance - $lwpAmount - $totalDeduction, 2);
+            if (abs((float)$salary->amount - $calculatedNet) > 0.01 && $calculatedNet > 0) {
+                $salary->amount = $calculatedNet;
+                $salary->save();
             }
 
             $pdf = PDF::loadView('payroll.slip',compact('schoolSetting','salary','total_leaves','days','allow_leaves', 'performanceEvaluation'))->setPaper('a5');

@@ -220,17 +220,16 @@
         <hr class="end-header">
 
         @php
+            $paidLeavesAllowed = (float)($salary->paid_leaves ?? 0);
+            $totalLeavesTaken = (float)($total_leaves ?? 0);
             $lwp = 0;
-            $lwp_amount = 0;
+            if ($totalLeavesTaken > $paidLeavesAllowed) {
+                $lwp = round($totalLeavesTaken - $paidLeavesAllowed, 2);
+            }
+            $lwp_amount = round(((float)$salary->basic_salary / 30) * $lwp, 2);
             $allowance = 0;
             $deduction = 0;
         @endphp
-
-        @if ($salary->paid_leaves < $total_leaves && $allow_leaves)
-            @php
-                $lwp = number_format($total_leaves - $salary->paid_leaves, 2);
-            @endphp
-        @endif
         
         <table class="full-width" style="margin-bottom: 20px;">
             <tr>
@@ -295,7 +294,7 @@
                                     Paid Days
                                 </th>
                                 <td>
-                                    : {{ $days - $lwp }}
+                                    : {{ (float)($days - $lwp) }}
                                 </td>
                             </tr>
                             <tr>
@@ -303,7 +302,7 @@
                                     LWP Days
                                 </th>
                                 <td>
-                                    : {{ $lwp }}
+                                    : {{ (float)$lwp }}
                                 </td>
                             </tr>
                         </table>
@@ -337,19 +336,12 @@
                         {{ number_format($salary->basic_salary, 2) }}
                     </td>
                     <td class="text-left">
-                        Leave Without Pay
+                        Leave Without Pay {{ $lwp > 0 ? '(' . (float)$lwp . ' ' . ((float)$lwp == 1 ? 'day' : 'days') . ')' : '' }}
                         <br>
-                        <span class="paid-leaves">Paid Leaves : {{ $salary->paid_leaves }}</span>
+                        <span class="paid-leaves">Paid Leaves : {{ (float)($salary->paid_leaves ?? 0) }}</span>
                     </td>
                     <td class="text-right">
-                        @if ($lwp)
-                            @php
-                                $lwp_amount = ($salary->basic_salary / 30) * $lwp;
-                            @endphp
-                            {{ number_format($lwp_amount, 2) }}
-                        @else
-                            00.00
-                        @endif
+                        {{ number_format($lwp_amount, 2) }}
                     </td>
                 </tr>
                 <tr>
@@ -469,28 +461,29 @@
                         Other Allowances
                     </td>
                     <td class="text-right">
-                        @if ($salary->amount > ($salary->basic_salary + $allowance - $lwp_amount - $deduction))
-                            {{ number_format($salary->amount - ($salary->basic_salary + $allowance - $deduction - $lwp_amount), 2) }}
-                            @php
-                                $allowance += $salary->amount - ($salary->basic_salary + $allowance - $deduction - $lwp_amount);
-                            @endphp
-                        @else
-                            {{ number_format(0,2) }}
-                        @endif
+                        @php
+                            $expectedNet = round((float)$salary->basic_salary + (float)$allowance - (float)$lwp_amount - (float)$deduction, 2);
+                            $otherAllowancesVal = 0;
+                            if ((float)$salary->amount > $expectedNet) {
+                                $otherAllowancesVal = (float)$salary->amount - $expectedNet;
+                                $allowance += $otherAllowancesVal;
+                            }
+                        @endphp
+                        {{ number_format($otherAllowancesVal, 2) }}
                     </td>
 
                     <td class="text-left">
                         Other Deductions
                     </td>
                     <td class="text-right">
-                        @if ($salary->amount < ($salary->basic_salary + $allowance - $lwp_amount - $deduction))
-                            {{ number_format(($salary->basic_salary + $allowance - $deduction - $lwp_amount) - $salary->amount, 2) }}
-                            @php
-                                $deduction += ($salary->basic_salary + $allowance - $deduction - $lwp_amount) - $salary->amount;
-                            @endphp
-                        @else
-                            {{ number_format(0,2) }}
-                        @endif
+                        @php
+                            $otherDeductionsVal = 0;
+                            if ((float)$salary->amount < $expectedNet) {
+                                $otherDeductionsVal = $expectedNet - (float)$salary->amount;
+                                $deduction += $otherDeductionsVal;
+                            }
+                        @endphp
+                        {{ number_format($otherDeductionsVal, 2) }}
                     </td>
                 </tr>
 
