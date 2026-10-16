@@ -38,10 +38,9 @@ class StaffPerformanceController extends Controller
 
         $months = sessionYearWiseMonth();
         $currentMonth = Carbon::now()->month;
-        $currentYear = Carbon::now()->year;
         $criteriaList = StaffPerformanceEvaluation::getDefaultCriteria();
 
-        return view('staff_performance.index', compact('sessionYears', 'defaultSessionYear', 'roles', 'months', 'currentMonth', 'currentYear', 'criteriaList'));
+        return view('staff_performance.index', compact('sessionYears', 'defaultSessionYear', 'roles', 'months', 'currentMonth', 'criteriaList'));
     }
 
     public function list(Request $request)
@@ -50,11 +49,24 @@ class StaffPerformanceController extends Controller
             ResponseService::noAnyPermissionThenSendJson(['staff-performance-list', 'staff-performance-create', 'payroll-list', 'payroll-create']);
         }
 
-        $month = $request->input('month', Carbon::now()->month);
-        $year = $request->input('year', Carbon::now()->year);
+        $month = (int) $request->input('month', Carbon::now()->month);
         $sessionYearId = $request->input('session_year_id');
         $roleId = $request->input('role_id');
         $search = $request->input('search');
+
+        // Automatically determine year from session year & selected month
+        $year = $request->input('year');
+        if (!$year) {
+            $selectedSessionYear = $sessionYearId ? SessionYear::find($sessionYearId) : app(CachingService::class)->getDefaultSessionYear();
+            if ($selectedSessionYear && $selectedSessionYear->start_date && $selectedSessionYear->end_date) {
+                $startYear = (int) date('Y', strtotime($selectedSessionYear->start_date));
+                $endYear = (int) date('Y', strtotime($selectedSessionYear->end_date));
+                $startMonth = (int) date('m', strtotime($selectedSessionYear->start_date));
+                $year = ($month >= $startMonth) ? $startYear : $endYear;
+            } else {
+                $year = (int) Carbon::now()->year;
+            }
+        }
 
         $offset = $request->input('offset', 0);
         $limit = $request->input('limit', 10);
@@ -161,14 +173,15 @@ class StaffPerformanceController extends Controller
                 $positive = $evaluation->positive_points;
                 $negative = $evaluation->negative_points;
                 $earnedIncentive = ($positive / 10) * $baseIncentive;
-                $scoreText = "<span class='badge badge-info'>{$positive} / 10</span>";
-                $statusBadge = "<span class='badge badge-success'>" . __('Evaluated') . "</span>";
+                $scoreBadge = $positive == 10 ? 'badge-success' : ($positive >= 7 ? 'badge-info' : 'badge-danger');
+                $scoreText = "<span class='badge {$scoreBadge}' style='font-size: 11px; padding: 5px 10px;'><i class='fa fa-star text-warning mr-1'></i>{$positive} / 10</span>";
+                $statusBadge = "<span class='badge badge-success' style='font-size: 11px; padding: 5px 10px;'><i class='fa fa-check mr-1'></i>" . __('Evaluated') . "</span>";
             } else {
                 $positive = 10;
                 $negative = 0;
                 $earnedIncentive = $baseIncentive;
-                $scoreText = "<span class='badge badge-secondary'>10 / 10 (" . __('Default') . ")</span>";
-                $statusBadge = "<span class='badge badge-warning'>" . __('Pending') . "</span>";
+                $scoreText = "<span class='badge badge-secondary' style='font-size: 11px; padding: 5px 10px;'>10 / 10 (" . __('Default') . ")</span>";
+                $statusBadge = "<span class='badge badge-warning' style='font-size: 11px; padding: 5px 10px;'><i class='fa fa-clock-o mr-1'></i>" . __('Pending') . "</span>";
             }
 
             $rolesText = $user->roles->pluck('name')->join(', ');

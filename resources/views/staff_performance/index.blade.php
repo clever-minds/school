@@ -13,18 +13,15 @@
         </div>
 
         <div class="row">
+            <!-- Filter Card -->
             <div class="col-md-12 grid-margin stretch-card">
                 <div class="card">
                     <div class="card-body">
-                        <h4 class="card-title">
-                            {{ __('Evaluate Staff Performance & Incentives') }}
+                        <h4 class="card-title text-body mb-3">
+                            <i class="fa fa-filter text-primary mr-2"></i>{{ __('filter') }}
                         </h4>
-                        <p class="card-description text-muted">
-                            Based on 10 performance criteria. Each negative feedback deducts 1 point (1/10th) from the staff's base performance incentive.
-                        </p>
-
-                        <div class="row" id="toolbar">
-                            <div class="form-group col-sm-12 col-md-3">
+                        <div class="row">
+                            <div class="form-group col-sm-12 col-md-4 mb-2">
                                 <label class="font-weight-bold">{{ __('Session Year') }} <span class="text-danger">*</span></label>
                                 <select name="session_year_id" id="filter_session_year" class="form-control">
                                     @foreach ($sessionYears as $sy)
@@ -40,7 +37,7 @@
                                     @endforeach
                                 </select>
                             </div>
-                            <div class="form-group col-sm-12 col-md-3">
+                            <div class="form-group col-sm-12 col-md-4 mb-2">
                                 <label class="font-weight-bold">{{ __('month') }} <span class="text-danger">*</span></label>
                                 <select name="month" id="filter_month" class="form-control">
                                     @foreach($months as $mKey => $mName)
@@ -50,17 +47,7 @@
                                     @endforeach
                                 </select>
                             </div>
-                            <div class="form-group col-sm-12 col-md-3">
-                                <label class="font-weight-bold">{{ __('year') }} <span class="text-danger">*</span></label>
-                                <select name="year" id="filter_year" class="form-control">
-                                    @for($y = $currentYear - 3; $y <= $currentYear + 2; $y++)
-                                        <option value="{{ $y }}" {{ $y == $currentYear ? 'selected' : '' }}>
-                                            {{ $y }}
-                                        </option>
-                                    @endfor
-                                </select>
-                            </div>
-                            <div class="form-group col-sm-12 col-md-3">
+                            <div class="form-group col-sm-12 col-md-4 mb-2">
                                 <label class="font-weight-bold">{{ __('role') }}</label>
                                 <select name="role_id" id="filter_role" class="form-control">
                                     <option value="">{{ __('all') }}</option>
@@ -69,6 +56,23 @@
                                     @endforeach
                                 </select>
                             </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Table Card -->
+            <div class="col-md-12 grid-margin stretch-card">
+                <div class="card">
+                    <div class="card-body">
+                        <h4 class="card-title">
+                            {{ __('Evaluate Staff Performance & Incentives') }}
+                        </h4>
+                        <p class="card-description text-muted mb-3">
+                            {{ __('Based on 10 performance criteria. Each negative feedback deducts 1 point (1/10th) from the staff\'s base performance incentive.') }}
+                        </p>
+
+                        <div class="row" id="toolbar">
                         </div>
 
                         <div class="table-responsive">
@@ -201,6 +205,16 @@
 
 @section('js')
 <script>
+    function getCalculatedYear() {
+        let opt = $('#filter_session_year option:selected');
+        let startYear = parseInt(opt.data('start-year')) || new Date().getFullYear();
+        let endYear = parseInt(opt.data('end-year')) || startYear;
+        let startMonth = parseInt(opt.data('start-month')) || 4;
+        let selectedMonth = parseInt($('#filter_month').val()) || (new Date().getMonth() + 1);
+
+        return (selectedMonth >= startMonth) ? startYear : endYear;
+    }
+
     function performanceQueryParams(p) {
         return {
             limit: p.limit,
@@ -210,45 +224,15 @@
             search: p.search,
             session_year_id: $('#filter_session_year').val(),
             month: $('#filter_month').val(),
-            year: $('#filter_year').val(),
+            year: getCalculatedYear(),
             role_id: $('#filter_role').val(),
         };
     }
 
-    function syncYearWithSessionAndMonth() {
-        let opt = $('#filter_session_year option:selected');
-        if (!opt.length) return;
-
-        let startYear = parseInt(opt.data('start-year')) || null;
-        let endYear = parseInt(opt.data('end-year')) || null;
-        let startMonth = parseInt(opt.data('start-month')) || 4;
-        let selectedMonth = parseInt($('#filter_month').val()) || 1;
-
-        if (startYear && endYear) {
-            let targetYear = (selectedMonth >= startMonth) ? startYear : endYear;
-            if ($('#filter_year option[value="' + targetYear + '"]').length) {
-                $('#filter_year').val(targetYear);
-            }
-        }
-    }
-
     $(document).ready(function() {
-        $('#filter_session_year').on('change', function() {
-            syncYearWithSessionAndMonth();
+        $('#filter_session_year, #filter_month, #filter_role').on('change', function() {
             $('#performance_table').bootstrapTable('refresh');
         });
-
-        $('#filter_month').on('change', function() {
-            syncYearWithSessionAndMonth();
-            $('#performance_table').bootstrapTable('refresh');
-        });
-
-        $('#filter_year, #filter_role').on('change', function() {
-            $('#performance_table').bootstrapTable('refresh');
-        });
-
-        // Initialize year sync on page load
-        syncYearWithSessionAndMonth();
 
         // Recalculate score & net incentive in modal
         function recalculateModalScore() {
