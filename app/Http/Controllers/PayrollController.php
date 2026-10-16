@@ -59,7 +59,7 @@ class PayrollController extends Controller {
         $sessionYear = date('Y', strtotime($sessionYear->start_date));
         // Get months starting from session year
         $months = sessionYearWiseMonth();
-        $schoolSetting = $this->schoolSetting->getAppCache();
+        $schoolSetting = $this->cache->getSchoolSettings();
 
         return view('payroll.index', compact('sessionYear', 'months', 'schoolSetting'));
     }
