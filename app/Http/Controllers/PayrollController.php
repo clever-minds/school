@@ -125,20 +125,57 @@ class PayrollController extends Controller {
 
                 $this->sessionYearsTrackingsService->storeSessionYearsTracking('App\Models\Expense', $expense->id, Auth::user()->id, $sessionYearInterface->id, Auth::user()->school_id, null);
 
-                $staffSalary = $this->staffSalary->builder()->where('staff_id',$user_id)->get();
+                $staffSalary = $this->staffSalary->builder()->with('payrollSetting')->where('staff_id',$user_id)->get();
                 if (count($staffSalary)) {
+                    $evaluation = \App\Models\StaffPerformanceEvaluation::where('staff_id', $user_id)
+                        ->where('month', $request->month)
+                        ->where('year', $request->year)
+                        ->first();
+
                     foreach ($staffSalary as $key => $payroll) {
+                        $finalAmount = $payroll->amount;
+                        $finalPercentage = $payroll->percentage;
+
+                        $isPerf = $payroll->payrollSetting && (
+                            $payroll->payrollSetting->type == 'performance' ||
+                            ($payroll->payrollSetting->type == 'allowance' && stripos($payroll->payrollSetting->name, 'performance') !== false)
+                        );
+
+                        if ($isPerf) {
+                            $baseAmount = $payroll->amount;
+                            if (!$baseAmount && $payroll->percentage) {
+                                $baseAmount = ($data['basic_salary'] * $payroll->percentage) / 100;
+                            }
+                            if ($evaluation) {
+                                $earned = ($evaluation->positive_points / 10) * $baseAmount;
+                                $deducted = $baseAmount - $earned;
+                                $finalAmount = $earned;
+                                $finalPercentage = null;
+
+                                $evaluation->update([
+                                    'base_incentive' => $baseAmount,
+                                    'earned_incentive' => $earned,
+                                    'deducted_incentive' => $deducted,
+                                ]);
+                            } else {
+                                $finalAmount = $baseAmount;
+                            }
+                        }
+
                         $staff_payroll_data[] = [
                             'expense_id' => $expense->id,
                             'payroll_setting_id' => $payroll->payroll_setting_id,
-                            'amount' => $payroll->amount,
-                            'percentage' => $payroll->percentage,
+                            'amount' => $finalAmount,
+                            'percentage' => $finalPercentage,
+                            'school_id' => Auth::user()->school_id,
                         ];   
                     }
                 }
             }
             
-            $this->staffPayroll->upsert($staff_payroll_data, ['staff_id', 'payroll_setting_id'], ['amount', 'percentage']);
+            if (!empty($staff_payroll_data)) {
+                $this->staffPayroll->upsert($staff_payroll_data, ['expense_id', 'payroll_setting_id'], ['amount', 'percentage', 'school_id']);
+            }
             $user = $this->staff->builder()->whereIn('id', $user_ids)->pluck('user_id');
           
             $title = 'Payroll Update !!!' ;
@@ -200,6 +237,7 @@ class PayrollController extends Controller {
         $res = $sql->get();
 
         $userIds = $res->pluck('user.id')->toArray();
+        $staffIds = $res->pluck('id')->toArray();
         $allAttendances = \App\Models\StaffAttendance::whereIn('user_id', $userIds)
             ->whereBetween('date', [$startDate, $endDate])
             ->get()
@@ -212,6 +250,12 @@ class PayrollController extends Controller {
             ->with('leave:id,user_id')
             ->get()
             ->groupBy('leave.user_id');
+
+        $allEvaluations = \App\Models\StaffPerformanceEvaluation::whereIn('staff_id', $staffIds)
+            ->where('month', $month)
+            ->where('year', $year)
+            ->get()
+            ->keyBy('staff_id');
 
         $bulkData = array();
         $bulkData['total'] = $total;
@@ -260,6 +304,7 @@ class PayrollController extends Controller {
             $salary = $row->salary;
             
             $userAttendances = $allAttendances->has($row->user->id) ? $allAttendances[$row->user->id] : collect();
+            $userLeaves = $allLeaves->has($row->user->id) ? $allLeaves[$row->user->id]->keyBy('date') : collect();
             
             $total_present = 0;
 
@@ -267,11 +312,21 @@ class PayrollController extends Controller {
             // Process Attendance records (Only P, W and H give present marks)
             foreach ($userAttendances as $att) {
                 $dateStr = Carbon::parse($att->date)->format('Y-m-d');
-                $attendance_map[$dateStr] = $att->status;
+                
+                $effectiveStatus = $att->status;
+                if ($att->type !== 'Work From Home' && $att->type !== 'Leave') {
+                    if ($att->check_in && $att->check_out) {
+                        $effectiveStatus = \App\Models\StaffAttendance::calculateStatusOnCheckOut($att->check_in, $att->check_out);
+                    } elseif ($att->check_in && empty($att->check_out)) {
+                        $effectiveStatus = 3; // Missing punch out counted as Half Day
+                    }
+                }
 
-                if ($att->status == 1) { // 1 = Present / WFH
+                $attendance_map[$dateStr] = $effectiveStatus;
+
+                if ($effectiveStatus == 1) { // 1 = Present / WFH
                     $total_present += 1;
-                } elseif ($att->status == 3) { // 3 = Half Day
+                } elseif ($effectiveStatus == 3) { // 3 = Half Day
                     $total_present += 0.5;
                 }
             }
@@ -311,7 +366,7 @@ class PayrollController extends Controller {
                     $prev_index = $first_index - 1;
                     $prev_date = $monthDates[$prev_index]['date'];
                     $status = isset($attendance_map[$prev_date]) ? $attendance_map[$prev_date] : null;
-                    if (!in_array($status, [1, 2, 3])) {
+                    if (!in_array($status, [1, 2, 3]) && !$userLeaves->has($prev_date)) {
                         $preceding_absent = true;
                     }
                 }
@@ -321,7 +376,7 @@ class PayrollController extends Controller {
                     $next_index = $last_index + 1;
                     $next_date = $monthDates[$next_index]['date'];
                     $status = isset($attendance_map[$next_date]) ? $attendance_map[$next_date] : null;
-                    if (!in_array($status, [1, 2, 3])) {
+                    if (!in_array($status, [1, 2, 3]) && !$userLeaves->has($next_date)) {
                         $following_absent = true;
                     }
                 }
@@ -338,14 +393,42 @@ class PayrollController extends Controller {
             $tempRow['salary_deduction'] = number_format($salary_deduction, 2);
             $allowanceAmount = [];
             $deductionAmount = [];
+            $performanceIncentiveEarned = 0;
+            $performanceIncentiveDeducted = 0;
+            $hasPerformanceSetting = false;
+
             foreach ($row->staffSalary as $salaryItem) {
                 $payrollSetting = $salaryItem->payrollSetting;
         
                 if (!$payrollSetting) {
                     continue;
                 }
+
+                $isPerformance = ($payrollSetting->type === 'performance') || 
+                                 ($payrollSetting->type === 'allowance' && stripos($payrollSetting->name, 'performance') !== false);
         
-                if ($payrollSetting->type === 'allowance') {
+                if ($isPerformance) {
+                    $hasPerformanceSetting = true;
+                    $baseIncentive = 0;
+                    if (isset($salaryItem->percentage)) {
+                        $baseIncentive = ($salaryItem->percentage / 100) * $salary;
+                    } elseif (isset($salaryItem->amount)) {
+                        $baseIncentive = $salaryItem->amount;
+                    }
+
+                    $evaluation = $allEvaluations->get($row->id);
+                    if ($evaluation) {
+                        // Formula: Each negative feedback point deducts 1 point (1/10th) from the base incentive
+                        $earned = ($evaluation->positive_points / 10) * $baseIncentive;
+                        $deducted = $baseIncentive - $earned;
+                        $performanceIncentiveEarned += $earned;
+                        $performanceIncentiveDeducted += $deducted;
+                    } else {
+                        // If not yet evaluated for the month, full base incentive is given
+                        $performanceIncentiveEarned += $baseIncentive;
+                    }
+                    $allowanceAmount[] = $performanceIncentiveEarned;
+                } elseif ($payrollSetting->type === 'allowance') {
                
                     if (isset($salaryItem->percentage)) {
                         $allowanceAmount[] = ($salaryItem->percentage / 100) * $salary;
@@ -368,6 +451,15 @@ class PayrollController extends Controller {
 
             $tempRow['allowances'] = isset($totalAllowanceAmount) ? number_format($totalAllowanceAmount,2) : 0;
             $tempRow['deductions'] = isset($totalDeductionAmount) ? number_format($totalDeductionAmount,2) : 0;
+
+            if ($hasPerformanceSetting) {
+                $evaluation = $allEvaluations->get($row->id);
+                if ($evaluation) {
+                    $tempRow['allowances'] = number_format($totalAllowanceAmount, 2) . '<br><small class="text-success" title="Earned Incentive (' . $evaluation->positive_points . '/10 points, -' . $evaluation->negative_points . ' negative)">Perf: ₹' . number_format($performanceIncentiveEarned, 2) . ' (' . $evaluation->positive_points . '/10)</small>';
+                } else {
+                    $tempRow['allowances'] = number_format($totalAllowanceAmount, 2) . '<br><small class="text-warning" title="Evaluation Pending (Base: ₹' . number_format($performanceIncentiveEarned, 2) . ')">Perf: ₹' . number_format($performanceIncentiveEarned, 2) . ' (Pending)</small>';
+                }
+            }
 
             if (isset($row->expense)) {
                 // TODO : this line can be converted into filter searching instead of searching from query
@@ -395,7 +487,13 @@ class PayrollController extends Controller {
                     if (count($expense->staff_payroll)) {
                         $allowance = $deduction = 0;
                         foreach ($expense->staff_payroll as $key => $staff_payroll) {
-                            if ($staff_payroll->payroll_setting->type == 'allowance') {
+                            if ($staff_payroll->payroll_setting->type == 'allowance' || $staff_payroll->payroll_setting->type == 'performance') {
+                                if ($staff_payroll->amount) {
+                                    $allowance += $staff_payroll->amount;
+                                } else {
+                                    $allowance += ($expense->basic_salary * $staff_payroll->percentage) / 100;
+                                }
+                            } else if($staff_payroll->payroll_setting->type == 'deduction') {
                                 if ($staff_payroll->amount) {
                                     $allowance += $staff_payroll->amount;
                                 } else {
@@ -569,6 +667,13 @@ class PayrollController extends Controller {
                 ->whereBetween('date', [$startDate, $endDate])
                 ->get();
 
+            $userLeaves = \App\Models\LeaveDetail::whereHas('leave', function($q) use ($salary) {
+                    $q->where('user_id', $salary->staff->user_id)->where('status', 1);
+                })
+                ->whereBetween('date', [$startDate, $endDate])
+                ->get()
+                ->keyBy('date');
+
             $daysInMonth = Carbon::create($salary->year, $salary->month, 1)->daysInMonth;
             
             // Calculate non-working days
@@ -608,11 +713,21 @@ class PayrollController extends Controller {
             $attendance_map = [];
             foreach ($userAttendances as $att) {
                 $dateStr = Carbon::parse($att->date)->format('Y-m-d');
-                $attendance_map[$dateStr] = $att->status;
+                
+                $effectiveStatus = $att->status;
+                if ($att->type !== 'Work From Home' && $att->type !== 'Leave') {
+                    if ($att->check_in && $att->check_out) {
+                        $effectiveStatus = \App\Models\StaffAttendance::calculateStatusOnCheckOut($att->check_in, $att->check_out);
+                    } elseif ($att->check_in && empty($att->check_out)) {
+                        $effectiveStatus = 3; // Missing punch out -> Half Day
+                    }
+                }
 
-                if ($att->status == 1) {
+                $attendance_map[$dateStr] = $effectiveStatus;
+
+                if ($effectiveStatus == 1) {
                     $total_present += 1;
-                } elseif ($att->status == 3) {
+                } elseif ($effectiveStatus == 3) {
                     $total_present += 0.5;
                 }
             }
@@ -652,7 +767,7 @@ class PayrollController extends Controller {
                     $prev_index = $first_index - 1;
                     $prev_date = $monthDates[$prev_index]['date'];
                     $status = isset($attendance_map[$prev_date]) ? $attendance_map[$prev_date] : null;
-                    if (!in_array($status, [1, 2, 3])) {
+                    if (!in_array($status, [1, 2, 3]) && !$userLeaves->has($prev_date)) {
                         $preceding_absent = true;
                     }
                 }
@@ -662,7 +777,7 @@ class PayrollController extends Controller {
                     $next_index = $last_index + 1;
                     $next_date = $monthDates[$next_index]['date'];
                     $status = isset($attendance_map[$next_date]) ? $attendance_map[$next_date] : null;
-                    if (!in_array($status, [1, 2, 3])) {
+                    if (!in_array($status, [1, 2, 3]) && !$userLeaves->has($next_date)) {
                         $following_absent = true;
                     }
                 }
@@ -683,7 +798,12 @@ class PayrollController extends Controller {
             // Total days
             $days = Carbon::now()->year($salary->year)->month($salary->month)->daysInMonth;
 
-            $pdf = PDF::loadView('payroll.slip',compact('schoolSetting','salary','total_leaves','days','allow_leaves'))->setPaper('a5');
+            $performanceEvaluation = \App\Models\StaffPerformanceEvaluation::where('staff_id', $salary->staff_id)
+                ->where('month', $salary->month)
+                ->where('year', $salary->year)
+                ->first();
+
+            $pdf = PDF::loadView('payroll.slip',compact('schoolSetting','salary','total_leaves','days','allow_leaves', 'performanceEvaluation'))->setPaper('a5');
             return $pdf->stream($salary->title.'-'.$salary->staff->user->full_name.'.pdf');
         } catch (\Throwable $th) {
             ResponseService::logErrorResponse($th);

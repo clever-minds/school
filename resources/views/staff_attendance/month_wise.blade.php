@@ -52,7 +52,8 @@
                                     <span class="badge badge-success mr-2 p-2">P : Present</span>
                                     <span class="badge badge-danger mr-2 p-2">A : Absent</span>
                                     <span class="badge badge-warning mr-2 p-2">H : Half Day</span>
-                                    <span class="badge badge-info p-2">W : Work From Home</span>
+                                    <span class="badge badge-info mr-2 p-2">W : Work From Home</span>
+                                    <span class="badge badge-primary p-2">L : Leave</span>
                                 </div>
                             </div>
                         </div>
@@ -402,12 +403,14 @@
             let aSelected = value === 'A' ? 'selected' : '';
             let wfhSelected = value === 'W' ? 'selected' : '';
             let hdSelected = value === 'H' ? 'selected' : '';
+            let lSelected = value === 'L' ? 'selected' : '';
 
             let colorClass = 'text-secondary';
             if (value === 'P') colorClass = 'text-success';
             else if (value === 'A') colorClass = 'text-danger';
             else if (value === 'W') colorClass = 'text-info';
             else if (value === 'H') colorClass = 'text-warning';
+            else if (value === 'L') colorClass = 'text-primary';
 
             return `
                 <select class="form-control form-control-sm ${colorClass} update-attendance font-weight-bold" style="width: auto; padding: 2px; height: auto; font-size: 13px; min-width: 45px;" data-userid="${userId}" data-day="${day}">
@@ -416,6 +419,7 @@
                     <option value="A" class="text-danger" ${aSelected}>A</option>
                     <option value="H" class="text-warning" ${hdSelected}>H</option>
                     <option value="W" class="text-info" ${wfhSelected}>W</option>
+                    <option value="L" class="text-primary" ${lSelected}>L</option>
                 </select>
             `;
         }
@@ -497,14 +501,18 @@
             } else if (val === 'W') {
                 status = 1;
                 type = 'Work From Home';
+            } else if (val === 'L') {
+                status = 4;
+                type = 'Leave';
             }
 
             let selectElem = $(this);
-            selectElem.removeClass('text-success text-danger text-info text-warning text-secondary');
+            selectElem.removeClass('text-success text-danger text-info text-warning text-primary text-secondary');
             if (val === 'P') selectElem.addClass('text-success');
             else if (val === 'A') selectElem.addClass('text-danger');
             else if (val === 'H') selectElem.addClass('text-warning');
             else if (val === 'W') selectElem.addClass('text-info');
+            else if (val === 'L') selectElem.addClass('text-primary');
             else selectElem.addClass('text-secondary');
 
             // Mark as dirty to save on submit
@@ -612,6 +620,7 @@
                     if (val === 'A') status = 4;
                     else if (val === 'H') status = 3;
                     else if (val === 'W') { status = 1; type = 'Work From Home'; }
+                    else if (val === 'L') { status = 4; type = 'Leave'; }
 
                     updates.push({
                         user_id: userId,

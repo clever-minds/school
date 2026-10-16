@@ -1498,6 +1498,10 @@ class StaffApiController extends Controller
                 return ResponseService::errorResponse('Already checked out for today');
             }
 
+            $status = ($attendance->type === 'Work From Home') 
+                ? 1 
+                : \App\Models\StaffAttendance::calculateStatusOnCheckOut($attendance->check_in, $currentTime);
+
             // Perform Check-Out
             $data = [
                 'check_out' => $currentTime,
@@ -1505,6 +1509,7 @@ class StaffApiController extends Controller
                 'check_out_longitude' => $request->longitude,
                 'check_out_location' => $request->address ?? null,
                 'check_out_ip' => $request->ip(),
+                'status' => $status,
             ];
             $this->staffAttendance->update($attendance->id, $data);
             return ResponseService::successResponse('Checked out successfully', ['type' => 'check_out']);

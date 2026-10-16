@@ -83,13 +83,22 @@ class StaffAttendanceController extends Controller
             $tempRow['check_out'] = $row->check_out ? Carbon::parse($row->check_out)->format('H:i:s') : '-';
             $tempRow['check_in_location'] = $row->check_in_location;
             $tempRow['check_out_location'] = $row->check_out_location;
+            $effectiveStatus = $row->status;
+            if ($row->type !== 'Work From Home') {
+                if ($row->check_in && $row->check_out) {
+                    $effectiveStatus = \App\Models\StaffAttendance::calculateStatusOnCheckOut($row->check_in, $row->check_out);
+                } elseif ($row->check_in && empty($row->check_out) && $row->date < Carbon::today()->toDateString()) {
+                    $effectiveStatus = 3;
+                }
+            }
+
             if ($row->type === 'Work From Home') {
                 $tempRow['status'] = 'Work From Home';
-            } elseif ($row->status == 1) {
+            } elseif ($effectiveStatus == 1) {
                 $tempRow['status'] = 'Present';
-            } elseif ($row->status == 2) {
+            } elseif ($effectiveStatus == 2) {
                 $tempRow['status'] = 'Late';
-            } elseif ($row->status == 3) {
+            } elseif ($effectiveStatus == 3) {
                 $tempRow['status'] = 'Half Day';
             } else {
                 $tempRow['status'] = 'Absent';
@@ -146,12 +155,17 @@ class StaffAttendanceController extends Controller
                     return ResponseService::errorResponse('Already checked out for today');
                 }
 
+                $status = ($attendance->type === 'Work From Home') 
+                    ? 1 
+                    : \App\Models\StaffAttendance::calculateStatusOnCheckOut($attendance->check_in, $currentTime);
+
                 $data = [
                     'check_out' => $currentTime,
                     'check_out_latitude' => $request->latitude,
                     'check_out_longitude' => $request->longitude,
                     'check_out_location' => $request->address ?? null,
                     'check_out_ip' => $request->ip(),
+                    'status' => $status,
                 ];
                 $this->staffAttendance->update($attendance->id, $data);
                 return ResponseService::successResponse('Successfully Checked Out');
@@ -210,6 +224,10 @@ class StaffAttendanceController extends Controller
                     return ResponseService::errorResponse("{$user->full_name} already checked out for today");
                 }
 
+                $status = ($attendance->type === 'Work From Home') 
+                    ? 1 
+                    : \App\Models\StaffAttendance::calculateStatusOnCheckOut($attendance->check_in, $currentTime);
+
                 $data = [
                     'check_out' => $currentTime,
                     'check_out_latitude' => $request->latitude,
@@ -217,6 +235,7 @@ class StaffAttendanceController extends Controller
                     'check_out_location' => $request->address ?? null,
                     'check_out_ip' => $request->ip(),
                     'scanned_by' => Auth::id(),
+                    'status' => $status,
                 ];
                 $this->staffAttendance->update($attendance->id, $data);
                 return ResponseService::successResponse("{$user->full_name} Successfully Checked Out", $user);
@@ -269,10 +288,19 @@ class StaffAttendanceController extends Controller
             ->whereBetween('date', [$startDate, $endDate])
             ->get()
             ->groupBy('user_id');
+
+        $allLeaves = \App\Models\LeaveDetail::whereHas('leave', function($q) use ($staffUserIds) {
+                $q->whereIn('user_id', $staffUserIds)->where('status', 1);
+            })
+            ->whereBetween('date', [$startDate, $endDate])
+            ->with('leave:id,user_id')
+            ->get()
+            ->groupBy('leave.user_id');
         
         foreach ($staffUsers as $staffUser) {            
             $staffAttendance = ['full_name' => $staffUser->full_name, 'user_id' => $staffUser->id];
             $userAttendances = $allAttendances->has($staffUser->id) ? $allAttendances[$staffUser->id]->keyBy('date') : collect();
+            $userLeaves = $allLeaves->has($staffUser->id) ? $allLeaves[$staffUser->id]->keyBy('date') : collect();
             
             for ($day=1; $day <= $date->daysInMonth; $day++) {
                 $currentDate = $date->copy()->day($day)->format('Y-m-d');
@@ -281,18 +309,43 @@ class StaffAttendanceController extends Controller
                 if ($attendance) {
                     if ($attendance->type === 'Work From Home') {
                         $staffAttendance["day_$day"] = 'W';
-                    } elseif ($attendance->status == 1) {
-                        $staffAttendance["day_$day"] = 'P';
-                    } elseif ($attendance->status == 3) {
-                        $staffAttendance["day_$day"] = 'H';
+                    } elseif ($attendance->type === 'Leave') {
+                        $staffAttendance["day_$day"] = 'L';
                     } else {
-                        $staffAttendance["day_$day"] = 'A';
+                        if ($attendance->check_in && $attendance->check_out) {
+                            $effStatus = \App\Models\StaffAttendance::calculateStatusOnCheckOut($attendance->check_in, $attendance->check_out);
+                            $staffAttendance["day_$day"] = $effStatus == 1 ? 'P' : ($effStatus == 3 ? 'H' : 'A');
+                        } elseif ($attendance->check_in && empty($attendance->check_out)) {
+                            // If check_out is missing on a completed date -> Half Day
+                            if ($currentDate < Carbon::today()->toDateString()) {
+                                $staffAttendance["day_$day"] = 'H';
+                            } else {
+                                $staffAttendance["day_$day"] = $attendance->status == 3 ? 'H' : 'P';
+                            }
+                        } else {
+                            if ($attendance->status == 1) {
+                                $staffAttendance["day_$day"] = 'P';
+                            } elseif ($attendance->status == 3) {
+                                $staffAttendance["day_$day"] = 'H';
+                            } else {
+                                $staffAttendance["day_$day"] = 'A';
+                            }
+                        }
                     }
 
                     $staffAttendance["punch_in_$day"] = $attendance->check_in ? Carbon::parse($attendance->check_in)->format('h:i A') : null;
                     $staffAttendance["punch_out_$day"] = $attendance->check_out ? Carbon::parse($attendance->check_out)->format('h:i A') : null;
                 } else {
-                    $staffAttendance["day_$day"] = null;
+                    if ($userLeaves->has($currentDate)) {
+                        $leaveDetail = $userLeaves[$currentDate];
+                        if (stripos($leaveDetail->type, 'Half') !== false) {
+                            $staffAttendance["day_$day"] = 'H';
+                        } else {
+                            $staffAttendance["day_$day"] = 'L';
+                        }
+                    } else {
+                        $staffAttendance["day_$day"] = null;
+                    }
                     $staffAttendance["punch_in_$day"] = null;
                     $staffAttendance["punch_out_$day"] = null;
                 }
@@ -335,6 +388,20 @@ class StaffAttendanceController extends Controller
 
             $status = $request->status;
             $type = $request->type;
+
+            if ($status === 'L' || $type === 'Leave') {
+                $status = 4;
+                $type = 'Leave';
+            } elseif ($status === 'P') {
+                $status = 1;
+            } elseif ($status === 'H') {
+                $status = 3;
+            } elseif ($status === 'A') {
+                $status = 4;
+            } elseif ($status === 'W') {
+                $status = 1;
+                $type = 'Work From Home';
+            }
 
             if (!$attendance) {
                 $targetUser = User::find($request->user_id);
@@ -389,6 +456,20 @@ class StaffAttendanceController extends Controller
 
                 $status = $att['status'];
                 $type = $att['type'] ?? '';
+
+                if ($status === 'L' || $type === 'Leave') {
+                    $status = 4;
+                    $type = 'Leave';
+                } elseif ($status === 'P') {
+                    $status = 1;
+                } elseif ($status === 'H') {
+                    $status = 3;
+                } elseif ($status === 'A') {
+                    $status = 4;
+                } elseif ($status === 'W') {
+                    $status = 1;
+                    $type = 'Work From Home';
+                }
 
                 if (!$attendance) {
                     $targetUser = User::find($att['user_id']);

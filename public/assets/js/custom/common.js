@@ -345,6 +345,7 @@ $('#edit-form,.edit-form,.edit-form-without-reset,.edit-form-staff-payroll-setti
     if ($(formElement).hasClass('edit-form-staff-payroll-setting')) {
         let allowance_id = [];
         let deduction_id = [];
+        let performance_id = [];
         $('.allowance_id').each(function() {
             if ($(this).val()) {
                 allowance_id.push($(this).val());
@@ -357,7 +358,13 @@ $('#edit-form,.edit-form,.edit-form-without-reset,.edit-form-staff-payroll-setti
             }
         });
 
-        if (hasDuplicates(allowance_id) || hasDuplicates(deduction_id)) {
+        $('.performance_id').each(function() {
+            if ($(this).val()) {
+                performance_id.push($(this).val());
+            }
+        });
+
+        if (hasDuplicates(allowance_id) || hasDuplicates(deduction_id) || hasDuplicates(performance_id)) {
             status = 0;
         }
     }

@@ -909,6 +909,14 @@
                                 </a>
                             </li>
                         @endcanany
+
+                        @canany(['payroll-create','payroll-edit', 'payroll-list'])
+                            <li class="nav-item">
+                                <a href="{{ route('staff-performance.index') }}" class="nav-link" data-name="{{ Auth::user()->getRoleNames()[0] }}" data-access="@hasFeatureAccess('Expense Management')">
+                                    {{ __('Performance Evaluation') }}
+                                </a>
+                            </li>
+                        @endcanany
                     </ul>
                 </div>
             </li>

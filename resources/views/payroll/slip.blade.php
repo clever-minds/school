@@ -355,7 +355,43 @@
                 <tr>
                     <td colspan="2">
                         @foreach ($salary->staff_payroll as $payroll)
-                            @if ($payroll->payroll_setting->type == 'allowance')
+                            @php
+                                $isPerf = $payroll->payroll_setting && (
+                                    $payroll->payroll_setting->type == 'performance' ||
+                                    ($payroll->payroll_setting->type == 'allowance' && stripos($payroll->payroll_setting->name, 'performance') !== false)
+                                );
+                            @endphp
+                            @if ($isPerf)
+                                <div class="row-col">
+                                    <div class="col-6">
+                                        <span class="text-left">
+                                            {{ $payroll->payroll_setting->name }}
+                                            @if ($performanceEvaluation ?? null)
+                                                <small style="color: #28a745; font-size: 9px;">({{ $performanceEvaluation->positive_points }}/10 pts)</small>
+                                                @if ($performanceEvaluation->negative_points > 0)
+                                                    <br><span style="font-size: 8.5px; color: gray;">Base: {{ number_format($performanceEvaluation->base_incentive, 2) }} ({{ $performanceEvaluation->negative_points }} neg: -{{ number_format($performanceEvaluation->deducted_incentive, 2) }})</span>
+                                                @endif
+                                            @endif
+                                        </span>
+                                    </div>
+                                    <div class="col-6 text-right">
+                                        <span class="text-right">
+                                            @if ($payroll->amount)
+                                                {{ number_format($payroll->amount, 2) }}
+                                                @php
+                                                    $allowance += $payroll->amount;
+                                                @endphp
+                                            @else
+                                            @php
+                                                $allowance += ($salary->basic_salary * $payroll->percentage) / 100;
+                                            @endphp
+                                                {{ number_format(($salary->basic_salary * $payroll->percentage) / 100, 2) }}
+                                            @endif
+                                            
+                                        </span>
+                                    </div>
+                                </div>
+                            @elseif ($payroll->payroll_setting->type == 'allowance')
                                 <div class="row-col">
                                     <div class="col-6">
                                         <span class="text-left">

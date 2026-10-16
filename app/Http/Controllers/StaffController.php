@@ -808,70 +808,13 @@ class StaffController extends Controller {
 
         $allowances = $this->payrollSetting->builder()->withTrashed()->where('type', 'allowance')->get();
         $deductions = $this->payrollSetting->builder()->withTrashed()->where('type', 'deduction')->get();
+        $performances = $this->payrollSetting->builder()->withTrashed()->where('type', 'performance')->get();
 
         return response(view('staff.view_salary_structure', compact(
             'allowances',
             'deductions',
+            'performances',
             'user'
-        )));
-
-        $user = $this->user->builder()->with([
-            'staff',
-            'staff.staffSalary',
-            'staff.staffSalary.payrollSetting'
-        ])->whereHas('roles', function ($q) {
-            $q->where('custom_role', 1)->whereNot('name', 'Teacher');
-        })->findOrFail($id);
-    
-        if (!$user || !$user->staff) {
-            return redirect('staff-list')->with('error', 'User not found or has no staff information');
-        }
-    
-        $salary = $user->staff->salary;
-    
-        $allowanceAmount = [];
-        $deductionAmount = [];
-        $allowances = [];
-        $deductions = [];
-    
-        foreach ($user->staff->staffSalary as $salaryItem) {
-            $payrollSetting = $salaryItem->payrollSetting;
-            if (!$payrollSetting) {
-                continue;
-            }
-    
-            if ($payrollSetting->type === 'allowance') {
-                $allowanceType = $payrollSetting->name;
-                if (isset($salaryItem->percentage)) {
-                    $allowanceType .= ' (' . $salaryItem->percentage . '%)';
-                    $allowanceAmount[] = ($salaryItem->percentage / 100) * $salary;
-                } elseif (isset($salaryItem->amount)) {
-                    $allowanceAmount[] = $salaryItem->amount;
-                }
-                $allowances[] =   $allowanceType;
-            } elseif ($payrollSetting->type === 'deduction') {
-                $deductionType= $payrollSetting->name;
-                if (isset($salaryItem->percentage)) {
-                    $deductionType .= ' (' . $salaryItem->percentage . '%)';
-                    $deductionAmount[] = ($salaryItem->percentage / 100) * $salary;
-                } elseif (isset($salaryItem->amount)) {
-                    $deductionAmount[] = $salaryItem->amount;
-                }
-                $deductions[] = $deductionType;
-            }
-        }
-    
-        $totalAllowanceAmount = array_sum($allowanceAmount);
-        $totalDeductionAmount = array_sum($deductionAmount);
-        $netSalary = $salary + $totalAllowanceAmount - $totalDeductionAmount;
-    
-        return response(view('staff.view_salary_structure', compact(
-            'salary',
-            'allowances',
-            'deductions',
-            'allowanceAmount',
-            'deductionAmount',
-            'netSalary'
         )));
     }
 
@@ -928,6 +871,24 @@ class StaffController extends Controller {
             }
             if ($deduction_status) {
                 $this->staffSalary->upsert($deduction_data,['staff_id','payroll_setting_id'],['amount','percentage']);
+            }
+
+            // Store performance incentives
+            $performance_data = array();
+            $performance_status = 0;
+            foreach ($request->performance ?? [] as $perf) {
+                if ($perf['id'] ?? '') {
+                    $performance_status = 1;
+                    $performance_data[] = [
+                        'staff_id' => $id,
+                        'payroll_setting_id' =>  $perf['id'],
+                        'amount' => $perf['amount'] ??  null,
+                        'percentage' => $perf['percentage'] ?? null
+                    ];
+                }
+            }
+            if ($performance_status) {
+                $this->staffSalary->upsert($performance_data,['staff_id','payroll_setting_id'],['amount','percentage']);
             }
 
             DB::commit();

@@ -1553,5 +1553,9 @@
     "last_school": "Last School",
     "last_cleared_class": "Last Cleared Class",
     "education_board": "Education Board",
-    "remarks": "Remarks"
+    "remarks": "Remarks",
+    "performance": "Performance",
+    "performance_incentive": "Performance Incentive",
+    "staff_performance": "Staff Performance",
+    "performance_evaluation": "Performance Evaluation"
 }

@@ -1473,6 +1473,13 @@ class DummySampleDataSeeder extends Seeder
                     'school_id' => $schoolId,
                 ],
                 [
+                    'name' => 'Performance Incentives',
+                    'amount' => 0,
+                    'percentage' => null,
+                    'type' => 'allowance',
+                    'school_id' => $schoolId,
+                ],
+                [
                     'name' => 'Professional Tax',
                     'amount' => 200,
                     'percentage' => null,

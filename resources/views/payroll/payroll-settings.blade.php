@@ -24,7 +24,7 @@
                             @csrf
                                 <div class="row">
 
-                                    <div class="form-group col-sm-12 col-md-12">
+                                     <div class="form-group col-sm-12 col-md-12">
                                         <label>{{ __('type') }} <span class="text-danger">*</span></label>
                                         <div class="col-12 d-flex row">
                                             <div class="form-check form-check-inline">
@@ -143,7 +143,7 @@
                             <div class="modal-body">
                                 <div class="row">
 
-                                    <div class="form-group col-sm-12 col-md-12">
+                                     <div class="form-group col-sm-12 col-md-12">
                                         <label>{{ __('type') }} <span class="text-danger">*</span></label>
                                         <div class="col-12 d-flex row">
                                             <div class="form-check form-check-inline">
@@ -229,6 +229,11 @@
                     $('#amount-div').hide();
                     $('#percentage-div').show();
                 }
+            });
+
+            // Filter Type dropdown change -> refresh table
+            $('#filter_type').on('change', function () {
+                $('#table_list').bootstrapTable('refresh');
             });
         });
     </script>

@@ -54,6 +54,7 @@ use App\Http\Controllers\SessionYearController;
 use App\Http\Controllers\ShiftController;
 use App\Http\Controllers\SliderController;
 use App\Http\Controllers\StaffController;
+use App\Http\Controllers\StaffPerformanceController;
 use App\Http\Controllers\StreamController;
 use App\Http\Controllers\StudentController;
 use App\Http\Controllers\SubjectController;
@@ -925,6 +926,12 @@ Route::post('/admin/impersonation-exit',
         Route::get('payroll/slips/list',[PayrollController::class,'slip_list'])->name('payroll.slip.list');
         
         Route::resource('payroll', PayrollController::class)->only(['index', 'store', 'show']);
+
+        // Staff Performance & Incentive Evaluation
+        Route::get('staff-performance', [StaffPerformanceController::class, 'index'])->name('staff-performance.index');
+        Route::get('staff-performance/list', [StaffPerformanceController::class, 'list'])->name('staff-performance.list');
+        Route::get('staff-performance/get', [StaffPerformanceController::class, 'getEvaluation'])->name('staff-performance.get');
+        Route::post('staff-performance/store', [StaffPerformanceController::class, 'store'])->name('staff-performance.store');
 
         // Leave
         Route::group(['prefix' => 'leave'], static function () {

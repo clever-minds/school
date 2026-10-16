@@ -47,4 +47,32 @@ class StaffAttendance extends Model
         }
         return $query;
     }
+
+    /**
+     * Calculate attendance status based on check_in and check_out working hours
+     *
+     * Rules:
+     * - >= 7 hours (>= 420 mins) -> 1 (Present / Full Day)
+     * - >= 2 hours and < 7 hours (120 to 419 mins) -> 3 (Half Day)
+     * - < 2 hours (< 120 mins) -> 4 (Absent)
+     * - If check_out is missing -> 3 (Half Day)
+     */
+    public static function calculateStatusOnCheckOut($checkIn, $checkOut)
+    {
+        if (empty($checkIn) || empty($checkOut)) {
+            return 3; // Missing punch-out is counted as Half Day
+        }
+
+        $start = \Carbon\Carbon::parse($checkIn);
+        $end = \Carbon\Carbon::parse($checkOut);
+        $minutes = $start->diffInMinutes($end);
+
+        if ($minutes >= 420) {
+            return 1; // 7 or more hours -> Full Day (Present)
+        } elseif ($minutes >= 120) {
+            return 3; // 2 to less than 7 hours -> Half Day
+        } else {
+            return 4; // Less than 2 hours -> Absent
+        }
+    }
 }
