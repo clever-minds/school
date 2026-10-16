@@ -19,7 +19,7 @@ class StaffPerformanceController extends Controller
 {
     public function index()
     {
-        ResponseService::noAnyPermissionThenRedirect(['payroll-list', 'payroll-create', 'payroll-edit']);
+        ResponseService::noAnyPermissionThenRedirect(['staff-performance-list', 'staff-performance-create', 'payroll-list', 'payroll-create', 'payroll-edit']);
 
         $roles = Role::whereNotIn('name', ['Student', 'Parent', 'Guardian'])->get();
         $currentMonth = Carbon::now()->month;
@@ -31,8 +31,8 @@ class StaffPerformanceController extends Controller
 
     public function list(Request $request)
     {
-        if (!Auth::user()->can('payroll-list') && !Auth::user()->can('payroll-create')) {
-            ResponseService::noAnyPermissionThenSendJson(['payroll-list', 'payroll-create']);
+        if (!Auth::user()->can('staff-performance-list') && !Auth::user()->can('staff-performance-create') && !Auth::user()->can('payroll-list') && !Auth::user()->can('payroll-create')) {
+            ResponseService::noAnyPermissionThenSendJson(['staff-performance-list', 'staff-performance-create', 'payroll-list', 'payroll-create']);
         }
 
         $month = $request->input('month', Carbon::now()->month);
@@ -152,6 +152,10 @@ class StaffPerformanceController extends Controller
 
     public function getEvaluation(Request $request)
     {
+        if (!Auth::user()->can('staff-performance-list') && !Auth::user()->can('staff-performance-create') && !Auth::user()->can('payroll-list') && !Auth::user()->can('payroll-create')) {
+            return ResponseService::errorResponse('Permission denied', null, 403);
+        }
+
         $validator = Validator::make($request->all(), [
             'staff_id' => 'required|exists:staffs,id',
             'month' => 'required|integer|between:1,12',
@@ -199,6 +203,10 @@ class StaffPerformanceController extends Controller
 
     public function store(Request $request)
     {
+        if (!Auth::user()->can('staff-performance-create') && !Auth::user()->can('staff-performance-edit') && !Auth::user()->can('payroll-create') && !Auth::user()->can('payroll-edit')) {
+            return ResponseService::errorResponse('Permission denied', null, 403);
+        }
+
         $validator = Validator::make($request->all(), [
             'staff_id' => 'required|exists:staffs,id',
             'month' => 'required|integer|between:1,12',

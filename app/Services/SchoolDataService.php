@@ -591,6 +591,10 @@ class SchoolDataService {
             'staff-create',
             'staff-edit',
             'staff-delete',
+            'staff-performance-list',
+            'staff-performance-create',
+            'staff-performance-edit',
+            'staff-performance-delete',
 
             'expense-category-list',
             'expense-category-create',

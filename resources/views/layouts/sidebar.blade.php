@@ -887,7 +887,7 @@
         @endcanany
 
         {{-- Payroll --}}
-        @canany(['payroll-create', 'payroll-list', 'payroll-edit', 'payroll-delete','payroll-settings-list','payroll-settings-create','payroll-settings-edit', 'payroll-settings-delete'])
+        @canany(['staff-performance-list', 'staff-performance-create', 'payroll-create', 'payroll-list', 'payroll-edit', 'payroll-delete','payroll-settings-list','payroll-settings-create','payroll-settings-edit', 'payroll-settings-delete'])
             <li class="nav-item">
                 <a href="#payroll-menu" class="nav-link" data-toggle="collapse" data-name="{{ Auth::user()->getRoleNames()[0] }}" data-access="@hasFeatureAccess('Expense Management')">
                     <i class="fa fa-credit-card-alt menu-icon"></i>
@@ -910,10 +910,10 @@
                             </li>
                         @endcanany
 
-                        @canany(['payroll-create','payroll-edit', 'payroll-list'])
+                        @canany(['staff-performance-list', 'staff-performance-create', 'staff-performance-edit', 'payroll-create','payroll-edit', 'payroll-list'])
                             <li class="nav-item">
-                                <a href="{{ route('staff-performance.index') }}" class="nav-link" data-name="{{ Auth::user()->getRoleNames()[0] }}" data-access="@hasFeatureAccess('Expense Management')">
-                                    {{ __('Performance Evaluation') }}
+                                <a href="{{ route('staff-performance.index') }}" class="nav-link" data-name="{{ Auth::user()->getRoleNames()[0] ?? '' }}" data-access="@hasFeatureAccess('Expense Management')">
+                                    {{ __('performance_evaluation') }}
                                 </a>
                             </li>
                         @endcanany

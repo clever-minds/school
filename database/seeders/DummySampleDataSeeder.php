@@ -900,8 +900,8 @@ class DummySampleDataSeeder extends Seeder
 
     private function addStudentCustomFieldData($studentId, $schoolId)
     {
+        $faker = $this->faker;
         $customFields = FormField::where('school_id', $schoolId)->where('user_type', 1)->get();
-        dd($customFields);
         foreach ($customFields as $field) {
             $value = '';
             
@@ -950,11 +950,10 @@ class DummySampleDataSeeder extends Seeder
             }
 
             // Insert the custom field value
-            DB::table('')->insert([
+            DB::table('extra_user_datas')->insert([
+                'user_id' => $studentId,
                 'form_field_id' => $field->id,
-                'field_value' => $value,
-                'model_type' => 'App\\Models\\Students',
-                'model_id' => $studentId,
+                'data' => $value,
                 'school_id' => $schoolId,
                 'created_at' => now(),
                 'updated_at' => now(),
