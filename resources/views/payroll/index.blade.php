@@ -6,143 +6,86 @@
 
 @section('css')
 <style>
-    .staff-table {
-        position: relative;
+    /* Exact Attendance table compact styling */
+    .show_attendance_student_list .table {
+        min-width: 1400px;
     }
 
-    .staff-table .fixed-table-container {
-        position: relative;
-        max-height: 72vh;
-        overflow: auto !important;
-        border: 1px solid #ebedf2;
-    }
-
-    .staff-table .fixed-table-body {
-        overflow: visible !important;
-        position: relative;
-    }
-
-    .staff-table #table_list {
-        border-collapse: separate !important;
-        border-spacing: 0 !important;
-        width: 100%;
-    }
-
-    /* Attendance-like compact padding and vertical alignment */
-    .staff-table #table_list td,
-    .staff-table #table_list th {
-        padding: 5px 8px !important;
+    .show_attendance_student_list .table td, 
+    .show_attendance_student_list .table th {
+        padding: 4px 6px !important;
         vertical-align: middle !important;
-        font-size: 12.5px;
+        font-size: 12px !important;
         white-space: nowrap !important;
         border-color: #ebedf2 !important;
     }
 
-    /* Sticky Headers */
-    .staff-table #table_list thead th {
-        position: sticky !important;
-        top: 0 !important;
-        z-index: 6 !important;
-        background-color: #f8f9fa !important;
-        color: #343a40 !important;
+    .show_attendance_student_list .table th {
         font-weight: 600 !important;
-        font-size: 12px !important;
-        border-bottom: 2px solid #dee2e6 !important;
-        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+        background-color: #ffffff !important;
+        color: #212529 !important;
+        border-bottom: 2px solid #ebedf2 !important;
     }
 
-    /* Column 1: Checkbox */
-    .staff-table #table_list th:nth-child(1),
-    .staff-table #table_list td:nth-child(1) {
-        position: sticky !important;
-        left: 0px !important;
-        z-index: 5 !important;
-        background-color: #ffffff !important;
-        width: 44px !important;
-        min-width: 44px !important;
-        max-width: 44px !important;
+    .show_attendance_student_list .table th[data-field="state"],
+    .fixed-columns th[data-field="state"],
+    .show_attendance_student_list .table td:first-child,
+    .fixed-columns td:first-child {
+        width: 38px !important;
+        min-width: 38px !important;
+        max-width: 38px !important;
         text-align: center !important;
-        padding: 5px 2px !important;
     }
 
-    /* Column 2: No. */
-    .staff-table #table_list th:nth-child(2),
-    .staff-table #table_list td:nth-child(2) {
-        position: sticky !important;
-        left: 44px !important;
-        z-index: 5 !important;
-        background-color: #ffffff !important;
-        width: 60px !important;
-        min-width: 60px !important;
-        max-width: 60px !important;
+    .show_attendance_student_list .table th[data-field="no"],
+    .fixed-columns th[data-field="no"],
+    .show_attendance_student_list .table td:nth-child(2),
+    .fixed-columns td:nth-child(2) {
+        width: 48px !important;
+        min-width: 48px !important;
+        max-width: 48px !important;
         text-align: center !important;
-        white-space: nowrap !important;
     }
 
-    /* Column 3: Name - sticky on horizontal scroll */
-    .staff-table #table_list th:nth-child(3),
-    .staff-table #table_list td:nth-child(3) {
-        position: sticky !important;
-        left: 104px !important;
-        z-index: 5 !important;
-        background-color: #ffffff !important;
+    .show_attendance_student_list .table th[data-field="user_full_name"],
+    .show_attendance_student_list .table td:nth-child(3),
+    .fixed-columns th[data-field="user_full_name"],
+    .fixed-columns td:nth-child(3) {
         min-width: 170px !important;
-        max-width: 240px !important;
-        white-space: nowrap !important;
-        font-weight: 500;
-        border-right: 2px solid #dee2e6 !important;
-        box-shadow: 4px 0 6px -2px rgba(0, 0, 0, 0.12) !important;
+        text-align: left !important;
+        font-weight: 600 !important;
+        text-transform: uppercase !important;
     }
 
-    /* Sticky Headers intersection for columns 1, 2, 3 */
-    .staff-table #table_list thead th:nth-child(1) {
-        position: sticky !important;
-        top: 0 !important;
-        left: 0px !important;
-        z-index: 10 !important;
-        background-color: #f8f9fa !important;
+    /* Fixed columns shadow & border matching attendance */
+    .fixed-columns {
+        background-color: #ffffff !important;
+        box-shadow: 2px 0 5px rgba(0, 0, 0, 0.08) !important;
+        border-right: 1px solid #ebedf2 !important;
+        z-index: 2 !important;
     }
 
-    .staff-table #table_list thead th:nth-child(2) {
-        position: sticky !important;
-        top: 0 !important;
-        left: 44px !important;
-        z-index: 10 !important;
-        background-color: #f8f9fa !important;
+    .fixed-columns th,
+    .fixed-columns td {
+        background-color: #ffffff !important;
     }
 
-    .staff-table #table_list thead th:nth-child(3) {
-        position: sticky !important;
-        top: 0 !important;
-        left: 104px !important;
-        z-index: 10 !important;
-        background-color: #f8f9fa !important;
-        border-right: 2px solid #dee2e6 !important;
-        box-shadow: 4px 0 6px -2px rgba(0, 0, 0, 0.12) !important;
-    }
-
-    /* Row hover and selected states for sticky cells */
-    .staff-table #table_list tbody tr:hover > td:nth-child(1),
-    .staff-table #table_list tbody tr:hover > td:nth-child(2),
-    .staff-table #table_list tbody tr:hover > td:nth-child(3) {
+    .fixed-columns tr:hover td,
+    .show_attendance_student_list .table tr:hover td {
         background-color: #f2edf3 !important;
     }
 
-    .staff-table #table_list tbody tr.selected > td:nth-child(1),
-    .staff-table #table_list tbody tr.selected > td:nth-child(2),
-    .staff-table #table_list tbody tr.selected > td:nth-child(3) {
-        background-color: #f2edf3 !important;
-    }
-
-    /* Compact inputs like attendance form elements */
-    .staff-table .basic-salary-input,
-    .staff-table .net-salary-input {
-        height: 28px !important;
-        line-height: 28px !important;
-        padding: 2px 6px !important;
+    /* Compact inputs matching attendance */
+    .show_attendance_student_list .basic-salary-input,
+    .show_attendance_student_list .net-salary-input {
+        height: 26px !important;
+        line-height: 26px !important;
+        padding: 1px 6px !important;
         font-size: 12px !important;
         border: 1px solid #ced4da !important;
-        border-radius: 4px !important;
+        border-radius: 3px !important;
+        background-color: #ffffff !important;
+        display: inline-block;
     }
 </style>
 @endsection
@@ -203,14 +146,14 @@
                                     </button>
                                 </div>
                             </div>
-                            <div class="staff-table">
+                            <div class="show_attendance_student_list">
 
-                                <table aria-describedby="mydesc" class='table' id='table_list'
+                                <table aria-describedby="mydesc" class='table student_table' id='table_list'
                                        data-toggle="table" data-url="{{ route('payroll.show', [1]) }}"
                                        data-click-to-select="true" data-side-pagination="server" data-pagination="false"
                                        data-page-list="[5, 10, 20, 50, 100, 200]" data-search="true" data-show-columns="false"
-                                       data-show-refresh="true" data-fixed-columns="false" data-fixed-number="2"
-                                       data-fixed-right-number="1" data-trim-on-search="false" data-mobile-responsive="true"
+                                       data-show-refresh="true" data-fixed-columns="true" data-fixed-number="3"
+                                       data-fixed-right-number="0" data-trim-on-search="false" data-mobile-responsive="true"
                                        data-sort-name="id" data-sort-order="desc" data-maintain-selected="true" data-query-params="payrollQueryParams"
                                        data-toolbar="#toolbar"
                                        data-export-options='{ "fileName": "payroll-salary-sheet-<?= date('d-m-y') ?>", "ignoreColumn":["state", "status", "operate"]}'
@@ -220,23 +163,23 @@
                                         <tr>
                                             <th data-field="state" data-checkbox="true"></th>
                                             <th scope="col" data-field="id" data-sortable="true" data-visible="false">{{ __('id') }}</th>
-                                            <th scope="col" data-field="no" data-sortable="false">{{ __('Sr.no.') }}</th>
-                                            <th scope="col" data-field="user_full_name" data-sortable="false">{{ __('NAME') }}</th>
-                                            <th scope="col" data-field="designation" data-sortable="false">{{ __('Designation') }}</th>
-                                            <th scope="col" data-field="salary" data-formatter="salaryInputFormatter" data-sortable="false">{{ __('Basic Sa') }}</th>
-                                            <th scope="col" data-field="perfo" data-formatter="perfoFormatter" data-sortable="false" data-escape="false">{{ __('Perfo') }}</th>
-                                            <th scope="col" data-field="per_day" data-sortable="false">{{ __('Per Day') }}</th>
-                                            <th scope="col" data-field="total_gross" data-sortable="false">{{ __('Total') }}</th>
-                                            <th scope="col" data-field="working_days" data-sortable="false">{{ __('Wor') }}</th>
-                                            <th scope="col" data-field="absent_days" data-sortable="false">{{ __('Abse') }}</th>
-                                            <th scope="col" data-field="paid_leaves" data-sortable="false">{{ __('Paid') }}</th>
-                                            <th scope="col" data-field="pen" data-sortable="false">{{ __('Pen') }}</th>
-                                            <th scope="col" data-field="attended_days" data-sortable="false">{{ __('Atten') }}</th>
-                                            <th scope="col" data-field="other_deductions" data-sortable="false">{{ __('OTHER') }}</th>
-                                            <th scope="col" data-field="net_salary" data-formatter="netSalaryInputFormatter" data-sortable="false">{{ __('Salary paid') }}</th>
-                                            <th scope="col" data-field="signature" data-formatter="signatureFormatter" data-sortable="false" data-escape="false">{{ __('Sign.') }}</th>
-                                            <th scope="col" data-formatter="salaryStatusFormatter" data-field="status">{{ __('status') }}</th>
-                                            <th scope="col" data-field="operate" data-escape="false">{{ __('action') }}</th>
+                                            <th scope="col" data-field="no" data-sortable="false" data-align="center">{{ __('Sr.no.') }}</th>
+                                            <th scope="col" data-field="user_full_name" data-sortable="false" data-align="left">{{ __('NAME') }}</th>
+                                            <th scope="col" data-field="designation" data-sortable="false" data-align="left">{{ __('Designation') }}</th>
+                                            <th scope="col" data-field="salary" data-formatter="salaryInputFormatter" data-sortable="false" data-align="right">{{ __('Basic Sa') }}</th>
+                                            <th scope="col" data-field="perfo" data-formatter="perfoFormatter" data-sortable="false" data-escape="false" data-align="right">{{ __('Perfo') }}</th>
+                                            <th scope="col" data-field="per_day" data-sortable="false" data-align="right">{{ __('Per Day') }}</th>
+                                            <th scope="col" data-field="total_gross" data-sortable="false" data-align="right">{{ __('Total') }}</th>
+                                            <th scope="col" data-field="working_days" data-sortable="false" data-align="center">{{ __('Wor') }}</th>
+                                            <th scope="col" data-field="absent_days" data-sortable="false" data-align="center">{{ __('Abse') }}</th>
+                                            <th scope="col" data-field="paid_leaves" data-sortable="false" data-align="center">{{ __('Paid') }}</th>
+                                            <th scope="col" data-field="pen" data-sortable="false" data-align="center">{{ __('Pen') }}</th>
+                                            <th scope="col" data-field="attended_days" data-sortable="false" data-align="center">{{ __('Atten') }}</th>
+                                            <th scope="col" data-field="other_deductions" data-sortable="false" data-align="right">{{ __('OTHER') }}</th>
+                                            <th scope="col" data-field="net_salary" data-formatter="netSalaryInputFormatter" data-sortable="false" data-align="right">{{ __('Salary paid') }}</th>
+                                            <th scope="col" data-field="signature" data-formatter="signatureFormatter" data-sortable="false" data-escape="false" data-align="center">{{ __('Sign.') }}</th>
+                                            <th scope="col" data-formatter="salaryStatusFormatter" data-field="status" data-align="center">{{ __('status') }}</th>
+                                            <th scope="col" data-field="operate" data-escape="false" data-align="center">{{ __('action') }}</th>
                                         </tr>
                                     </thead>
                                 </table>
@@ -277,38 +220,6 @@
             return '<span class="signature-line" style="display:inline-block; width: 60px; border-bottom: 1px dashed #bbb;">&nbsp;</span>';
         }
 
-        function alignStickyColumns() {
-            let $table = $('#table_list');
-            if (!$table.length) return;
-
-            let $thState = $table.find('thead th[data-field="state"]');
-            let $thNo = $table.find('thead th[data-field="no"]');
-            let $thName = $table.find('thead th[data-field="user_full_name"]');
-            if (!$thName.length) {
-                $thName = $table.find('thead th[data-field="user.full_name"]');
-            }
-
-            let idxState = $thState.index() + 1 || 1;
-            let idxNo = $thNo.index() + 1 || 2;
-            let idxName = $thName.index() + 1 || 3;
-
-            let wState = Math.round($thState.outerWidth()) || 44;
-            let wNo = Math.round($thNo.outerWidth()) || 60;
-
-            let leftNo = wState;
-            let leftName = wState + wNo;
-
-            $('#dynamic-sticky-style').remove();
-            let css = '<style id="dynamic-sticky-style">' +
-                '.staff-table #table_list th:nth-child(' + idxState + '), .staff-table #table_list td:nth-child(' + idxState + ') { left: 0px !important; width: ' + wState + 'px !important; min-width: ' + wState + 'px !important; max-width: ' + wState + 'px !important; }' +
-                '.staff-table #table_list th:nth-child(' + idxNo + '), .staff-table #table_list td:nth-child(' + idxNo + ') { left: ' + leftNo + 'px !important; width: ' + wNo + 'px !important; min-width: ' + wNo + 'px !important; max-width: ' + wNo + 'px !important; }' +
-                '.staff-table #table_list th:nth-child(' + idxName + '), .staff-table #table_list td:nth-child(' + idxName + ') { left: ' + leftName + 'px !important; }' +
-                '.staff-table #table_list thead th:nth-child(' + idxState + ') { left: 0px !important; }' +
-                '.staff-table #table_list thead th:nth-child(' + idxNo + ') { left: ' + leftNo + 'px !important; }' +
-                '.staff-table #table_list thead th:nth-child(' + idxName + ') { left: ' + leftName + 'px !important; }' +
-                '</style>';
-            $('head').append(css);
-        }
 
         function setupExportOptions() {
             let opts = $('#table_list').bootstrapTable('getOptions');
@@ -464,76 +375,98 @@
 
         $('#search').click(function (e) {
             e.preventDefault();
+            $('.show_attendance_student_list').show();
             $('#table_list').bootstrapTable('refresh');
-            $('.staff-table').show();
-            let month = $('#month').val();
-            let year = $('#year').val();
             $('#table_list').bootstrapTable('uncheckAll');
             setTimeout(function () {
-                alignStickyColumns();
+                $('#table_list').bootstrapTable('resetView');
                 setupExportOptions();
             }, 300);
         });
-        window.onload = $('.staff-table').hide();
+
+        $(document).ready(function() {
+            $('.show_attendance_student_list').hide();
+        });
     </script>
 
     <script>
-        var $tableList = $('#table_list')
-        var selections = []
+        var $tableList = $('#table_list');
+        var selections = [];
         var user_list = [];
 
         function responseHandler(res) {
             $.each(res.rows, function (i, row) {
-                row.state = $.inArray(row.id, selections) !== -1
-            })
-            return res
+                row.state = $.inArray(row.id, selections) !== -1;
+            });
+            return res;
         }
 
         $(function () {
-            alignStickyColumns();
             setupExportOptions();
 
             $tableList.on('post-body.bs.table post-header.bs.table load-success.bs.table', function () {
-                alignStickyColumns();
+                $('.fixed-columns input, .fixed-columns select').not('[type="checkbox"]').removeAttr('name');
                 setupExportOptions();
-                setTimeout(alignStickyColumns, 80);
-                setTimeout(alignStickyColumns, 250);
+                setTimeout(function() {
+                    $('#table_list').bootstrapTable('resetView');
+                }, 80);
             });
 
             $(window).on('resize', function () {
-                alignStickyColumns();
+                $('#table_list').bootstrapTable('resetView');
             });
 
             $(document).on('click', '.export .dropdown-menu a, .export .dropdown-menu li, .export button', function () {
                 setupExportOptions();
             });
 
+            // Delegate checkbox clicks from fixed columns overlay to Bootstrap Table
+            $(document).on('click', '.fixed-columns [name="btSelectItem"]', function (e) {
+                e.stopPropagation();
+                var idx = $(this).closest('tr').data('index');
+                if (idx !== undefined) {
+                    if ($(this).prop('checked')) {
+                        $tableList.bootstrapTable('check', idx);
+                    } else {
+                        $tableList.bootstrapTable('uncheck', idx);
+                    }
+                }
+            });
+
+            $(document).on('click', '.fixed-columns [name="btSelectAll"]', function (e) {
+                e.stopPropagation();
+                if ($(this).prop('checked')) {
+                    $tableList.bootstrapTable('checkAll');
+                } else {
+                    $tableList.bootstrapTable('uncheckAll');
+                }
+            });
+
             $tableList.on('check.bs.table check-all.bs.table uncheck.bs.table uncheck-all.bs.table',
                 function (e, rowsAfter, rowsBefore) {
                     user_list = [];
-                    var rows = rowsAfter
+                    var rows = rowsAfter;
                     if (e.type === 'uncheck-all') {
-                        rows = rowsBefore
+                        rows = rowsBefore;
                     }
                     var ids = $.map(!$.isArray(rows) ? [rows] : rows, function (row) {
-                        return row.id
-                    })
+                        return row.id;
+                    });
 
-                    var func = $.inArray(e.type, ['check', 'check-all']) > -1 ? 'union' : 'difference'
-                    selections = window._[func](selections, ids)
+                    var func = $.inArray(e.type, ['check', 'check-all']) > -1 ? 'union' : 'difference';
+                    selections = window._[func](selections, ids);
                     selections.forEach(element => {
                         user_list.push(element);
                     });
                     $('textarea#user_id').val(user_list);
-                })
-        })
-
+                });
+        });
 
         function formSuccessFunction(response) {
             setTimeout(() => {
                 user_list = [];
                 $('#table_list').bootstrapTable('uncheckAll');
-                $('.staff-table').hide();
+                $('.show_attendance_student_list').hide();
             }, 2000);
         }
     </script>
