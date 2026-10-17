@@ -297,7 +297,7 @@ class PayrollController extends Controller {
 
         foreach ($res as $row) {
             $tempRow = $row->toArray();
-            $tempRow['no'] = 'NO.' . $no++;
+            $tempRow['no'] = $no++;
             $salary = (float)$row->salary;
             
             $userAttendances = $allAttendances->has($row->user->id) ? $allAttendances[$row->user->id] : collect();

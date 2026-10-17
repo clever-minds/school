@@ -12,17 +12,43 @@
 
     .staff-table .fixed-table-container {
         position: relative;
-        overflow: visible;
+        max-height: 72vh;
+        overflow: auto !important;
+        border: 1px solid #ebedf2;
     }
 
     .staff-table .fixed-table-body {
-        overflow-x: auto !important;
+        overflow: visible !important;
         position: relative;
     }
 
     .staff-table #table_list {
         border-collapse: separate !important;
-        border-spacing: 0;
+        border-spacing: 0 !important;
+        width: 100%;
+    }
+
+    /* Attendance-like compact padding and vertical alignment */
+    .staff-table #table_list td,
+    .staff-table #table_list th {
+        padding: 5px 8px !important;
+        vertical-align: middle !important;
+        font-size: 12.5px;
+        white-space: nowrap !important;
+        border-color: #ebedf2 !important;
+    }
+
+    /* Sticky Headers */
+    .staff-table #table_list thead th {
+        position: sticky !important;
+        top: 0 !important;
+        z-index: 6 !important;
+        background-color: #f8f9fa !important;
+        color: #343a40 !important;
+        font-weight: 600 !important;
+        font-size: 12px !important;
+        border-bottom: 2px solid #dee2e6 !important;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
     }
 
     /* Column 1: Checkbox */
@@ -32,55 +58,91 @@
         left: 0px !important;
         z-index: 5 !important;
         background-color: #ffffff !important;
-        width: 45px !important;
-        min-width: 45px !important;
-        max-width: 45px !important;
-        text-align: center;
+        width: 44px !important;
+        min-width: 44px !important;
+        max-width: 44px !important;
+        text-align: center !important;
+        padding: 5px 2px !important;
     }
 
     /* Column 2: No. */
     .staff-table #table_list th:nth-child(2),
     .staff-table #table_list td:nth-child(2) {
         position: sticky !important;
-        left: 45px !important;
+        left: 44px !important;
         z-index: 5 !important;
         background-color: #ffffff !important;
-        width: 50px !important;
-        min-width: 50px !important;
-        max-width: 50px !important;
-        text-align: center;
+        width: 60px !important;
+        min-width: 60px !important;
+        max-width: 60px !important;
+        text-align: center !important;
+        white-space: nowrap !important;
     }
 
     /* Column 3: Name - sticky on horizontal scroll */
     .staff-table #table_list th:nth-child(3),
     .staff-table #table_list td:nth-child(3) {
         position: sticky !important;
-        left: 95px !important;
+        left: 104px !important;
         z-index: 5 !important;
         background-color: #ffffff !important;
-        min-width: 180px !important;
-        max-width: 250px !important;
-        white-space: normal;
-        box-shadow: 4px 0 6px -2px rgba(0, 0, 0, 0.15) !important;
-        border-right: 1px solid #ebedf2 !important;
+        min-width: 170px !important;
+        max-width: 240px !important;
+        white-space: nowrap !important;
+        font-weight: 500;
+        border-right: 2px solid #dee2e6 !important;
+        box-shadow: 4px 0 6px -2px rgba(0, 0, 0, 0.12) !important;
     }
 
-    /* Sticky Headers th */
-    .staff-table #table_list thead th:nth-child(1),
-    .staff-table #table_list thead th:nth-child(2),
-    .staff-table #table_list thead th:nth-child(3) {
-        z-index: 7 !important;
+    /* Sticky Headers intersection for columns 1, 2, 3 */
+    .staff-table #table_list thead th:nth-child(1) {
+        position: sticky !important;
+        top: 0 !important;
+        left: 0px !important;
+        z-index: 10 !important;
         background-color: #f8f9fa !important;
+    }
+
+    .staff-table #table_list thead th:nth-child(2) {
+        position: sticky !important;
+        top: 0 !important;
+        left: 44px !important;
+        z-index: 10 !important;
+        background-color: #f8f9fa !important;
+    }
+
+    .staff-table #table_list thead th:nth-child(3) {
+        position: sticky !important;
+        top: 0 !important;
+        left: 104px !important;
+        z-index: 10 !important;
+        background-color: #f8f9fa !important;
+        border-right: 2px solid #dee2e6 !important;
+        box-shadow: 4px 0 6px -2px rgba(0, 0, 0, 0.12) !important;
     }
 
     /* Row hover and selected states for sticky cells */
     .staff-table #table_list tbody tr:hover > td:nth-child(1),
     .staff-table #table_list tbody tr:hover > td:nth-child(2),
-    .staff-table #table_list tbody tr:hover > td:nth-child(3),
+    .staff-table #table_list tbody tr:hover > td:nth-child(3) {
+        background-color: #f2edf3 !important;
+    }
+
     .staff-table #table_list tbody tr.selected > td:nth-child(1),
     .staff-table #table_list tbody tr.selected > td:nth-child(2),
     .staff-table #table_list tbody tr.selected > td:nth-child(3) {
         background-color: #f2edf3 !important;
+    }
+
+    /* Compact inputs like attendance form elements */
+    .staff-table .basic-salary-input,
+    .staff-table .net-salary-input {
+        height: 28px !important;
+        line-height: 28px !important;
+        padding: 2px 6px !important;
+        font-size: 12px !important;
+        border: 1px solid #ced4da !important;
+        border-radius: 4px !important;
     }
 </style>
 @endsection
@@ -219,48 +281,33 @@
             let $table = $('#table_list');
             if (!$table.length) return;
 
-            let idxState = $table.find('thead th[data-field="state"]').index() + 1;
-            let idxNo = $table.find('thead th[data-field="no"]').index() + 1;
-            let idxName = $table.find('thead th[data-field="user_full_name"]').index() + 1;
-            if (idxName <= 0) {
-                idxName = $table.find('thead th[data-field="user.full_name"]').index() + 1;
+            let $thState = $table.find('thead th[data-field="state"]');
+            let $thNo = $table.find('thead th[data-field="no"]');
+            let $thName = $table.find('thead th[data-field="user_full_name"]');
+            if (!$thName.length) {
+                $thName = $table.find('thead th[data-field="user.full_name"]');
             }
 
-            if (idxState <= 0) idxState = 1;
-            if (idxNo <= 0) idxNo = 2;
-            if (idxName <= 0) idxName = 3;
+            let idxState = $thState.index() + 1 || 1;
+            let idxNo = $thNo.index() + 1 || 2;
+            let idxName = $thName.index() + 1 || 3;
 
-            let $thState = $table.find('thead th:nth-child(' + idxState + ')');
-            let $thNo = $table.find('thead th:nth-child(' + idxNo + ')');
-            let $thName = $table.find('thead th:nth-child(' + idxName + ')');
-
-            let wState = $thState.outerWidth() || 45;
-            let wNo = $thNo.outerWidth() || 60;
+            let wState = Math.round($thState.outerWidth()) || 44;
+            let wNo = Math.round($thNo.outerWidth()) || 60;
 
             let leftNo = wState;
             let leftName = wState + wNo;
 
-            $table.find('tr > *:nth-child(' + idxState + ')').css({
-                'position': 'sticky',
-                'left': '0px',
-                'z-index': '5'
-            });
-
-            $table.find('tr > *:nth-child(' + idxNo + ')').css({
-                'position': 'sticky',
-                'left': leftNo + 'px',
-                'z-index': '5'
-            });
-
-            $table.find('tr > *:nth-child(' + idxName + ')').css({
-                'position': 'sticky',
-                'left': leftName + 'px',
-                'z-index': '5'
-            });
-
-            $thState.css('z-index', '7');
-            $thNo.css('z-index', '7');
-            $thName.css('z-index', '7');
+            $('#dynamic-sticky-style').remove();
+            let css = '<style id="dynamic-sticky-style">' +
+                '.staff-table #table_list th:nth-child(' + idxState + '), .staff-table #table_list td:nth-child(' + idxState + ') { left: 0px !important; width: ' + wState + 'px !important; min-width: ' + wState + 'px !important; max-width: ' + wState + 'px !important; }' +
+                '.staff-table #table_list th:nth-child(' + idxNo + '), .staff-table #table_list td:nth-child(' + idxNo + ') { left: ' + leftNo + 'px !important; width: ' + wNo + 'px !important; min-width: ' + wNo + 'px !important; max-width: ' + wNo + 'px !important; }' +
+                '.staff-table #table_list th:nth-child(' + idxName + '), .staff-table #table_list td:nth-child(' + idxName + ') { left: ' + leftName + 'px !important; }' +
+                '.staff-table #table_list thead th:nth-child(' + idxState + ') { left: 0px !important; }' +
+                '.staff-table #table_list thead th:nth-child(' + idxNo + ') { left: ' + leftNo + 'px !important; }' +
+                '.staff-table #table_list thead th:nth-child(' + idxName + ') { left: ' + leftName + 'px !important; }' +
+                '</style>';
+            $('head').append(css);
         }
 
         function setupExportOptions() {
@@ -449,6 +496,8 @@
             $tableList.on('post-body.bs.table post-header.bs.table load-success.bs.table', function () {
                 alignStickyColumns();
                 setupExportOptions();
+                setTimeout(alignStickyColumns, 80);
+                setTimeout(alignStickyColumns, 250);
             });
 
             $(window).on('resize', function () {
