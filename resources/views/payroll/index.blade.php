@@ -7,72 +7,11 @@
 @section('css')
 <style>
     /* Exact Attendance table compact styling */
-    .show_attendance_student_list .table {
-        min-width: 1400px;
-    }
-
     .show_attendance_student_list .table td, 
     .show_attendance_student_list .table th {
-        padding: 4px 6px !important;
-        vertical-align: middle !important;
-        font-size: 12px !important;
-        white-space: nowrap !important;
-        border-color: #ebedf2 !important;
-    }
-
-    .show_attendance_student_list .table th {
-        font-weight: 600 !important;
-        background-color: #ffffff !important;
-        color: #212529 !important;
-        border-bottom: 2px solid #ebedf2 !important;
-    }
-
-    .show_attendance_student_list .table th[data-field="state"],
-    .fixed-columns th[data-field="state"],
-    .show_attendance_student_list .table td:first-child,
-    .fixed-columns td:first-child {
-        width: 38px !important;
-        min-width: 38px !important;
-        max-width: 38px !important;
-        text-align: center !important;
-    }
-
-    .show_attendance_student_list .table th[data-field="no"],
-    .fixed-columns th[data-field="no"],
-    .show_attendance_student_list .table td:nth-child(2),
-    .fixed-columns td:nth-child(2) {
-        width: 48px !important;
-        min-width: 48px !important;
-        max-width: 48px !important;
-        text-align: center !important;
-    }
-
-    .show_attendance_student_list .table th[data-field="user_full_name"],
-    .show_attendance_student_list .table td:nth-child(3),
-    .fixed-columns th[data-field="user_full_name"],
-    .fixed-columns td:nth-child(3) {
-        min-width: 170px !important;
-        text-align: left !important;
-        font-weight: 600 !important;
-        text-transform: uppercase !important;
-    }
-
-    /* Fixed columns shadow & border matching attendance */
-    .fixed-columns {
-        background-color: #ffffff !important;
-        box-shadow: 2px 0 5px rgba(0, 0, 0, 0.08) !important;
-        border-right: 1px solid #ebedf2 !important;
-        z-index: 2 !important;
-    }
-
-    .fixed-columns th,
-    .fixed-columns td {
-        background-color: #ffffff !important;
-    }
-
-    .fixed-columns tr:hover td,
-    .show_attendance_student_list .table tr:hover td {
-        background-color: #f2edf3 !important;
+        padding: 4px 5px !important;
+        vertical-align: middle;
+        white-space: nowrap;
     }
 
     /* Compact inputs matching attendance */
@@ -404,12 +343,9 @@
         $(function () {
             setupExportOptions();
 
-            $tableList.on('post-body.bs.table post-header.bs.table load-success.bs.table', function () {
+            $tableList.on('load-success.bs.table post-body.bs.table', function () {
                 $('.fixed-columns input, .fixed-columns select').not('[type="checkbox"]').removeAttr('name');
                 setupExportOptions();
-                setTimeout(function() {
-                    $('#table_list').bootstrapTable('resetView');
-                }, 80);
             });
 
             $(window).on('resize', function () {
