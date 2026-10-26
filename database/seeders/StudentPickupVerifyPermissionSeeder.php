@@ -5,7 +5,6 @@ namespace Database\Seeders;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
 use Spatie\Permission\Models\Permission;
-use Spatie\Permission\Models\Role;
 use Spatie\Permission\PermissionRegistrar;
 use Throwable;
 
@@ -45,17 +44,33 @@ class StudentPickupVerifyPermissionSeeder extends Seeder
         }
         $this->command->info("✅ Permissions created in main database.");
 
+        $mainPermMap = DB::connection('mysql')->table('permissions')
+            ->whereIn('name', $permissions)
+            ->pluck('id', 'name')
+            ->toArray();
+
         // Assign to Super Admin in main database
-        $superAdmin = Role::where('name', 'Super Admin')->first();
-        if ($superAdmin) {
-            $superAdmin->givePermissionTo($permissions);
+        $superAdminId = DB::connection('mysql')->table('roles')->where('name', 'Super Admin')->value('id');
+        if ($superAdminId && !empty($mainPermMap)) {
+            $rows = [];
+            foreach ($mainPermMap as $permId) {
+                $rows[] = ['permission_id' => $permId, 'role_id' => $superAdminId];
+            }
+            DB::connection('mysql')->table('role_has_permissions')->insertOrIgnore($rows);
             $this->command->info("✅ Permissions assigned to Super Admin in main DB.");
         }
 
-        $mainSchoolAdmins = Role::withoutGlobalScope('school')->where('name', 'School Admin')->get();
-        foreach ($mainSchoolAdmins as $adminRole) {
-            $adminRole->givePermissionTo($permissions);
-            $this->command->info("✅ Permissions assigned to School Admin (ID: {$adminRole->id}) in main DB.");
+        // Assign to School Admin in main database
+        $mainSchoolAdminIds = DB::connection('mysql')->table('roles')->where('name', 'School Admin')->pluck('id')->toArray();
+        if (!empty($mainSchoolAdminIds) && !empty($mainPermMap)) {
+            $rows = [];
+            foreach ($mainSchoolAdminIds as $adminId) {
+                foreach ($mainPermMap as $permId) {
+                    $rows[] = ['permission_id' => $permId, 'role_id' => $adminId];
+                }
+            }
+            DB::connection('mysql')->table('role_has_permissions')->insertOrIgnore($rows);
+            $this->command->info("✅ Permissions assigned to School Admin in main DB.");
         }
 
         // 2. Sync to all Tenant Databases
@@ -75,28 +90,59 @@ class StudentPickupVerifyPermissionSeeder extends Seeder
                 config(['database.connections.school.database' => $tenantDbName]);
                 DB::purge('school');
                 DB::reconnect('school');
+                DB::setDefaultConnection('school');
 
                 app()[PermissionRegistrar::class]->forgetCachedPermissions();
 
+                // 2a. Create permissions in tenant database
                 foreach ($permissions as $name) {
-                    Permission::on('school')->firstOrCreate(['name' => $name, 'guard_name' => 'web']);
+                    Permission::firstOrCreate(['name' => $name, 'guard_name' => 'web']);
                 }
 
-                $adminRole = Role::on('school')->where('name', 'School Admin')->first();
-                if ($adminRole) {
-                    $adminRole->givePermissionTo($permissions);
+                // 2b. Fetch tenant's actual permission IDs to avoid foreign key constraints
+                $tenantPermMap = DB::connection('school')->table('permissions')
+                    ->whereIn('name', $permissions)
+                    ->pluck('id', 'name')
+                    ->toArray();
+
+                // 2c. Assign to School Admin
+                $adminRoleId = DB::connection('school')->table('roles')->where('name', 'School Admin')->value('id');
+                if ($adminRoleId && !empty($tenantPermMap)) {
+                    $rows = [];
+                    foreach ($tenantPermMap as $permId) {
+                        $rows[] = ['permission_id' => $permId, 'role_id' => $adminRoleId];
+                    }
+                    DB::connection('school')->table('role_has_permissions')->insertOrIgnore($rows);
                     $this->command->info("   ✅ Permissions assigned to 'School Admin' in {$schoolName}");
                 }
 
-                $teacherRole = Role::on('school')->where('name', 'Teacher')->first();
-                if ($teacherRole) {
-                    $teacherRole->givePermissionTo($verifyPermissions);
+                // 2d. Assign to Teacher
+                $teacherRoleId = DB::connection('school')->table('roles')->where('name', 'Teacher')->value('id');
+                if ($teacherRoleId && !empty($tenantPermMap)) {
+                    $rows = [];
+                    foreach ($verifyPermissions as $pName) {
+                        if (isset($tenantPermMap[$pName])) {
+                            $rows[] = ['permission_id' => $tenantPermMap[$pName], 'role_id' => $teacherRoleId];
+                        }
+                    }
+                    if (!empty($rows)) {
+                        DB::connection('school')->table('role_has_permissions')->insertOrIgnore($rows);
+                    }
                     $this->command->info("   ✅ Permissions assigned to 'Teacher' in {$schoolName}");
                 }
 
-                $principalRole = Role::on('school')->where('name', 'Principal')->first();
-                if ($principalRole) {
-                    $principalRole->givePermissionTo($verifyPermissions);
+                // 2e. Assign to Principal
+                $principalRoleId = DB::connection('school')->table('roles')->where('name', 'Principal')->value('id');
+                if ($principalRoleId && !empty($tenantPermMap)) {
+                    $rows = [];
+                    foreach ($verifyPermissions as $pName) {
+                        if (isset($tenantPermMap[$pName])) {
+                            $rows[] = ['permission_id' => $tenantPermMap[$pName], 'role_id' => $principalRoleId];
+                        }
+                    }
+                    if (!empty($rows)) {
+                        DB::connection('school')->table('role_has_permissions')->insertOrIgnore($rows);
+                    }
                     $this->command->info("   ✅ Permissions assigned to 'Principal' in {$schoolName}");
                 }
 
