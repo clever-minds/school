@@ -58,6 +58,8 @@ class SyncMissingPermissions extends Command
             'student-pickup-create',
             'student-pickup-edit',
             'student-pickup-delete',
+            'student-pickup-verify',
+            'student-pickup-verify-otp',
             'staff-kyc-upload',
             'manual-upi-transaction-list',
             'staff-performance-list',

@@ -19,14 +19,14 @@
         </li>
         {{-- student pickup --}}
         @if(Auth::user()->school_id)
-            @can('student-pickup-list')
+            @canany(['student-pickup-list', 'student-pickup-verify', 'student-pickup-verify-otp'])
             <li class="nav-item">
                 <a class="nav-link" href="{{ route('student-pickup.index') }}">
                     <i class="fa fa-handshake-o menu-icon"></i>
                     <span class="menu-title">{{ __('Student Pickup') }}</span>
                 </a>
             </li>
-            @endcan
+            @endcanany
 
             @can('consent-form-list')
             <li class="nav-item">

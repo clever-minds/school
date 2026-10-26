@@ -422,7 +422,7 @@ class SchoolDataService {
             ['name' => 'manage-expense-show'],
             ...self::permission('reminder'),
             ...self::permission('school-policy'),
-            ...self::permission('student-pickup')
+            ...self::permission('student-pickup', ['verify', 'verify-otp'])
 
         ];
         $permissions = array_map(static function ($data) {
@@ -712,6 +712,8 @@ class SchoolDataService {
             'student-pickup-create',
             'student-pickup-edit',
             'student-pickup-delete',
+            'student-pickup-verify',
+            'student-pickup-verify-otp',
             'staff-kyc-upload'
 
         ];
@@ -767,7 +769,10 @@ class SchoolDataService {
             'student-diary-edit',
             'student-diary-delete',
             'staff-kyc-upload',
-            'staff-attendance-list'
+            'staff-attendance-list',
+            'student-pickup-list',
+            'student-pickup-verify',
+            'student-pickup-verify-otp'
         ];
         $teacher_role->syncPermissions($TeacherHasAccessTo);
     }

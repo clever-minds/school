@@ -95,7 +95,7 @@ class StudentPickupController extends Controller
      */
     public function verifyPickupOTP(Request $request)
     {
-        // ResponseService::noPermissionThenSendJson('student-pickup-edit');
+        ResponseService::noAnyPermissionThenSendJson(['student-pickup-verify', 'student-pickup-verify-otp', 'student-pickup-edit']);
 
         $validator = Validator::make($request->all(), [
             'otp' => 'required|string|size:6',
@@ -141,7 +141,7 @@ class StudentPickupController extends Controller
      */
     public function getAllPickupRequests(Request $request)
     {
-        // ResponseService::noPermissionThenSendJson('student-pickup-list');
+        ResponseService::noAnyPermissionThenSendJson(['student-pickup-list', 'student-pickup-verify', 'student-pickup-verify-otp']);
 
         try {
             $user = Auth::user();

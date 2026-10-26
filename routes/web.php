@@ -617,6 +617,7 @@ Route::post('/admin/impersonation-exit',
         Route::group(['prefix' => 'student-pickup'], static function () {
             Route::get('/', [StudentPickupController::class, 'index'])->name('student-pickup.index');
             Route::get('/list', [StudentPickupController::class, 'show'])->name('student-pickup.list');
+            Route::post('/verify-otp', [StudentPickupController::class, 'verifyOtp'])->name('student-pickup.verify-otp');
         });
 
         /*** Teacher Onboarding ***/
