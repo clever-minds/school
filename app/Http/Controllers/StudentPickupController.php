@@ -70,7 +70,6 @@ class StudentPickupController extends Controller
                     if ($canVerify && $row->status == 0) {
                         $operate = '<button type="button" class="btn btn-xs btn-gradient-success btn-rounded btn-icon verify-pickup-btn" ' .
                             'data-id="' . $row->id . '" ' .
-                            'data-otp="' . $row->otp . '" ' .
                             'data-student="' . htmlspecialchars($studentName, ENT_QUOTES) . '" ' .
                             'data-class="' . htmlspecialchars($classFull, ENT_QUOTES) . '" ' .
                             'data-person="' . htmlspecialchars($row->pickup_person_name ?? '', ENT_QUOTES) . '" ' .
