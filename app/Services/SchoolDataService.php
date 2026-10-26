@@ -422,7 +422,8 @@ class SchoolDataService {
             ['name' => 'manage-expense-show'],
             ...self::permission('reminder'),
             ...self::permission('school-policy'),
-            ...self::permission('student-pickup', ['verify-otp'])
+            ...self::permission('student-pickup', ['verify-otp']),
+            ...self::permission('consent-form')
 
         ];
         $permissions = array_map(static function ($data) {
@@ -713,6 +714,10 @@ class SchoolDataService {
             'student-pickup-edit',
             'student-pickup-delete',
             'student-pickup-verify-otp',
+            'consent-form-list',
+            'consent-form-create',
+            'consent-form-edit',
+            'consent-form-delete',
             'staff-kyc-upload'
 
         ];

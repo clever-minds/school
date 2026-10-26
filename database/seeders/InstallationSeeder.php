@@ -84,6 +84,7 @@ class InstallationSeeder extends Seeder {
             ...self::permission('reminder'),
             ...self::permission('school-policy'),
             ...self::permission('student-pickup', ['verify-otp']),
+            ...self::permission('consent-form'),
             ['name' => 'staff-kyc-upload']
 
             
@@ -200,6 +201,10 @@ class InstallationSeeder extends Seeder {
             'student-pickup-edit',
             'student-pickup-delete',
             'student-pickup-verify-otp',
+            'consent-form-list',
+            'consent-form-create',
+            'consent-form-edit',
+            'consent-form-delete',
             'staff-kyc-upload',
             'activity-log-list',
             'activity-log-edit',
