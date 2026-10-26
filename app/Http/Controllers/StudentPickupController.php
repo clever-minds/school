@@ -20,13 +20,13 @@ class StudentPickupController extends Controller
 
     public function index()
     {
-        ResponseService::noAnyPermissionThenRedirect(['student-pickup-list', 'student-pickup-verify', 'student-pickup-verify-otp']);
+        ResponseService::noAnyPermissionThenRedirect(['student-pickup-list', 'student-pickup-verify-otp']);
         return view('student_pickup.index');
     }
 
     public function show(Request $request)
     {
-        ResponseService::noAnyPermissionThenSendJson(['student-pickup-list', 'student-pickup-verify', 'student-pickup-verify-otp']);
+        ResponseService::noAnyPermissionThenSendJson(['student-pickup-list', 'student-pickup-verify-otp']);
         try {
             $offset = $request->input('offset', 0);
             $limit = $request->input('limit', 10);
@@ -56,7 +56,7 @@ class StudentPickupController extends Controller
             $total = $query->count();
             $rows = $query->orderBy($sort, $order)->offset($offset)->limit($limit)->get();
 
-            $canVerify = Auth::user()->canany(['student-pickup-verify', 'student-pickup-verify-otp', 'student-pickup-edit']);
+            $canVerify = Auth::user()->can('student-pickup-verify-otp');
 
             $bulkData = [
                 'total' => $total,
@@ -136,7 +136,7 @@ class StudentPickupController extends Controller
 
     public function checkOtp(Request $request)
     {
-        ResponseService::noAnyPermissionThenSendJson(['student-pickup-verify', 'student-pickup-verify-otp', 'student-pickup-edit']);
+        ResponseService::noPermissionThenSendJson('student-pickup-verify-otp');
 
         $request->validate([
             'otp' => 'required|string|size:6',
@@ -176,7 +176,7 @@ class StudentPickupController extends Controller
 
     public function verifyOtp(Request $request)
     {
-        ResponseService::noAnyPermissionThenSendJson(['student-pickup-verify', 'student-pickup-verify-otp', 'student-pickup-edit']);
+        ResponseService::noPermissionThenSendJson('student-pickup-verify-otp');
 
         $request->validate([
             'otp' => 'required|string|size:6',

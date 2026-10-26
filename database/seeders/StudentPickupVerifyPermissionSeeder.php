@@ -23,13 +23,11 @@ class StudentPickupVerifyPermissionSeeder extends Seeder
             'student-pickup-create',
             'student-pickup-edit',
             'student-pickup-delete',
-            'student-pickup-verify',
             'student-pickup-verify-otp',
         ];
 
         $verifyPermissions = [
             'student-pickup-list',
-            'student-pickup-verify',
             'student-pickup-verify-otp',
         ];
 

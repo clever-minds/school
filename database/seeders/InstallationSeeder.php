@@ -83,7 +83,7 @@ class InstallationSeeder extends Seeder {
             ['name' => 'manage-expense-show'],
             ...self::permission('reminder'),
             ...self::permission('school-policy'),
-            ...self::permission('student-pickup', ['verify', 'verify-otp']),
+            ...self::permission('student-pickup', ['verify-otp']),
             ['name' => 'staff-kyc-upload']
 
             
@@ -199,7 +199,6 @@ class InstallationSeeder extends Seeder {
             'student-pickup-create',
             'student-pickup-edit',
             'student-pickup-delete',
-            'student-pickup-verify',
             'student-pickup-verify-otp',
             'staff-kyc-upload',
             'activity-log-list',

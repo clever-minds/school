@@ -19,7 +19,7 @@
         </li>
         {{-- student pickup --}}
         @if(Auth::user()->school_id)
-            @canany(['student-pickup-list', 'student-pickup-verify', 'student-pickup-verify-otp'])
+            @canany(['student-pickup-list', 'student-pickup-verify-otp'])
             <li class="nav-item">
                 <a class="nav-link" href="{{ route('student-pickup.index') }}">
                     <i class="fa fa-handshake-o menu-icon"></i>
