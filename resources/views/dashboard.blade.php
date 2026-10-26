@@ -525,7 +525,7 @@
                                     <tr>
                                         <td>{{ $holiday->title }}</td>
                                         <td><span
-                                                class="float-right text-muted">{{ date('d - M', strtotime($holiday->date)) }}</span>
+                                                class="float-right text-muted">{{ $holiday->formatted_date }}</span>
                                         </td>
                                     </tr>
                                     @empty

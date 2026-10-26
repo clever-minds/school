@@ -698,6 +698,7 @@ Route::post('/admin/impersonation-exit',
         Route::resource('announcement', AnnouncementController::class);
 
         /*** Holiday ***/
+        Route::post('holiday/sync-to-all', [HolidayController::class, 'syncToAllSchools'])->name('holiday.sync-to-all');
         Route::resource('holiday', HolidayController::class);
 
         /*** Assignment ***/

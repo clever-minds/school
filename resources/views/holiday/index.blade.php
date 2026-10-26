@@ -103,6 +103,16 @@
 
                         </div>
 
+                        <div class="row">
+                            <div class="form-group col-md-12">
+                                <div class="form-check">
+                                    <label class="form-check-label text-primary font-weight-bold">
+                                        <input type="checkbox" name="apply_to_all_schools" value="1" class="form-check-input">
+                                        {{ __('Apply to all schools') }}
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
 
                         <button class="btn btn-theme float-right ml-3" type="submit">
                             {{ __('submit') }}
@@ -168,6 +178,14 @@
 
                         </div>
 
+                        @if (Auth::user()->can('holiday-create'))
+                        <div class="form-group col-md-3 d-flex align-items-end">
+                            <button type="button" class="btn btn-outline-primary btn-sm mb-2" id="sync-all-schools-btn">
+                                <i class="fa fa-sync"></i> {{ __('Sync to All Schools') }}
+                            </button>
+                        </div>
+                        @endif
+
                     </div>
 
 
@@ -188,8 +206,8 @@
                                 data-show-refresh="true"
                                 data-show-columns="true"
                                 data-mobile-responsive="true"
-                                data-sort-name="id"
-                                data-sort-order="desc"
+                                data-sort-name="date"
+                                data-sort-order="asc"
                                 data-query-params="holidayQueryParams">
 
                                 <thead>
@@ -200,10 +218,10 @@
 
                                         <th data-field="no">{{ __('no.') }}</th>
 
-                                        <th data-field="date" data-width="150">{{ __('date') }}</th>
+                                        <th data-field="date" data-width="150" data-sortable="true">{{ __('date') }}</th>
 
-                                        <th data-field="title">{{ __('title') }}</th>
-                                        <th data-field="holiday_type">{{ __('Holiday Type') }}</th>
+                                        <th data-field="title" data-sortable="true">{{ __('title') }}</th>
+                                        <th data-field="holiday_type" data-sortable="true">{{ __('Holiday Type') }}</th>
                                           <th data-field="class">{{ __('Class') }}</th>
                                         <th data-field="description"
                                             data-formatter="descriptionFormatter"
@@ -478,6 +496,45 @@ $(document).ready(function () {
 
         }
 
+    });
+
+    // SYNC TO ALL SCHOOLS
+    $('#sync-all-schools-btn').on('click', function() {
+        Swal.fire({
+            title: "{{ __('Are you sure?') }}",
+            text: "{{ __('This will copy all holidays of this school to all other schools.') }}",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#3085d6',
+            cancelButtonColor: '#d33',
+            confirmButtonText: "{{ __('Yes, Sync Now!') }}"
+        }).then((result) => {
+            if (result.isConfirmed) {
+                $.ajax({
+                    url: "{{ route('holiday.sync-to-all') }}",
+                    type: 'POST',
+                    data: {
+                        _token: "{{ csrf_token() }}"
+                    },
+                    beforeSend: function() {
+                        $('#sync-all-schools-btn').prop('disabled', true).html('<i class="fa fa-spinner fa-spin"></i> Syncing...');
+                    },
+                    success: function(response) {
+                        $('#sync-all-schools-btn').prop('disabled', false).html('<i class="fa fa-sync"></i> {{ __("Sync to All Schools") }}');
+                        if (!response.error) {
+                            showSuccessToast(response.message);
+                            $('#table_list').bootstrapTable('refresh');
+                        } else {
+                            showErrorToast(response.message);
+                        }
+                    },
+                    error: function(err) {
+                        $('#sync-all-schools-btn').prop('disabled', false).html('<i class="fa fa-sync"></i> {{ __("Sync to All Schools") }}');
+                        showErrorToast('Something went wrong!');
+                    }
+                });
+            }
+        });
     });
 
 });

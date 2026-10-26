@@ -200,7 +200,20 @@ class DashboardController extends Controller
 
             $defaultSessionYear = $this->cache->getDefaultSessionYear();
 
-            $holiday = $this->holiday->builder()->whereDate('date', '>=', Carbon::now()->format('Y-m-d'))->whereDate('date', '<=', $defaultSessionYear->end_date)->orderBy('date', 'ASC')->get();
+            $today = Carbon::now()->format('Y-m-d');
+            $holiday = $this->holiday->builder()
+                ->where('type', 'holiday')
+                ->where(function ($q) use ($today) {
+                    $q->whereDate('date', '>=', $today)
+                      ->orWhere(function ($sub) use ($today) {
+                          $sub->whereNotNull('end_date')->whereDate('end_date', '>=', $today);
+                      });
+                })
+                ->when($defaultSessionYear, function ($q) use ($defaultSessionYear) {
+                    $q->whereDate('date', '<=', $defaultSessionYear->end_date);
+                })
+                ->orderBy('date', 'ASC')
+                ->get();
 
             $announcement = $this->announcement->builder()->whereHas('announcement_class', function ($q) {
                 $q->where('class_subject_id', null);

@@ -75,5 +75,19 @@ class Holiday extends Model {
         
         return $date;
     }
+
+    public function getFormattedDateAttribute() {
+        $rawDate = $this->getRawOriginal('date');
+        $rawEndDate = $this->getRawOriginal('end_date');
+        if (empty($rawDate)) {
+            return '';
+        }
+        $startDateFormatted = date('d M', strtotime($rawDate));
+        if (!empty($rawEndDate) && $rawDate !== $rawEndDate) {
+            $endDateFormatted = date('d M', strtotime($rawEndDate));
+            return $startDateFormatted . ' - ' . $endDateFormatted;
+        }
+        return $startDateFormatted;
+    }
    
 }

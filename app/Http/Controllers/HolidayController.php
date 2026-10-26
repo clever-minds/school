@@ -8,9 +8,14 @@ use App\Services\BootstrapTableService;
 use App\Services\ResponseService;
 use App\Services\SessionYearsTrackingsService;
 use App\Services\CachingService;
+use App\Models\School;
+use App\Models\Holiday;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Facades\Config;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Carbon\Carbon;
 use Throwable;
 
@@ -122,6 +127,10 @@ class HolidayController extends Controller
             );
         }
 
+        if ($request->apply_to_all_schools) {
+            $this->syncHolidayToAllSchools($data);
+        }
+
         ResponseService::successResponse('Data Stored Successfully');
 
     } catch (Throwable $e) {
@@ -217,8 +226,8 @@ class HolidayController extends Controller
 
     $offset = request('offset', 0);
     $limit = request('limit', 10);
-    $sort = request('sort', 'id');
-    $order = request('order', 'DESC');
+    $sort = request('sort', 'date');
+    $order = request('order', 'ASC');
     $search = request('search');
     $session_year_id = request('session_year_id');
     $month = request('month');
@@ -249,7 +258,7 @@ class HolidayController extends Controller
                     $sessionYear->start_date,
                     $sessionYear->end_date
                 ])
-                    ->orWhereIn('type', ['saturday_all', 'saturday_2_4']);
+                    ->orWhereIn('type', ['saturday_all', 'saturday_1_3', 'saturday_2_4']);
             });
         })
 
@@ -262,7 +271,13 @@ class HolidayController extends Controller
 
     $total = $sql->count();
 
-    $sql->orderBy($sort, $order)->skip($offset)->take($limit);
+    if ($sort == 'date') {
+        $sql->orderByRaw("CASE WHEN type != 'holiday' OR date IS NULL THEN 1 ELSE 0 END, date {$order}, id {$order}");
+    } else {
+        $sql->orderBy($sort, $order);
+    }
+
+    $sql->skip($offset)->take($limit);
 
     $res = $sql->get();
 
@@ -304,9 +319,12 @@ class HolidayController extends Controller
         } elseif ($row->type == 'saturday_all') {
              $tempRow['date'] = "";
             $tempRow['holiday_type'] = 'All Saturday Off';
+        } elseif ($row->type == 'saturday_1_3') {
+            $tempRow['holiday_type'] = '1st & 3rd Saturday Off';
+            $tempRow['date'] = "";
         } elseif ($row->type == 'saturday_2_4') {
             $tempRow['holiday_type'] = '2nd & 4th Saturday Off';
-              $tempRow['date'] = "";
+            $tempRow['date'] = "";
         }
 
         // Class List
@@ -349,4 +367,109 @@ class HolidayController extends Controller
             ResponseService::errorResponse();
         }
     }
+
+    /**
+     * Sync single holiday to all other schools
+     */
+    private function syncHolidayToAllSchools(array $data)
+    {
+        $currentSchoolId = Auth::user()->school_id;
+        $schools = School::on('mysql')->where('id', '!=', $currentSchoolId)->get();
+        $originalDb = Config::get('database.connections.school.database');
+
+        foreach ($schools as $school) {
+            try {
+                if (!empty($school->database_name)) {
+                    Config::set('database.connections.school.database', $school->database_name);
+                    DB::purge('school');
+                    DB::connection('school')->reconnect();
+                    DB::setDefaultConnection('school');
+                }
+
+                Holiday::create([
+                    'type'        => $data['type'],
+                    'date'        => $data['date'] ?? null,
+                    'end_date'    => $data['end_date'] ?? null,
+                    'title'       => $data['title'],
+                    'description' => $data['description'] ?? null,
+                    'school_id'   => $school->id,
+                ]);
+            } catch (Throwable $e) {
+                Log::error("Failed to sync holiday to school {$school->id}: " . $e->getMessage());
+            }
+        }
+
+        // Restore original connection
+        if (!empty($originalDb)) {
+            Config::set('database.connections.school.database', $originalDb);
+            DB::purge('school');
+            DB::connection('school')->reconnect();
+            DB::setDefaultConnection('school');
+        }
+    }
+
+    /**
+     * Sync all holidays of current school to all other tenant schools
+     */
+    public function syncToAllSchools(Request $request)
+    {
+        ResponseService::noFeatureThenRedirect('Holiday Management');
+        ResponseService::noPermissionThenRedirect('holiday-create');
+
+        try {
+            $currentSchoolId = Auth::user()->school_id;
+            $currentHolidays = Holiday::where('school_id', $currentSchoolId)->get();
+
+            if ($currentHolidays->isEmpty()) {
+                ResponseService::errorResponse('No holidays found to sync.');
+            }
+
+            $schools = School::on('mysql')->where('id', '!=', $currentSchoolId)->get();
+            $originalDb = Config::get('database.connections.school.database');
+            $syncedCount = 0;
+
+            foreach ($schools as $school) {
+                try {
+                    if (!empty($school->database_name)) {
+                        Config::set('database.connections.school.database', $school->database_name);
+                        DB::purge('school');
+                        DB::connection('school')->reconnect();
+                        DB::setDefaultConnection('school');
+                    }
+
+                    foreach ($currentHolidays as $curr) {
+                        Holiday::updateOrCreate(
+                            [
+                                'type'      => $curr->type,
+                                'date'      => $curr->getRawOriginal('date'),
+                                'title'     => $curr->title,
+                                'school_id' => $school->id,
+                            ],
+                            [
+                                'end_date'    => $curr->getRawOriginal('end_date'),
+                                'description' => $curr->description,
+                            ]
+                        );
+                    }
+                    $syncedCount++;
+                } catch (Throwable $e) {
+                    Log::error("Failed syncing holidays to school {$school->id}: " . $e->getMessage());
+                }
+            }
+
+            // Restore connection
+            if (!empty($originalDb)) {
+                Config::set('database.connections.school.database', $originalDb);
+                DB::purge('school');
+                DB::connection('school')->reconnect();
+                DB::setDefaultConnection('school');
+            }
+
+            ResponseService::successResponse("Holidays successfully synced to {$syncedCount} schools.");
+        } catch (Throwable $e) {
+            ResponseService::logErrorResponse($e, "HolidayController -> syncToAllSchools");
+            ResponseService::errorResponse();
+        }
+    }
 }
+

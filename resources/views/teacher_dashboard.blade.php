@@ -67,7 +67,7 @@
                                     @foreach ($holiday as $holiday)
                                         <div class="col-md-12 bg-light p-2 mb-2">
                                             <span>{{ $holiday->title }}</span>
-                                            <span class="float-right text-muted">{{ date('d - M',strtotime($holiday->date)) }}</span>
+                                            <span class="float-right text-muted">{{ $holiday->formatted_date }}</span>
                                         </div>
                                     @endforeach
                                 @else

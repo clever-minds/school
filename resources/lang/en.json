@@ -1557,5 +1557,9 @@
     "performance": "Performance",
     "performance_incentive": "Performance Incentive",
     "staff_performance": "Staff Performance",
-    "performance_evaluation": "Performance Evaluation"
+    "performance_evaluation": "Performance Evaluation",
+    "Apply to all schools": "Apply to All Schools",
+    "Sync to All Schools": "Sync to All Schools",
+    "This will copy all holidays of this school to all other schools.": "This will copy all holidays of this school to all other schools.",
+    "Yes, Sync Now!": "Yes, Sync Now!"
 }
