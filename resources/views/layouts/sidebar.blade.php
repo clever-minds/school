@@ -756,14 +756,15 @@
         @endif
         {{-- @endrole --}}
 
-        @if (Auth::user()->school_id && Auth::user()->staff)
+        {{-- Payroll Slips (Commented out) --}}
+        {{-- @if (Auth::user()->school_id && Auth::user()->staff)
             <li class="nav-item">
                 <a href="{{ route('payroll.slip.index') }}" class="nav-link" data-name="{{ Auth::user()->getRoleNames()[0] }}" data-access="@hasFeatureAccess('Expense Management')">
                     <i class="fa fa-money menu-icon"></i>
                     <span class="menu-title">{{ __('payroll') }} {{ __('slips') }}</span>
                 </a>
             </li>
-        @endif
+        @endif --}}
 
         {{-- Schools --}}
         @canany(['schools-list','schools-create', 'schools-edit', 'schools-delete','school-custom-field-list','school-custom-field-create','school-custom-field-edit','school-custom-field-delete'])
@@ -802,24 +803,24 @@
         @endcanany
 
 
-        {{-- package --}}
-        @canany(['package-list', 'package-create', 'package-edit', 'package-delete'])
+        {{-- package (Commented out) --}}
+        {{-- @canany(['package-list', 'package-create', 'package-edit', 'package-delete'])
             <li class="nav-item">
                 <a href="{{ route('package.index') }}" class="nav-link">
                     <i class="fa fa-codepen menu-icon"></i>
                     <span class="menu-title">{{ __('package') }}</span>
                 </a>
             </li>
-        @endcan
-        {{-- package --}}
-        @canany(['addons-list', 'addons-create', 'addons-edit', 'addons-delete'])
+        @endcan --}}
+        {{-- addons (Commented out) --}}
+        {{-- @canany(['addons-list', 'addons-create', 'addons-edit', 'addons-delete'])
             <li class="nav-item">
                 <a href="{{ route('addons.index') }}" class="nav-link">
                     <i class="fa fa-puzzle-piece menu-icon"></i>
                     <span class="menu-title">{{ __('addons') }}</span>
                 </a>
             </li>
-        @endcan
+        @endcan --}}
 
         {{-- Features list --}}
         @canany(['addons-list', 'addons-create', 'addons-edit', 'addons-delete','package-list', 'package-create', 'package-edit', 'package-delete'])
@@ -831,8 +832,8 @@
             </li>
         @endcan
 
-        {{-- subscription-view --}}
-        @can('subscription-view')
+        {{-- subscription-view (Commented out) --}}
+        {{-- @can('subscription-view')
             <li class="nav-item">
                 <a href="{{ url('subscriptions/report') }}" class="nav-link">
                     <i class="fa fa-puzzle-piece menu-icon"></i>
@@ -846,7 +847,7 @@
                     <span class="menu-title">{{ __('subscription_transaction') }}</span>
                 </a>
             </li>
-        @endcan
+        @endcan --}}
 
 
         {{-- Expense --}}
@@ -1136,8 +1137,8 @@
             </a>
         </li>
         @endcanany
-        {{-- Super admin web settings --}}
-        @role('Super Admin')
+        {{-- Super admin web settings (Commented out) --}}
+        {{-- @role('Super Admin')
         @can('web-settings')
         <li class="nav-item">
             <a class="nav-link" data-toggle="collapse" href="#web_settings" aria-expanded="false"
@@ -1165,10 +1166,10 @@
             </div>
         </li>
         @endcan
-        @endrole
+        @endrole --}}
 
-        {{-- School web page setttings --}}
-        @can('school-web-settings')
+        {{-- School web page setttings (Commented out) --}}
+        {{-- @can('school-web-settings')
             <li class="nav-item">
                 <a class="nav-link" data-toggle="collapse" href="#web_settings" aria-expanded="false"
                 aria-controls="web_settings-menu" data-access="@hasFeatureAccess('Website Management')">
@@ -1190,7 +1191,7 @@
                     </ul>
                 </div>
             </li>
-        @endcan
+        @endcan --}}
     
         
 
@@ -1225,8 +1226,8 @@
             </li>
         @endcanany
 
-        {{-- settings --}}
-        @canany(['app-settings', 'language-list', 'school-setting-manage', 'system-setting-manage',
+        {{-- System Settings (Commented out) --}}
+        {{-- @canany(['app-settings', 'language-list', 'school-setting-manage', 'system-setting-manage',
             'fcm-setting-manage', 'email-setting-create', 'privacy-policy', 'contact-us', 'about-us', 'guidance-create',
             'guidance-list', 'guidance-edit', 'guidance-delete', 'email-template'])
             <li class="nav-item">
@@ -1251,7 +1252,7 @@
                                     href="{{ route('school-settings.index') }}">{{ __('general_settings') }}</a>
                             </li>
 
-                            {{-- session-year.index --}}
+                            <!-- session-year.index -->
                             <li class="nav-item">
                                 <a class="nav-link" href="{{ route('session-year.index') }}">{{ __('session_year') }}</a>
                             </li>
@@ -1281,11 +1282,11 @@
                         @endcan
                         @endrole
 
-                        {{-- @can('front-site-setting')
+                        <!-- @can('front-site-setting')
                             <li class="nav-item">
                                 <a class="nav-link" href="{{ route('system-settings.front-site-settings') }}">{{ __('front_site_settings') }}</a>
                             </li>
-                        @endcan --}}
+                        @endcan -->
                         @canany(['guidance-create', 'guidance-list', 'guidance-edit', 'guidance-delete'])
                             <li class="nav-item">
                                 <a class="nav-link" href="{{ route('guidances.index') }}">{{ __('guidance') }}</a>
@@ -1309,12 +1310,12 @@
                         @endcan
                         @endrole
 
-                        {{-- @can('fees-config')
+                        <!-- @can('fees-config')
                             <li class="nav-item">
                                 <a href="{{ route('fees.config.index') }}" class="nav-link" data-name="{{ Auth::user()->getRoleNames()[0] }}" data-access="@hasFeatureAccess('Fees Management')">
                                     {{ __('Fees Settings') }}</a>
                             </li>
-                        @endcan --}}
+                        @endcan -->
 
                         @can('school-setting-manage')
                             <li class="nav-item">
@@ -1334,7 +1335,7 @@
                         @endcan
                         @endrole
 
-                        {{-- Super admin panel --}}
+                        <!-- Super admin panel -->
                         @role('Super Admin')
                         @can('email-setting-create')
                             <li class="nav-item">
@@ -1344,7 +1345,7 @@
                         @endcan
                         @endrole
 
-                        {{-- School admin panel --}}
+                        <!-- School admin panel -->
                         @can('email-template')
                             <li class="nav-item">
                                 <a class="nav-link"
@@ -1352,7 +1353,7 @@
                             </li>
                         @endcan
 
-                        {{-- Payment Configuration Menu --}}
+                        <!-- Payment Configuration Menu -->
                         @can('payment-settings')
                             <li class="nav-item">
                                 <a class="nav-link"
@@ -1376,11 +1377,11 @@
                         @endcan
                         @endrole
 
-                        {{-- @can('database-backup')
+                        <!-- @can('database-backup')
                             <li class="nav-item">
                                 <a class="nav-link" href="{{ url('database-backup') }}">{{ __('database_backup') }}</a>
                             </li>
-                        @endcan --}}
+                        @endcan -->
 
 
 
@@ -1401,19 +1402,19 @@
 
                         @can('school-setting-manage')
 
-                            {{-- Privacy Policy --}}
+                            <!-- Privacy Policy -->
                             <li class="nav-item">
                                 <a class="nav-link"
                                     href="{{ route('school-settings.privacy-policy') }}">{{ __('privacy_policy') }}</a>
                             </li>
 
-                            {{-- Terms & Conditions --}}
+                            <!-- Terms & Conditions -->
                             <li class="nav-item">
                                 <a class="nav-link"
                                     href="{{ route('school-settings.terms-condition') }}">{{ __('terms_condition') }}</a>
                             </li>
 
-                            {{-- Refund Cancellation --}}
+                            <!-- Refund Cancellation -->
 
                             <li class="nav-item">
                                 <a class="nav-link"
@@ -1441,7 +1442,7 @@
                     </ul>
                 </div>
             </li>
-        @endcanany
+        @endcanany --}}
 
         @if (Auth::user()->hasRole('Super Admin'))
             <li class="nav-item">
