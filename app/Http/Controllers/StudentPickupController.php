@@ -68,15 +68,17 @@ class StudentPickupController extends Controller
 
                     $operate = '';
                     if ($canVerify && $row->status == 0) {
-                        $operate = '<button type="button" class="btn btn-xs btn-gradient-success btn-rounded btn-icon verify-pickup-btn" ' .
+                        $operate = '<button type="button" class="btn btn-sm btn-theme text-white verify-pickup-btn" ' .
                             'data-id="' . $row->id . '" ' .
                             'data-student="' . htmlspecialchars($studentName, ENT_QUOTES) . '" ' .
                             'data-class="' . htmlspecialchars($classFull, ENT_QUOTES) . '" ' .
                             'data-person="' . htmlspecialchars($row->pickup_person_name ?? '', ENT_QUOTES) . '" ' .
                             'data-parent="' . htmlspecialchars($row->parent->full_name ?? '', ENT_QUOTES) . '" ' .
-                            'title="' . __('Verify OTP') . '">' .
-                            '<i class="fa fa-check"></i>' .
+                            'title="' . __('Click here to Verify OTP') . '">' .
+                            '<i class="fa fa-shield mr-1"></i> ' . __('Verify OTP') .
                             '</button>';
+                    } else if ($row->status == 1) {
+                        $operate = '<span class="badge badge-success px-2 py-1"><i class="fa fa-check"></i> ' . __('Verified') . '</span>';
                     }
 
                     return [
