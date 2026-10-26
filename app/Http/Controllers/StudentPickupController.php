@@ -103,6 +103,76 @@ class StudentPickupController extends Controller
         }
     }
 
+    public function pendingList()
+    {
+        ResponseService::noAnyPermissionThenSendJson(['student-pickup-list', 'student-pickup-verify', 'student-pickup-verify-otp']);
+
+        $requests = $this->studentPickup->builder()
+            ->with(['student.user', 'student.class_section.class', 'student.class_section.section', 'parent'])
+            ->where('status', 0)
+            ->orderBy('id', 'DESC')
+            ->get();
+
+        $data = $requests->map(function ($row) {
+            $studentName = $row->student->full_name ?? ($row->student->user->full_name ?? '-');
+            $className = $row->student->class_section->class->name ?? '';
+            $sectionName = $row->student->class_section->section->name ?? '';
+            $classFull = trim($className . ' ' . $sectionName);
+
+            return [
+                'id' => $row->id,
+                'otp' => $row->otp,
+                'student_name' => $studentName,
+                'class_name' => $classFull ?: '-',
+                'pickup_person_name' => $row->pickup_person_name,
+                'parent_name' => $row->parent->full_name ?? '-',
+                'created_at' => $row->created_at ? date('d M Y, h:i A', strtotime($row->created_at)) : '-',
+            ];
+        });
+
+        return response()->json(['error' => false, 'data' => $data]);
+    }
+
+    public function checkOtp(Request $request)
+    {
+        ResponseService::noAnyPermissionThenSendJson(['student-pickup-verify', 'student-pickup-verify-otp', 'student-pickup-edit']);
+
+        $request->validate([
+            'otp' => 'required|string|size:6',
+        ]);
+
+        $pickupRequest = $this->studentPickup->builder()
+            ->with(['student.user', 'student.class_section.class', 'student.class_section.section', 'parent'])
+            ->where('otp', $request->otp)
+            ->where('status', 0)
+            ->first();
+
+        if (!$pickupRequest) {
+            return response()->json([
+                'error' => true,
+                'message' => 'No pending pickup request found for this OTP'
+            ]);
+        }
+
+        $studentName = $pickupRequest->student->full_name ?? ($pickupRequest->student->user->full_name ?? '-');
+        $className = $pickupRequest->student->class_section->class->name ?? '';
+        $sectionName = $pickupRequest->student->class_section->section->name ?? '';
+        $classFull = trim($className . ' ' . $sectionName);
+
+        return response()->json([
+            'error' => false,
+            'data' => [
+                'id' => $pickupRequest->id,
+                'otp' => $pickupRequest->otp,
+                'student_name' => $studentName,
+                'class_name' => $classFull ?: '-',
+                'pickup_person_name' => $pickupRequest->pickup_person_name,
+                'parent_name' => $pickupRequest->parent->full_name ?? '-',
+                'created_at' => $pickupRequest->created_at ? date('d M Y, h:i A', strtotime($pickupRequest->created_at)) : '-',
+            ]
+        ]);
+    }
+
     public function verifyOtp(Request $request)
     {
         ResponseService::noAnyPermissionThenSendJson(['student-pickup-verify', 'student-pickup-verify-otp', 'student-pickup-edit']);

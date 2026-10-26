@@ -617,6 +617,8 @@ Route::post('/admin/impersonation-exit',
         Route::group(['prefix' => 'student-pickup'], static function () {
             Route::get('/', [StudentPickupController::class, 'index'])->name('student-pickup.index');
             Route::get('/list', [StudentPickupController::class, 'show'])->name('student-pickup.list');
+            Route::get('/pending-list', [StudentPickupController::class, 'pendingList'])->name('student-pickup.pending-list');
+            Route::post('/check-otp', [StudentPickupController::class, 'checkOtp'])->name('student-pickup.check-otp');
             Route::post('/verify-otp', [StudentPickupController::class, 'verifyOtp'])->name('student-pickup.verify-otp');
         });
 
