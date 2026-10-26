@@ -69,7 +69,7 @@
                             {{ __('Evaluate Staff Performance & Incentives') }}
                         </h4>
                         <p class="card-description text-muted mb-3">
-                            {{ __('Based on 10 performance criteria. Each negative feedback deducts 1 point (1/10th) from the staff\'s base performance incentive.') }}
+                            {{ __('Based on 10 performance criteria. Each negative feedback deducts 1 point (1/10th). If deductions exceed 3 points (>3 negative points), 100% of the performance incentive is forfeited.') }}
                         </p>
 
                         <div class="row" id="toolbar">
@@ -250,9 +250,14 @@
                 }
             });
 
-            let earned = (positiveCount / 10) * base;
+            let negativeCount = 10 - positiveCount;
+            let earned = (negativeCount > 3) ? 0 : (positiveCount / 10) * base;
             $('#badge_score').text(positiveCount);
-            $('#badge_net_incentive').text(earned.toFixed(2));
+            if (negativeCount > 3) {
+                $('#badge_net_incentive').html('<span class="text-danger font-weight-bold">0.00</span> <small class="text-danger font-weight-normal">(>3 deductions: 100% cut)</small>');
+            } else {
+                $('#badge_net_incentive').text(earned.toFixed(2));
+            }
 
             let allChecked = ($('#criteriaTableBody input.criteria-checkbox:checked').length === $('#criteriaTableBody input.criteria-checkbox').length);
             $('#checkAllCriteria').prop('checked', allChecked);

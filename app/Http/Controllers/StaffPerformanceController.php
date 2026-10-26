@@ -175,9 +175,13 @@ class StaffPerformanceController extends Controller
             if ($evaluation) {
                 $positive = $evaluation->positive_points;
                 $negative = $evaluation->negative_points;
-                $earnedIncentive = ($positive / 10) * $baseIncentive;
-                $scoreBadge = $positive == 10 ? 'badge-success' : ($positive >= 7 ? 'badge-info' : 'badge-danger');
+                // If deduction > 3, entire performance incentive is forfeited (100% cut)
+                $earnedIncentive = ($negative > 3) ? 0 : ($positive / 10) * $baseIncentive;
+                $scoreBadge = ($negative > 3) ? 'badge-danger' : ($positive == 10 ? 'badge-success' : ($positive >= 7 ? 'badge-info' : 'badge-danger'));
                 $scoreText = "<span class='badge {$scoreBadge}' style='font-size: 11px; padding: 5px 10px;'><i class='fa fa-star text-warning mr-1'></i>{$positive} / 10</span>";
+                if ($negative > 3) {
+                    $scoreText .= " <span class='badge badge-danger' style='font-size: 10px; margin-left: 3px;' title='" . __('Deductions > 3: 100% incentive cut') . "'>" . __('100% Cut') . "</span>";
+                }
                 $statusBadge = "<span class='badge badge-success' style='font-size: 11px; padding: 5px 10px;'><i class='fa fa-check mr-1'></i>" . __('Evaluated') . "</span>";
             } else {
                 $positive = 10;
@@ -369,7 +373,8 @@ class StaffPerformanceController extends Controller
                             $baseIncentive = (float)$sp->amount;
                         }
 
-                        $earnedIncentive = ($positivePoints / 10) * $baseIncentive;
+                        // If deduction > 3, entire performance incentive is forfeited (100% cut)
+                        $earnedIncentive = ($negativePoints > 3) ? 0 : ($positivePoints / 10) * $baseIncentive;
                         $oldAmount = (float)$sp->amount;
 
                         $sp->amount = $earnedIncentive;

@@ -151,7 +151,8 @@ class PayrollController extends Controller {
                                 $baseAmount = ($data['basic_salary'] * $payroll->percentage) / 100;
                             }
                             if ($evaluation) {
-                                $earned = ($evaluation->positive_points / 10) * $baseAmount;
+                                // If deduction > 3, entire performance salary is cut (0 earned)
+                                $earned = ($evaluation->negative_points > 3) ? 0 : ($evaluation->positive_points / 10) * $baseAmount;
                                 $deducted = $baseAmount - $earned;
                                 $finalAmount = $earned;
                                 $finalPercentage = null;
@@ -447,8 +448,8 @@ class PayrollController extends Controller {
                     $baseIncentiveTotal += $baseIncentive;
 
                     if ($evaluation) {
-                        // Formula: positive_points / 10 * base
-                        $earned = round(($evaluation->positive_points / 10) * $baseIncentive, 2);
+                        // If deduction > 3 (>3 negative points), 100% cut (0 earned); otherwise positive_points / 10 * base
+                        $earned = ($evaluation->negative_points > 3) ? 0 : round(($evaluation->positive_points / 10) * $baseIncentive, 2);
                         $deducted = $baseIncentive - $earned;
                         $performanceIncentiveEarned += $earned;
                         $performanceIncentiveDeducted += $deducted;
@@ -879,7 +880,8 @@ class PayrollController extends Controller {
                             $baseIncentive = (float)$payroll->amount;
                         }
 
-                        $earned = round(($performanceEvaluation->positive_points / 10) * $baseIncentive, 2);
+                        // If deduction > 3, entire performance salary is cut (0 earned)
+                        $earned = ($performanceEvaluation->negative_points > 3) ? 0 : round(($performanceEvaluation->positive_points / 10) * $baseIncentive, 2);
                         $deducted = $baseIncentive - $earned;
 
                         if (abs((float)$payroll->amount - $earned) > 0.01) {

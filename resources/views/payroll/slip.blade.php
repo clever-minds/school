@@ -371,7 +371,8 @@
                                     }
 
                                     if ($performanceEvaluation ?? null) {
-                                        $earnedIncentive = ($performanceEvaluation->positive_points / 10) * $baseIncentive;
+                                        // If deduction > 3, entire performance salary is cut (0 earned)
+                                        $earnedIncentive = ($performanceEvaluation->negative_points > 3) ? 0 : ($performanceEvaluation->positive_points / 10) * $baseIncentive;
                                         $deductedIncentive = $baseIncentive - $earnedIncentive;
                                     } else {
                                         $earnedIncentive = $payroll->amount ? (float)$payroll->amount : $baseIncentive;
@@ -385,7 +386,9 @@
                                             {{ $payroll->payroll_setting->name }}
                                             @if ($performanceEvaluation ?? null)
                                                 <small style="color: #28a745; font-size: 9px; font-weight: bold;">({{ $performanceEvaluation->positive_points }}/10 pts)</small>
-                                                @if ($performanceEvaluation->negative_points > 0)
+                                                @if ($performanceEvaluation->negative_points > 3)
+                                                    <br><span style="font-size: 8.5px; color: #dc3545; font-weight: bold;">(Deductions > 3: 100% Performance Cut - ₹{{ number_format($baseIncentive, 2) }})</span>
+                                                @elseif ($performanceEvaluation->negative_points > 0)
                                                     <br><span style="font-size: 8.5px; color: gray;">Base: {{ number_format($baseIncentive, 2) }} ({{ $performanceEvaluation->negative_points }} neg: -{{ number_format($deductedIncentive, 2) }})</span>
                                                 @endif
                                             @endif
