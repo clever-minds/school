@@ -109,6 +109,30 @@ class ConsentFormPermissionSeeder extends Seeder
                     $this->command->info("   ✅ Consent form permissions assigned to 'School Admin' in {$schoolName}");
                 }
 
+                // 2d. Remove consent form permissions from all OTHER roles (e.g. Principal, Teacher, Staff)
+                // so that staff does NOT see it until School Admin explicitly assigns it via Roles management
+                if (!empty($tenantPermMap)) {
+                    $otherRoleQuery = DB::connection('school')->table('roles');
+                    if ($adminRoleId) {
+                        $otherRoleQuery->where('id', '!=', $adminRoleId);
+                    }
+                    $otherRoleIds = $otherRoleQuery->pluck('id')->toArray();
+
+                    if (!empty($otherRoleIds)) {
+                        DB::connection('school')->table('role_has_permissions')
+                            ->whereIn('permission_id', array_values($tenantPermMap))
+                            ->whereIn('role_id', $otherRoleIds)
+                            ->delete();
+                    }
+
+                    // Also remove from model_has_permissions if directly assigned to any user
+                    DB::connection('school')->table('model_has_permissions')
+                        ->whereIn('permission_id', array_values($tenantPermMap))
+                        ->delete();
+
+                    $this->command->info("   🔒 Removed consent permissions from staff/other roles in {$schoolName} (School Admin can now assign manually)");
+                }
+
                 // 2d. Backfill existing students with parent creation date if applicable
                 try {
                     DB::connection('school')->statement("

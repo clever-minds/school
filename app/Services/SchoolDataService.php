@@ -786,7 +786,7 @@ class SchoolDataService {
         $principal_role = Role::updateOrCreate(['name' => 'Principal', 'school_id' => $school->id, 'custom_role' => 1, 'editable' => 1]);
         $allPermissions = Permission::where('guard_name', 'web')->pluck('name')->toArray();
         $principalPermissions = array_filter($allPermissions, function ($p) {
-            return !str_ends_with($p, '-delete');
+            return !str_ends_with($p, '-delete') && !str_starts_with($p, 'consent-form-');
         });
         $principal_role->syncPermissions($principalPermissions);
 
