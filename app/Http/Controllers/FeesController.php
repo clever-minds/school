@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Fee;
+use App\Models\FeesPaid;
 use App\Models\FeesAdvance;
 use App\Models\FeesClassType;
 use App\Repositories\ClassSchool\ClassSchoolInterface;

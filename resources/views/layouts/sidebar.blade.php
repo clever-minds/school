@@ -356,7 +356,7 @@
             </li>
         @endcanany
 
-        {{-- Reminders --}}
+        {{-- Reminders
         @canany(['reminder-create', 'reminder-list'])
             <li class="nav-item">
                 <a href="{{ route('reminders.index') }}" class="nav-link">
@@ -364,7 +364,7 @@
                     <span class="menu-title">{{ __('reminder') }}</span>
                 </a>
             </li>
-        @endcanany
+        @endcanany --}}
 
         {{-- Schedules --}}
         @canany(['schedule-create', 'schedule-list'])
